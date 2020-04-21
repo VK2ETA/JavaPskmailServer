@@ -32,9 +32,9 @@ import javax.swing.JFrame;
  */
 public class Main {
 
-    static String application = "jpskmailserver 0.9.1"; // Used to preset an empty status
-    //Based on "jpskmail 1.7.b";
-    static String version = "version 0.9.1, 20200331";
+    static String application = "jpskmailserver 0.9.2"; // Used to preset an empty status
+    //VK2ETA Based on "jpskmail 1.7.b";
+    static String version = "version 0.9.2, 20200421";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
