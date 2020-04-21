@@ -101,6 +101,7 @@ public class Modem implements Runnable {
     private BufferedReader reader = null;
     private Socket sock = null;
     private boolean fldigiRunning = false;
+    private boolean cantLaunchFldigi = false;
 //   
 
     //RadioMsg stuff
@@ -139,14 +140,14 @@ public class Modem implements Runnable {
         int launchResult = 0;
         int launchCount = 0;
 
-        while (!opened && launchCount++ < 5) {
+        while (!opened && launchCount++ < 2) {
             try {
                 launchResult = connectToFldigi();
                 //Prevent premature killing of Fldigi. Start timeout at modem launch
                 Main.lastCharacterTime = System.currentTimeMillis();
-                if (launchResult == -1) {
-                    opened = true;
-                }
+                //if (launchResult == -1) {
+                //    opened = true;
+                //}
                 Sendln("<cmd>server</cmd>");
                 try {
                     Thread.sleep(100);
@@ -180,50 +181,72 @@ public class Modem implements Runnable {
 
         if (Main.WantRelayOverRadio | Main.WantRelaySMSs | Main.WantRelayEmails | Main.WantServer) {
             //Pskmail Mini-Server or RadioMSG relay, we should launch Fldigi automatically
-//            if (Main.onWindows) {
-                //we are under Windows
-                //TO-DO
-//            } else { //Linux
-                try {
-                    if (killAndLaunchFldigi() != 0) {
-                        String outLine;
-                        //We should have a listening socket, make the socket objects
+            if (killAndLaunchFldigi() == -1) {
+                //String outLine;
+/*                      //We should have a listening socket, make the socket objects
                         Socket sock = new Socket(fldigiHost, fldigiPort);
                         OutputStream out = sock.getOutputStream();
                         in = sock.getInputStream();
                         pout = new PrintWriter(out, true);
                         opened = true;
                         result = -1; //Started ok
-                        //Preset time counter
-                        Main.lastModemCharTime = System.currentTimeMillis();
+                 */
+                //Preset time counter
+                Main.lastModemCharTime = System.currentTimeMillis();
 //                      int exitCode = fldigiProc.waitFor();
-                        //(re-)init Rigctl
-                        Rigctl.Rigctl();
-                    }
-                } catch (IOException e) {
-                    opened = false;
-                }
-//            }
+                //(re-)init Rigctl
+                Rigctl.Rigctl();
+            } else if (killAndLaunchFldigi() == +1) {
+                Main.log.writelog("Can't Launch Fldigi, check program path and name in options", true);
+            }
+
         } else {
             result = -2; //Manual start required
         }
         return result;
     }
     
-    
     private int killAndLaunchFldigi() {
         int result = -1;
         
+        //New listening thread looking for error stream data (e.g. we can't launch Fldigi)
+        final Thread myOutputStreamThread = new Thread() {
+            @Override
+            public void run() {
+                cantLaunchFldigi = false;
+                String outProcLine2 = "";
+                Boolean readerOpen = false;
+                //Wait until we start reading data from input buffer
+                while (readerOpen == false) {
+                    try {
+                        Thread.sleep(100);
+                        if (reader != null) {
+                            outProcLine2 = reader.readLine();
+                            readerOpen = true;
+                            if (outProcLine2.contains(" No")) {
+                                cantLaunchFldigi = true;
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                    } catch (Exception e) {
+                        cantLaunchFldigi = true;
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+
         Thread myThread = new Thread() {
             @Override
             public void run() {
-                String outProcLine;
                 //Kill
                 try {
                     if (fldigiProc != null) {
-                        fldigiProc.destroyForcibly();                    
+                        fldigiProc.destroyForcibly();
                         //Wait until the socket is closed
-                        while ((outProcLine = reader.readLine()) != null) {
+                        while ((reader.readLine()) != null) {
                             Thread.sleep(100);
                         };
                     }
@@ -234,59 +257,73 @@ public class Modem implements Runnable {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                //Close stream now if it was open
+                try {
+                    if (reader != null) {
+                        reader.close();
+                        reader = null;
+                    }
+                } catch (IOException e) {
+                }
                 //Now (re-)launch Fldigi
+                //Kill any new listening thread 
+                if (myOutputStreamThread != null && myOutputStreamThread.isAlive()) {
+                    myOutputStreamThread.interrupt();
+                }
                 fldigiProc = null;
                 fldigiRunning = false;
                 try {
                     String fldigiPath = Main.configuration.getPreference("FLDIGIAPPLICATIONPATH", "fldigi");
                     ProcessBuilder processBuilder = new ProcessBuilder();
-                    processBuilder.command("bash", "-c", fldigiPath);
+                    if (Main.onWindows) {
+                        processBuilder.command("cmd.exe", "/c", fldigiPath);
+                    } else { //Linux
+                        processBuilder.command("bash", "-c", fldigiPath);
+                    }
                     fldigiProc = processBuilder.start();
                     //fldigiProc = Runtime.getRuntime().exec("fldigi");
-                    if (reader != null) reader.close();
                     reader = new BufferedReader(new InputStreamReader(fldigiProc.getErrorStream()));
-                    //Wait until we start reading data from input buffer
-                    outProcLine = reader.readLine();
-                    while (outProcLine == null) {
-                        Thread.sleep(100);
-                        outProcLine = reader.readLine();
-                    }
-                    if (outProcLine.contains(" no ")) {
-                        //Main.cantLaunchFldigi = true;
-                    } else {
-                        fldigiRunning = true;
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 } catch (IOException e) {
+                    cantLaunchFldigi = true;
                     e.printStackTrace();
                 }
             }
         };
         //Clear running flag as we expect to kill the Fldigi task first
         fldigiRunning = false;
+        myOutputStreamThread.start();
         myThread.start();
         //Wait up to 30 seconds for launch
         int waitCount = 0;
-        while (!fldigiRunning && waitCount < 30) {
+        opened = false;
+        while (!cantLaunchFldigi && !opened && waitCount < 30) {
             waitCount++;
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                    e.printStackTrace();
+                e.printStackTrace();
+            }
+            try {
+                //We should have a listening socket, make the socket objects
+                Socket sock = new Socket(fldigiHost, fldigiPort);
+                OutputStream out = sock.getOutputStream();
+                in = sock.getInputStream();
+                pout = new PrintWriter(out, true);
+                opened = true;
+                fldigiRunning = true;
+            } catch (IOException e) {
+                opened = false;
             }
         }
         if (waitCount >= 30) {
             //Timeout. Fldigi didn't launch within 30 seconds
             result = 0;
-        } else {
-            //Wait for ports to open
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
+        if (cantLaunchFldigi) {
+            result = +1;
+        }
+        //Kill stream listening thread if not already exited (no use now)
+        myOutputStreamThread.interrupt();
         //Reset transmit flag so that we return to Rx strait away
         Main.TXActive = false;
         return result;
@@ -630,7 +667,7 @@ public class Modem implements Runnable {
 //                    System.out.println("Test, 2nd read returns: " + (char) back);
                 } catch (IOException e1) {
                     //Tried but fail, stop trying
-                    e1.printStackTrace();
+                    //e1.printStackTrace();
                     Main.modemAutoRestartDelay = 0; //Clear auto-restart timer, no point in doubling up
                     Main.requestModemRestart = false; //Clear restart flag
                 }
