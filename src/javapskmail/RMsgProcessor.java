@@ -1316,7 +1316,7 @@ public class RMsgProcessor {
     //Is the string representative of a cellular number
     private static boolean isCellular(String destination) {
 
-        return destination.matches("^\\+?\\d{8,16}");
+        return destination.matches("^([\\w-]+=)?\\+?\\d{7,16}"); //"^\\+?\\d{8,16}"
     }
 
     private static String convertNumberToE164(String phoneNumber) {
@@ -1368,6 +1368,7 @@ public class RMsgProcessor {
                     saveAndDisplay = false;
                 }
             }
+            //To-Do: Add check for messages that are resent as the sms field contains the sender's filename
         } else {
             saveAndDisplay = false;
         }
@@ -1441,11 +1442,11 @@ public class RMsgProcessor {
                         //Command message?
                         if (mMessage.sms.startsWith("*cmd")) {
                             if (matchMyCallWith(mMessage.via, false)) {
-                                //A scan on/off command? "s on", "s off"
+                                //A scan on/off command? e.g. "*cmd s off 30 m" or "*cmd s on"
                                 //Scan off can also have a duration after which it restarts automatically. E.g. "s off 3h"
                                 boolean cmdOk = false;
                                 String replyString = "";
-                                Pattern psc = Pattern.compile("^\\*cmd\\s((?:s\\son)|(?:s\\soff))(?:\\s(\\d{1,3})([mh]))?$");
+                                Pattern psc = Pattern.compile("^\\*cmd\\s((?:s\\son)|(?:s\\soff))(?:\\s(\\d{1,3})\\s*([mh]))?$");
                                 Matcher msc = psc.matcher(mMessage.sms);
                                 if (messageAuthorized && msc.find()) {
                                     String onOff = msc.group(1);
@@ -1482,6 +1483,7 @@ public class RMsgProcessor {
                                     }
                                 }
                                 //A "mute"/"unmute" command to allow/disallow immediate forwarding of SMSs and Emails
+                                //E.g. "*cmd mute" or "*cmd unmute"
                                 psc = Pattern.compile("^\\*cmd\\s((?:mute)|(?:unmute))$");
                                 String muteUnmute = "";
                                 msc = psc.matcher(mMessage.sms);

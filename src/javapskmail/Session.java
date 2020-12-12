@@ -440,7 +440,7 @@ public class Session {
                 if (tg.group(4) != null) {
                     startStopStr = tg.group(4).trim();
                 }
-                Boolean tgetZip = (tg.group(1) != null);
+                Boolean tgetZip = (tg.group(2) != null);
                 if (Main.WantServer) {
                     Main.TX_Text += serverMail.readWebPage(tg.group(3), startStopStr, tgetZip);
                 } else {

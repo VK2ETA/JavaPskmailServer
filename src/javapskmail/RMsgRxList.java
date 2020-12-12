@@ -194,17 +194,19 @@ public class RMsgRxList {
         messageList.add(mMessage);
     }
 
+    //Check if a message is a duplicate of the one we received just prior 
+    //Stems from possibly receiving a message directly when it was sent VIA a radio relay station
     synchronized public static boolean isDuplicate(RMsgObject mMessage) {
         boolean isDuplicate = false;
         //We have an alias alone, try to find a previous message with "alias=destination"
         int listLength = messageList.size();
-        RMsgObject recMessage = null;
+        RMsgObject recMessage;
         if (listLength > 0) {
-            //Iterate through the list and count only the locations with updated gps coordinates
+            //Iterate through the list
             int trialCount = 0;
             for (int ii = listLength - 1; ii >= 0; ii--) {
-                //No need to check past the two previous messages
-                if (++trialCount > 2) break;
+                //No need to check past the few previous messages
+                if (++trialCount > 4) break;
                 recMessage = (RMsgObject) messageList.get(ii);
                 //Looks like the same message was received direct and via a relay?
                 if (recMessage.from.equals(mMessage.from)

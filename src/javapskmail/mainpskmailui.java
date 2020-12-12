@@ -366,7 +366,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                 if (Main.TXActive) {
                     setDCDColor(Color.RED);
                 }
-                if (Main.BlockActive) {
+                if (Main.m.BlockActive) {
                     setDCDColor(Color.cyan);
                 }
                 // set link status indicator
@@ -557,7 +557,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                             Main.Progress = Main.Quality;
 //                                System.out.println(Main.sql);
                             //Open Squelch when actively listening
-                            if (Main.Connected || Main.BlockActive
+                            if (Main.Connected || Main.m.BlockActive
                                     || Main.receivingRadioMsg || Main.possibleRadioMsg != 0L 
                                     || Main.modemTestMode) {
                                 Main.sql = Main.sqlfloor;
@@ -1289,12 +1289,13 @@ public class mainpskmailui extends javax.swing.JFrame {
             } catch (BadLocationException be) {
                 System.err.println("Oops, " + be);
             }
-        } else if (Main.BlockActive) {
+        } else if (Main.m.BlockActive) {
             try {
                 monitordoc.insertString(monitordoc.getLength(), instring, blue);
                 if (Main.EOTrcv) {
                     Main.EOTrcv = false;
-                    Main.BlockActive = false;
+                    //VK2ETA interferes with timeouts - removed
+                    //Main.m.BlockActive = false;
                 }
             } catch (BadLocationException be) {
                 System.err.println("Oops, " + be);

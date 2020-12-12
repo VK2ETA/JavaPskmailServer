@@ -47,8 +47,11 @@ public class Modem implements Runnable {
     private String txIDend = "</txrsid><cmd>";
     private long blockstart;
     private long blocktime;
+    public int firstCharDelay = 4;
+    public boolean receivingStatusBlock = false;
+    public  boolean BlockActive = false;
     private char b = 0;
-    private int stxcount = 0;
+    //private int stxcount = 0;
     static String[] fldigimodes = {"unknown", "THOR 8>", "MFSK-16>", "THOR 22>", "MFSK-32>",
         "PSK-250R>", "PSK-500R>", "BPSK-500>", "BPSK-250>", "BPSK-125>",
         "BPSK-63>", "PSK-125R>", "MFSK-64>", "THOR 11>", "THOR 4>", "Contestia>",
@@ -228,11 +231,11 @@ public class Modem implements Runnable {
                             }
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                     } catch (InterruptedException e) {
                     } catch (Exception e) {
                         cantLaunchFldigi = true;
-                        e.printStackTrace();
+                        //e.printStackTrace();
                     }
                 }
             }
@@ -546,11 +549,12 @@ public class Modem implements Runnable {
         return 0;
     }
 
-    //Returns the theoretical blocktime so that timings are correct when we downgrade RX modes
+    //Returns the theoretical blocktime so that timings are correct when we change RX modes
     public int getBlockTime(modemmodeenum mode) {
         double cps = 2;
         double myblocktime = 0;
 
+        firstCharDelay = 4; //Must account for Client's TX delay, RSID and silences, FEC/interleaver delay, decoding delay
         try {
             switch (mode) {
                 case PSK63:
@@ -560,36 +564,45 @@ public class Modem implements Runnable {
                     cps = 13;
                     break;
                 case PSK125R:
+                    firstCharDelay = 7;
                     cps = 7;
                     break;
                 case PSK250:
                     cps = 26;
                     break;
                 case PSK250R:
+                    firstCharDelay = 6;
                     cps = 15;
                     break;
                 case PSK500:
                     cps = 52;
                     break;
                 case PSK500R:
+                    firstCharDelay = 5;
                     cps = 31;
                     break;
                 case MFSK16:
-                    cps = 3.9;
+                    firstCharDelay = 7;
+                    cps = 3.4;
                     break;
                 case MFSK32:
+                    firstCharDelay = 5;
                     cps = 7;
                     break;
                 case MFSK64:
+                    firstCharDelay = 6;
                     cps = 22;
                     break;
                 case THOR8:
+                    firstCharDelay = 11;
                     cps = 2;
                     break;
                 case THOR16:
+                    firstCharDelay = 7;
                     cps = 7;
                     break;
                 case THOR22:
+                    firstCharDelay = 6;
                     cps = 11;
                     break;
                 case DOMINOEX5:
@@ -599,15 +612,19 @@ public class Modem implements Runnable {
                     cps = 1;
                     break;
                 case PSK63RC5:
+                    firstCharDelay = 10;
                     cps = 16;
                     break;
                 case PSK63RC10:
+                    firstCharDelay = 10;
                     cps = 31;
                     break;
                 case PSK250RC3:
+                    firstCharDelay = 10;
                     cps = 30;
                     break;
                 case PSK125RC4:
+                    firstCharDelay = 10;
                     cps = 25;
                     break;
                 case DOMINOEX22:
@@ -620,8 +637,12 @@ public class Modem implements Runnable {
         } catch (NullPointerException npe) {
             Main.log.writelog("Error in modem.getBlockTime", npe, true);
         }
-        myblocktime = (64 + 9) / cps;
-        return (int) myblocktime;
+        //VK2ETA assumes a maximum 64 character block size!!
+        //and delay from start of TX to RXed first character is 9 seconds in MFSK16
+        //This is too short for slow modes
+        //myblocktime = (64 + 9) / cps;
+        myblocktime = (64) / cps;
+        return (int) (myblocktime + 0.5);
     }
 
     public void Set_rxID() {
@@ -729,10 +750,10 @@ public class Modem implements Runnable {
         try {
 
             char inChar = '\0';
-            boolean BlockActive = false;
             boolean DC2_rcvd = false;
             int first = -1;
-            int lst = 0;
+            BlockActive = false;
+            //int lst = 0;
             int C;
             int B;
 
@@ -758,7 +779,7 @@ public class Modem implements Runnable {
                         inChar = (char) C;
                         Main.shown(Character.toString(inChar));
                         first = 0;
-                        lst = 0;
+                        //lst = 0;
                     } else if (inChar == 6) {
                         if (Main.TXActive) {
                             Main.TXActive = false;
@@ -783,8 +804,8 @@ public class Modem implements Runnable {
                 switch (inChar) {
 
                     case 0:
-                        break; // do nothing
-                    case 1:
+                        break; // ignore
+                    case 1: //SOH
                         Main.lastCharacterTime = blockstart = System.currentTimeMillis();
                         Main.haveSOH = true;
                         //Just received RSID, restart counting Radio Msg header timeout from now
@@ -801,10 +822,11 @@ public class Modem implements Runnable {
                         WriteToMonitor("<SOH>");
                         if (BlockActive == false) {
                             BlockActive = true;
-                            Main.BlockActive = true;
                             BlockString = "<SOH>";
                         } else {
                             BlockString += "<SOH>";
+                            //We continue on a new block, reset timeout counter
+                            Main.oldtime = System.currentTimeMillis() / 1000;
                             Main.RXBlocksize = BlockString.length() - 17;
                             Main.Totalbytes += Main.RXBlocksize;
                             try {
@@ -815,7 +837,7 @@ public class Modem implements Runnable {
                         }
                         Main.DCD = 0;
                         break;
-                    case 4:
+                    case 4: //EOT
 //        System.out.println("EOT:" + BlockString);
                         blocktime = (System.currentTimeMillis() - blockstart);
 //VK2ETA debug extra status send when TXing long data in slow mode from server
@@ -823,9 +845,10 @@ public class Modem implements Runnable {
                         Main.haveSOH = false;                        //Just received RSID, restart counting Radio Msg header timeout from now
                         Main.possibleRadioMsg = 0L;
                         Main.receivingRadioMsg = false;
+                        receivingStatusBlock = false;
                         Main.blockval = blocktime;
                         WriteToMonitor("<EOT>\n");
-                        if (BlockActive == true) {
+                        if (BlockActive) {
                             BlockString += "<EOT>";
                             //RM reset block reception if active
                             try {
@@ -837,9 +860,8 @@ public class Modem implements Runnable {
 
                             BlockString = "";
                         }
-                        if (Main.BlockActive) {
+                        if (BlockActive) {
                             BlockActive = false;
-                            Main.BlockActive = false;
                             Main.EOTrcv = true;
                             if (!Main.Connected) {
                                 Main.DCD = 2;
@@ -856,7 +878,7 @@ public class Modem implements Runnable {
                             //Duplicate, see below 
                             //Main.TXActive = false;
                         }
-
+                        Main.m.receivingStatusBlock = false; //Reset now as there may not be an EOT to reset it
                         Main.DCD = 0;
                         Main.TXActive = false;
                         if (Main.summoning) {
@@ -878,7 +900,7 @@ public class Modem implements Runnable {
                     case 10:
                     case 13:
                         WriteToMonitor("\n");
-                        if (BlockActive == true) {
+                        if (BlockActive) {
                             BlockString += inChar;
                             Main.lastCharacterTime = System.currentTimeMillis();
                             //RM check if we have the start of a RadioMessage block
@@ -893,8 +915,8 @@ public class Modem implements Runnable {
 
                             }
                         } else if (Main.wantbulletins) {
-//                                Main.Bul.get("" + inChar); 
-                            String dummy = amp.get("" + inChar);
+                            //Main.Bul.get("" + inChar); 
+                            //String dummy = amp.get("" + inChar);
                         }
                         Main.DCD = 0;
                         break;
@@ -966,12 +988,17 @@ public class Modem implements Runnable {
                             BlockString += inChar;
                             Main.lastCharacterTime = System.currentTimeMillis();
                             //            System.out.println("BS:" + BlockString);
+                            //Determine if this is a status frame 
+                            if (BlockString.length() == 8) {
+                                //String blockType = BlockString.substring(7, 8);
+                                receivingStatusBlock = BlockString.substring(7, 8).equals("s");
+                            }
                         }
                         break;
                 } // end switch
-                //Check that we are not waiting for nothing after a Radio message header
+                //Check that we are not waiting for nothing while expecting a Radio message header
                 //Resets if invalid characters are found in the address line, or it is longer than 52 characters
-                if (Main.BlockActive && !Main.receivingRadioMsg
+                if (BlockActive && !Main.receivingRadioMsg
                         && BlockString.length() > 3) {
                     Matcher msc = RXBlock.invalidCharsInHeaderPattern.matcher(BlockString);
                     if (msc.find() || BlockString.length() > 52) {

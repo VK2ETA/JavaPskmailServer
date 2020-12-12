@@ -2,7 +2,7 @@
  * Main.java
  * 
  * Copyright (C) 2008 Pär Crusefalk and Rein Couperus
- * Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 2018-2019
+ * Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 2018-2020
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -32,9 +32,9 @@ import javax.swing.JFrame;
  */
 public class Main {
 
-    static String application = "jpskmailserver 0.9.2"; // Used to preset an empty status
     //VK2ETA Based on "jpskmail 1.7.b";
-    static String version = "version 0.9.2, 20200421";
+    static String application = "jpskmailserver 0.9.3"; // Used to preset an empty status
+    static String version = "version 0.9.3, 20201212";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -91,7 +91,7 @@ public class Main {
     static int DCD = 0;
     static int MAXDCD = 3;
     static int Persistence = 4;
-    static boolean BlockActive = false;
+    //static boolean BlockActive = false;
     static boolean EOTrcv = false;
     static String TXblocklength = "5";
     static int Maxblocks = 8;
@@ -576,7 +576,9 @@ public class Main {
                                     // set blocktime for idle time measurement...
                                     if (Blockline.length() > 8) {
                                         charval = (int) (blockval / (Blockline.length() - 4)); // msec
-                                        blocktime = (charval * 64 / 1000);
+                                        //Must account for Client's TX delay, RSID and silences, FEC/interleaver delay, decoding delay
+                                        //Done at connect time, should be enough 
+                                        //blocktime = (charval * 64 / 1000) + m.firstCharDelay;
                                     }
                                     //Move processing of block before decision on mode upgrade
                                     sm.RXStatus(rxb.payload);   // parse incoming status packet
@@ -1017,7 +1019,7 @@ public class Main {
                                 }
                             }
 
-                            String s = Blockline + "\n";
+                            //String s = Blockline + "\n";
 
                             //                           System.out.println(Blockline);
                             // unproto packet
@@ -1103,8 +1105,8 @@ public class Main {
 //                                        q.send_rsid_command("OFF");
                                     q.Message("Rejected:" + rejectreason, 10);
                                 }
-                                // connect_ack
-                            } else if (rxb.type.equals("k") & rxb.valid) {  // connect ack
+                            // connect_ack
+                            } else if (rxb.type.equals("k") & rxb.valid) { 
 
                                 Pattern pk = Pattern.compile("^(\\S+):\\d+\\s(\\S+):\\d+\\s(\\d)$");
                                 Matcher mk = pk.matcher(rxb.payload);
@@ -1255,7 +1257,8 @@ public class Main {
                                             TimeoutPolls = 0;
                                             if (Blockline.length() > 8) {
                                                 charval = (int) (blockval / (Blockline.length() - 4)); // msec
-                                                blocktime = (charval * 64 / 1000);
+                                                blocktime = m.getBlockTime(Main.RxModem); //Use pre-calculated value
+                                                //blocktime = (charval * 64 / 1000) + 4;
                                             }
                                             log("Connect request from " + TTYCaller);
                                         } else {
@@ -1267,30 +1270,6 @@ public class Main {
                                         }
                                     }
                                 }
-                            } else if (Main.Bulletinmode) {
-                                // Bulletin mode
-                                Blockline = Blockline.substring(5);
-                                if (Blockline.length() > 9) {
-                                    Blockline = Blockline.substring(0, Blockline.length() - 9);
-                                }
-                                Pattern pb = Pattern.compile("NNNN");
-                                Matcher mb = pb.matcher(Blockline);
-                                if (mb.find()) {
-                                    Blockline = "\n----------\n";
-                                    bulletin.write(Blockline);
-                                    Main.Bulletinmode = false;
-                                    Main.Status = "Listening";
-                                }
-
-                                mainwindow += Blockline;
-                                Bulletin_time = 30;
-
-                                // write to bulletins file...
-                                bulletin.write(Blockline);
-                                bulletin.flush();
-
-                            } else if (Main.IACmode) {
-                                sm.parseInput(Blockline);
                             } else if (rxb.radioMsgBlock) {//process RadioMsg message
                                 if (WantRelayOverRadio | WantRelaySMSs | WantRelayEmails) {
                                     radioMsgWorking = true;//Use either last RSID modem used if any or the default mode
@@ -1313,21 +1292,44 @@ public class Main {
 //                                System.out.println("valid");
                                 }
                             }
-                            oldtime = System.currentTimeMillis() / 1000;
+                        //End of //if  NO bulletin mode & NO IAC mode
+                        } else if (Main.Bulletinmode) {
+                            // Bulletin mode
+                            Blockline = Blockline.substring(5);
+                            if (Blockline.length() > 9) {
+                                Blockline = Blockline.substring(0, Blockline.length() - 9);
+                            }
+                            Pattern pb = Pattern.compile("NNNN");
+                            Matcher mb = pb.matcher(Blockline);
+                            if (mb.find()) {
+                                Blockline = "\n----------\n";
+                                bulletin.write(Blockline);
+                                Main.Bulletinmode = false;
+                                Main.Status = "Listening";
+                            }
 
-                        }
+                            mainwindow += Blockline;
+                            Bulletin_time = 30;
+
+                            // write to bulletins file...
+                            bulletin.write(Blockline);
+                            bulletin.flush();
+
+                        } else if (Main.IACmode) {
+                            sm.parseInput(Blockline);
+                        } 
                     } else { // if NO (m.checkBlock())
-                        // no block coming...
+                        // no block coming...and we are server (or received a connect request)
                         if (!Main.TXActive & (TTYConnected.equals("Connected")
                                 | TTYConnected.equals("Connecting"))) {  //Allow timeouts when in connecting phase as well
-                            long now = System.currentTimeMillis();
-                            Systime = now / 1000;
+                            //long now = System.currentTimeMillis();
+                            Systime = System.currentTimeMillis() / 1000;
                             idlesecs = (int) (Systime - oldtime);
                             //Overall session idle timeout
                             String IdleTimeStr = configuration.getPreference("IDLETIME", "15");
                             int MaxSessionIdleTime = Integer.parseInt(IdleTimeStr); //In seconds
                             if (MaxSessionIdleTime > 0 & MaxSessionIdleTime < 120) {
-                                MaxSessionIdleTime = 120;
+                                MaxSessionIdleTime = 120; //Minimum 2 minutes
                             }
                             if (MaxSessionIdleTime > 0) {  //Zero mean never disconnect
                                 long SessionIdleSec = Systime - LastSessionExchangeTime;
@@ -1354,17 +1356,40 @@ public class Main {
                             }
                             //Check timeouts on status replies
                             //If we have seen an <SOH> wait for full block, otherwise assume we didn't hear anything
-                            if (((Main.BlockActive | TTYConnected.equals("Connecting")) & (idlesecs > (blocktime * 3) + 8))
-                                    | (!Main.BlockActive & (idlesecs > (blocktime * 0.8) + 8))) {
-// PA0R: increased to blocktime * 3....                               
-                                oldtime = Systime;
+                            //if (((Main.BlockActive | TTYConnected.equals("Connecting")) & (idlesecs > (blocktime * 3) + 8))
+                            //        | (!Main.BlockActive & (idlesecs > (blocktime * 0.8) + 8))) {
+ 
+                            /*
+                            //Split the below logical test by taking a snapshot as the modem thread changes variables on us
+                            if ((m.BlockActive  && !m.receivingStatusBlock && (idlesecs > (blocktime * 2.2 + m.firstCharDelay)))) {
+                                //Normal data block reception
+                                System.out.println("Normal block t/o");
+                            }
+                            if(m.BlockActive && m.receivingStatusBlock && (idlesecs > (blocktime * 0.3 + m.firstCharDelay))) {
+                                boolean ba = m.BlockActive;
+                                boolean rsb = m.receivingStatusBlock;
+                                int is = idlesecs;
+                                int bt = blocktime;
+                                //Status block reception
+                                System.out.println("Status block T/O");
+                            }
+                            if (!m.BlockActive && (idlesecs > blocktime * 0.5 + m.firstCharDelay)) {
+                                // No data block received
+                                System.out.println("test 3");
+                            }
+                            */
+                            if ((m.BlockActive  && !m.receivingStatusBlock && (idlesecs > (blocktime * 2.2 + m.firstCharDelay))) //Normal data block reception
+                                    | (m.BlockActive && m.receivingStatusBlock && (idlesecs > (blocktime * 0.3 + m.firstCharDelay))) //Data block is status block
+                                    | (!m.BlockActive && (idlesecs > blocktime * 0.5 + m.firstCharDelay)) // No data block received
+                                    ) {                             
+                                oldtime = Systime;                                
                                 Main.TimeoutPolls += 1;
                                 // Check if we need to downgrade modes
                                 if (Main.TimeoutPolls > 1) {
                                     DowngradeOneMode ();
                                     TimeoutPolls = 0;
                                 }
-                                if (!status_received & NumberOfAcks > 0) {
+                                if (TTYConnected.equals("Connecting") & !status_received & NumberOfAcks > 0) {
                                     // repeat sending ack...
                                     //Turn RXid and TXid ON as I am repeating a connect ack
                                     q.send_rsid_command("ON");
@@ -1374,7 +1399,7 @@ public class Main {
                                     idlesecs = 0;
 
                                     NumberOfAcks--;
-                                } else if (!status_received) {
+                                } else if (TTYConnected.equals("Connecting") & !status_received) {
                                     //Abandon connect trial
                                     Status = "Listening";
                                     Connected = false;
@@ -1390,7 +1415,7 @@ public class Main {
                                     isDisconnected = true;
                                     //Set RXid ON for next connect request
                                     q.send_txrsid_command("ON");
-                                } else {
+                                } else if (TTYConnected.equals("Connected")) {
                                     // We are in a session, send a poll
                                     //Turn RXid and TXid ON as I am repeating a status request
                                     q.send_rsid_command("ON");
