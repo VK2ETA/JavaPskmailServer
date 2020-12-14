@@ -359,11 +359,13 @@ public class Session {
 
     public void parseInput(String str) throws NoClassDefFoundError, FileNotFoundException, IOException, Exception {
         boolean Firstline = false;
+        boolean foundMatchingCommand = false;
 
         // ~QUIT for TTY session...
         Pattern TTYm = Pattern.compile("^\\s*~QUIT");
         Matcher tm = TTYm.matcher(str);
         if (Main.TTYConnected.equals("Connected") & tm.lookingAt()) {
+            foundMatchingCommand = true;
             Main.disconnect = true;
             Main.log("Disconnect request from " + Main.TTYCaller);
 
@@ -375,6 +377,7 @@ public class Session {
         Matcher lf = LFm.matcher(str);
         //Open both ways                        if (Main.TTYConnected.equals("Connected") & lf.lookingAt()) {
         if (lf.lookingAt()) {
+            foundMatchingCommand = true;
             String downloaddir = Main.HomePath + Main.Dirprefix + "Downloads" + Main.Separator;
             File dd = new File(downloaddir);
             String[] filelist = dd.list();
@@ -392,6 +395,7 @@ public class Session {
         int fromNumber = 0;
         if (Main.TTYConnected.equals("Connected") & mh.lookingAt()) {
             if (mh.group(1) != null) {
+                foundMatchingCommand = true;
                 try {
                     fromNumber = Integer.decode(mh.group(1));
                 } catch (NumberFormatException e) {
@@ -412,6 +416,7 @@ public class Session {
         boolean compressed = false;
         if (Main.TTYConnected.equals("Connected") & rm.lookingAt()) {
             if (rm.group(2) != null) {
+                foundMatchingCommand = true;
                 try {
                     emailNumber = Integer.decode(rm.group(2));
                     compressed = (rm.group(1) != null);
@@ -437,6 +442,7 @@ public class Session {
         String startStopStr = "";
         if (Main.TTYConnected.equals("Connected") & tg.lookingAt()) {
             if (tg.group(3) != null) {
+                foundMatchingCommand = true;
                 if (tg.group(4) != null) {
                     startStopStr = tg.group(4).trim();
                 }
@@ -473,6 +479,7 @@ public class Session {
         Matcher gb = GBm.matcher(str);
         //Open both ways                                    if (Main.TTYConnected.equals("Connected") & gb.lookingAt()) {
         if (gb.lookingAt()) {
+            foundMatchingCommand = true;
             String downloaddir = Main.HomePath + Main.Dirprefix + "Downloads" + Main.Separator;
 
             String codedFile = "";
@@ -606,7 +613,8 @@ public class Session {
             }
         }
 
-        // APRS positions
+        //Not used at present
+        // APRS positions 
         //P14,PE1FTV,51.35300,5.38517
         Pattern APRSm = Pattern.compile("(\\w\\d+),(\\S+),(\\-*\\d+\\.\\d+),(\\-*\\d+\\.\\d+)");
         Matcher am = APRSm.matcher(str);
@@ -711,6 +719,7 @@ public class Session {
         Pattern SMp = Pattern.compile("^(~SEND)$");
         Matcher smm = SMp.matcher(str);
         if (Main.TTYConnected.equals("Connected") & smm.lookingAt()) {
+            foundMatchingCommand = true;
             if (smm.group(1).equals("~SEND")) {
                 emailUpload = true;
                 Main.comp = false;
@@ -752,6 +761,7 @@ public class Session {
         Pattern fm = Pattern.compile("\\s*>FM:(\\S+):(\\S+):(\\S+):(\\w):(.*):(\\d+)");
         Matcher fmm = fm.matcher(str);
         if (fmm.lookingAt()) {
+            foundMatchingCommand = true;
             if (fmm.group(4).equals("f")) {
                 FileDownload = true;
                 Main.comp = true;
@@ -973,9 +983,10 @@ public class Session {
         }
 
         // >FO5:PI4TUE:PA0R:JhyJkk:f:test.txt:496
-        Pattern ofr = Pattern.compile(">FO(\\d):([A-Z0-9\\-]+):([A-Z0-9\\-]+):([A-Za-z0-9_-]+):(\\w)");
+        Pattern ofr = Pattern.compile("\\s*>FO(\\d):([A-Z0-9\\-]+):([A-Z0-9\\-]+):([A-Za-z0-9_-]+):(\\w)");
         Matcher ofrm = ofr.matcher(str);
         if (ofrm.lookingAt()) {
+            foundMatchingCommand = true;
             if (ofrm.group(5).equals("f") | ofrm.group(5).equals("w") | ofrm.group(5).equals("m")) {
                 // get the file ?
                 File pending;
@@ -1000,9 +1011,10 @@ public class Session {
 
         // ~FO5:PI4TUE:PA0R:tmpasdkkdfj:u:test.txt:36
         // ~FO5:PI4TUE:PA0R-1:a30a69:s: :847 //E-mail upload to this TTYserver
-        Pattern ofr2 = Pattern.compile(".*~FO(\\d):([A-Z0-9\\-]+):([A-Z0-9\\-]+):([A-Za-z0-9_-]+):(\\w).*");
+        Pattern ofr2 = Pattern.compile("\\s*~FO(\\d):([A-Z0-9\\-]+):([A-Z0-9\\-]+):([A-Za-z0-9_-]+):(\\w).*");
         Matcher ofrm2 = ofr2.matcher(str);
         if (ofrm2.lookingAt()) {
+            foundMatchingCommand = true;
             if (ofrm2.group(5).equals("u")) {
                 // get the file ?
                 File pending = new File(Main.HomePath + Main.Dirprefix + "Pending" + Main.Separator + ofrm2.group(4));
@@ -1035,9 +1047,10 @@ public class Session {
         }
 
         // ~FY:tmpjGUytg:request partial email upload 
-        Pattern yfr = Pattern.compile(".*~FY:([A-Za-z0-9]+):(\\d+)");
+        Pattern yfr = Pattern.compile("\\s*~FY:([A-Za-z0-9]+):(\\d+)");
         Matcher yfrm = yfr.matcher(str);
         if (yfrm.lookingAt()) {
+            foundMatchingCommand = true;
             String partialfile = yfrm.group(1);
             String startingbyte = yfrm.group(2);
 //                     System.out.println(partialfile);
@@ -1201,10 +1214,10 @@ public class Session {
         }
 
         // ~FA:tmpjGUytg  delete output file in Outbox
-        Pattern afr = Pattern.compile("~FA:([A-Za-z0-9]+)");
+        Pattern afr = Pattern.compile("\\s*~FA:([A-Za-z0-9]+)");
         Matcher afrm = afr.matcher(str);
         if (afrm.lookingAt()) {
-
+            foundMatchingCommand = true;
             String deletefl = afrm.group(1);
             str = "";
             //Are we a server or client?
@@ -1328,6 +1341,7 @@ public class Session {
         Pattern pmsg = Pattern.compile("^\\s*(Your\\smsg:)\\s(\\d+)");
         Matcher mmsg = pmsg.matcher(str);
         if (mmsg.lookingAt()) {
+            foundMatchingCommand = true;
             if (mmsg.group(1).equals("Your msg:")) {
                 MsgDownload = true;
                 Firstline = true;
@@ -1347,6 +1361,7 @@ public class Session {
         Pattern cpmsg = Pattern.compile("^\\s*(~ZIPPED64)\\s(\\d+)");
         Matcher cmmsg = cpmsg.matcher(str);
         if (cmmsg.lookingAt()) {
+            foundMatchingCommand = true;
             if (cmmsg.group(1).equals("~ZIPPED64")) {
                 CMsgDownload = true;
                 Main.comp = true;
@@ -1372,6 +1387,7 @@ public class Session {
         Pattern pw = Pattern.compile("^\\s*(Your\\swwwpage:)\\s(\\d+)");
         Matcher mw = pw.matcher(str);
         if (mw.lookingAt()) {
+            foundMatchingCommand = true;
             if (mw.group(1).equals("Your wwwpage:")) {
                 WWWDownload = true;
                 Firstline = true;
@@ -1387,6 +1403,7 @@ public class Session {
         Pattern tgmsg = Pattern.compile("^\\s*(~TGET64)\\s(\\d+)");
         Matcher tgmmsg = tgmsg.matcher(str);
         if (tgmmsg.lookingAt()) {
+            foundMatchingCommand = true;
             if (tgmmsg.group(1).equals("~TGET64")) {
                 CwwwDownload = true;
                 Main.comp = true;
@@ -1416,6 +1433,7 @@ public class Session {
         Pattern ps = Pattern.compile("^\\s*(Message sent\\.\\.\\.)");
         Matcher ms = ps.matcher(str);
         if (ms.lookingAt()) {
+            foundMatchingCommand = true;
             if (ms.group(1).equals("Message sent...")) {
                 try {
                     File fd = new File(Main.Mailoutfile);
@@ -1434,6 +1452,7 @@ public class Session {
             Pattern SMpe = Pattern.compile("^(\\.)$");
             Matcher SMme = SMpe.matcher(str);
             if (SMme.lookingAt()) {
+                foundMatchingCommand = true;
                 String to = "";
                 String subject = "";
                 String body = "";
@@ -1485,6 +1504,7 @@ public class Session {
         Matcher me = pe.matcher(str);
         if (me.lookingAt()) {
             if (me.group(1).equals("-end-")) {
+                foundMatchingCommand = true;
                 if (Headers) {
                     Headers = false;
                     DataReceived = 0;
@@ -2070,6 +2090,7 @@ public class Session {
                 Transaction = "";
 
             } else if (me.group(1).equals("-abort-")) {
+                foundMatchingCommand = true;
                 if (Headers) {
                     Headers = false;
                     DataReceived = 0;
@@ -2277,6 +2298,7 @@ public class Session {
         }
 // messages                                    
         if (MsgDownload & !Firstline) {
+            foundMatchingCommand = true;
             DataReceived += str.length();
             Main.Progress = 100 * DataReceived / DataSize;
             this.tmpmessage.write(str + "\n");
@@ -2284,6 +2306,7 @@ public class Session {
 
         // compressed messages download or compressed Email upload                                   
         if ((CMsgDownload | CompressedEmailUpload) & !Firstline) {
+            foundMatchingCommand = true;
             DataReceived += str.length();
             Main.Progress = 100 * DataReceived / DataSize;
 
@@ -2305,6 +2328,7 @@ public class Session {
         }
 // compressed www pages
         if (CwwwDownload & !Firstline) {
+            foundMatchingCommand = true;
             DataReceived += str.length();
             Main.Progress = 100 * DataReceived / DataSize;
             try {
@@ -2327,6 +2351,7 @@ public class Session {
 
         // www pages       WWWDownload     
         if (WWWDownload & !Firstline) {
+            foundMatchingCommand = true;
             DataReceived += str.length();
 //                                        double ProGress = 100 * DataReceived / DataSize;
             if (DataSize > 0) {
@@ -2343,6 +2368,14 @@ public class Session {
                 Main.mainwindow += str + "\n";
             } catch (IOException exc) {
                 Main.log.writelog("Error when trying to write to download file.", exc, true);
+            }
+        }
+        //Do we have an unknown command?
+        if (!foundMatchingCommand && Main.TTYConnected.equals("Connected")) {
+            Pattern pmc = Pattern.compile("^(\\s*\\~[A-Z]{2,}.*)");
+            Matcher mmc = pmc.matcher(str);
+            if (mmc.lookingAt()) {
+                Main.TX_Text = "\nI don't understand:" + str + "\n";
             }
         }
     }

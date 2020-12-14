@@ -11,7 +11,7 @@ package javapskmail;
  */
 
 /*
- * Processor.java
+ * RMsgProcessor.java
  *
  * Copyright (C) 2011 John Douyere (VK2ETA)
  *

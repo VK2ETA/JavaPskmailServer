@@ -229,7 +229,8 @@ public class mainpskmailui extends javax.swing.JFrame {
                 IgateSwitch.setSelected(true);
                 IgateSwitch.setText("ON");
                 Main.wantigate = true;
-                IgateCallField.setText(Main.configuration.getPreference("APRSCALL", Main.APRSCall));
+                //String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
+                IgateCallField.setText(Main.configuration.getPreference("CALLSIGNASSERVER", Main.APRSCall));
             } else {
                 IgateSwitch.setSelected(false);
                 IgateSwitch.setText("OFF");
@@ -262,7 +263,9 @@ public class mainpskmailui extends javax.swing.JFrame {
         Character c = bl.charAt(0);
         int charval = c.charValue() - 48;
 
-        IgateCallField.setText(Main.configuration.getPreference("APRSCALL"));
+        
+        //IgateCallField.setText(Main.configuration.getPreference("APRSCALL"));
+        IgateCallField.setText(Main.configuration.getPreference("CALLSIGNASSERVER"));
         String nr = Main.configuration.getPreference("APRSINTERNETSERVER");
         if (nr.equals("")) {
             APRSServerSelect.setSelectedIndex(10);
@@ -2648,6 +2651,11 @@ public class mainpskmailui extends javax.swing.JFrame {
                 tabIgate.add(APRSServerSelect, gridBagConstraints);
 
                 APRS_IS.setText(bundle.getString("mainpskmailui.APRS_IS.text")); // NOI18N
+                APRS_IS.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        APRS_ISActionPerformed(evt);
+                    }
+                });
                 gridBagConstraints = new java.awt.GridBagConstraints();
                 gridBagConstraints.gridx = 0;
                 gridBagConstraints.gridy = 3;
@@ -7235,6 +7243,10 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         Main.configuration.setPreference("ICONlevel", Main.ICONlevel);
 //        System.out.println(Main.ICONlevel);
     }//GEN-LAST:event_cboAPRS2ndActionPerformed
+
+    private void APRS_ISActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_APRS_ISActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_APRS_ISActionPerformed
 
     /**
      * Simple message dialog with yes and no button

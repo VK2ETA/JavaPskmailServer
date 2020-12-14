@@ -31,7 +31,19 @@ public enum txstatus {
     /**
      * 
      */
+    TXPingReply,
+    /**
+     * 
+     */
     TXInq,
+    /**
+     * 
+     */
+    TXInqReply,
+    /**
+     * 
+     */
+    TXQSLReply,
     /**
      * 
      */

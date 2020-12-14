@@ -1,8 +1,17 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Processor.java
+ *
+ * Copyright (C) 2018,2019,2020 John Douyere (VK2ETA)
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package javapskmail;
 
 import javax.mail.Message;
@@ -232,6 +241,59 @@ public class serverMail {
             }
         }
         return mailHeaders;
+    }
+
+    //Request emails headers from mail server
+    public static int getMailCount() {        
+
+        IMAPFolder folder = null;
+        Store store = null;
+        String mailHeaders = "";
+
+        try {
+            Properties props = System.getProperties();
+            props.setProperty("mail.store.protocol", "imaps");
+            props.setProperty("mail.imap.starttls.enable", "true");
+            props.setProperty("mail.imap.ssl.enable", "true");
+            MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
+            socketFactory.setTrustAllHosts(true);
+            props.put("mail.imaps.ssl.socketFactory", socketFactory);
+            //conflict with default instance, create a new one each time
+            //Session session = Session.getDefaultInstance(props, null);
+            javax.mail.Session session = javax.mail.Session.getInstance(props, null); //Conflicts with local Session.java, must be explicit
+            store = session.getStore("imaps");
+            String imapHost = Main.configuration.getPreference("SERVERIMAPHOST");
+            String emailAddress = Main.configuration.getPreference("SERVEREMAILADDRESS");
+            String emailPassword = Main.configuration.getPreference("SERVERPASSWORD");
+            //store.connect("imap.googlemail.com",emailAddress, emailPassword);
+            store.connect(imapHost, emailAddress, emailPassword);
+            folder = (IMAPFolder) store.getFolder("inbox");
+            if (!folder.isOpen()) {
+                folder.open(Folder.READ_WRITE);
+            }
+            //Get the number of messages in the folder
+            int count = folder.getMessageCount();
+            return count;
+        } catch (Error err) {
+            err.printStackTrace();
+            Main.log.writelog("Error accessing Folder: " + err.getMessage() + "\n", true);
+            //throw (err);
+        } catch (Exception e) {
+            Exception e1 = e;
+            Main.log.writelog("Error accessing emails: " + e1.getMessage() + "\n", true);
+        } finally {
+            try {
+                if (folder != null && folder.isOpen()) {
+                    folder.close(true);
+                }
+                if (store != null) {
+                    store.close();
+                }
+            } catch (Exception e) {
+                //do nothing
+            }
+        }
+        return -1; //Means error accessing inbox mail count
     }
 
     //Extract body text from a message (can be multi-parts, plain text/html...)

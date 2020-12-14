@@ -820,7 +820,7 @@ public class Modem implements Runnable {
                                 + String.format(Locale.US, "%02d%02d%02d", c1.get(Calendar.HOUR_OF_DAY),
                                         c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND)) + ".txt";
                         WriteToMonitor("<SOH>");
-                        if (BlockActive == false) {
+                        if (!BlockActive) {
                             BlockActive = true;
                             BlockString = "<SOH>";
                         } else {

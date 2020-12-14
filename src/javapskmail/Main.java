@@ -34,7 +34,7 @@ public class Main {
 
     //VK2ETA Based on "jpskmail 1.7.b";
     static String application = "jpskmailserver 0.9.3"; // Used to preset an empty status
-    static String version = "version 0.9.3, 20201212";
+    static String version = "version 0.9.3, 20201214";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -320,7 +320,7 @@ public class Main {
 
             // Get settings and initialize
             handleinitialization();
-/* Moved modem init to after gui to allow for auto launch of Fldigi without slowing 
+            /* Moved modem init to after gui to allow for auto launch of Fldigi without slowing 
   the gui down and allows for a message to be displayed while fldigi is launched
             // start the modem thread
             System.out.println("About to create new Modem.");
@@ -330,7 +330,7 @@ public class Main {
             myThread.setDaemon(true);
             System.out.println("Launching modem thread.");            
             myThread.start();
-*/
+             */
             // Make arq object
             //System.out.println("About to create new ARQ.");            
             q = new arq();
@@ -377,8 +377,7 @@ public class Main {
             mainui.setLocationRelativeTo(null); // position in the center of the screen
             System.out.println("about to setDefaultCloseOperation");
             mainui.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            
-            
+
             System.out.println("about to setVisible");
             mainui.setVisible(true);
 //            mainui.disableMboxMenu();
@@ -389,9 +388,9 @@ public class Main {
             Thread myThread = new Thread(m);
             // Start the modem thread
             myThread.setDaemon(true);
-            System.out.println("Launching modem thread.");            
+            System.out.println("Launching modem thread.");
             myThread.start();
-            
+
             //vk2eta debug
             System.out.println("Starting UI timers");
             //VK2ETA locking up at startup when heavy CPU load. Solution: Delayed timer's
@@ -401,7 +400,7 @@ public class Main {
             mainui.u.start();
             mainui.timer200ms.start();
             System.out.println("Timers started");
- 
+
             // Start the aprs server socket
             mapsock = new aprsmapsocket();
             mapsock.setPort(aprsserverport);
@@ -430,7 +429,7 @@ public class Main {
 
             //Launch separate thread to monitor and relay incoming emails and messages if required
             RMsgProcessor.startEmailsAndSMSsMonitor();
-            
+
             //vk2eta debug
             System.out.println("entering receive loop");
             while (true) {
@@ -714,7 +713,7 @@ public class Main {
                                     // ident block
                                 } else if (rxb.session.equals(session) & rxb.type.equals("i")) {
                                     // discard
-                                    // data block
+                                    // info block
                                 } else if (rxb.valid & rxb.session.equals(session)) {
                                     myrxstatus = sm.doRXBuffer(rxb.payload, rxb.type);
                                 } else if (rxb.session.equals(session)) {
@@ -756,8 +755,7 @@ public class Main {
                                         }
                                     }
                                 }
-
-                            }
+                            } //End if (connected)
 
                             if (!Connected & Blockline.contains("QSL") & Blockline.contains(q.callsign)) {
                                 String pCheck = "";
@@ -837,7 +835,8 @@ public class Main {
 //                                        System.out.println("check not ok.\n");
                                 }
                             } else if (!Connected & Blockline.contains(":26 ")) {
-                                // System.out.println(Blockline);                              
+                                // System.out.println(Blockline);
+                                //Uncompressed APRS Beacon or APRS message
                                 Pattern bsc = Pattern.compile(".*00u(\\S+):26\\s(.)(.*)(.)([0123456789ABCDEF]{4}).*");
                                 Matcher bmsc = bsc.matcher(Blockline);
                                 String scall = "";
@@ -856,11 +855,19 @@ public class Main {
                                     if (check.equals(pCheck)) {
 //                             System.out.println("CHECKED, type=" + type);
                                         if (type.equals("!")) {
+                                            //Uncompressed APRS Beacon
+                                            //E.g. <SOH>00uVK2ETA:26 !2700.00S/13300.00E.Test 1FDF9<EOT>
+                                            //VK2ETA>PSKAPR,TCPIP*,qAC,T2SYDNEY:!2712.85S/15303.72E.test aprs 2
                                             outstring = scall + ">PSKAPR,TCPIP*:" + type + binfo;
 //                                                System.out.println(outstring);
                                             igate.write(outstring);
                                             // Push this to aprs map too
                                             mapsock.sendmessage(outstring);
+                                            //If I run as server, send QSL
+                                            if (Main.WantServer) {
+                                                q.send_QSL_reply();
+                                            }
+                                            //record heard server stations?????
                                             if (nodetype.equals("&")) {
                                                 // is serverbeacon
                                                 Serverbeacon = true;
@@ -884,25 +891,8 @@ public class Main {
                                                 }
 
                                             }
-                                        } else if (!type.equals(":")) {
-                                            // message PA0R-2:26 PA0R test
-                                            //                                System.out.println("IS :" + Blockline);
-                                            Pattern gm = Pattern.compile(".*00u(\\S+):26\\s(\\S+)>PSKAPR...(\\S+)\\s*:(.*)\\{(\\d\\d).*");
-                                            Matcher gmm = gm.matcher(Blockline);
-                                            if (gmm.lookingAt()) {
-                                                //                                   System.out.println("FOUND:" +  Blockline);
-                                                String fromcall = gmm.group(3) + "        ";
-                                                fromcall = fromcall.substring(0, 8);
-
-                                                String toxastir = gmm.group(2) + ">PSKAPR,TCPIP*,qAC," + gmm.group(1) + "::" + fromcall + "  " + ":" + gmm.group(4) + "\n";
-                                                mapsock.sendmessage(toxastir);
-
-                                                String aprsmessage = fromcall + "  " + ":" + gmm.group(4);
-//                                                    System.out.println(aprsmessage);
-                                            }
-
-                                        } else {
-//System.out.println(type + binfo);
+                                        } else if (type.equals(":")) {
+                                            //System.out.println(type + binfo);
                                             Pattern gc = Pattern.compile("(\\S+)>PSKAPR.::(\\S+)\\s*:(.*)(\\{\\d+)");
                                             Matcher gmc = gc.matcher(type + binfo);
                                             if (gmc.lookingAt()) {
@@ -922,12 +912,39 @@ public class Main {
                                                 mapsock.sendmessage(outstring);
                                                 mainui.appendMainWindow(outstring);
                                             }
+                                        } else {
+                                            //APRS message to another callsign
+                                            // message PA0R-2:26 PA0R test
+                                            //System.out.println("IS :" + Blockline);
+                                            Pattern gm = Pattern.compile(".*00u(\\S+):26\\s(\\S+)\\s(.*)([0123456789ABCDEF]{4}).*");
+                                            Matcher gmm = gm.matcher(Blockline);
+                                            if (gmm.lookingAt()) {
+                                                //                                   System.out.println("FOUND:" +  Blockline);
+                                                String fromcall = gmm.group(1);// + "         ";
+                                                //fromcall = fromcall.substring(0, 9);
+                                                String outcall = gmm.group(2) + "         ";
+                                                outcall = outcall.substring(0, 9);
+                                                binfo = gmm.group(3);
+                      
+                                                String toxastir = gmm.group(2) + ">PSKAPR,TCPIP*,qAC," + gmm.group(1) + "::" + fromcall + "  " + ":" + gmm.group(3) + "\n";
+                                                mapsock.sendmessage(toxastir);
+                                                //test: VK2ETA>PSKAPR,TCPIP*::vk2eta-1 :test aprs 1
+                                               //VK2ZZZ>APWW11,TCPIP*,qAC,T2LUBLIN::VK2XXX-8 :Hello Jack Long time no see!{21}
+                                                String aprsmessage = fromcall + ">PSKAPR,TCPIP*::" + outcall + ":" + binfo;
+                                                igate.write(aprsmessage);
+                                                //System.out.println(aprsmessage);
+                                                //If I run as server, send QSL
+                                                if (Main.WantServer) {
+                                                    q.send_QSL_reply();
+                                                }
+                                            }
                                         }
                                         outstring = "";
                                     }
 
                                 }
                             } else if (!Connected & Blockline.contains(":6 ")) {
+                                //Compressed beacon
                                 Pattern cbsc = Pattern.compile(".*00u(\\S+):6\\s(.*)([0123456789ABCDEF]{4}).*");
                                 Matcher cbmsc = cbsc.matcher(Blockline);
                                 String scall = "";
@@ -1015,15 +1032,59 @@ public class Main {
                                         // Push this to aprs map too
                                         mapsock.sendmessage(outstring);
                                         outstring = "";
+                                        //If I run as server, send QSL
+                                        if (Main.WantServer) {
+                                            q.send_QSL_reply();
+                                        }
+                                    }
+                                }
+                            } else if (!Connected & WantServer & Blockline.contains(":7 ")) {
+                                //Ping request
+                                //<SOH>00uVK2ETA:7 1830<EOT>
+                                Pattern cbsc = Pattern.compile(".*00u(\\S+):7\\s([0123456789ABCDEF]{4}).*");
+                                Matcher cbmsc = cbsc.matcher(Blockline);
+                                String scall = "";
+                                if (cbmsc.lookingAt()) {
+                                    scall = cbmsc.group(1);
+                                    if (scall.length() > 1) {
+                                        //Some callsign present, reply with s/n
+                                        String uiMsg = "Ping request from " + scall;
+                                        q.Message(uiMsg, 10);
+                                        try {
+                                            Thread.sleep(10);
+                                        } catch (Exception e) {
+                                            //Nothing
+                                        }
+                                        q.set_txstatus(txstatus.TXPingReply);
+                                        q.send_ping_reply();
+                                    }
+                                }
+                            } else if (!Connected & WantServer & Blockline.contains(":8 ")) {
+                                //Inquire request
+                                //<SOH>00uVK2ETA:8 VK2ETA-5 B848<EOT>
+                                Pattern cbsc = Pattern.compile(".*00u(\\S+):8\\s(\\S+)\\s([0123456789ABCDEF]{4}).*");
+                                Matcher cbmsc = cbsc.matcher(Blockline);
+                                String scall;
+                                String reqcall;
+                                if (cbmsc.lookingAt()) {
+                                    reqcall = cbmsc.group(1);
+                                    scall = cbmsc.group(2);
+                                    String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
+                                    if (scall.length() > 1 && reqcall.length() > 1 && scall.equals(serverCall)) {
+                                        //Some callsigns present and match my call as sever, reply with s/n
+                                        String uiMsg = "Inquire request from " + reqcall;
+                                        q.Message(uiMsg, 5);
+                                        q.set_txstatus(txstatus.TXInqReply);
+                                        q.setReqCallsign(reqcall);
+                                        q.send_inquire_reply();
                                     }
                                 }
                             }
 
-                            //String s = Blockline + "\n";
-
-                            //                           System.out.println(Blockline);
-                            // unproto packet
+                            //System.out.println(Blockline);
+                            // unproto packets
                             if (rxb.type.equals("u")) {
+                                //Display received APRS message???? - Check the callsigns used
                                 if (rxb.port.equals("26") & !Serverbeacon) {
                                     if (rxb.call.equals(configuration.getPreference("CALL")) || rxb.call.equals(configuration.getPreference("PSKAPRS"))) {
                                         //                                       q.send_txrsid_command("OFF");
@@ -1039,6 +1100,7 @@ public class Main {
                                         }
                                     }
                                 } else if (rxb.port.equals("71") | rxb.port.equals("72")) {
+                                    //Ping reply from server
                                     int i;
                                     boolean knownserver = false;
                                     Calendar cal = Calendar.getInstance();
@@ -1105,8 +1167,8 @@ public class Main {
 //                                        q.send_rsid_command("OFF");
                                     q.Message("Rejected:" + rejectreason, 10);
                                 }
-                            // connect_ack
-                            } else if (rxb.type.equals("k") & rxb.valid) { 
+                                // connect_ack
+                            } else if (rxb.type.equals("k") & rxb.valid) {
 
                                 Pattern pk = Pattern.compile("^(\\S+):\\d+\\s(\\S+):\\d+\\s(\\d)$");
                                 Matcher mk = pk.matcher(rxb.payload);
@@ -1292,7 +1354,7 @@ public class Main {
 //                                System.out.println("valid");
                                 }
                             }
-                        //End of //if  NO bulletin mode & NO IAC mode
+                            //End of //if  NO bulletin mode & NO IAC mode
                         } else if (Main.Bulletinmode) {
                             // Bulletin mode
                             Blockline = Blockline.substring(5);
@@ -1317,7 +1379,7 @@ public class Main {
 
                         } else if (Main.IACmode) {
                             sm.parseInput(Blockline);
-                        } 
+                        }
                     } else { // if NO (m.checkBlock())
                         // no block coming...and we are server (or received a connect request)
                         if (!Main.TXActive & (TTYConnected.equals("Connected")
@@ -1326,12 +1388,12 @@ public class Main {
                             Systime = System.currentTimeMillis() / 1000;
                             idlesecs = (int) (Systime - oldtime);
                             //Overall session idle timeout
-                            String IdleTimeStr = configuration.getPreference("IDLETIME", "15");
+                            String IdleTimeStr = configuration.getPreference("IDLETIME", "120");
                             int MaxSessionIdleTime = Integer.parseInt(IdleTimeStr); //In seconds
-                            if (MaxSessionIdleTime > 0 & MaxSessionIdleTime < 120) {
-                                MaxSessionIdleTime = 120; //Minimum 2 minutes
+                            if (MaxSessionIdleTime > 0 & MaxSessionIdleTime < 60) {
+                                MaxSessionIdleTime = 60; //Minimum 1 minute
                             }
-                            if (MaxSessionIdleTime > 0) {  //Zero mean never disconnect
+                            if (MaxSessionIdleTime > 0) {  //Zero mean never disconnect, use with care
                                 long SessionIdleSec = Systime - LastSessionExchangeTime;
                                 if (SessionIdleSec > MaxSessionIdleTime) {
                                     //Disconnect session
@@ -1358,7 +1420,7 @@ public class Main {
                             //If we have seen an <SOH> wait for full block, otherwise assume we didn't hear anything
                             //if (((Main.BlockActive | TTYConnected.equals("Connecting")) & (idlesecs > (blocktime * 3) + 8))
                             //        | (!Main.BlockActive & (idlesecs > (blocktime * 0.8) + 8))) {
- 
+
                             /*
                             //Split the below logical test by taking a snapshot as the modem thread changes variables on us
                             if ((m.BlockActive  && !m.receivingStatusBlock && (idlesecs > (blocktime * 2.2 + m.firstCharDelay)))) {
@@ -1377,16 +1439,16 @@ public class Main {
                                 // No data block received
                                 System.out.println("test 3");
                             }
-                            */
-                            if ((m.BlockActive  && !m.receivingStatusBlock && (idlesecs > (blocktime * 2.2 + m.firstCharDelay))) //Normal data block reception
+                             */
+                            if ((m.BlockActive && !m.receivingStatusBlock && (idlesecs > (blocktime * 2.2 + m.firstCharDelay))) //Normal data block reception
                                     | (m.BlockActive && m.receivingStatusBlock && (idlesecs > (blocktime * 0.3 + m.firstCharDelay))) //Data block is status block
                                     | (!m.BlockActive && (idlesecs > blocktime * 0.5 + m.firstCharDelay)) // No data block received
-                                    ) {                             
-                                oldtime = Systime;                                
+                                    ) {
+                                oldtime = Systime;
                                 Main.TimeoutPolls += 1;
                                 // Check if we need to downgrade modes
                                 if (Main.TimeoutPolls > 1) {
-                                    DowngradeOneMode ();
+                                    DowngradeOneMode();
                                     TimeoutPolls = 0;
                                 }
                                 if (TTYConnected.equals("Connecting") & !status_received & NumberOfAcks > 0) {

@@ -59,6 +59,7 @@ public class arq {
     public String backoff = cf.getBlocklength();
     static private Modem m;
     private String summonsfreq = "0";
+    private String reqCallSign = ""; //Requester's call sign, typically a client making an inquiry
 
     String Modem = "PSK500R";    // Current modem mode
     modemmodeenum mode = modemmodeenum.PSK500R;
@@ -69,6 +70,13 @@ public class arq {
      */
     public void setCallsign(String incall) {
         callsign = incall;
+    }
+    /**
+     *
+     * @param reqCallSign
+     */
+    public void setReqCallsign(String reqCallSign) {
+        this.reqCallSign = reqCallSign;
     }
 
     /**
@@ -197,11 +205,38 @@ public class arq {
         return returnframe;
     }
 
+    private String replyPingblock() {
+        String returnframe = "";
+        String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
+        returnframe = "00" + Unproto + serverCall + ":71 " + (int) Main.snr + " ";
+        return returnframe;
+    }
+
+    //Send an Inquire block
     private String inquireblock() {
         String returnframe = "";
         // Fix stream id, this is wrong
         callsign = Main.configuration.getPreference("CALL");
         returnframe = "00" + Unproto + callsign + ":8 " + Main.mainui.getcboServer() + " ";
+        return returnframe;
+    }
+
+    //Reply to an Inquire block
+    private String replyInquireblock() {
+        String returnframe = "";
+        String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
+        //Get mail count
+        int mailCount = serverMail.getMailCount();
+        //my $QSL = sprintf("%cQSL %s de %s %s %d:%d",0x01, $1, $ServerCall, $s2n, $mls, $mlcount);
+        returnframe = "00" + Unproto + "QSL " + reqCallSign + " de " + serverCall + " " + (int) Main.snr + " " + mailCount + " ";
+        return returnframe;
+    }
+
+    //Reply with a QSL block (when I am a server and I received an APRS message, beacon or short email)
+    private String replyQSLblock() {
+        String returnframe = "";
+        String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
+        returnframe = "00" + Unproto + "QSL de " + serverCall + " " + (int) Main.snr;
         return returnframe;
     }
 
@@ -501,9 +536,8 @@ public class arq {
         return true;
     }
 
-    
     public boolean send_reject(String clientCallsign, String reasonStr) {
-        String info = "00" + Reject + clientCallsign + ":" + reasonStr; 
+        String info = "00" + Reject + clientCallsign + ":" + reasonStr;
 // System.out.println("rejectblock:" + returnframe);
         String outstring = make_block(info) + FrameEnd;
         sendit(outstring);
@@ -520,7 +554,7 @@ public class arq {
         // make the protobyte
         char sprobyte = (char) quality;
         //I am a TTY server - send client's TX mode instead
-        if (Main.TTYConnected.equals("Connected")) { 
+        if (Main.TTYConnected.equals("Connected")) {
             //sprobyte = (char) (48 + Main.m.getModemPos(Main.RxModem));
             //Need index in the array of client modes, starting at position 1
             int myIndex = Main.getClientModeIndex(Main.RxModem);
@@ -540,7 +574,6 @@ public class arq {
         }
         return returnframe;
     }
-
 
     /**
      *
@@ -565,9 +598,26 @@ public class arq {
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
+            case TXPingReply:
+                info = replyPingblock();
+                Lastblockinframe = 1;
+                outstring = make_block(info) + FrameEnd;
+                break;
             case TXInq:
                 //    System.out.println("INQ");
                 info = inquireblock();
+                Lastblockinframe = 1;
+                outstring = make_block(info) + FrameEnd;
+                break;
+            case TXInqReply:
+                //    System.out.println("INQ Reply");
+                info = replyInquireblock();
+                Lastblockinframe = 1;
+                outstring = make_block(info) + FrameEnd;
+                break;
+            case TXQSLReply:
+                //    System.out.println("QSL Reply");
+                info = replyQSLblock();
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
@@ -576,7 +626,6 @@ public class arq {
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
-
             case TXaprsmessage:
                 send_txrsid_command("ON");
                 //               Thread.sleep(1000);
@@ -663,6 +712,33 @@ public class arq {
      */
     public void send_ping() throws InterruptedException {
         this.txserverstatus = txstatus.TXPing;
+        send_frame("");
+    }
+
+    /**
+     * /
+     * Send a reply to a ping, using port 71
+     */
+    public void send_ping_reply() throws InterruptedException {
+        this.txserverstatus = txstatus.TXPingReply;
+        send_frame("");
+    }
+
+    /**
+     * /
+     * Send a reply to an Inquire
+     */
+    public void send_inquire_reply() throws InterruptedException {
+        this.txserverstatus = txstatus.TXInqReply;
+        send_frame("");
+    }
+
+    /**
+     * /
+     * Send a QSL reply
+     */
+    public void send_QSL_reply() throws InterruptedException {
+        this.txserverstatus = txstatus.TXQSLReply;
         send_frame("");
     }
 
@@ -794,6 +870,16 @@ public class arq {
      */
     public void send_link() throws InterruptedException {
         this.txserverstatus = txstatus.TXlinkreq;
+        send_frame("");
+    }
+
+    /**
+     * /
+     * Send a simple ping, using port 7
+     */
+    public void send_link_ack(String reqCallSign) throws InterruptedException {
+        this.reqCallSign = reqCallSign;
+        this.txserverstatus = txstatus.TXlinkack;
         send_frame("");
     }
 

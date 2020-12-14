@@ -42,8 +42,8 @@ public class igate {
         //while (!connected & Main.wantigate) {
         while (!connected) {
 
-            aprscall = Main.configuration.getPreference("CALL");
-
+            //aprscall = Main.configuration.getPreference("CALL");
+            aprscall = Main.configuration.getPreference("CALLSIGNASSERVER");
             aprspass = getHash (aprscall);
 
             connected = true;
@@ -133,15 +133,15 @@ public class igate {
 
     public static void write(String aprs_out) throws IOException {
 
-            if (connected) {
+        if (connected) {
 
-                if (aprs_out.length() > 0) {
-                    out.println(aprs_out);
-                    Main.aprsbeacontxt = aprs_out + "\n";
-                    aprs_out = "";
-                }
-
+            if (aprs_out.length() > 0) {
+                out.println(aprs_out);
+                Main.aprsbeacontxt = aprs_out + "\n";
+                aprs_out = "";
             }
+
+        }
     }
 
    public void close() throws IOException {

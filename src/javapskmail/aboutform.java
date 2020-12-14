@@ -77,7 +77,7 @@ public class aboutform extends javax.swing.JFrame {
         jTextArea1.setColumns(20);
         jTextArea1.setFont(new java.awt.Font("DejaVu Sans", 0, 12)); // NOI18N
         jTextArea1.setRows(5);
-        jTextArea1.setText("Welcome to JPSKmail, PSKmail client v. 1.7.b\n\nThis is the cross-platform client for PSKmail developed in java.\nTo find out more about PSKmail please visit www.pskmail.org.\n\n(c) Copyright 2009-2014 Pär Crusefalk and Rein Couperus\n\nDistributed under the GNU General Public License version 2 or later.\nThis is free software: you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.\n");
+        jTextArea1.setText("Welcome to JPSKmail Server and Client application, \n\nJava PSKmail Server  v. 0.9.3\n\nThis is the cross-platforms Client and Server for PSKmail developed in java.\nTo find out more about PSKmail please visit http://pskmail.wikidot.com/.\n\n(c) Copyright 2018-2020 John Douyere (VK2ETA), based \non jPskmail client 1.7 by Pär Crusefalk and Rein Couperus\n\nDistributed under the GNU General Public License version 3 or later.\nThis is free software: you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.\n");
         jTextArea1.setMaximumSize(new java.awt.Dimension(1024, 768));
         jTextArea1.setMinimumSize(new java.awt.Dimension(450, 100));
         jTextArea1.setPreferredSize(new java.awt.Dimension(450, 150));
