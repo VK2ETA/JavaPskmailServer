@@ -164,7 +164,7 @@ public class RXBlock{
                        Main.Status = "Listening";
                        Main.Bulletin_time = 0;
                        Main.mainwindow = "\n----------\n";
-                       Main.DCD = 0;
+                       //VK2ETA Why altering it here ??? Main.DCD = 0;
 //           System.out.println("RXBl:Bulletin OFF");
                         return "\n----------\n";
               }

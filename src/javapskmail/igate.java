@@ -131,7 +131,7 @@ public class igate {
     }
 
 
-    public static void write(String aprs_out) throws IOException {
+    public static boolean write(String aprs_out) throws IOException {
 
         if (connected) {
 
@@ -140,10 +140,11 @@ public class igate {
                 Main.aprsbeacontxt = aprs_out + "\n";
                 aprs_out = "";
             }
-
+            return true;
         }
+        return false;
     }
-
+    
    public void close() throws IOException {
              out.close();
             in.close();

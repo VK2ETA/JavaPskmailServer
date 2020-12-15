@@ -34,7 +34,8 @@ public class Main {
 
     //VK2ETA Based on "jpskmail 1.7.b";
     static String application = "jpskmailserver 0.9.3"; // Used to preset an empty status
-    static String version = "version 0.9.3, 20201214";
+    static String version = "0.9.3";
+    static String versionDate = "20201215";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -153,8 +154,10 @@ public class Main {
     static boolean disconnect = false;
     static long Systime;
     static int DCDthrow;
+    static double RxDelay = 2.0f; //Initial 3 seconds delay of RX just in case
+    static double RxDelayCount = 2.0f;
     static String connectsecond;
-    static long oldtime = 0;
+    static long oldtime = 0L;
     static int Missedblocks = 0;
     static long blockval = 0; //msec 
     static int charval = 0; //msecs
@@ -196,7 +199,8 @@ public class Main {
     static int TimeoutPolls = 0;
     static boolean JustDowngradedRX = false;
     static boolean status_received = false;
-    static int NumberOfAcks = 5;
+    static final int maxNumberOfAcks = 5;
+    static int NumberOfAcks = maxNumberOfAcks;
     static int Freq_offset = 1000;
     static int Quality = 0;
     static int sql = 30;
@@ -446,7 +450,7 @@ public class Main {
                 SendCommand = "";
 
                 //Handle RadioMsg messages only when fully idle
-                if (Sendline.length() == 0
+                if (Sendline.length() == 0 & !TXActive
                         & !Connected & !Connecting & !Aborting
                         & TTYConnected.equals("") & !receivingRadioMsg) {
                     if (RMsgTxList.getAvailableLength() > 0) {
@@ -473,63 +477,64 @@ public class Main {
                 radioMsgWorking = false;
 
 // if (Sendline.length() > 0) {System.out.println("MAIN:" + Sendline);   }        
-                // see if tx active and DCD is off
-                if (Sendline.length() > 0 & !TXActive & DCD == 0) {
+                // see if tx active and DCD is off and we have exhausted the extra reception delay
+                if (Sendline.length() > 0 & !TXActive & DCD == 0 & RxDelayCount < 0.1f) {
 //                    System.out.println("MAIN2:" + Sendline);
-                    DCDthrow = generator.nextInt(Persistence);
-
-//     System.out.println("DCD:" + DCDthrow);               
-                    if (Connected | Connecting | Aborting) {
+                    //VK2ETA DCDthrow not used 
+                    //DCDthrow = generator.nextInt(Persistence);
+                    //     System.out.println("DCD:" + DCDthrow);               
+                    if (Connected | Connecting | Aborting | !TTYConnected.equals("")) {
+                        //We are in some session as client or server
                         if (Aborting) {
                             Aborting = false;
                         }
-                        DCDthrow = 0;
-                    }
-                    if (DCDthrow == 0) {
-                        //      System.out.println("MAIN3:" + Sendline); 
-                        String Sendline_cp = Sendline;
-                        try {
-//       System.out.println("MAIN4:" + Sendline_cp);                   
-                            int TxDelay = 0;
-                            String TxDelayStr = configuration.getPreference("TXDELAY", "0");
-//System.out.println("TXDELAY:" + TxDelayStr);  
-                            if (TxDelayStr.length() > 0) {
-                                TxDelay = Integer.parseInt(TxDelayStr);
-                            }
-
-                            if (TxDelay > 0) {
-                                Thread.sleep(TxDelay * 1000);
-                            }
-                            // System.out.println("MAIN5" );                        
-                            //  Add a 2 seconds delay when mode is MFSK16 (1 sec for MFSK32) to prevent overlaps as
-                            //  the trail of MFSK is very long
-                            if (Main.RxModem.equals(modemmodeenum.MFSK16)) {
-                                Thread.sleep(2000);
-                            } else if (Main.RxModem.equals(modemmodeenum.MFSK32)) {
-                                Thread.sleep(1000);
-                            }
-                            //Try to stop Fldigi locking up by having a delay between the mode change and the data
-                            //  block as Fldigi needs to re-initialize the modem at each mode change
-                            String SendMode = "";
-//System.out.println("TXMODEM for connect:" + getTXModemString(TxModem));
-                            SendMode = "<cmd><mode>" + getTXModemString(TxModem) + "</mode></cmd>";
-//       System.out.println("MAIN6:" + Sendline_cp);
-
-                            m.Sendln(SendMode);
-                            Thread.sleep(250);
-                            m.Sendln(Sendline_cp);
-                            Sendline_cp = "";
-                            Sendline = "";
-                            Main.TXActive = true;
-                        } catch (Exception e) {
-                            Main.monitor += ("\nModem problem. Is fldigi running?");
-                            log.writelog("Modem problem. Is fldigi running?", e, true);
-                        }
                     } else {
-                        if (!Connected & !Connecting) {
-                            DCD = MAXDCD;
-                        }
+                        //Reset DCD for next round if we are not in a session
+                        DCD = Integer.parseInt(configuration.getPreference("DCD", "0"));
                     }
+                    //VK2ETA DCDthrow not used 
+                    //if (DCDthrow == 0) {
+                    //      System.out.println("MAIN3:" + Sendline); 
+                    String Sendline_cp = Sendline;
+                    try {
+//       System.out.println("MAIN4:" + Sendline_cp);                   
+                        int TxDelay = 0;
+                        String TxDelayStr = configuration.getPreference("TXDELAY", "0");
+//System.out.println("TXDELAY:" + TxDelayStr);  
+                        if (TxDelayStr.length() > 0) {
+                            TxDelay = Integer.parseInt(TxDelayStr);
+                        }
+                        if (TxDelay > 0) {
+                            Thread.sleep(TxDelay * 1000);
+                        }
+                        // System.out.println("MAIN5" );                        
+                        //  Add a 2 seconds delay when mode is MFSK16 (1 sec for MFSK32) to prevent overlaps as
+                        //  the trail of MFSK is very long
+                        //if (Main.RxModem.equals(modemmodeenum.MFSK16)) {
+                        //    Thread.sleep(2000);
+                        //} else if (Main.RxModem.equals(modemmodeenum.MFSK32)) {
+                        //    Thread.sleep(1000);
+                        //}
+                        //Try to stop Fldigi locking up by having a delay between the mode change and the data
+                        //  block as Fldigi needs to re-initialize the modem at each mode change
+                        String SendMode = "<cmd><mode>" + getTXModemString(TxModem) + "</mode></cmd>";
+                        //System.out.println("TXMODEM for connect:" + getTXModemString(TxModem));
+                        //       System.out.println("MAIN6:" + Sendline_cp);
+                        Main.TXActive = true;
+                        m.Sendln(SendMode);
+                        Thread.sleep(250);
+                        m.Sendln(Sendline_cp);
+                        Sendline_cp = "";
+                        Sendline = "";
+                    } catch (Exception e) {
+                        Main.monitor += ("\nModem problem. Is fldigi running?");
+                        log.writelog("Modem problem. Is fldigi running?", e, true);
+                    }
+                    //} else {
+                    //    if (!Connected & !Connecting) {
+                    //        DCD = MAXDCD;
+                    //    }
+                    //}
                 }
                 // receive block
 
@@ -597,8 +602,15 @@ public class Main {
                                         //Auto speed/mode adjustment
                                         //I am a TTY server (protocol byte = quality of receive by client)
                                         //Turn RXid and TXid OFF as I am a server and I received a good "s" block
-                                        q.send_rsid_command("On");
-                                        q.send_txrsid_command("On");
+                                        q.send_rsid_command("OFF");
+                                        //Exception is for frequency sensitive modes like MFSK16, MFSK8, DOMINOEX5
+                                        if (Main.TxModem == modemmodeenum.MFSK16 
+                                                || Main.TxModem == modemmodeenum.MFSK8
+                                                || Main.TxModem == modemmodeenum.DOMINOEX5) {
+                                            q.send_txrsid_command("ON");
+                                        } else {
+                                            q.send_txrsid_command("OFF");
+                                        }
                                         //Adjust my TX mode (as a server) AND the Client's TX modes
                                         pint = (pint - 32) * 100 / 90;
                                         hiss2n = decayaverage(hiss2n, pint, 2);
@@ -860,11 +872,11 @@ public class Main {
                                             //VK2ETA>PSKAPR,TCPIP*,qAC,T2SYDNEY:!2712.85S/15303.72E.test aprs 2
                                             outstring = scall + ">PSKAPR,TCPIP*:" + type + binfo;
 //                                                System.out.println(outstring);
-                                            igate.write(outstring);
+                                            boolean igateSendOk = igate.write(outstring);
                                             // Push this to aprs map too
                                             mapsock.sendmessage(outstring);
                                             //If I run as server, send QSL
-                                            if (Main.WantServer) {
+                                            if (Main.WantServer && igateSendOk) {
                                                 q.send_QSL_reply();
                                             }
                                             //record heard server stations?????
@@ -907,7 +919,7 @@ public class Main {
                                                 outstring += ":";
                                                 outstring += binfo;
                                                 outstring += mnumber;
-                                                igate.write(outstring);
+                                                boolean igateSendOk = igate.write(outstring);
                                                 // Push this to aprs map too
                                                 mapsock.sendmessage(outstring);
                                                 mainui.appendMainWindow(outstring);
@@ -931,10 +943,10 @@ public class Main {
                                                 //test: VK2ETA>PSKAPR,TCPIP*::vk2eta-1 :test aprs 1
                                                //VK2ZZZ>APWW11,TCPIP*,qAC,T2LUBLIN::VK2XXX-8 :Hello Jack Long time no see!{21}
                                                 String aprsmessage = fromcall + ">PSKAPR,TCPIP*::" + outcall + ":" + binfo;
-                                                igate.write(aprsmessage);
+                                                boolean igateSendOk = igate.write(aprsmessage);
                                                 //System.out.println(aprsmessage);
                                                 //If I run as server, send QSL
-                                                if (Main.WantServer) {
+                                                if (Main.WantServer && igateSendOk) {
                                                     q.send_QSL_reply();
                                                 }
                                             }
@@ -1028,12 +1040,12 @@ public class Main {
                                         String outstring = scall + ">PSKAPR,TCPIP*:" + linfo;
 
 //                                            System.out.println(outstring);
-                                        igate.write(outstring);
+                                        boolean igateSendOk = igate.write(outstring);
                                         // Push this to aprs map too
                                         mapsock.sendmessage(outstring);
                                         outstring = "";
                                         //If I run as server, send QSL
-                                        if (Main.WantServer) {
+                                        if (Main.WantServer && igateSendOk) {
                                             q.send_QSL_reply();
                                         }
                                     }
@@ -1233,12 +1245,15 @@ public class Main {
                                     Main.TTYConnected = "Connected";
                                     Main.Connected = true;
                                     status_received = true;
-                                    NumberOfAcks = 5;
+                                    NumberOfAcks = maxNumberOfAcks;
                                     sm.initSession();
                                     String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
-                                    Main.TX_Text = "\nHi, this is the PSKmail client of " + serverCall + "\nVersion is " + application + "\n\n";
+                                    //Main.TX_Text = "\nHi, this is the PSKmail Server of " + serverCall + "\nVersion is " + application + "\n\n";
+                                    Main.TX_Text = serverCall + " V" + version + ", Hi\n";
                                     Main.TX_Text += serverMail.getPendingList(serverCall, TTYCaller);
                                     Main.TX_Text += Motd + "\n";
+                                    //We are nor fully connected, stop TxIDs
+                                    q.send_txrsid_command("OFF");
                                     myrxstatus = sm.getTXStatus();
                                     q.send_status(myrxstatus);  // send our status
                                 }
@@ -1267,7 +1282,8 @@ public class Main {
                                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, e);
                                 }
                                 //Set RXid ON for next connect request
-                                q.send_txrsid_command("ON");
+                                q.send_txrsid_command("OFF");
+                                q.send_rsid_command("ON");
                                 // send disconnect packet to caller...
                                 q.send_disconnect();
                                 //TTY connect request from other client (I become a TTY server)
@@ -1385,8 +1401,8 @@ public class Main {
                         if (!Main.TXActive & (TTYConnected.equals("Connected")
                                 | TTYConnected.equals("Connecting"))) {  //Allow timeouts when in connecting phase as well
                             //long now = System.currentTimeMillis();
-                            Systime = System.currentTimeMillis() / 1000;
-                            idlesecs = (int) (Systime - oldtime);
+                            Systime = System.currentTimeMillis();
+                            idlesecs = (int)((Systime - oldtime) / 1000);
                             //Overall session idle timeout
                             String IdleTimeStr = configuration.getPreference("IDLETIME", "120");
                             int MaxSessionIdleTime = Integer.parseInt(IdleTimeStr); //In seconds
@@ -1394,7 +1410,7 @@ public class Main {
                                 MaxSessionIdleTime = 60; //Minimum 1 minute
                             }
                             if (MaxSessionIdleTime > 0) {  //Zero mean never disconnect, use with care
-                                long SessionIdleSec = Systime - LastSessionExchangeTime;
+                                long SessionIdleSec = (Systime / 1000) - LastSessionExchangeTime;
                                 if (SessionIdleSec > MaxSessionIdleTime) {
                                     //Disconnect session
                                     disconnect = false;
@@ -1411,7 +1427,8 @@ public class Main {
                                     }
                                     isDisconnected = true;
                                     //Set RXid ON for next connect request
-                                    q.send_txrsid_command("ON");
+                                    q.send_txrsid_command("OFF");
+                                    q.send_rsid_command("ON");
                                     // send disconnect packet to caller...
                                     q.send_disconnect();
                                 }
@@ -1440,9 +1457,11 @@ public class Main {
                                 System.out.println("test 3");
                             }
                              */
-                            if ((m.BlockActive && !m.receivingStatusBlock && (idlesecs > (blocktime * 2.2 + m.firstCharDelay))) //Normal data block reception
-                                    | (m.BlockActive && m.receivingStatusBlock && (idlesecs > (blocktime * 0.3 + m.firstCharDelay))) //Data block is status block
-                                    | (!m.BlockActive && (idlesecs > blocktime * 0.5 + m.firstCharDelay)) // No data block received
+                            if ((m.BlockActive && !m.receivingStatusBlock && (idlesecs > (blocktime * 2.2 + m.firstCharDelay + RxDelay))) //Normal data block reception
+  //DEBUG 
+                                    | (m.BlockActive && m.receivingStatusBlock && (idlesecs > (blocktime * (0.3) + m.firstCharDelay + RxDelay))) //Data block is status block
+  //DEBUG                           
+                                    | (!m.BlockActive && (idlesecs > blocktime * (0.5) + m.firstCharDelay + RxDelay)) // No data block received
                                     ) {
                                 oldtime = Systime;
                                 Main.TimeoutPolls += 1;
@@ -1459,8 +1478,10 @@ public class Main {
                                     q.send_ack(TTYCaller);
                                     status_received = false;
                                     idlesecs = 0;
-
                                     NumberOfAcks--;
+                                    //Add 3 seconds to the rxDelay in case the client is slow to respond or has a long Tx delay (i.e. through a repeater)
+                                    Main.RxDelay += 3;
+                                    if (RxDelay > 9) RxDelay = 9; //Max delay
                                 } else if (TTYConnected.equals("Connecting") & !status_received) {
                                     //Abandon connect trial
                                     Status = "Listening";
@@ -1490,7 +1511,6 @@ public class Main {
                         }
                     }
                     Thread.sleep(50);
-
                 } catch (FileNotFoundException ex) {
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IOException ex) {

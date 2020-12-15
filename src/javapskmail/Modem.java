@@ -48,6 +48,7 @@ public class Modem implements Runnable {
     private long blockstart;
     private long blocktime;
     public int firstCharDelay = 4;
+    private double validPskmailRxDelay = 0.0f;
     public boolean receivingStatusBlock = false;
     public  boolean BlockActive = false;
     private char b = 0;
@@ -705,10 +706,11 @@ public class Modem implements Runnable {
 //         System.out.println( myChar);
             return myChar;
         } catch (IOException e) {
-            //System.out.println("Error reading from modem (IOException): " + e);
+            System.out.println("Error reading from modem (IOException): " + e);
+            //Modem was forcibly killed either by operator or the program monitoring
             return '\0';  // should not happen.
         } catch (Exception e) {
-            //System.out.println("Error reading from modem (Exception): " + e);
+            System.out.println("Error reading from modem (Exception): " + e);
             return '\0';  // should not happen.
         }
     }
@@ -792,9 +794,10 @@ public class Modem implements Runnable {
                     inChar = GetByte();
                 }
 
-                if (!Main.Connected & !Main.Connecting) {
-                    Main.DCD = Main.MAXDCD;
-                }
+                //VK2ETA not here
+                //if (!Main.Connected & !Main.Connecting) {
+                //    Main.DCD = Main.MAXDCD;
+                //}
 
                 if (inChar > 127) {
                     // todo: unicode encoding
@@ -826,7 +829,7 @@ public class Modem implements Runnable {
                         } else {
                             BlockString += "<SOH>";
                             //We continue on a new block, reset timeout counter
-                            Main.oldtime = System.currentTimeMillis() / 1000;
+                            Main.oldtime = System.currentTimeMillis();
                             Main.RXBlocksize = BlockString.length() - 17;
                             Main.Totalbytes += Main.RXBlocksize;
                             try {
@@ -835,13 +838,14 @@ public class Modem implements Runnable {
                             } catch (InterruptedException e) {
                             }
                         }
-                        Main.DCD = 0;
+                        //VK2ETA not here
+                        //Main.DCD = 0;
                         break;
                     case 4: //EOT
 //        System.out.println("EOT:" + BlockString);
                         blocktime = (System.currentTimeMillis() - blockstart);
 //VK2ETA debug extra status send when TXing long data in slow mode from server
-                        Main.oldtime = System.currentTimeMillis() / 1000;
+                        Main.oldtime = System.currentTimeMillis();
                         Main.haveSOH = false;                        //Just received RSID, restart counting Radio Msg header timeout from now
                         Main.possibleRadioMsg = 0L;
                         Main.receivingRadioMsg = false;
@@ -851,6 +855,13 @@ public class Modem implements Runnable {
                         if (BlockActive) {
                             BlockString += "<EOT>";
                             //RM reset block reception if active
+                            BlockActive = false;
+                            Main.EOTrcv = true;
+//VK2ETA simplify DCD         if (!Main.Connected) {
+//                                Main.DCD = 2;
+//                            } else {
+//                                Main.DCD = 0;
+//                            }
                             try {
                                 putMessage(BlockString);
                                 //                               System.out.println("\n" + BlockString);
@@ -860,26 +871,16 @@ public class Modem implements Runnable {
 
                             BlockString = "";
                         }
-                        if (BlockActive) {
-                            BlockActive = false;
-                            Main.EOTrcv = true;
-                            if (!Main.Connected) {
-                                Main.DCD = 2;
-                            }
-                        } else {
-                            Main.DCD = 0;
-                        }
                         break;
                     case 6:
                         //Returning from TX
                         //Start timeout count for TTY server mode (but update only once)
                         if (Main.TXActive) {
-                            Main.oldtime = System.currentTimeMillis() / 1000;
-                            //Duplicate, see below 
-                            //Main.TXActive = false;
+                            Main.oldtime = System.currentTimeMillis();
                         }
                         Main.m.receivingStatusBlock = false; //Reset now as there may not be an EOT to reset it
-                        Main.DCD = 0;
+                        //VK2ETA not here
+                        //Main.DCD = 0;
                         Main.TXActive = false;
                         if (Main.summoning) {
                             Main.summoning = false;
@@ -893,6 +894,12 @@ public class Modem implements Runnable {
 //                        }
                         //Reset Rx timeout counter
                         Main.lastCharacterTime = System.currentTimeMillis();
+                        //And restart rxdelay counter if we are in a server session
+                        if (!Main.TTYConnected.equals("")) {
+                            Main.RxDelayCount = Main.RxDelay;
+                        } else {
+                            Main.RxDelayCount = 0.0f; //Make sure it is zero in all other cases
+                        }
                         break;
                     case 31:
                         WriteToMonitor("<US>");
@@ -918,7 +925,8 @@ public class Modem implements Runnable {
                             //Main.Bul.get("" + inChar); 
                             //String dummy = amp.get("" + inChar);
                         }
-                        Main.DCD = 0;
+                        //VK2ETA not here
+                        //Main.DCD = 0;
                         break;
                     case 18:
                         // DC2 received
@@ -933,10 +941,10 @@ public class Modem implements Runnable {
                                 DC2_rcvd = false; 
                                 notifier = "";
                             }
-                            if (inChar == 62) {
+                            if (inChar == 62) { // ">" character
                                 DC2_rcvd = false;
 //                               System.out.println(notifier);
-                                //      <s2n: 58, 100.0, 0.0>
+                                //    <s2n: 58, 100.0, 0.0>
                                 if (notifier.contains("s2n: ")) {
                                     notifier = notifier.substring(6);
                                     Pattern mpf = Pattern.compile("(\\d*), (\\d+\\.\\d), (\\d+\\.\\d).*");
@@ -949,7 +957,7 @@ public class Modem implements Runnable {
                                             Main.snr = snr - snrsd;
                                         }
                                     }
-                                } else {                             
+                                } else { //We must have received an RSID                         
                                     Main.possibleRadioMsg = System.currentTimeMillis();
                                     //Open squelch...a frame may be coming
                                     Rigctl.SetSql(Main.sqlfloor);
@@ -961,12 +969,25 @@ public class Modem implements Runnable {
                                     int mi = getmodeindex(notifier);
                                     //          System.out.println(mi);
                                     if (mi < 16 & mi > 0) {
+                                        //As the client always sends an RSID in connect phase, calculate
+                                        // the Client's delay to send an RSID so that we adapt to its timing.
+                                        //This may be of value when using repeaters with long hang times. 
+                                        // The client can then safely increase the Tx delay. Useful for slow CPUs too.
+                                        if (Main.oldtime > 0) {
+                                            validPskmailRxDelay = (System.currentTimeMillis() - Main.oldtime) / 1000;
+                                            if (validPskmailRxDelay < 10.0f && validPskmailRxDelay >= 0.0f) { //Max 10 seconds delay
+                                                //With average
+                                                //Main.RxDelay = decayAverage(Main.RxDelay, validPskmailRxDelay, 3);
+                                                //Without average
+                                                Main.RxDelay = validPskmailRxDelay + 0; //Allow for RSID silence and processing
+                                            }
+                                        }
                                         Main.RxModem = pmodes[mi];
                                         Main.RxModemString = smodes[mi];
                                         //Mark time when we received an RSID to block mode and 
                                         // frequency change until we are sure we are not receiving a
                                         // Radio Message.
-                                    } else if (mi == 0) {
+                                    } else if (mi == 0) { //False alarm, not a valid RSID or an unsupported mode
                                         Main.TxModem = Main.RxModem;
                                     }
                                 }
@@ -988,7 +1009,7 @@ public class Modem implements Runnable {
                             BlockString += inChar;
                             Main.lastCharacterTime = System.currentTimeMillis();
                             //            System.out.println("BS:" + BlockString);
-                            //Determine if this is a status frame 
+                            //Determine if this is a status frame coming
                             if (BlockString.length() == 8) {
                                 //String blockType = BlockString.substring(7, 8);
                                 receivingStatusBlock = BlockString.substring(7, 8).equals("s");
@@ -1168,6 +1189,13 @@ public class Modem implements Runnable {
 
     public void run() {
         GetBlock();
+    }
+  
+    	private double decayAverage(double average, double input, double weight) {
+        if (weight <= 1.0) {
+            return input;
+        }
+        return input * (1.0 / weight) + average * (1.0 - (1.0 / weight));
     }
 
 }  // end Modem

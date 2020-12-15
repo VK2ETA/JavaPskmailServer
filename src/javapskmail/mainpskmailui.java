@@ -402,7 +402,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                 // 5 x  200 = 1000 msec timer
                 if (timercnt < 5) {
                     timercnt++;
-                } else {
+                } else { //Second loop
                     //Check last character receipt from Fldigi
                     //More than 3 minutes ago, set test mode = Squelch fully open
                     //If more than 30 seconds in test mode, then kill fldigi and let the 
@@ -417,8 +417,10 @@ public class mainpskmailui extends javax.swing.JFrame {
                         } else {
                             if (System.currentTimeMillis() - Main.lastModemCharTime > 220000) {//220000 = 3 minutes+ 40 seconds
                                 //We have a hang modem, request an Flgdigi restart
-                                Main.requestModemRestart = true;
-                                System.out.println("Modem test period exausted, requesting modem restart");
+                                //NO, just kill it
+                                Main.m.killFldigi();
+                                //Main.requestModemRestart = true;
+                                //System.out.println("Modem test period exausted, requesting modem restart");
                                 //Reset test flag
                                 Main.modemTestMode = false;
                                 //Reset time counter
@@ -436,9 +438,13 @@ public class mainpskmailui extends javax.swing.JFrame {
                     int Second = cal.get(Calendar.SECOND);
                     Systemsecond = Second;
 
-                    // decrement DCD
+                    // decrement DCD every second.
                     if (Main.DCD > 0) {
                         Main.DCD--;
+                    }
+                    // decrement RxDelayCount every second IF we are in a server session
+                    if (Main.RxDelayCount > 0 && !Main.TTYConnected.equals("")) {
+                        Main.RxDelayCount--;
                     }
                     // update message window
                     if (Main.MSGwindow.length() > 0) {
@@ -476,7 +482,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                     if (Main.receivingRadioMsg) {
                         Main.Statusline = "Receiving radio Message";
                         Main.StatusLineTimer = 2;
-                    } else if (Main.possibleRadioMsg > 0L) {
+                    } else if (Main.possibleRadioMsg > 0L && !Main.Connected) {
                         Main.Statusline = "Radio Message?";
                         Main.StatusLineTimer = 2;
                     } else if (RMsgTxList.getAvailableLength() > 0 | Main.radioMsgWorking) {
@@ -485,7 +491,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                     }
                     //Radio Message timeout on lack of characters received
                     if (Main.receivingRadioMsg
-                            && (System.currentTimeMillis() - Main.lastCharacterTime > 7000)) {
+                            && (System.currentTimeMillis() - Main.lastCharacterTime > 10000)) {
                         Main.receivingRadioMsg = false;
                     }
                     //Reset time since last RSID if we don't see a radio message header within 30 seconds
@@ -545,7 +551,8 @@ public class mainpskmailui extends javax.swing.JFrame {
                             Main.Quality = (int) f;
                             if (Main.Quality > Qavg) {
                                 Qhi = ((Qhi * 4) + Main.Quality) / 5;
-                                if (!Main.Connected & !Main.Connecting) {
+                                //VK2ETA if (!Main.Connected & !Main.Connecting) {
+                                if (!Main.Connected & !Main.Connecting & !Main.Aborting & Main.TTYConnected.equals("")) {
                                     Main.DCD = Main.MAXDCD;
                                 }
                             } else if (Main.Quality < Qavg) {
@@ -559,7 +566,7 @@ public class mainpskmailui extends javax.swing.JFrame {
 
                             Main.Progress = Main.Quality;
 //                                System.out.println(Main.sql);
-                            //Open Squelch when actively listening
+                            //Squelch fully open when actively listening
                             if (Main.Connected || Main.m.BlockActive
                                     || Main.receivingRadioMsg || Main.possibleRadioMsg != 0L 
                                     || Main.modemTestMode) {
