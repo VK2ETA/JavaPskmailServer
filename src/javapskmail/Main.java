@@ -35,7 +35,7 @@ public class Main {
     //VK2ETA Based on "jpskmail 1.7.b";
     static String application = "jpskmailserver 0.9.3"; // Used to preset an empty status
     static String version = "0.9.3";
-    static String versionDate = "20201215";
+    static String versionDate = "20201216";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected

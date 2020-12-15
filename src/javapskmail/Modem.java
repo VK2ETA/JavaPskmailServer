@@ -220,6 +220,13 @@ public class Modem implements Runnable {
                 cantLaunchFldigi = false;
                 String outProcLine2 = "";
                 Boolean readerOpen = false;
+                String fldigiPath = Main.configuration.getPreference("FLDIGIAPPLICATIONPATH", "fldigi");
+                //Remove parameters
+                Pattern ppc = Pattern.compile("\\s*(\\S+)\\s*");
+                Matcher mpc = ppc.matcher(fldigiPath);
+                if (mpc.lookingAt()) {
+                    fldigiPath = mpc.group(1);
+                }
                 //Wait until we start reading data from input buffer
                 while (readerOpen == false) {
                     try {
@@ -227,7 +234,7 @@ public class Modem implements Runnable {
                         if (reader != null) {
                             outProcLine2 = reader.readLine();
                             readerOpen = true;
-                            if (outProcLine2.contains(" No")) {
+                            if (outProcLine2.contains(fldigiPath) && outProcLine2.toLowerCase(Locale.US).contains(" no such file")) {
                                 cantLaunchFldigi = true;
                             }
                         }
@@ -259,6 +266,8 @@ public class Modem implements Runnable {
                     //Expect to get one hit at the start of the launch process
                     //e.printStackTrace();
                 } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 //Close stream now if it was open
