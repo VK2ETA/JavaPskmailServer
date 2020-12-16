@@ -239,7 +239,7 @@ public class arq {
     private String replyQSLblock() {
         String returnframe = "";
         String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
-        returnframe = "00" + Unproto + "QSL de " + serverCall + " " + (int) Main.snr;
+        returnframe = "00" + Unproto + "QSL de " + serverCall + " " + (int) Main.snr + " ";
         return returnframe;
     }
 
@@ -782,6 +782,7 @@ public class arq {
     }
 
     public void send_txrsid_command(String s) {
+        //System.out.println("arq.send_txrsid_command: " + s + "\n"); 
         String txrsidstart = "<cmd><txrsid>";
         String txrsidend = "</txrsid></cmd>";
         if (!s.equals("")) {

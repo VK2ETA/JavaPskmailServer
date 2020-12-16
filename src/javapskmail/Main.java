@@ -493,7 +493,7 @@ public class Main {
                         }
                     } else {
                         //Reset DCD for next round if we are not in a session
-                        DCD = Integer.parseInt(configuration.getPreference("DCD", "0"));
+                        MAXDCD = Integer.parseInt(configuration.getPreference("DCD", "0"));
                     }
                     //VK2ETA DCDthrow not used 
                     //if (DCDthrow == 0) {
@@ -781,28 +781,36 @@ public class Main {
 
                             if (!Connected & Blockline.contains("QSL") & Blockline.contains(q.callsign)) {
                                 String pCheck = "";
-                                Pattern psc = Pattern.compile(".*de ([A-Z0-9\\-]+)\\s(\\d*)\\s([0123456789ABCDEF]{4}).*");
+                                //Pattern psc = Pattern.compile(".*de ([A-Z0-9\\-]+)\\s(?:(\\d*)|((\\d+)\\s+(\\d+))\\s)([0123456789ABCDEF]{4}).*");
+                                Pattern psc = Pattern.compile(".*de ([A-Z0-9\\-]+)\\s*(?:(?:(\\d+\\s)(\\d+\\s))|(\\d*\\s))([0123456789ABCDEF]{4}).*");
                                 Matcher msc = psc.matcher(Blockline);
                                 String scall = "";
                                 rx_snr = "";
+                                String numberOfMails = "";
                                 if (msc.lookingAt()) {
                                     scall = msc.group(1);
-                                    rx_snr = msc.group(2);
-
-                                    pCheck = msc.group(3);
-//                                        q.send_txrsid_command("OFF");
-//                                        Thread.sleep(500);
-//                                        q.send_mode_command(defaultmode);
+                                    if (msc.group(4) != null) {
+                                        rx_snr = msc.group(4).trim();
+                                    } else {
+                                        rx_snr = msc.group(2).trim();
+                                        numberOfMails = msc.group(3).trim();
+                                    }
+                                    pCheck = msc.group(5);
                                 }
                                 // fill the servers drop down list
                                 char soh = 1;
                                 String sohstr = Character.toString(soh);
                                 String checkstring = "";
                                 if (rx_snr.equals("")) {
-                                    checkstring = sohstr + "QSL " + q.callsign + " de " + scall + " ";
-                                } else {
-                                    checkstring = sohstr + "QSL " + q.callsign + " de " + scall + " " + rx_snr + " ";
-                                    //                                       System.out.println("RX_SNR:" + rx_snr);
+                                    checkstring = sohstr + "00uQSL " + q.callsign + " de " + scall + " ";
+                                } else if (!rx_snr.equals("") && !numberOfMails.equals("")) {
+                                    checkstring = sohstr + "00uQSL " + q.callsign + " de " + scall + " " + rx_snr + " " + numberOfMails + " ";
+                                    //System.out.println("RX_SNR:" + rx_snr);
+                                    mainui.appendMainWindow("From " + scall + ": " + rx_snr + "%, " + numberOfMails + " mails\n");
+                                    setrxdata(scall, Integer.parseInt(rx_snr));
+                                } else if (!rx_snr.equals("") && numberOfMails.equals("")){
+                                    checkstring = sohstr + "00uQSL " + q.callsign + " de " + scall + " " + rx_snr + " ";
+                                    //System.out.println("RX_SNR:" + rx_snr);
                                     mainui.appendMainWindow("From " + scall + ": " + rx_snr + "%\n");
                                     setrxdata(scall, Integer.parseInt(rx_snr));
                                 }
@@ -964,6 +972,36 @@ public class Main {
                                         outstring = "";
                                     }
 
+                                }
+                            } else if (!Connected & Blockline.contains(":25 ")) {
+                                // System.out.println(Blockline);
+                                //Unproto email message
+                                Pattern bsc = Pattern.compile(".*00u(\\S+):25(\\s+)([\\w.-]+@\\w+\\.[\\w.-]+)(\\s+)(.+)\\n([0123456789ABCDEF]{4}).*");
+                                Matcher bmsc = bsc.matcher(Blockline); //
+                                String scall = "";
+                                String spaces1 = "";
+                                String email = "";
+                                String spaces2 = "";
+                                String body = "";
+                                if (bmsc.lookingAt()) {
+                                    scall = bmsc.group(1);
+                                    spaces1 = bmsc.group(2);
+                                    email = bmsc.group(3);
+                                    spaces2 = bmsc.group(4);
+                                    body = bmsc.group(5);
+                                    String pCheck = bmsc.group(6);
+                                    String checkstring = "00u" + scall + ":25" + spaces1 + email + spaces2 + body + "\n";
+                                    String check = q.checksum(checkstring);
+                                    //Only authorized if the server is left open (without a password)
+                                    // Otherwise use the RadioMsg app to send short messages
+                                    if (Main.WantServer && Main.accessPassword.length() == 0 && check.equals(pCheck)) {
+                                        String subject = "Short email from " + scall;
+                                        String resultStr = serverMail.sendMail(scall, email, subject, body, ""); //last param is attachementFileName
+                                        //If I run as server, send QSL
+                                        if (resultStr.contains("Message sent")) {
+                                            q.send_QSL_reply();
+                                        }
+                                    }
                                 }
                             } else if (!Connected & Blockline.contains(":6 ")) {
                                 //Compressed beacon

@@ -771,8 +771,13 @@ public class mainpskmailui extends javax.swing.JFrame {
                     }
 
                     // write frequency to frame title
-                    setTitle(Main.application + " - Client:" + Main.mycall + ", Server:" + Main.callsignAsServer + " - " + ClientFreqTxtfield.getText());
-
+                    if (!Main.TTYConnected.equals("")) {
+                        setTitle(Main.application + " - Server:" + Main.callsignAsServer + " - " + ClientFreqTxtfield.getText());
+                    } else if (Main.Connected) {
+                        setTitle(Main.application + " - Client:" + Main.mycall + " - " + ClientFreqTxtfield.getText());
+                    } else {
+                        setTitle(Main.application + " - Client:" + Main.mycall + ", Server:" + Main.callsignAsServer + " - " + ClientFreqTxtfield.getText());
+                    }
                     // minute timer
                     if (Minute != oldminute) {
                         //Check if we have RadioMsg activity
