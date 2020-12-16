@@ -389,7 +389,7 @@ public class Session {
         }
 
         // ~QTC? or ~QTC? NN+  for TTY session...
-        Pattern MHm = Pattern.compile("^\\s*~QTC\\??\\s*(\\d*)");
+        Pattern MHm = Pattern.compile("^\\s*~QTC\\??\\s*(\\d*)\\+?");
         Matcher mh = MHm.matcher(str);
         //Open both ways                        if (Main.TTYConnected.equals("Connected") & lf.lookingAt()) {
         int fromNumber = 0;

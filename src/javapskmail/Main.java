@@ -1271,6 +1271,7 @@ public class Main {
                                 // we got an abort, clean up...
                             } else if (TTYConnected.equals("Connected")
                                     & rxb.session.equals(session) & rxb.type.equals("a") | disconnect) {
+                                q.send_disconnect();
                                 disconnect = false;
                                 Status = "Listening";
                                 Connected = false;
@@ -1293,10 +1294,11 @@ public class Main {
                                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, e);
                                 }
                                 //Set RXid ON for next connect request
-                                q.send_txrsid_command("OFF");
+                                q.send_txrsid_command("ON");
                                 q.send_rsid_command("ON");
                                 // send disconnect packet to caller...
-                                q.send_disconnect();
+                                //VK2ETA moved up to be first in sequence
+                                //q.send_disconnect();
                                 Main.RxDelay = Main.initialRxDelay;
                                 //TTY connect request from other client (I become a TTY server)
                                 //} else if (rxb.valid & rxb.type.equals("c")) { //now with access password
