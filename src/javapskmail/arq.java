@@ -64,6 +64,9 @@ public class arq {
     String Modem = "PSK500R";    // Current modem mode
     modemmodeenum mode = modemmodeenum.PSK500R;
 
+    //Counts the number of received RSID for frequency sensitive modes like MFSK16 so that we can decide to send an RSID to re-align the server's RX
+    private int rxRsidCounter = 0;
+
     /**
      *
      * @param incall
@@ -497,8 +500,9 @@ public class arq {
         String info = "";
         String outstring = "";
 
-        send_txrsid_command("ON");
-//            Thread.sleep(1000);
+        //VK2ETA not automatically, decided elsewhere
+        //send_txrsid_command("ON");
+        //test Thread.sleep(1000);
         info = connect_ack(server);
         outstring = make_block(info);
         if (Main.TTYConnected.equals("Connecting")) { //I am a TTY server
@@ -616,12 +620,14 @@ public class arq {
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXQSLReply:
+                send_txrsid_command("ON");
                 //    System.out.println("QSL Reply");
                 info = replyQSLblock();
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXCQ:
+                send_txrsid_command("ON");
                 info = cqblock();
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
@@ -672,6 +678,28 @@ public class arq {
                 }
                 break;
             case TXStat:
+                if (Main.justReceivedRSID) {
+                    rxRsidCounter++;
+                }
+                if (rxRsidCounter > 1 && (Main.TxModem == modemmodeenum.MFSK32
+                        || Main.TxModem == modemmodeenum.MFSK64
+                        || Main.TxModem == modemmodeenum.PSK125
+                        || Main.TxModem == modemmodeenum.PSK125R)) {
+                    send_txrsid_command("ON");
+                    rxRsidCounter = 0;
+                } else if (rxRsidCounter > 0 && (Main.TxModem == modemmodeenum.MFSK8
+                        || Main.TxModem == modemmodeenum.MFSK16
+                        || Main.TxModem == modemmodeenum.PSK63
+                        || Main.TxModem == modemmodeenum.DOMINOEX5
+                        || Main.TxModem == modemmodeenum.PSK31)) {
+                    send_txrsid_command("ON");
+                    rxRsidCounter = 0;
+                }
+                ;
+                //In any case send RSID until we have full connect exchange so that the server can gauge it's tx delay
+                if (Main.connectingPhase) {
+                    send_txrsid_command("ON");
+                }
                 info = statusblock(Main.myrxstatus);
                 outstring = make_block(info) + FrameEnd;
                 break;

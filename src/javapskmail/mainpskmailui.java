@@ -443,7 +443,9 @@ public class mainpskmailui extends javax.swing.JFrame {
                         Main.DCD--;
                     }
                     // decrement RxDelayCount every second IF we are in a server session
-                    if (Main.RxDelayCount > 0 && !Main.TTYConnected.equals("")) {
+                    //VK2ETA debug : always decrement, otherwise we can't connect/respond to first/last exchange
+                    //if (Main.RxDelayCount > 0 && !Main.TTYConnected.equals("")) {
+                    if (Main.RxDelayCount > 0) {
                         Main.RxDelayCount--;
                     }
                     // update message window
@@ -660,8 +662,10 @@ public class mainpskmailui extends javax.swing.JFrame {
                         oldstatus = Main.Status;
                         lblStatus.setText(Main.Status);
                         if (Main.Status.equals("Connected")) {
-                            Main.Connecting = false;
-                            Main.Connecting_time = 0;
+                            //VK2ETA logic for changing must be elsewhere
+                            //Main.Connecting = false;
+                            //VK2ETA logic for changing must be elsewhere
+                            //Main.Connecting_time = 0;
                             lblStatus.setText(Main.linkedserver);
                             lblStatus.setForeground(Color.BLUE);
                         } else if (Main.Status.equals("Connecting")) {
@@ -869,6 +873,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                                 Connect_time--;
                                 if (Connect_time == 0) {
                                     Main.Connecting = false;
+                                    Main.connectingPhase = false;
                                     Main.Status = "Listening";
                                 }
                             }
@@ -4170,6 +4175,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                         myarq.send_rsid_command("ON");
                         myarq.set_txstatus(txstatus.TXConnect);
                         Main.Connecting = true;
+                        Main.connectingPhase = true;
                         Connect_time = 5;
                         myarq.send_frame("");
                         myarq.Message(mainpskmailui.getString("Choose_File_to_read..."), 5);
@@ -4595,13 +4601,14 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                 if (mnuMailScanning.isSelected()) {
                     Main.Scanning = true;
                     Main.Connecting = true;
+                    Main.connectingPhase = true;
                     Connect_time = 5;
                     lblStatus.setText(mainpskmailui.getString("Connecting"));
                     lblStatus.setForeground(Color.RED);
                     myarq.Message(mainpskmailui.getString("Connecting,_waiting_for_channel..."), 5);
                 } else {
                     Main.Connecting = true;
-                    Main.Connecting = true;
+                    Main.connectingPhase = true;
                     Connect_time = 5;
 
                     myarq.send_rsid_command("ON");
@@ -4619,6 +4626,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
     private void AbortButtonAction() {
         Main.Bulletinmode = false;
         Main.Connecting = false;
+        Main.connectingPhase = false;
         Main.Connecting_time = 0;
         Main.Scanning = false;
         mysession.FileDownload = false;
@@ -5422,6 +5430,7 @@ private void bSummonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
 
     Main.summoning = true;
     Main.Connecting = true;
+    Main.connectingPhase = true;
 
     if (Main.Connected) {
         ConnectButtonAction();
@@ -5446,6 +5455,7 @@ private void bSummonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
                        try {
                                Main.summoning = true;
                                Main.Connecting = true;
+                               Main.connectingPhase = true;
                                Main.Connecting_time = 5;
                                myarq.send_rsid_command("ON");
                                myarq.set_txstatus(txstatus.TXSummon);

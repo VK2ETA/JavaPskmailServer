@@ -39,6 +39,7 @@ import java.util.zip.GZIPOutputStream;
 import static javapskmail.Main.host;
 import javax.mail.Authenticator;
 import javax.mail.BodyPart;
+import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -585,6 +586,73 @@ public class serverMail {
 
         return returnString;
     }
+
+    //Read one email from the IMAP server
+    public static String deleteMail(int emailNumber) {
+
+        IMAPFolder folder = null;
+        Store store = null;
+        String returnString = "";
+
+        try {
+            Properties props = System.getProperties();
+            props.setProperty("mail.store.protocol", "imaps");
+
+            props.setProperty("mail.imap.starttls.enable", "true");
+            props.setProperty("mail.imap.ssl.enable", "true");
+
+            MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
+            socketFactory.setTrustAllHosts(true);
+            props.put("mail.imaps.ssl.socketFactory", socketFactory);
+            //conflict with default instance, create a new one each time
+            //Session session = Session.getDefaultInstance(props, null);
+            javax.mail.Session session = javax.mail.Session.getInstance(props, null); //Conflicts with local Session.java, must be explicit
+            store = session.getStore("imaps");
+            String imapHost = Main.configuration.getPreference("SERVERIMAPHOST");
+            String emailAddress = Main.configuration.getPreference("SERVEREMAILADDRESS");
+            String emailPassword = Main.configuration.getPreference("SERVERPASSWORD");
+            //store.connect("imap.googlemail.com",emailAddress, emailPassword);
+            store.connect(imapHost, emailAddress, emailPassword);
+            //folder = (IMAPFolder) store.getFolder("[Gmail]/Spam"); // This doesn't work for other email account
+            folder = (IMAPFolder) store.getFolder("inbox");
+            if (!folder.isOpen()) {
+                folder.open(Folder.READ_WRITE);
+            }
+            //Get the number of messages in the folder and compare
+            if (emailNumber > folder.getMessageCount()) {
+                //Sorry not enough
+                returnString = "Email # " + emailNumber + " does Not exist.\n";
+                return returnString;
+            } else {
+                //Get the selected messages
+                Message message = folder.getMessage(emailNumber);
+                //Mark it for deletion
+                message.setFlag(Flags.Flag.DELETED, true);
+                returnString = "Deleted Email # " + emailNumber + "\n";
+            }
+        } catch (Error err) {
+            err.printStackTrace();
+            Main.log.writelog("Error accessing Folder: " + err.getMessage() + "\n", true);
+            //throw (err);
+        } catch (Exception e) {
+            Exception e1 = e;
+            Main.log.writelog("Error accessing emails: " + e1.getMessage() + "\n", true);
+        } finally {
+            try {
+                if (folder != null && folder.isOpen()) {
+                    // expunges the folder to remove messages which are marked deleted
+                    folder.close(true);
+                }
+                if (store != null) {
+                    store.close();
+                }
+            } catch (Exception e) {
+                //do nothing
+            }
+        }
+        return returnString;
+    }
+   
 
     //Read a web page as supplied and optionally trim with the begin: and end: strings
     public static String readWebPage(String webURL, String startStopStr, boolean compressedPage) {

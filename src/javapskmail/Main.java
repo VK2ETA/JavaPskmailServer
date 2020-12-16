@@ -42,6 +42,7 @@ public class Main {
     static long lastModemCharTime = 0L;
     static boolean requestModemRestart = false;
     static int modemAutoRestartDelay = 0; //In minutes, 10080 = 7 days = once per week by default
+    public static boolean justReceivedRSID = false;
     static boolean onWindows = true;
     static String ModemPreamble = "";  // String to send before each frame
     static String ModemPostamble = ""; // String to send after each frame
@@ -154,8 +155,9 @@ public class Main {
     static boolean disconnect = false;
     static long Systime;
     static int DCDthrow;
-    static double RxDelay = 2.0f; //Initial 3 seconds delay of RX just in case
-    static double RxDelayCount = 2.0f;
+    static final double initialRxDelay = 2.0f;//Initial 2 seconds delay of RX just in case
+    static double RxDelay = initialRxDelay; 
+    static double RxDelayCount = initialRxDelay;
     static String connectsecond;
     static long oldtime = 0L;
     static int Missedblocks = 0;
@@ -168,7 +170,8 @@ public class Main {
     static long LastSessionExchangeTime = 0;
     static boolean isDisconnected = false;
     static boolean Connected = false;
-    static boolean Connecting = false;
+    public static boolean connectingPhase = false; //True from connect request until receipt of greeting/Server info
+    public static boolean Connecting = false; //True until first acknowledgment of server's connect ack
     static int Connecting_time = 0;
     static boolean Aborting = false;
     static boolean Scanning = false;
@@ -765,6 +768,13 @@ public class Main {
                                             Main.TX_Text += "~Mp" + output + "\n";
                                             //   System.out.println(Main.TX_Text);                                        
                                         }
+                                    } else {
+                                        Pattern pps = Pattern.compile(".*" + q.servercall + " V(\\d{1,2}\\.\\d{1,2}\\.\\d{1,2}),\\sHi.*");
+                                        //System.out.println(Blockline);
+                                        Matcher mps = pps.matcher(Blockline);
+                                        if (mps.lookingAt()) {
+                                            Main.connectingPhase = false;
+                                        }
                                     }
                                 }
                             } //End if (connected)
@@ -1172,6 +1182,7 @@ public class Main {
                                     mainui.disableMboxMenu();
                                     Bulletinmode = false;
                                     Connecting = false;
+                                    Main.connectingPhase = false;
                                     Main.Connecting_time = 0;
                                     Scanning = false;
                                     session = "";
@@ -1201,9 +1212,9 @@ public class Main {
                                 }
                                 // are we  connected?
                                 if (rxb.call.equals(rxb.mycall) & rxb.server.equals(configuration.getPreference("SERVER"))) {
-                                    //txid on, rxid off
-//                                        q.send_txrsid_command("OFF");
-//                                        Thread.sleep(500);
+                                    //txid on, rxid off. Not yet, we now wait until full connect exchange
+                                    //q.send_txrsid_command("OFF");
+                                    //q.send_rsid_command("ON"); 
                                     Status = "Connected";
                                     Connected = true;
                                     Connecting = false;
@@ -1237,7 +1248,7 @@ public class Main {
                                     }
 
                                 }
-
+                                //Status block, are we a server?
                             } else if (!Connected & (rxb.type.equals("s"))
                                     & rxb.valid & rxb.session.equals(session)) {
 
@@ -1286,6 +1297,7 @@ public class Main {
                                 q.send_rsid_command("ON");
                                 // send disconnect packet to caller...
                                 q.send_disconnect();
+                                Main.RxDelay = Main.initialRxDelay;
                                 //TTY connect request from other client (I become a TTY server)
                                 //} else if (rxb.valid & rxb.type.equals("c")) { //now with access password
                             } else if (rxb.type.equals("c")) {
@@ -1496,8 +1508,10 @@ public class Main {
                                         Session.txbuffer[i] = "";
                                     }
                                     isDisconnected = true;
+                                    Main.RxDelay = Main.initialRxDelay;
                                     //Set RXid ON for next connect request
-                                    q.send_txrsid_command("ON");
+                                    q.send_txrsid_command("OFF");
+                                    q.send_rsid_command("ON");
                                 } else if (TTYConnected.equals("Connected")) {
                                     // We are in a session, send a poll
                                     //Turn RXid and TXid ON as I am repeating a status request

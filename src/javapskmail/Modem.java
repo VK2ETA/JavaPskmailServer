@@ -387,7 +387,9 @@ public class Modem implements Runnable {
                     } catch (InterruptedException ex) {
                         Logger.getLogger(Modem.class.getName()).log(Level.SEVERE, null, ex);
                     }
-
+                } else if (!outLine.contains("<cmd>")) {
+                    //Must be a data block, reset receive marker of RSID for next RX
+                    Main.justReceivedRSID = false;
                 }
             }
         } catch (Exception ex) {
@@ -909,6 +911,8 @@ public class Modem implements Runnable {
                         } else {
                             Main.RxDelayCount = 0.0f; //Make sure it is zero in all other cases
                         }
+                        //Reset TxRSID as it is OFF by default and needs to be enabled when required
+                        Main.q.send_txrsid_command("OFF");
                         break;
                     case 31:
                         WriteToMonitor("<US>");
@@ -978,6 +982,7 @@ public class Modem implements Runnable {
                                     int mi = getmodeindex(notifier);
                                     //          System.out.println(mi);
                                     if (mi < 16 & mi > 0) {
+                                        Main.justReceivedRSID = true;
                                         //As the client always sends an RSID in connect phase, calculate
                                         // the Client's delay to send an RSID so that we adapt to its timing.
                                         //This may be of value when using repeaters with long hang times. 

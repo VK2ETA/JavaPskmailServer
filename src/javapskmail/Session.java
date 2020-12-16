@@ -58,7 +58,7 @@ public class Session {
     private static boolean rx_lastBlock; // Flag for end of frame
 
     private static String[] rxbuffer = new String[64];
-    private static int beginblock;
+    //private static int beginblock;
     private static int goodblock;
     private static int thisblock;
     private static int lastblock;
@@ -255,7 +255,7 @@ public class Session {
         rx_lastreceived = " ";
         rx_missing = "";
         rx_lastBlock = false;
-        beginblock = 0;
+        //beginblock = 0;
         goodblock = 0;
         thisblock = 0;
         lastblock = 0;
@@ -403,6 +403,25 @@ public class Session {
             }
             if (Main.WantServer) {
                 Main.TX_Text += serverMail.getHeaderList(fromNumber);
+            } else {
+                Main.TX_Text += "Sorry, Not enabled\n";
+            }
+        }
+        
+        // ~DELETE NN for TTY session...delete specific message (one at a time)
+        Pattern pdc = Pattern.compile("^\\s*~DELETE\\s+(\\d+)\\S*");
+        Matcher mdc = pdc.matcher(str);
+        int deleteNumber = 0;
+        if (Main.TTYConnected.equals("Connected") & mdc.lookingAt()) {
+            if (mdc.group(1) != null) {
+                foundMatchingCommand = true;
+                try {
+                    deleteNumber = Integer.decode(mdc.group(1));
+                } catch (NumberFormatException e) {
+                }
+            }
+            if (Main.WantServer) {
+                Main.TX_Text += serverMail.deleteMail(deleteNumber);
             } else {
                 Main.TX_Text += "Sorry, Not enabled\n";
             }
@@ -700,6 +719,7 @@ public class Session {
                                              }
                                     }                                    
          */
+        
         // file list
         Pattern pl = Pattern.compile("^\\s*(Your_files:)\\s(\\d+)");
         Matcher ml = pl.matcher(str);
@@ -1337,6 +1357,7 @@ public class Session {
             }
 
         }
+        
         // message receive
         Pattern pmsg = Pattern.compile("^\\s*(Your\\smsg:)\\s(\\d+)");
         Matcher mmsg = pmsg.matcher(str);
@@ -1357,6 +1378,7 @@ public class Session {
                 Main.DataSize = Integer.toString(DataSize);
             }
         }
+        
         // compresssed message receive
         Pattern cpmsg = Pattern.compile("^\\s*(~ZIPPED64)\\s(\\d+)");
         Matcher cmmsg = cpmsg.matcher(str);
@@ -2472,13 +2494,15 @@ public class Session {
             Nrblocks = 8;
             Maxblocklength = 5;
             Minblocklength = 4;
-            a.send_txrsid_command("ON");
+            //VK2ETA not sure this is necessary
+            //a.send_txrsid_command("ON");
 //        System.out.println("TXID ON");      
         } else {
             Nrblocks = 4;
             Maxblocklength = 5;
             Minblocklength = 3;
-            a.send_txrsid_command("ON");
+            //VK2ETA not sure this is necessary
+            //a.send_txrsid_command("ON");
 //        System.out.println("TXID ON");      
         }
 
