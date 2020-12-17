@@ -33,8 +33,8 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA Based on "jpskmail 1.7.b";
-    static String application = "jpskmailserver 0.9.3"; // Used to preset an empty status
-    static String version = "0.9.3";
+    static String application = "jpskmailserver 0.9.3.17"; // Used to preset an empty status
+    static String version = "0.9.3.17";
     static String versionDate = "20201216";
     static String host = "localhost";
     static int port = 7322;
@@ -155,6 +155,7 @@ public class Main {
     static boolean disconnect = false;
     static long Systime;
     static int DCDthrow;
+    //RxDelay is the measured delay between the return to Rx of the server and the end of the RSID tx by the client
     static final double initialRxDelay = 2.0f;//Initial 2 seconds delay of RX just in case
     static double RxDelay = initialRxDelay; 
     static double RxDelayCount = initialRxDelay;
@@ -829,9 +830,6 @@ public class Main {
                                     if (!knownserver) {
                                         mainui.addServer(scall); // add to servers drop down list
                                     }
-
-                                    // switch off txrsid
-//                                       q.send_txrsid_command("OFF");
                                 }
                             } else if (!Connected & Blockline.contains(":71 ")) {
                                 Pattern psc = Pattern.compile(".*00u(\\S+):71\\s(\\d*)\\s([0123456789ABCDEF]{4}).*");
@@ -1341,62 +1339,83 @@ public class Main {
                                 //TTY connect request from other client (I become a TTY server)
                                 //} else if (rxb.valid & rxb.type.equals("c")) { //now with access password
                             } else if (rxb.type.equals("c")) {
-//                                        Pattern cmsg = Pattern.compile("<SOH>.0c(\\S+):1024\\s(\\S+):24\\s(\\d).*");
+                                //Connect request
+                                //Pattern cmsg = Pattern.compile("<SOH>.0c(\\S+):1024\\s(\\S+):24\\s(\\d).*");
                                 Pattern cmsg = Pattern.compile("<SOH>.0c(\\S+):1024\\s(\\S+):24\\s(.*)[0-9A-F]{4}<EOT>.*");
                                 Matcher getcl = cmsg.matcher(Blockline);
                                 if (getcl.lookingAt()) {
                                     //No access password and standard CRC
                                     if (getcl.group(2).equals(q.callsignAsServer)) {
                                         //Pass or need access password
-                                        TTYCaller = getcl.group(1);
-                                        if (rxb.valid && Main.accessPassword.length() == 0
-                                                || rxb.validWithPW && Main.accessPassword.length() > 0) {
-                                            //Clean any previous session blocks
-                                            for (int i = 0; i < 64; i++) {
-                                                Session.txbuffer[i] = "";
-                                            }
-                                            sm.FileDownload = false;
-                                            try {
-                                                if (sm.pFile != null) {
-                                                    sm.pFile.close();
-                                                }
-                                            } catch (IOException e) {
-                                                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, e);
-                                            }
-                                            // send TTY acknowledge
-                                            String tmp = "Connect request from " + TTYCaller;
-                                            //Set TX mode to mode requested by client
-                                            TTYmodes = getcl.group(3);
-                                            //Old protocol, simulate symetric modes
-                                            if (TTYmodes == null) {
-                                                TTYmodes = "0";
-                                            }
-                                            String myTxmodem = TTYmodes.substring(0, 1);
-                                            if (myTxmodem.equals("0")) {
-                                                Main.TxModem = Main.RxModem;
-                                            } else if (TTYmodes.length() > 1) {
-                                                TTYmodes = TTYmodes.substring(1);
-                                                Main.TxModem = getmodem(myTxmodem);
-                                            }
-                                            LastSessionExchangeTime = System.currentTimeMillis() / 1000; //Set initial value of session timeout
-                                            q.send_txrsid_command("ON");
-                                            q.send_rsid_command("ON");
-                                            q.Message(tmp, 10);
-                                            q.send_ack(TTYCaller);
-                                            status_received = false;
-                                            TimeoutPolls = 0;
-                                            if (Blockline.length() > 8) {
-                                                charval = (int) (blockval / (Blockline.length() - 4)); // msec
-                                                blocktime = m.getBlockTime(Main.RxModem); //Use pre-calculated value
-                                                //blocktime = (charval * 64 / 1000) + 4;
-                                            }
-                                            log("Connect request from " + TTYCaller);
+                                        String newCaller = getcl.group(1);
+                                        if (TTYConnected.equals("Connected") && !newCaller.equals(TTYCaller)) {
+                                            //I am already in a session and this request is not from the same client, ignore
+                                            q.Message("Con. request from " + newCaller + ". Ignored...", 5);
                                         } else {
-                                            //Send a reject block with a reason
-                                            q.send_txrsid_command("ON");
-                                            q.send_rsid_command("ON");
-                                            log("Connect attempted with damaged transmission or wrong/missing password");
-                                            q.send_reject(TTYCaller, "Damaged transmission or access password incorrect\n");
+                                            //I am not in a session, or the current client is connecting again, try to accept connection connect
+                                            TTYCaller = newCaller; 
+                                            if (rxb.valid && Main.accessPassword.length() == 0
+                                                    || rxb.validWithPW && Main.accessPassword.length() > 0) {
+                                                //Clean any previous session data
+                                                //
+                                                disconnect = false;
+                                                Status = "Listening";
+                                                Connected = false;
+                                                TTYConnected = "";
+                                                //Reset RxDelay too
+                                                RxDelay = initialRxDelay;
+                                                //
+                                                session = "";
+                                                TX_Text = "";
+                                                Totalbytes = 0;
+                                                sm.initSession();
+                                                for (int i = 0; i < 64; i++) {
+                                                    Session.txbuffer[i] = "";
+                                                }
+                                                //isDisconnected = true;
+                                                sm.FileDownload = false;
+                                                try {
+                                                    if (sm.pFile != null) {
+                                                        sm.pFile.close();
+                                                    }
+                                                } catch (IOException e) {
+                                                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, e);
+                                                }
+                                                // send TTY acknowledge
+                                                String tmp = "Connect request from " + TTYCaller;
+                                                //Set TX mode to mode requested by client
+                                                TTYmodes = getcl.group(3);
+                                                //Old protocol, simulate symetric modes
+                                                if (TTYmodes == null) {
+                                                    TTYmodes = "0";
+                                                }
+                                                String myTxmodem = TTYmodes.substring(0, 1);
+                                                if (myTxmodem.equals("0")) {
+                                                    Main.TxModem = Main.RxModem;
+                                                } else if (TTYmodes.length() > 1) {
+                                                    TTYmodes = TTYmodes.substring(1);
+                                                    Main.TxModem = getmodem(myTxmodem);
+                                                }
+                                                LastSessionExchangeTime = System.currentTimeMillis() / 1000; //Set initial value of session timeout
+                                                q.send_txrsid_command("ON");
+                                                q.send_rsid_command("ON");
+                                                q.Message(tmp, 10);
+                                                q.send_ack(TTYCaller);
+                                                status_received = false;
+                                                TimeoutPolls = 0;
+                                                if (Blockline.length() > 8) {
+                                                    charval = (int) (blockval / (Blockline.length() - 4)); // msec
+                                                    blocktime = m.getBlockTime(Main.RxModem); //Use pre-calculated value
+                                                    //blocktime = (charval * 64 / 1000) + 4;
+                                                }
+                                                log("Connect request from " + TTYCaller);
+                                            } else {
+                                                //Send a reject block with a reason
+                                                q.send_txrsid_command("ON");
+                                                q.send_rsid_command("ON");
+                                                log("Connect attempted with damaged transmission or wrong/missing password");
+                                                q.send_reject(TTYCaller, "Damaged transmission or access password incorrect\n");
+                                            }
                                         }
                                     }
                                 }
