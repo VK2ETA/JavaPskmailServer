@@ -2,7 +2,7 @@
  * Main.java
  * 
  * Copyright (C) 2008 Pär Crusefalk and Rein Couperus
- * Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 2018-2020
+ * Copyright (C) 2018-2020 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -32,10 +32,10 @@ import javax.swing.JFrame;
  */
 public class Main {
 
-    //VK2ETA Based on "jpskmail 1.7.b";
-    static String application = "jpskmailserver 0.9.3.17"; // Used to preset an empty status
-    static String version = "0.9.3.17";
-    static String versionDate = "20201216";
+    //VK2ETA: Based on "jpskmail 1.7.b";
+    static String version = "0.9.3.19";
+    static String application = "jpskmailserver " + version;// Used to preset an empty status
+    static String versionDate = "20201220";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -461,7 +461,10 @@ public class Main {
                         Main.TXActive = true; //Moved up to prevent change in mode when replying
                         RMsgObject txMessage = RMsgTxList.getOldest();
                         //Set TxId
-                        m.Set_txID();
+                        q.send_txrsid_command("ON");
+                        m.Sendln(SendCommand);
+                        SendCommand = "";
+                        Thread.sleep(100);
                         //Set Mode
                         SendCommand += "<cmd><mode>" + txMessage.rxMode + "</mode></cmd>";
                         m.Sendln(SendCommand);

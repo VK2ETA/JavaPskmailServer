@@ -394,8 +394,6 @@ public class RMsgProcessor {
                     //Request emails from server
                     IMAPFolder folder = null;
                     Store store = null;
-                    //Store current time. To be used with increments of 1 seconds to differentiate the messages
-                    //Calendar c1 = Calendar.getInstance(TimeZone.getDefault());
                     try {
                         Properties props = System.getProperties();
                         props.setProperty("mail.store.protocol", "imaps");
@@ -440,21 +438,30 @@ public class RMsgProcessor {
                                                 break;
                                             }
                                         }
-                                        //SMS from gateway, convert phone number to E.164 format always
-                                        String smsGatewayDomain = Main.configuration.getPreference("SMSEMAILGATEWAY", "").trim();
-                                        if (smsGatewayDomain.length() > 0 && senderAddress.endsWith(smsGatewayDomain)) {
-                                            String phoneNumber = senderAddress.replace("@" + smsGatewayDomain, "");
-                                            senderAddress = convertNumberToE164(phoneNumber) + "@" + smsGatewayDomain;
-                                        }
+                                        //Save message time for making filenames later on
+                                        Calendar c1 = Calendar.getInstance(TimeZone.getDefault());
+                                        Date msgDateTime = msg.getReceivedDate();
+                                        c1.setTime(msgDateTime);
+                                        //Body
                                         smsString = getBodyTextFromMessage(msg);
                                         if (smsString.length() > 155) {
                                             smsString = smsString.subSequence(0, 155 - 1) + " ...>";
                                         }
+                                        String phoneNumber = "";
                                         String smsSubject = msg.getSubject();
-                                        //Not a reply to a previous radio message, add the subject line
-                                        if (!smsSubject.contains("Radio Message from ")) {
-                                            smsString = "Subject: " + smsSubject
-                                                    + "\n" + smsString;
+                                        //SMS from gateway, convert phone number to E.164 format always
+                                        String smsGatewayDomain = Main.configuration.getPreference("SMSEMAILGATEWAY", "").trim();
+                                        if (smsGatewayDomain.length() > 0 && senderAddress.endsWith(smsGatewayDomain)) {
+                                            phoneNumber = senderAddress.replace("@" + smsGatewayDomain, "");
+                                            //Only store the phone number in international format, not the sms gateway
+                                            senderAddress = convertNumberToE164(phoneNumber);// + "@" + smsGatewayDomain;
+                                        } else {
+                                            //Not a reply to a previous radio message, add the subject line
+                                            if (!smsSubject.contains("Radio Message from ")
+                                                    && !smsSubject.contains("Reply from ")) {
+                                                smsString = smsSubject
+                                                        + "\n" + smsString;
+                                            }
                                         }
                                     } catch (Exception e) {
                                         continue; //Skip processing that message
@@ -470,17 +477,17 @@ public class RMsgProcessor {
                                             radioEmailMessage.relay = Main.configuration.getPreference("CALLSIGNASSERVER", "");
                                             radioEmailMessage.sms = smsString;
                                             radioEmailMessage.via = ""; //only direct send
-                                            String smsGatewayDomain = Main.configuration.getPreference("SMSEMAILGATEWAY", "").trim();
+                                            //String smsGatewayDomain = Main.configuration.getPreference("SMSEMAILGATEWAY", "").trim();
                                             //Are we still asked to send immediately? Treat SMSs and emails individually. 
                                             if (Main.configuration.getPreference("RELAYSMSSIMMEDIATELY", "").equals("yes")
-                                                    && senderAddress.endsWith(smsGatewayDomain)) {
+                                                    && isCellular(senderAddress)) {
                                                 //Keep only the phone number and get the alias if any
-                                                radioEmailMessage.from = RMsgRxList.getAliasFromOrigin(senderAddress.replace("@" + smsGatewayDomain, ""), toString);
+                                                radioEmailMessage.from = RMsgRxList.getAliasFromOrigin(senderAddress, toString);
                                                 //Create message and add in outbox list
                                                 RMsgTxList.addMessageToList(radioEmailMessage);
                                             }
                                             if (Main.configuration.getPreference("RELAYEMAILSIMMEDIATELY", "").equals("yes")
-                                                    && !senderAddress.endsWith(smsGatewayDomain)) {
+                                                    && isEmail(senderAddress)) {
                                                 //Create message and add in outbox list
                                                 radioEmailMessage.from = RMsgRxList.getAliasFromOrigin(senderAddress, toString);
                                                 RMsgTxList.addMessageToList(radioEmailMessage);
@@ -598,7 +605,7 @@ public class RMsgProcessor {
             if ( Main.configuration.getPreference("SENDUSINGLOCALNUMBER", "no").equals("yes")) {
                 PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
                 try {
-                    String countryCode = Main.configuration.getPreference("GATEWAYISOCOUNTRYCODE");
+                    String countryCode = Main.configuration.getPreference("GATEWAYISOCOUNTRYCODE").trim();
                     if (countryCode.length()  == 0) {
                         //Try via the Locale set on this computer as a last resort
                         Locale currentLocale = Locale.getDefault();
@@ -612,7 +619,7 @@ public class RMsgProcessor {
             }
             String sendTo = resultNum + "@" + email2SmsGateway;
             //Send via the email to SMS gateway
-            sendMailMsg(mailMessage, sendTo, mailMessage.to + "@" + email2SmsGateway);
+            sendMailMsg(mailMessage, sendTo, mailMessage.to);
             //Redundant, done in sendMailMsg. updateSMSFilter(mailMessage.to, mailMessage.from);
         }
     }
@@ -671,9 +678,14 @@ public class RMsgProcessor {
 
         //Create text part of message and see if we need to wait for other data like a picture
         RMsgObject mMessage = RMsgObject.extractMsgObjectFromString(blockLine, false, fileName, rxMode);//Only text information
-        //Replace alias only with alias=destination
+        //Now, replace alias only with alias=destination if necessary
         mMessage.to = RMsgRxList.getAliasAndDestination(mMessage.to, mMessage.from);
-
+        //If is a phone number (sms message)  gateway, convert the phone number to the international format
+        String mDestination = RMsgUtil.extractDestination(mMessage.to);
+        if (isCellular(mDestination)) {
+            mDestination = convertNumberToE164(mDestination);
+            mMessage.to = RMsgUtil.extractAliasOnly(mMessage.to) + mDestination;
+        }
         if (!mMessage.pictureString.equals("")) {
             //We have a picture coming, save this message for later
             //Message will be saved when either Picture is received or Timeout occurred
@@ -908,8 +920,8 @@ public class RMsgProcessor {
         //MsgObject recDisplayItem;
         RMsgObject recMessage;
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
-        Calendar localCalendar = Calendar.getInstance(TimeZone.getDefault());
-        Date dateNow = localCalendar.getTime();
+        //Calendar localCalendar = Calendar.getInstance(TimeZone.getDefault());
+        //Date dateNow = localCalendar.getTime();
         Date recMsgDate = null;
         //If requested since last QTC, find the previous one first and extract the time filter
         if (numberOf == -1) {
@@ -985,6 +997,10 @@ public class RMsgProcessor {
                         continue;
                     }
                 }
+                //Save message time for making filenames later on
+                Date msgDateTime = msg.getReceivedDate();
+                c1.setTime(msgDateTime);
+
                 //Check reply messages count
                 if (++msgCount > 20 //Hard stop
                         || (numberOf > 0 && msgCount > numberOf)) {
@@ -1000,12 +1016,13 @@ public class RMsgProcessor {
                         break;
                     }
                 }
-                //SMS from gateway, convert phone number to E.164 format always
+                String phoneNumber = "";
+                //SMS from gateway, convert phone number to E.164 format always. To match stored number format.
                 String smsGatewayDomain = Main.configuration.getPreference("SMSEMAILGATEWAY", "").trim();
                 if (smsGatewayDomain.length() > 0 && fromString.endsWith(smsGatewayDomain)) {
-                    String phoneNumber = fromString.replace("@" + smsGatewayDomain, "");
-                    //Reformat as +614123456789@mysmsgateway.com.au
-                    fromString = convertNumberToE164(phoneNumber) + "@" + smsGatewayDomain;
+                    phoneNumber = fromString.replace("@" + smsGatewayDomain, "");
+                    //Reformat as +614123456789@mysmsgateway.com.au..NO, filters for SMSs are stored as phonenumber only
+                    fromString = convertNumberToE164(phoneNumber);  // + "@" + smsGatewayDomain;
                 }
                 String[] tos;
                 if (forAll) {
@@ -1025,10 +1042,14 @@ public class RMsgProcessor {
                             smsString = smsString.subSequence(0, charLimit - 1) + " ...>";
                         }
                         String smsSubject = msg.getSubject();
-                        //Not a reply to a previous radio message, add the subject line
-                        if (!smsSubject.contains("Radio Message from ")) {
-                            smsString = "Subject: " + smsSubject
-                                    + "\n" + smsString;
+                        //If is NOT an SMS reply, add subject line
+                        if (phoneNumber.equals("")) {
+                            //Not a reply to a previous radio message, add the subject line
+                           if (!smsSubject.contains("Radio Message from ")
+                                    && !smsSubject.contains("SMS received from ")) {
+                                smsString = "Subject: " + smsSubject
+                                        + "\n" + smsString;
+                            }
                         }
                         //Debug
                         //smsString = smsString + " Rec Date: " + msg.getReceivedDate() + "\n";
@@ -1512,7 +1533,7 @@ public class RMsgProcessor {
                             }
                         } else if (mMessage.sms.startsWith("*qtc?") & (Main.WantRelayEmails
                                 | Main.WantRelaySMSs | Main.WantRelayOverRadio)) {
-                            //Re-send last message or last X messages/emails/SMSs or in the last minutes/Hours/Days or since last request
+    /*                        //Re-send last message or last X messages/emails/SMSs or in the last minutes/Hours/Days or since last request
                             // Case 1: Request SMS or EMAIL request. Ignore TO, Via = me
                             // Case 2: Request radio relay to another station. Via = me, To = NOT (SMS/Email/To_ALL)
                             // Case 3: Request re-send of last X heard messages for me or ALL. (Via = me AND To = All)
@@ -1616,6 +1637,100 @@ public class RMsgProcessor {
                                     //We are just repeating sent messages, excluding already re-sent ones, Always allow.
                                     //Not yet (need a Sent list first) resendList = buildTXedResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
                                 } else {
+                                    RMsgUtil.sendBeeps(false);
+                                    //We have an access password missing
+                                    //RMsgUtil.replyWithText(mMessage, "Sorry...Missing Access Password");
+                                } 
+                            } */
+                                //QTC message VIA is my call, but TO is not my call OR TO is my call but VIA is blank
+                            if ((matchMyCallWith(mMessage.via, false) && !matchMyCallWith(mMessage.to, false)) ||
+                                    (matchMyCallWith(mMessage.to, false) && mMessage.via.equals(""))) {
+                                boolean directRequest = (matchMyCallWith(mMessage.to, false)
+                                        && mMessage.via.equals(""));
+                                //Only properly received (and secured) messages
+                                if (messageAuthorized || directRequest) {
+                                    RMsgUtil.sendBeeps(true);
+                                    //Read request (last X minutes or last N messages). Default is last ONE message if nothing is sent.
+                                    int numberOf = 1;
+                                    if (mMessage.sms.length() > 6 && mMessage.sms.substring(5, 6).equals(" ")) {
+                                        try {
+                                            //First remove all non digit characters after the "*qtc? "
+                                            String extractedStr = mMessage.sms.substring(6).replaceAll("[^0-9]", "");
+                                            //Any number following or preceding
+                                            numberOf = Integer.valueOf(extractedStr);
+                                        } catch (Exception e) {
+                                            numberOf = 1;
+                                        }
+                                    }
+                                    //Make sure we have at least 1
+                                    numberOf = numberOf == 0 ? 1 : numberOf;
+                                    //Any modifier after the numbers like "m" for last X minutes, "h" for last X hours, "d" for last X days,
+                                    // "p" for last X position reports only, "a" for last X sms from "all" as in for a third party,
+                                    // "e" for last e-Mails (short version), "f" for last e-Mails (fuller version),
+                                    // "le" for last e-Mails since last qtc (short version), "lf" for last e-Mails since last qtc (fuller version),
+                                    Long forLast = 0L;
+                                    Boolean forAll = false;
+                                    //Boolean emailRequest = false;
+                                    Boolean positionsOnly = false;
+                                    String extractedStr = mMessage.sms.substring(6).replaceAll("[^a-zA-Z]", "").toLowerCase(Locale.US);
+                                    if (extractedStr.startsWith("m")) { //Minutes
+                                        forLast = numberOf * 60000L;
+                                        numberOf = 0;
+                                    } else if (extractedStr.startsWith("h")) { //Hours
+                                        forLast = numberOf * 3600000L;
+                                        numberOf = 0;
+                                    } else if (extractedStr.startsWith("d")) { //Days
+                                        forLast = numberOf * 24 * 3600000L;
+                                        numberOf = 0;
+                                    } else if (extractedStr.startsWith("p")) { //Last X positions
+                                        positionsOnly = true;
+                                    } else if (extractedStr.equals("l")) { // "L" for last messages since last QTC request
+                                        numberOf = -1;
+                                    } else if (extractedStr.contains("a")) { //All messages even if for someone else
+                                        forAll = true;
+                                    }
+                                    //Blank list
+                                    ArrayList<RMsgObject> resendList = new ArrayList();
+                                    //What type of qtc did we receive?
+                                    if (!directRequest) {
+                                        //process email request
+                                        resendList = buildNonEmailResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
+                                        //We are repeating existing received messages
+                                        ArrayList<RMsgObject> emailList = new ArrayList();
+                                        if (Main.WantRelayEmails) {
+                                            emailList = buildEmailResendList(mMessage, numberOf, extractedStr.endsWith("f"), forAll);
+                                            resendList.addAll(emailList);
+                                        }
+                                    } else {
+                                        //We are just repeating messages sent directly (no Via), excluding already re-sent ones
+                                        resendList = buildTXedResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
+                                    }
+
+                                    //Now sort the list if not zero length
+                                    if (resendList.size() > 0) {
+                                        Collections.sort(resendList, new Comparator() {
+                                            public int compare(Object o1, Object o2) {
+                                                RMsgObject m1 = (RMsgObject) o1;
+                                                RMsgObject m2 = (RMsgObject) o2;
+                                                return m1.fileName.compareToIgnoreCase(m2.fileName);
+                                            }
+                                        });
+                                        //Send requested number of messages with a max of 20 messages. If numberof is <0, we have a time based request, limit to 20 too.
+                                        int iMax = (numberOf > 0 && numberOf < 21) ? numberOf : 20;
+                                        int i = 0;
+                                        //If we have more than requested, start down the list to send the n most recent messages as they are sorted in increasing date order
+                                        if (numberOf > 0 && (resendList.size() > numberOf)) i = resendList.size() - numberOf;
+                                        //Copy up to requested number or in any case max 20
+                                        for (; i < resendList.size() && i <= iMax; i++) { //i is already initialised
+                                            RMsgTxList.addMessageToList(resendList.get(i));
+                                        }
+                                    } else {
+                                        //Notify of nothing to send
+                                        mMessage.via = ""; //Blank via as it's from this device
+                                        RMsgUtil.replyWithText(mMessage, "No messages");
+                                    }
+                                } else {
+                                    //Alert with low beep to indicate invalid message
                                     RMsgUtil.sendBeeps(false);
                                     //We have an access password missing
                                     //RMsgUtil.replyWithText(mMessage, "Sorry...Missing Access Password");

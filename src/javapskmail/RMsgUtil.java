@@ -339,6 +339,21 @@ public class RMsgUtil {
         return toAliasAndDestination;
     }
 
+    //Extract the alias from an "alias=destination" address field, return string in "alias=" format
+    public static String extractAliasOnly(String toAliasAndDestination) {
+        
+        Pattern psc = Pattern.compile("^\\s*(.+)\\s*=(.*)\\s*$");
+        Matcher msc = psc.matcher(toAliasAndDestination);
+        if (msc.lookingAt()) {
+            if (!msc.group(1).equals("")) {
+                //Found, return "alias="
+                return msc.group(1) + "=";
+            }
+        } 
+        //No alias, return blank
+        return "";
+    }
+
 
 
     //Takes the temp bitmap and creates a byte array ready for TX by MFSK

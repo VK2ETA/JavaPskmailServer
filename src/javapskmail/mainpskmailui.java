@@ -408,16 +408,17 @@ public class mainpskmailui extends javax.swing.JFrame {
                     //If more than 30 seconds in test mode, then kill fldigi and let the 
                     //  modem getbyte() restart it and re-int Rigctl
                     if (!Main.TXActive 
-                            && (System.currentTimeMillis() - Main.lastModemCharTime > 180000)) { //180000 = 3 minutes
+                            && (System.currentTimeMillis() - Main.lastModemCharTime > 55000)) { // = 55 seconds
                         if (!Main.modemTestMode) {
                             //Enter test mode for next iteration
                             Main.modemTestMode = true;
                             //Note: Squelch will be set to minimum below
                             System.out.println("Timeout on receipt of data from modem. Entering test mode");
                         } else {
-                            if (System.currentTimeMillis() - Main.lastModemCharTime > 220000) {//220000 = 3 minutes+ 40 seconds
+                            if (System.currentTimeMillis() - Main.lastModemCharTime > 115000) {// = 1 minutes+ 55 seconds
                                 //We have a hang modem, request an Flgdigi restart
                                 //NO, just kill it
+                                System.out.println("Modem test period exausted, Killing modem process");
                                 Main.m.killFldigi();
                                 //Main.requestModemRestart = true;
                                 //System.out.println("Modem test period exausted, requesting modem restart");
@@ -428,6 +429,10 @@ public class mainpskmailui extends javax.swing.JFrame {
                             }
                         }
                     } else {
+                        if (Main.modemTestMode) {
+                            System.out.println("Exiting Modem test mode, all OK");
+                            
+                        }
                         //Reset test flag
                         Main.modemTestMode = false;
                     }
@@ -819,11 +824,14 @@ public class mainpskmailui extends javax.swing.JFrame {
                             }
                             minutebytes = 0;
 
-                            // reset mode  ??
+                            // reset mode  ??, 
+                            //But not if we are in modem test mode to check if Fldigi is still alive. 
+                            // Changing the mode will results in a couple of erratic characters being 
+                            // sent, providing a false positive for the modem activity
                             if ((mnuMailScanning.isSelected() & !Main.Connected)
                                     | (!Main.Connected & !Main.Connecting & !Main.Monitor
                                     & !Main.Bulletinmode & !radioMsgActive & !serverActive
-                                    & !Main.TXActive)) {
+                                    & !Main.TXActive & !Main.modemTestMode)) {
                                 myarq.send_mode_command(Main.defaultmode);
                                 Main.TxModem = Main.defaultmode;
                                 Main.RxModem = Main.defaultmode;

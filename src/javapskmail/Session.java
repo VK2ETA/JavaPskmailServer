@@ -361,6 +361,71 @@ public class Session {
         boolean Firstline = false;
         boolean foundMatchingCommand = false;
 
+        // ~STOP: <transaction> for TTY session...
+        //"~STOP:" + Main.sm.Transaction + "\n"
+        Pattern STOPm = Pattern.compile("^\\s*~STOP:([A-Za-z0-9]+)?");
+        Matcher stopm = STOPm.matcher(str);
+        if (Main.TTYConnected.equals("Connected") & stopm.lookingAt()) {
+            foundMatchingCommand = true;
+            String transaction = stopm.group(1);
+            if (transaction != null && !transaction.equals("")) {
+                Main.log("Stopping Transaction: " + transaction);
+                //Delete specified transaction (the one in progress)
+                //Look in the Outbox for partial upload to client. Files are in the format VK2ETA_-w-_12345
+                //Since we don't know the file type from the ~FY command (s,w,f etc...),
+                //  we scan the directory for a match
+                String caller = Main.TTYCaller;
+                File[] filesOutbox;
+                // Get the list of files in the designated folder
+                File dir = new File(Main.HomePath + Main.Dirprefix + "Outbox");
+                //filesOutbox = dir.listFiles();
+                FileFilter fileFilter = new FileFilter() {
+                    public boolean accept(File file) {
+                        return file.isFile();
+                    }
+                };
+                //Generates an array of strings containing the file names to resume downloading
+                filesOutbox = dir.listFiles(fileFilter);
+                for (int i = 0; i < filesOutbox.length; i++) {
+                    String pendingCaller = "";
+                    String pendingType = "";
+                    String pendingToken = "";
+                    String pendingFn = filesOutbox[i].getName();
+                    if (pendingFn.contains("_-")) {
+                        int firstSep = pendingFn.indexOf("_-");
+                        int secondSep = pendingFn.indexOf("-_");
+                        if (firstSep > 0 && secondSep > 0) {
+                            pendingCaller = pendingFn.substring(0, firstSep);
+                            pendingType = pendingFn.substring(firstSep + 2, secondSep);
+                            pendingToken = pendingFn.substring(secondSep + 2);
+                        }
+                        if (pendingCaller.equals(caller) && transaction.equals(pendingToken)) {
+                            //Found a match for callsign and token combination, delete file
+                            File penfOut = filesOutbox[i].getAbsoluteFile();
+                            if (penfOut.exists()) {
+                                penfOut.delete();
+                            }
+                        }
+                    }
+                }
+            }
+            //Clear everything in the current session (as if we had just concluded the connection)
+            //tx_lastsent = " ";
+            tx_lastreceived = tx_lastsent;
+            //tx_ok = " ";
+            tx_missing = "";
+            //rx_lastsent = " ";
+            rx_ok = " ";
+            rx_lastreceived = rx_lastsent;
+            rx_missing = "";
+            Blocklength = 6;
+            Main.TX_Text = "";
+            //VK2ETA should we clear the buffers too?
+            for (int i = 0; i < 64; i++) {
+                rxbuffer[i] = "";
+                txbuffer[i] = "";
+            }
+        }
         // ~QUIT for TTY session...
         Pattern TTYm = Pattern.compile("^\\s*~QUIT");
         Matcher tm = TTYm.matcher(str);
@@ -867,6 +932,7 @@ public class Session {
                 }
 // compressed web page open...
             } else if (fmm.group(4).equals("w")) {
+                //Compressed web page
                 CwwwDownload = true;
                 Main.comp = true;
                 Firstline = true;
@@ -910,6 +976,7 @@ public class Session {
 
                 // compressed mail download
             } else if (fmm.group(4).equals("m")) {
+                //Mail download
                 CMsgDownload = true;
                 Transaction = fmm.group(3);
                 Main.comp = true;
@@ -2494,16 +2561,16 @@ public class Session {
             Nrblocks = 8;
             Maxblocklength = 5;
             Minblocklength = 4;
-            //VK2ETA not sure this is necessary
+            //VK2ETA should not be controlled here
             //a.send_txrsid_command("ON");
 //        System.out.println("TXID ON");      
         } else {
             Nrblocks = 4;
             Maxblocklength = 5;
             Minblocklength = 3;
-            //VK2ETA not sure this is necessary
+            //VK2ETA should not be controlled here
             //a.send_txrsid_command("ON");
-//        System.out.println("TXID ON");      
+            //System.out.println("TXID ON");      
         }
 
         while (i < (Nrblocks - nr_missing) & Main.TX_Text.length() > 0) {

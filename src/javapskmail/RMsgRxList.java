@@ -99,7 +99,7 @@ public class RMsgRxList {
     // as a match later on). Each "From" callsign have their own alias=destination combinations.
     synchronized public static String getAliasAndDestination(String toAlias, String fromStr) {
 
-        Pattern psc = Pattern.compile("^\\s*(.+)\\s*=(.*)\\s*$");
+        Pattern psc =  Pattern.compile("^\\s*(.+)\\s*=(.*)\\s*$");
         Pattern pscf = Pattern.compile("^\\s*(.+)\\s*=(.+)\\s*$");
         Matcher msc = psc.matcher(toAlias);
         if (msc.lookingAt()) {
