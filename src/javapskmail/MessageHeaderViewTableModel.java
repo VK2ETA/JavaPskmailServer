@@ -118,7 +118,7 @@ public class MessageHeaderViewTableModel extends AbstractTableModel{
      }
 
      /**
- * Convert strings in ISO 8859-1 to readavle text
+ * Convert strings in ISO 8859-1 to readable text
  * @param instr
  * @return
  */

@@ -35,6 +35,7 @@ import java.util.zip.GZIPOutputStream;
 import static javapskmail.Main.HomePath;
 import static javapskmail.modemmodeenum.DOMINOEX5;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.text.*;
 
@@ -288,6 +289,9 @@ public class mainpskmailui extends javax.swing.JFrame {
                 Main.wantigate = false;
             }
         }
+        
+        //Load Radio Messages from the list into the Gui tab
+        loadRadioMsg(0);
 
 // timer, 1 sec tick
         u = new javax.swing.Timer(1000, new ActionListener() {
@@ -1548,6 +1552,9 @@ public class mainpskmailui extends javax.swing.JFrame {
         freq2 = new javax.swing.JTextField();
         freq3 = new javax.swing.JTextField();
         freq4 = new javax.swing.JTextField();
+        tabRadioMsg = new javax.swing.JPanel();
+        scrRadioMsgUpDown = new javax.swing.JScrollPane();
+        tblRadioMsgs = new javax.swing.JTable();
         pnlStatus = new javax.swing.JPanel();
         snLabel = new javax.swing.JLabel();
         StatusLabel = new javax.swing.JLabel();
@@ -1877,19 +1884,18 @@ public class mainpskmailui extends javax.swing.JFrame {
             tblInbox.getColumnModel().getColumn(0).setMinWidth(50);
             tblInbox.getColumnModel().getColumn(0).setPreferredWidth(50);
             tblInbox.getColumnModel().getColumn(0).setMaxWidth(100);
-            tblInbox.getColumnModel().getColumn(0).setHeaderValue(bundle.getString("mainpskmailui.tblInbox.columnModel.title0")); // NOI18N
+            tblInbox.getColumnModel().getColumn(0).setHeaderValue(bundle.getString("mainpskmailui.tblInbox.columnModel.title0_1")); // NOI18N
             tblInbox.getColumnModel().getColumn(1).setMinWidth(80);
             tblInbox.getColumnModel().getColumn(1).setPreferredWidth(80);
-            tblInbox.getColumnModel().getColumn(1).setMaxWidth(400);
             tblInbox.getColumnModel().getColumn(1).setHeaderValue(bundle.getString("mainpskmailui.tblInbox.columnModel.title1")); // NOI18N
             tblInbox.getColumnModel().getColumn(2).setMinWidth(100);
             tblInbox.getColumnModel().getColumn(2).setPreferredWidth(200);
             tblInbox.getColumnModel().getColumn(2).setMaxWidth(400);
-            tblInbox.getColumnModel().getColumn(2).setHeaderValue(bundle.getString("mainpskmailui.tblInbox.columnModel.title2")); // NOI18N
+            tblInbox.getColumnModel().getColumn(2).setHeaderValue(bundle.getString("mainpskmailui.tblInbox.columnModel.title2_1")); // NOI18N
             tblInbox.getColumnModel().getColumn(3).setMinWidth(50);
             tblInbox.getColumnModel().getColumn(3).setPreferredWidth(50);
             tblInbox.getColumnModel().getColumn(3).setMaxWidth(150);
-            tblInbox.getColumnModel().getColumn(3).setHeaderValue(bundle.getString("mainpskmailui.tblInbox.columnModel.title3")); // NOI18N
+            tblInbox.getColumnModel().getColumn(3).setHeaderValue(bundle.getString("mainpskmailui.tblInbox.columnModel.title3_1")); // NOI18N
         }
 
         jSplitPane1.setRightComponent(scrEmailRight);
@@ -2945,6 +2951,61 @@ public class mainpskmailui extends javax.swing.JFrame {
                 tabRigctl.add(pnlFreqs, gridBagConstraints);
 
                 tabMain.addTab(bundle.getString("mainpskmailui.tabRigctl.TabConstraints.tabTitle"), tabRigctl); // NOI18N
+
+                scrRadioMsgUpDown.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                scrRadioMsgUpDown.setPreferredSize(new java.awt.Dimension(1000, 500));
+
+                tblRadioMsgs.setAutoCreateRowSorter(true);
+                tblRadioMsgs.setBackground(new java.awt.Color(255, 255, 230));
+                tblRadioMsgs.setModel(new javax.swing.table.DefaultTableModel(
+                    new Object [][] {
+
+                    },
+                    new String [] {
+                        "Messages"
+                    }
+                ) {
+                    Class[] types = new Class [] {
+                        java.lang.String.class
+                    };
+                    boolean[] canEdit = new boolean [] {
+                        false
+                    };
+
+                    public Class getColumnClass(int columnIndex) {
+                        return types [columnIndex];
+                    }
+
+                    public boolean isCellEditable(int rowIndex, int columnIndex) {
+                        return canEdit [columnIndex];
+                    }
+                });
+                tblRadioMsgs.setAlignmentX(0.0F);
+                tblRadioMsgs.setRowSorter(null);
+                tblRadioMsgs.setSelectionBackground(new java.awt.Color(150, 150, 150));
+                tblRadioMsgs.setShowVerticalLines(false);
+                tblRadioMsgs.getTableHeader().setReorderingAllowed(false);
+                tblRadioMsgs.addMouseListener(new java.awt.event.MouseAdapter() {
+                    public void mousePressed(java.awt.event.MouseEvent evt) {
+                        tblRadioMsgsMousePressed(evt);
+                    }
+                    public void mouseReleased(java.awt.event.MouseEvent evt) {
+                        tblRadioMsgsMouseReleased(evt);
+                    }
+                    public void mouseClicked(java.awt.event.MouseEvent evt) {
+                        tblRadioMsgsMouseClicked(evt);
+                    }
+                });
+                scrRadioMsgUpDown.setViewportView(tblRadioMsgs);
+                if (tblRadioMsgs.getColumnModel().getColumnCount() > 0) {
+                    tblRadioMsgs.getColumnModel().getColumn(0).setMinWidth(80);
+                    tblRadioMsgs.getColumnModel().getColumn(0).setPreferredWidth(80);
+                    tblRadioMsgs.getColumnModel().getColumn(0).setHeaderValue(bundle.getString("mainpskmailui.tblInbox.columnModel.title1")); // NOI18N
+                }
+
+                tabRadioMsg.add(scrRadioMsgUpDown);
+
+                tabMain.addTab(mainpskmailui.getString("mainpskmailui.tabRadioMsg.TabConstraints.tabTitle"), tabRadioMsg); // NOI18N
 
                 gridBagConstraints = new java.awt.GridBagConstraints();
                 gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
@@ -7278,6 +7339,18 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         // TODO add your handling code here:
     }//GEN-LAST:event_APRS_ISActionPerformed
 
+    private void tblRadioMsgsMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblRadioMsgsMousePressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_tblRadioMsgsMousePressed
+
+    private void tblRadioMsgsMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblRadioMsgsMouseReleased
+        // TODO add your handling code here:
+    }//GEN-LAST:event_tblRadioMsgsMouseReleased
+
+    private void tblRadioMsgsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblRadioMsgsMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_tblRadioMsgsMouseClicked
+
     /**
      * Simple message dialog with yes and no button
      *
@@ -7753,6 +7826,21 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         //       mymapcls.setlocalfileasmap("Images/freemap_world.png");
 
     }
+    
+    //Load the GUI table in the Radio Msg tab with the list of messages
+    private void loadRadioMsg(int whichFolder) {
+        int listSize = RMsgRxList.getLength();
+        DefaultTableModel radioMSgTblModel;
+        radioMSgTblModel = new DefaultTableModel();
+        tblRadioMsgs.setModel(radioMSgTblModel);
+        radioMSgTblModel.addColumn("Message");
+        tblRadioMsgs.getColumnModel().getColumn(0).setCellRenderer( new RMsgTableRenderer() );
+        for (int i=0; i<listSize; i++) {
+            RMsgObject mMessage = RMsgRxList.getItem(i);
+            String mMessageStr = mMessage.formatForList(false);
+            radioMSgTblModel.addRow(new Object[]{mMessageStr});
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -7970,6 +8058,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JScrollPane scrEmailLeft;
     private javax.swing.JScrollPane scrEmailRight;
     private javax.swing.JScrollPane scrInMsgs;
+    private javax.swing.JScrollPane scrRadioMsgUpDown;
     private javax.swing.JTextArea serverlist;
     private javax.swing.JLabel snLabel;
     private javax.swing.JSpinner spnMinute;
@@ -7980,9 +8069,11 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JPanel tabIgate;
     private javax.swing.JTabbedPane tabMain;
     private javax.swing.JPanel tabModem;
+    private javax.swing.JPanel tabRadioMsg;
     private javax.swing.JPanel tabRigctl;
     private javax.swing.JPanel tabTerminal;
     private javax.swing.JTable tblInbox;
+    private javax.swing.JTable tblRadioMsgs;
     private javax.swing.JTextField txtCourse;
     private javax.swing.JTextField txtFixTakenAt;
     private javax.swing.JTextArea txtInMsgs;

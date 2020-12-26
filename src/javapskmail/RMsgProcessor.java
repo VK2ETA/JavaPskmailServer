@@ -859,6 +859,10 @@ public class RMsgProcessor {
                     && (!matchThisCallWith(mMessage.from, recMessage.from, false))
                     //AND be only a position message if requested so
                     && (!positionsOnly || recMessage.msgHasPosition)
+                    //AND must not be a command message
+                    && (!recMessage.sms.startsWith("*cmd"))
+                    //AND must not be an already re-sent message
+                    && (!recMessage.sms.startsWith("Re-Sending "))
                     //AND must not be a qtc? request
                     && (!recMessage.sms.startsWith("*qtc?"))) {
                 if (forLast > 0L) { //We have a time-based request
@@ -1140,8 +1144,9 @@ public class RMsgProcessor {
                     && (!matchThisCallWith(mMessage.from, recMessage.from, false))
                     //AND be only a position message if requested so
                     && (!positionsOnly || recMessage.msgHasPosition)
-                    //AND must not be a qtc? request
+                    //AND must not be a qtc?, command or previously re-sent message
                     && (!recMessage.sms.startsWith("*qtc?"))
+                    && (!recMessage.sms.startsWith("*cmd"))
                     && (!recMessage.sms.startsWith("Re-Sending "))) {
                 if (forLast > 0L) { //We have a time-based request
                     Date recMsgDate;
@@ -1485,17 +1490,24 @@ public class RMsgProcessor {
                                         cmdOk = true;
                                         replyString = "Scan On";
                                     } else if (onOff.equals("s off") && !numberOff.equals("") && !units.equals("")) {
+                                        cmdOk = true;
                                         try {
                                             int durationToRestart = Integer.parseInt(numberOff);
+                                            int finalDurationToRestart = durationToRestart;
                                             if (units.equals("h")) {
                                                 //Time in hours in fact, max 24 hours
-                                                durationToRestart = durationToRestart > 24 ? 24 : durationToRestart;
-                                                durationToRestart *= 60;  //convert hours to minutes
+                                                finalDurationToRestart = durationToRestart > 24 ? 24 : durationToRestart;
+                                                finalDurationToRestart *= 60;  //convert hours to minutes
+                                                cmdOk = true;
+                                            } else if (!units.equals("m")) {
+                                                Main.restartScanAtEpoch = 0L;
+                                                cmdOk = false;
                                             }
-                                            Main.restartScanAtEpoch = System.currentTimeMillis() + (durationToRestart * 60000);
-                                            Main.wantScanner = false;
-                                            cmdOk = true;
-                                            replyString = "Scan Off " + durationToRestart + " " + units;
+                                            if (cmdOk) {
+                                                Main.restartScanAtEpoch = System.currentTimeMillis() + (finalDurationToRestart * 60000);
+                                                Main.wantScanner = false;
+                                                replyString = "Scan Off " + durationToRestart + " " + units;
+                                            }
                                         } catch (Exception e) {
                                             //Bad syntax, re-enable scanning
                                             Main.restartScanAtEpoch = 0L;

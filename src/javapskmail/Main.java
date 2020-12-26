@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "0.9.3.19";
+    static String version = "0.9.3.21";
     static String application = "jpskmailserver " + version;// Used to preset an empty status
-    static String versionDate = "20201220";
+    static String versionDate = "20201226";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -1912,7 +1912,7 @@ public class Main {
 
         //Load Stored Received RadioMSG messages into rxMessagelist
         RMsgRxList.messageList.clear();
-        int whichFolders = 1; //both inbox only at this point
+        int whichFolders = 1; //Inbox only at this point
         ArrayList<RMsgObject> objList = RMsgObject.loadMsgObjectListFromFolders(whichFolders, RMsgObject.SORTBYNAME);
         for (RMsgObject thisObject : objList) {
             RMsgRxList.addMessageToList(thisObject);

@@ -6,11 +6,6 @@ package javapskmail;
  * @author jdouyere
  */
 
-/**
- *
- * @author jdouyere
- */
-
 //import android.graphics.Bitmap;
 //import android.location.Location;
 
