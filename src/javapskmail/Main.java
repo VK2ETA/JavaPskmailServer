@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "0.9.3.21";
+    static String version = "0.9.3.22";
     static String application = "jpskmailserver " + version;// Used to preset an empty status
-    static String versionDate = "20201226";
+    static String versionDate = "20210419";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -272,7 +272,7 @@ public class Main {
 
     // Our main window
     static mainpskmailui mainui;
-
+    
     // Modem handle
     static public Modem m;
     static String RXmodemindex = "";
@@ -459,19 +459,19 @@ public class Main {
                         & TTYConnected.equals("") & !receivingRadioMsg) {
                     if (RMsgTxList.getAvailableLength() > 0) {
                         Main.TXActive = true; //Moved up to prevent change in mode when replying
-                        RMsgObject txMessage = RMsgTxList.getOldest();
+                        m.txMessage = RMsgTxList.getOldest();
                         //Set TxId
                         q.send_txrsid_command("ON");
                         m.Sendln(SendCommand);
                         SendCommand = "";
                         Thread.sleep(100);
                         //Set Mode
-                        SendCommand += "<cmd><mode>" + txMessage.rxMode + "</mode></cmd>";
+                        SendCommand += "<cmd><mode>" + m.txMessage.rxMode + "</mode></cmd>";
                         m.Sendln(SendCommand);
                         SendCommand = "";
                         Thread.sleep(250);
                         //Send message
-                        Sendline = "\n\n" + txMessage.formatForTx(false) + "\n"; //No CCIR modes for now
+                        Sendline = "\n\n" + m.txMessage.formatForTx(false) + "\n"; //No CCIR modes for now
                         m.Sendln(Sendline);
                         //Log in monitor screen
                         Main.monitor += "\n*TX*  " + "<SOH>"
@@ -1302,7 +1302,7 @@ public class Main {
                                     Main.TX_Text = serverCall + " V" + version + ", Hi\n";
                                     Main.TX_Text += serverMail.getPendingList(serverCall, TTYCaller);
                                     Main.TX_Text += Motd + "\n";
-                                    //We are nor fully connected, stop TxIDs
+                                    //We are now fully connected, stop TxIDs
                                     q.send_txrsid_command("OFF");
                                     myrxstatus = sm.getTXStatus();
                                     q.send_status(myrxstatus);  // send our status
@@ -1910,15 +1910,8 @@ public class Main {
 
         XmlRpc_URL = "http://" + XMLIP + ":7362/RPC2";
 
-        //Load Stored Received RadioMSG messages into rxMessagelist
-        RMsgRxList.messageList.clear();
-        int whichFolders = 1; //Inbox only at this point
-        ArrayList<RMsgObject> objList = RMsgObject.loadMsgObjectListFromFolders(whichFolders, RMsgObject.SORTBYNAME);
-        for (RMsgObject thisObject : objList) {
-            RMsgRxList.addMessageToList(thisObject);
-        }
     }
-
+    
     private static void handlegpsd() {
         try {
             // Connect to gpsd at port 2947 on localhost

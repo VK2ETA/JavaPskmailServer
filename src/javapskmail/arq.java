@@ -19,7 +19,6 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static javapskmail.Main.SendCommand;
-import static javapskmail.Main.m;
 import static javapskmail.modemmodeenum.CTSTIA;
 import static javapskmail.modemmodeenum.PSK125RC4;
 import static javapskmail.modemmodeenum.PSK500;

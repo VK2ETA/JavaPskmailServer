@@ -482,14 +482,14 @@ public class RMsgProcessor {
                                             if (Main.configuration.getPreference("RELAYSMSSIMMEDIATELY", "").equals("yes")
                                                     && isCellular(senderAddress)) {
                                                 //Keep only the phone number and get the alias if any
-                                                radioEmailMessage.from = RMsgRxList.getAliasFromOrigin(senderAddress, toString);
+                                                radioEmailMessage.from = Main.mainui.msgDisplayList.getAliasFromOrigin(senderAddress, toString);
                                                 //Create message and add in outbox list
                                                 RMsgTxList.addMessageToList(radioEmailMessage);
                                             }
                                             if (Main.configuration.getPreference("RELAYEMAILSIMMEDIATELY", "").equals("yes")
                                                     && isEmail(senderAddress)) {
                                                 //Create message and add in outbox list
-                                                radioEmailMessage.from = RMsgRxList.getAliasFromOrigin(senderAddress, toString);
+                                                radioEmailMessage.from = Main.mainui.msgDisplayList.getAliasFromOrigin(senderAddress, toString);
                                                 RMsgTxList.addMessageToList(radioEmailMessage);
                                             }
 
@@ -679,7 +679,7 @@ public class RMsgProcessor {
         //Create text part of message and see if we need to wait for other data like a picture
         RMsgObject mMessage = RMsgObject.extractMsgObjectFromString(blockLine, false, fileName, rxMode);//Only text information
         //Now, replace alias only with alias=destination if necessary
-        mMessage.to = RMsgRxList.getAliasAndDestination(mMessage.to, mMessage.from);
+        mMessage.to = Main.mainui.msgDisplayList.getReceivedAliasAndDestination(mMessage.to, mMessage.from);
         //If is a phone number (sms message)  gateway, convert the phone number to the international format
         String mDestination = RMsgUtil.extractDestination(mMessage.to);
         if (isCellular(mDestination)) {
@@ -835,7 +835,7 @@ public class RMsgProcessor {
     private static ArrayList<RMsgObject> buildNonEmailResendList(RMsgObject mMessage, int numberOf, Long forLast, Boolean forAll, Boolean positionsOnly) {
 
         //Get list of messages to send
-        int listCount = RMsgRxList.getLength();
+        int listCount = Main.mainui.msgDisplayList.getLength();
         ArrayList<RMsgObject> resendList = new ArrayList<RMsgObject>();
         RMsgObject recMessage;
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
@@ -846,7 +846,7 @@ public class RMsgProcessor {
         Boolean goodToResend;
         for (int i = listCount - 2; i >= 0; i--) {//Skip just received qtc? message
             goodToResend = false;
-            recMessage = RMsgRxList.getItem(i);
+            recMessage = Main.mainui.msgDisplayList.getItemMessage(i);
             //      Must be a received message
             if (matchThisCallWith(mMessage.from, recMessage.from, false)
                     && recMessage.sms.startsWith("*qtc?")) {
@@ -919,7 +919,7 @@ public class RMsgProcessor {
     private static ArrayList<RMsgObject> buildEmailResendList(RMsgObject mMessage, int numberOf, boolean fullSize, boolean forAll) {
 
         //Get list of messages to send
-        int listCount = RMsgRxList.getLength();
+        int listCount = Main.mainui.msgDisplayList.getLength();
         ArrayList<RMsgObject> resendList = new ArrayList<RMsgObject>();
         //MsgObject recDisplayItem;
         RMsgObject recMessage;
@@ -931,7 +931,7 @@ public class RMsgProcessor {
         if (numberOf == -1) {
             //Iterate from the 2nd last message received, backwards (back in time), skipping just received "*qtc?" message
             for (int i = listCount - 2; i >= 0; i--) {
-                recMessage = RMsgRxList.getItem(i);
+                recMessage = Main.mainui.msgDisplayList.getItemMessage(i);
                 //      Must be a received message
                 if (matchThisCallWith(mMessage.from, recMessage.from, false)
                         && recMessage.sms.startsWith("*qtc?")) {
@@ -1069,10 +1069,10 @@ public class RMsgProcessor {
                         //From address: email address or cellular number replying?
                         if (smsGatewayDomain.length() > 0 && fromString.endsWith(smsGatewayDomain)) {
                             //Keep only the phone number and get the alias if any
-                            fullMessage.from = RMsgRxList.getAliasFromOrigin(fromString.replace("@" + smsGatewayDomain, ""), tos[j]);
+                            fullMessage.from = Main.mainui.msgDisplayList.getAliasFromOrigin(fromString.replace("@" + smsGatewayDomain, ""), tos[j]);
                         } else {
                             //Other email addresses
-                            fullMessage.from = RMsgRxList.getAliasFromOrigin(fromString, tos[j]);
+                            fullMessage.from = Main.mainui.msgDisplayList.getAliasFromOrigin(fromString, tos[j]);
                         }
                         //Then save Message in list for sorting and limiting the number
                         fullMessage.fileName = String.format(Locale.US, "%04d", c1.get(Calendar.YEAR)) + "-"
@@ -1120,7 +1120,7 @@ public class RMsgProcessor {
     private static ArrayList<RMsgObject> buildTXedResendList(RMsgObject mMessage, int numberOf, Long forLast, Boolean forAll, Boolean positionsOnly) {
 
         //Get list of messages to send
-        int listCount = RMsgRxList.getLength();
+        int listCount = Main.mainui.msgDisplayList.getLength();
         ArrayList<RMsgObject> resendList = new ArrayList<RMsgObject>();
         RMsgObject recMessage;
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
@@ -1131,7 +1131,7 @@ public class RMsgProcessor {
         Boolean goodToResend;
         for (int i = listCount - 2; i >= 0; i--) {//Skip just received qtc? message
             goodToResend = false;
-            recMessage = RMsgRxList.getItem(i);
+            recMessage = Main.mainui.msgDisplayList.getItemMessage(i);
             //      Must be a received message
             if (matchThisCallWith(mMessage.from, recMessage.from, false)
                     && recMessage.sms.startsWith("*qtc?")) {
@@ -1340,12 +1340,12 @@ public class RMsgProcessor {
     }
 
     //Is the string representative of a cellular number
-    private static boolean isCellular(String destination) {
+    public static boolean isCellular(String destination) {
 
         return destination.matches("^([\\w-]+=)?\\+?\\d{7,16}"); //"^\\+?\\d{8,16}"
     }
 
-    private static String convertNumberToE164(String phoneNumber) {
+    public static String convertNumberToE164(String phoneNumber) {
         String resultNum = phoneNumber.replaceAll(" ", "");
         if (resultNum.startsWith("+")) {
             //Already formatted, return as-is with spaces removed
@@ -1390,7 +1390,7 @@ public class RMsgProcessor {
             //Check if this is a duplicate (E.g. We received the message direct and now via a relay)
             if (!mMessage.relay.equals("") && !mMessage.timeId.equals("")) {
                 //Relayed and with timeId, check if it is a duplicate
-                if (RMsgRxList.isDuplicate(mMessage)) {
+                if (Main.mainui.msgDisplayList.isDuplicate(mMessage)) {
                     saveAndDisplay = false;
                 }
             }
@@ -1429,7 +1429,7 @@ public class RMsgProcessor {
                         //Add to listadapter
                         //final RMsgObject finalMessage = mMessage;
                         //tbf announce and display new message
-                        RMsgRxList.addMessageToList(mMessage);
+                        Main.mainui.msgDisplayList.addNewItem(mMessage, false); //Not my own
                         Main.log(mMessage.formatForList(false));
                         /*
                         RadioMSG.myInstance.runOnUiThread(new Runnable() {

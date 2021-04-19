@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -106,6 +107,7 @@ public class Modem implements Runnable {
     private Socket sock = null;
     private boolean fldigiRunning = false;
     private boolean cantLaunchFldigi = false;
+    public RMsgObject txMessage = null;
 //   
 
     //RadioMsg stuff
@@ -913,6 +915,8 @@ public class Modem implements Runnable {
                         }
                         //Reset TxRSID as it is OFF by default and needs to be enabled when required
                         Main.q.send_txrsid_command("OFF");
+                        //Save Radio  Message in Sent Box
+                        saveSentRadioMSg();
                         break;
                     case 31:
                         WriteToMonitor("<US>");
@@ -1166,6 +1170,88 @@ public class Modem implements Runnable {
         }
     }
 
+    private void saveSentRadioMSg() {
+        //Save message into Sent folder if tx is not aborted and is not selcall
+        if (txMessage != null  && !txMessage.rxMode.equals("CCIR493")) {
+            Calendar c1 = Calendar.getInstance(TimeZone.getDefault());
+            //Adjust time so that is is accurate if using GPS time
+            //Not on laptops
+            //c1.add(Calendar.SECOND, RadioMSG.DeviceToGPSTimeCorrection);
+            String sentFileNameString = String.format(Locale.US, "%04d", c1.get(Calendar.YEAR)) + "-"
+                    + String.format(Locale.US, "%02d", c1.get(Calendar.MONTH) + 1) + "-"
+                    + String.format(Locale.US, "%02d", c1.get(Calendar.DAY_OF_MONTH)) + "_"
+                    + String.format(Locale.US, "%02d%02d%02d", c1.get(Calendar.HOUR_OF_DAY),
+                            c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND)) + ".txt";
+            //Save the text part of the message
+            String sentFolderPath = Main.HomePath
+                    + Main.Dirprefix + Main.DirSent + Main.Separator;
+            txMessage.fileName = sentFileNameString;
+            File msgSentFile = new File(sentFolderPath + sentFileNameString);
+            if (msgSentFile.exists()) {
+                msgSentFile.delete();
+            }
+            try {
+                FileWriter sentFile = null;
+                sentFile = new FileWriter(msgSentFile, true);
+                String stringToSave = txMessage.formatForStorage(false);
+                sentFile.write(stringToSave);
+                sentFile.close();
+            } catch (IOException e) {
+                //RadioMSG.middleToastText("Error Saving Message in Sent Folder " + e.toString());
+            }
+            /* Not yet on Laptops
+            //Save the binary part of the message if any
+            if (myMessage.picture != null) {
+                try {
+                    //In any case, save the image file for further usage if required
+                    //fileName = RMsgUtil.dateTimeStamp() + ".png";
+                    String sentPicFileNameString = sentFileNameString.replace(".txt", ".png");
+                    String ImageFilePath = RMsgProcessor.HomePath + RMsgProcessor.Dirprefix + RMsgProcessor.DirImages
+                            + RMsgProcessor.Separator;
+                    File dest = new File(ImageFilePath + sentPicFileNameString);
+                    FileOutputStream out = new FileOutputStream(dest);
+                    myMessage.picture.compress(Bitmap.CompressFormat.PNG, 100, out);
+                    out.flush();
+                    out.close();
+                    //Make it available in the System Picture Gallery
+                    ContentValues values = new ContentValues();
+                    values.put(Images.Media.TITLE, sentPicFileNameString);
+                    values.put(Images.Media.DATE_TAKEN, System.currentTimeMillis());
+                    values.put(Images.ImageColumns.BUCKET_ID, dest.toString().toLowerCase(Locale.US).hashCode());
+                    values.put(Images.ImageColumns.BUCKET_DISPLAY_NAME, dest.getName().toLowerCase(Locale.US));
+                    values.put("_data", dest.getAbsolutePath());
+                    values.put(Images.Media.DESCRIPTION, "RadioMsg Image");
+                    ContentResolver cr = RadioMSG.myContext.getContentResolver();
+                    cr.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+                } catch (Exception e) {
+                    loggingclass.writelog("Exception Error in 'txData' " + e.getMessage(), null, true);
+                }
+            }
+            */
+            //Set the earliest time to transmit again, after we have heard all the acks (maxAcks)
+            //Not yet 
+            //nextTimeToTx = waitUntilAcksHeard();
+            //Are we displaying the list of Sent Messages?
+            //int whichFolders = config.getPreferenceI("WHICHFOLDERS", 3);
+            int whichFolders = 3;
+            if (whichFolders == 2 || whichFolders == 3) {
+                //Add to Display list
+                final RMsgObject txFinalMessage = RMsgObject.extractMsgObjectFromFile(Main.DirSent, sentFileNameString, false); //Text part only
+                //RadioMSG.myInstance.runOnUiThread(new Runnable() {
+                //    public void run() {
+                //        RadioMSG.msgDisplayList.addNewItem(txFinalMessage, true); //Is my own message
+                        //VK2ETA test debug changing filename of received SMS
+                        //RadioMSG.msgDisplayList.notifyDataSetChanged();
+                        //update the list if we are on that screen
+                //        RadioMSG.mHandler.post(RadioMSG.updateList);
+                //    }
+                //});
+                //Moved in ui thread, just above
+                //RadioMSG.mHandler.post(RadioMSG.updateList);
+            }
+        }
+    }
+   
     private modemmodeenum checkmode(char c) {
         modemmodeenum mymode = modemmodeenum.CTSTIA;
 

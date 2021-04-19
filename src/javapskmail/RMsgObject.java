@@ -5,12 +5,6 @@
  */
 package javapskmail;
 
-//import android.content.Intent;
-//import android.graphics.Bitmap;
-//import android.graphics.BitmapFactory;
-//import android.location.Location;
-//import android.net.Uri;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.text.DecimalFormat;
@@ -430,7 +424,7 @@ public class RMsgObject {
     //Takes a message object and returns a formatted string rebuilt with matching received CRC
     public String formatForRx(boolean withAccessPassword) {
 
-        String txBuffer = createBufferNoCRC(false); //No conversion to lowercase
+        String txBuffer = createBufferNoCRC(false, false); //No conversion to lowercase, not for storage
 
         //Add enclosing new lines and crc
         String accessPassword = Main.accessPassword;
@@ -445,7 +439,7 @@ public class RMsgObject {
     //Takes a message object and returns a formatted string ready for Txing via Radio Modems
     public String formatForTx(boolean allCharsToLowerCase) {
 
-        String txBuffer = createBufferNoCRC(allCharsToLowerCase);
+        String txBuffer = createBufferNoCRC(allCharsToLowerCase, false); //Not for storage
 
         //Add enclosing new lines and crc
         String chksumString = RMsgCheckSum.Crc16(txBuffer); ///Not yet Txing + RadioMSG.selectedViaPassword);
@@ -455,9 +449,20 @@ public class RMsgObject {
     }
 
 
+    //Takes a message object and returns a formatted string ready for Saving to file, including additional information
+    public String formatForStorage(boolean allCharsToLowerCase) {
+
+        String txBuffer = createBufferNoCRC(allCharsToLowerCase, true); //For storage (include password and mode)
+        //Build the checksum WITHOUT password
+        String chksumString = RMsgCheckSum.Crc16(txBuffer);
+        txBuffer = txBuffer + chksumString + Character.toString((char)4);
+
+        return txBuffer;
+    }
+
 
     //Takes a message object and returns a formatted string ready for Txing via Radio Modems
-    public String createBufferNoCRC(boolean allCharsToLowerCase) {
+    public String createBufferNoCRC(boolean allCharsToLowerCase, boolean forStorage) {
 
         String txBuffer;
 
@@ -765,16 +770,14 @@ public class RMsgObject {
     public  final static int SENTONLY = 2;
     public  final static int INOUTBOXCOMBINED = 3;
 
-    
+ 
     // Loads the list of Received messages smsview
-    public static ArrayList<RMsgObject> loadMsgObjectListFromFolders(int whichFolders, int sortMethod)
-    {
+    public static ArrayList<RMsgDisplayItem> loadFileListFromFolders(int whichFolders, int sortMethod) {
         File[] filesInbox = null;
         File[] filesSent = null;
-        ArrayList<RMsgObject> msgObjectList = new ArrayList<RMsgObject>();
+        ArrayList<RMsgDisplayItem> displayList = new ArrayList<RMsgDisplayItem>();
 
-        try
-        {
+        try {
             //Inbox first
             if (whichFolders == 1 || whichFolders == 3) {
                 // Get the list of files in the designated folder
@@ -782,8 +785,7 @@ public class RMsgObject {
                         + Main.DirInbox);
                 filesInbox = dir.listFiles();
                 FileFilter fileFilter = new FileFilter() {
-                    public boolean accept(File file)
-                    {
+                    public boolean accept(File file) {
                         return file.isFile();
                     }
                 };
@@ -797,8 +799,7 @@ public class RMsgObject {
                         + Main.DirSent);
                 filesSent = dir.listFiles();
                 FileFilter fileFilter = new FileFilter() {
-                    public boolean accept(File file)
-                    {
+                    public boolean accept(File file) {
                         return file.isFile();
                     }
                 };
@@ -807,15 +808,15 @@ public class RMsgObject {
             }
             //Combine both in any case
             int pos = 0;
-            File[] files = new File[(filesInbox != null? filesInbox.length: 0) + (filesSent != null? filesSent.length: 0)];
+            File[] files = new File[(filesInbox != null ? filesInbox.length : 0) + (filesSent != null ? filesSent.length : 0)];
             if (filesInbox != null) {
-                for (int i=0; i<filesInbox.length; i++) {
+                for (int i = 0; i < filesInbox.length; i++) {
                     files[pos] = filesInbox[i];
                     pos++;
                 }
             }
             if (filesSent != null) {
-                for (int i=0; i<filesSent.length; i++) {
+                for (int i = 0; i < filesSent.length; i++) {
                     files[pos] = filesSent[i];
                     pos++;
                 }
@@ -824,10 +825,10 @@ public class RMsgObject {
             if (sortMethod == 1 || sortMethod == 3) {//Sort by name, ignoring case
                 Arrays.sort(files, new Comparator<File>() {
                     public int compare(File fileA, File fileB) {
-                        if(fileA != null && fileB != null) {
+                        if (fileA != null && fileB != null) {
                             //Just in case we have directories
-                            if(fileB.isDirectory() && (!fileA.isDirectory())) return 1;
-                            if(fileA.isDirectory() && (!fileB.isDirectory())) return -1;
+                            if (fileB.isDirectory() && (!fileA.isDirectory())) return 1;
+                            if (fileA.isDirectory() && (!fileB.isDirectory())) return -1;
                             return fileA.getName().toLowerCase(Locale.US).
                                     compareTo(fileB.getName().toLowerCase(Locale.US));
                         }
@@ -837,12 +838,12 @@ public class RMsgObject {
             } else { //sort by date, reversed
                 Arrays.sort(files, new Comparator<File>() {
                     public int compare(File fileA, File fileB) {
-                        if(fileA != null && fileB != null) {
+                        if (fileA != null && fileB != null) {
                             //Just in case we have directories
-                            if(fileB.isDirectory() && (!fileA.isDirectory())) return +1;
-                            if(fileA.isDirectory() && (!fileB.isDirectory())) return -1;
+                            if (fileB.isDirectory() && (!fileA.isDirectory())) return +1;
+                            if (fileA.isDirectory() && (!fileB.isDirectory())) return -1;
                             if (fileA.lastModified() == fileB.lastModified()) return 0;
-                            return (fileA.lastModified() > fileB.lastModified()? -1: +1);
+                            return (fileA.lastModified() > fileB.lastModified() ? -1 : +1);
                         }
                         return 0;
                     }
@@ -851,26 +852,26 @@ public class RMsgObject {
 
             String sentDirPath = Main.HomePath + Main.Dirprefix + Main.DirSent;
             RMsgObject mMessage;
-            for (int i = 0; i < files.length; i++)
-            {
+            for (int i = 0; i < files.length; i++) {
                 //Iterate through all the files to extract the data for display
                 boolean fromSentFolder = files[i].getAbsolutePath().contains(sentDirPath);
                 //Choose between Sent and Inbox folders
                 String msgFolder = fromSentFolder ? Main.DirSent : Main.DirInbox;
                 mMessage = extractMsgObjectFromFile(msgFolder, files[i].getName(), false);//Text part only
-                //Check this below displayItem mDisplayItem = new displayItem(mMessage, 0f, 0f, false, fromSentFolder);
-                //String mDisplayItem = mMessage.formatForList(fromSentFolder);
-                msgObjectList.add(mMessage);
+                RMsgDisplayItem mDisplayItem = new RMsgDisplayItem(mMessage, 0f, 0f, false, fromSentFolder);
+                //mDisplayItem.mMessage = mMessage;
+                //Check if from Sent folder
+                //if (fromSentFolder) {
+                //    mDisplayItem.myOwn = true;
+                //}
+                displayList.add(mDisplayItem);
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             //loggingclass.writelog("Error when extracting Inbox or Sent Items to list." + "\nDetails: ", e, true);
         }
 
-        return msgObjectList;
+        return displayList;
     }
-
 
 
     
@@ -902,7 +903,7 @@ public class RMsgObject {
             if (whichFolders == 2 || whichFolders == 3) {
                 // Get the list of files in the designated folder
                 File dir = new File(Main.HomePath + Main.Dirprefix
-                        + "RadioMsgSentbox");
+                        + Main.DirSent);
                 filesSent = dir.listFiles();
                 FileFilter fileFilter = new FileFilter() {
                     public boolean accept(File file)

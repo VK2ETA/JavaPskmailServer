@@ -107,6 +107,26 @@ public class mainpskmailui extends javax.swing.JFrame {
     MessageOutViewTableModel outboxmodel;
     MessageHeaderViewTableModel headermodel;
 
+    //private CheckBox checkbox = null;
+    static final String[] opModes = new String[]{"HF-Clubs", "HF-Poor", "HF-Good", "HF-Fast", "UHF-Poor", "UHF-Good", "UHF-Fast"};
+    static final String[] defaultModes = new String[]{"CCIR476", "OLIVIA_8_500", "OLIVIA_8_1000", "OLIVIA_8_2000", "MFSK32", "MFSK64", "MFSK128"};
+    //Keep a reference to the spinner so that we can change its colour
+    //static private Spinner toDropdown = null;
+    static public boolean sendAliasAndDetails = false;
+    //To field spinner selection
+    public static String selectedTo = "*";
+    public static String selectedToAlias = ""; //Aliases for sms or email destinations
+    public static String selectedVia = "";
+    public static String selectedViaPassword = ""; //For relays with password required
+    public static String[] toArray; //Stores array of To stations/email addresses/Cellular numbers
+    public static String[] toAliasArray; //Stores array of To stations' aliases if any in the same order as toArray
+    public static String[] viaArray; //Stores array of relay (via) stations
+    public static String[] viaPasswordArray; //Stores array of To stations' passwords if any in the same order as viaArray
+
+    //Resend request radio buttons values
+    private static String howManyToResend = "1";
+    private static String whatToResend = "";
+
     // Enums for email grid state
     private enum grid {
         IN, OUT, HEADERS, SENT
@@ -119,6 +139,23 @@ public class mainpskmailui extends javax.swing.JFrame {
 
     //Date object that holds the time of the latest gps fix
     Date gpsfixlatest;
+
+    //Radio messages display list
+    public RMsgDisplayList msgDisplayList;
+    public boolean updatingMsgListAdapter = false;
+
+    
+    
+    void buildDisplayList() {
+       //Collect all stored messages for display
+        //Prevent updates by GPS while (re-)building the list
+        updatingMsgListAdapter = true;
+        // Initialize the message array adapter and load Received Messages
+        //int whichFolders = config.getPreferenceI("WHICHFOLDERS", 3);
+        msgDisplayList = new RMsgDisplayList(RMsgObject.loadFileListFromFolders(RMsgObject.INOUTBOXCOMBINED,
+                RMsgObject.SORTBYNAME));
+        updatingMsgListAdapter = false;
+    }
 
     /**
      * Creates new form mainpskmailui
@@ -291,7 +328,9 @@ public class mainpskmailui extends javax.swing.JFrame {
         }
         
         //Load Radio Messages from the list into the Gui tab
-        loadRadioMsg(0);
+        //Build the list of inbox and/or outbox messages to display
+        buildDisplayList();
+        loadRadioMsg();
 
 // timer, 1 sec tick
         u = new javax.swing.Timer(1000, new ActionListener() {
@@ -1846,7 +1885,7 @@ public class mainpskmailui extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Nummer", "Från", "Ämne", "Storlek"
+                "Number", "Messages", "Subject", "Size"
             }
         ) {
             Class[] types = new Class [] {
@@ -2962,14 +3001,14 @@ public class mainpskmailui extends javax.swing.JFrame {
 
                     },
                     new String [] {
-                        "Messages"
+                        "", "Message"
                     }
                 ) {
                     Class[] types = new Class [] {
-                        java.lang.String.class
+                        java.lang.String.class, java.lang.Object.class
                     };
                     boolean[] canEdit = new boolean [] {
-                        false
+                        false, false
                     };
 
                     public Class getColumnClass(int columnIndex) {
@@ -2981,7 +3020,6 @@ public class mainpskmailui extends javax.swing.JFrame {
                     }
                 });
                 tblRadioMsgs.setAlignmentX(0.0F);
-                tblRadioMsgs.setRowSorter(null);
                 tblRadioMsgs.setSelectionBackground(new java.awt.Color(150, 150, 150));
                 tblRadioMsgs.setShowVerticalLines(false);
                 tblRadioMsgs.getTableHeader().setReorderingAllowed(false);
@@ -2998,9 +3036,13 @@ public class mainpskmailui extends javax.swing.JFrame {
                 });
                 scrRadioMsgUpDown.setViewportView(tblRadioMsgs);
                 if (tblRadioMsgs.getColumnModel().getColumnCount() > 0) {
-                    tblRadioMsgs.getColumnModel().getColumn(0).setMinWidth(80);
-                    tblRadioMsgs.getColumnModel().getColumn(0).setPreferredWidth(80);
+                    tblRadioMsgs.getColumnModel().getColumn(0).setMinWidth(0);
+                    tblRadioMsgs.getColumnModel().getColumn(0).setPreferredWidth(0);
+                    tblRadioMsgs.getColumnModel().getColumn(0).setMaxWidth(60);
                     tblRadioMsgs.getColumnModel().getColumn(0).setHeaderValue(bundle.getString("mainpskmailui.tblInbox.columnModel.title1")); // NOI18N
+                    tblRadioMsgs.getColumnModel().getColumn(1).setMinWidth(80);
+                    tblRadioMsgs.getColumnModel().getColumn(1).setPreferredWidth(80);
+                    tblRadioMsgs.getColumnModel().getColumn(1).setHeaderValue(mainpskmailui.getString("mainpskmailui.tblRadioMsgs.columnModel.title1")); // NOI18N
                 }
 
                 tabRadioMsg.add(scrRadioMsgUpDown);
@@ -7828,19 +7870,24 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     }
     
     //Load the GUI table in the Radio Msg tab with the list of messages
-    private void loadRadioMsg(int whichFolder) {
-        int listSize = RMsgRxList.getLength();
+    private void loadRadioMsg() {
+        int listSize = msgDisplayList.getLength();
         DefaultTableModel radioMSgTblModel;
         radioMSgTblModel = new DefaultTableModel();
         tblRadioMsgs.setModel(radioMSgTblModel);
         radioMSgTblModel.addColumn("Message");
         tblRadioMsgs.getColumnModel().getColumn(0).setCellRenderer( new RMsgTableRenderer() );
+        RMsgDisplayItem mDisplayItem;
+        //String mMessageStr;
         for (int i=0; i<listSize; i++) {
-            RMsgObject mMessage = RMsgRxList.getItem(i);
-            String mMessageStr = mMessage.formatForList(false);
-            radioMSgTblModel.addRow(new Object[]{mMessageStr});
+            mDisplayItem = msgDisplayList.getItem(i);
+            //mMessageStr = mMessage.formatForList(false);
+            //Load message object directly
+            //radioMSgTblModel.addRow(new Object[]{mMessageStr});
+            radioMSgTblModel.addRow(new Object[]{mDisplayItem});
         }
     }
+    
 
     /**
      * @param args the command line arguments
