@@ -17,6 +17,7 @@
 package javapskmail;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -141,6 +142,7 @@ public class mainpskmailui extends javax.swing.JFrame {
     Date gpsfixlatest;
 
     //Radio messages display list
+    DefaultTableModel mRadioMSgTblModel;
     public RMsgDisplayList msgDisplayList;
     public boolean updatingMsgListAdapter = false;
 
@@ -2991,36 +2993,30 @@ public class mainpskmailui extends javax.swing.JFrame {
 
                 tabMain.addTab(bundle.getString("mainpskmailui.tabRigctl.TabConstraints.tabTitle"), tabRigctl); // NOI18N
 
-                scrRadioMsgUpDown.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+                tabRadioMsg.setLayout(new java.awt.BorderLayout());
+
                 scrRadioMsgUpDown.setPreferredSize(new java.awt.Dimension(1000, 500));
 
-                tblRadioMsgs.setAutoCreateRowSorter(true);
-                tblRadioMsgs.setBackground(new java.awt.Color(255, 255, 230));
+                tblRadioMsgs.setBackground(new java.awt.Color(224, 251, 224));
                 tblRadioMsgs.setModel(new javax.swing.table.DefaultTableModel(
                     new Object [][] {
 
                     },
                     new String [] {
-                        "", "Message"
+                        "Message"
                     }
                 ) {
-                    Class[] types = new Class [] {
-                        java.lang.String.class, java.lang.Object.class
-                    };
                     boolean[] canEdit = new boolean [] {
-                        false, false
+                        false
                     };
-
-                    public Class getColumnClass(int columnIndex) {
-                        return types [columnIndex];
-                    }
 
                     public boolean isCellEditable(int rowIndex, int columnIndex) {
                         return canEdit [columnIndex];
                     }
                 });
-                tblRadioMsgs.setAlignmentX(0.0F);
+                tblRadioMsgs.setMinimumSize(new java.awt.Dimension(0, 0));
                 tblRadioMsgs.setSelectionBackground(new java.awt.Color(150, 150, 150));
+                tblRadioMsgs.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
                 tblRadioMsgs.setShowVerticalLines(false);
                 tblRadioMsgs.getTableHeader().setReorderingAllowed(false);
                 tblRadioMsgs.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -3036,16 +3032,12 @@ public class mainpskmailui extends javax.swing.JFrame {
                 });
                 scrRadioMsgUpDown.setViewportView(tblRadioMsgs);
                 if (tblRadioMsgs.getColumnModel().getColumnCount() > 0) {
-                    tblRadioMsgs.getColumnModel().getColumn(0).setMinWidth(0);
-                    tblRadioMsgs.getColumnModel().getColumn(0).setPreferredWidth(0);
-                    tblRadioMsgs.getColumnModel().getColumn(0).setMaxWidth(60);
-                    tblRadioMsgs.getColumnModel().getColumn(0).setHeaderValue(bundle.getString("mainpskmailui.tblInbox.columnModel.title1")); // NOI18N
-                    tblRadioMsgs.getColumnModel().getColumn(1).setMinWidth(80);
-                    tblRadioMsgs.getColumnModel().getColumn(1).setPreferredWidth(80);
-                    tblRadioMsgs.getColumnModel().getColumn(1).setHeaderValue(mainpskmailui.getString("mainpskmailui.tblRadioMsgs.columnModel.title1")); // NOI18N
+                    tblRadioMsgs.getColumnModel().getColumn(0).setMinWidth(80);
+                    tblRadioMsgs.getColumnModel().getColumn(0).setPreferredWidth(80);
+                    tblRadioMsgs.getColumnModel().getColumn(0).setHeaderValue(mainpskmailui.getString("mainpskmailui.tblRadioMsgs.columnModel.title1")); // NOI18N
                 }
 
-                tabRadioMsg.add(scrRadioMsgUpDown);
+                tabRadioMsg.add(scrRadioMsgUpDown, java.awt.BorderLayout.CENTER);
 
                 tabMain.addTab(mainpskmailui.getString("mainpskmailui.tabRadioMsg.TabConstraints.tabTitle"), tabRadioMsg); // NOI18N
 
@@ -7382,15 +7374,41 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     }//GEN-LAST:event_APRS_ISActionPerformed
 
     private void tblRadioMsgsMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblRadioMsgsMousePressed
-        // TODO add your handling code here:
+        // Where did this take place?
+        JTable source = (JTable) evt.getSource();
+        int nrow = source.rowAtPoint(evt.getPoint());
+        int ncolumn = source.columnAtPoint(evt.getPoint());
+        if (!source.isRowSelected(nrow)) {
+            source.changeSelection(nrow, ncolumn, false, false);
+        }
     }//GEN-LAST:event_tblRadioMsgsMousePressed
 
     private void tblRadioMsgsMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblRadioMsgsMouseReleased
         // TODO add your handling code here:
+        //this.tblInboxMousePressed(evt);
     }//GEN-LAST:event_tblRadioMsgsMouseReleased
 
     private void tblRadioMsgsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblRadioMsgsMouseClicked
         // TODO add your handling code here:
+        JTable source = (JTable) evt.getSource();
+        int nrow = source.rowAtPoint(evt.getPoint());
+        int ncolumn = source.columnAtPoint(evt.getPoint());
+        int clickCount = evt.getClickCount();
+        if (clickCount == 1 && source.getSelectedRow() != -1) {
+            if (!source.isRowSelected(nrow)) {
+                source.changeSelection(nrow, ncolumn, false, false);
+            }
+        }
+        if (clickCount == 2 && source.getSelectedRow() != -1) {
+            if (!source.isRowSelected(nrow)) {
+                source.changeSelection(nrow, ncolumn, false, false);
+            }
+            RMsgDisplayItem myDisplayItem = (RMsgDisplayItem) source.getModel().getValueAt(nrow, ncolumn);
+            RMsgMessageViewer myRMsgViewer = new RMsgMessageViewer(myDisplayItem);
+            // Center screen
+            myRMsgViewer.setLocationRelativeTo(null);
+            myRMsgViewer.setVisible(true);
+        }
     }//GEN-LAST:event_tblRadioMsgsMouseClicked
 
     /**
@@ -7872,19 +7890,16 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     //Load the GUI table in the Radio Msg tab with the list of messages
     private void loadRadioMsg() {
         int listSize = msgDisplayList.getLength();
-        DefaultTableModel radioMSgTblModel;
-        radioMSgTblModel = new DefaultTableModel();
-        tblRadioMsgs.setModel(radioMSgTblModel);
-        radioMSgTblModel.addColumn("Message");
-        tblRadioMsgs.getColumnModel().getColumn(0).setCellRenderer( new RMsgTableRenderer() );
+        mRadioMSgTblModel = new RMsgTableModel();
+        tblRadioMsgs.setModel(mRadioMSgTblModel);
+        mRadioMSgTblModel.addColumn("Message");
+        tblRadioMsgs.getColumnModel().getColumn(0).setCellRenderer(new RMsgTableRenderer());
+        TableColumn mycol = tblRadioMsgs.getColumnModel().getColumn(0);
         RMsgDisplayItem mDisplayItem;
         //String mMessageStr;
         for (int i=0; i<listSize; i++) {
             mDisplayItem = msgDisplayList.getItem(i);
-            //mMessageStr = mMessage.formatForList(false);
-            //Load message object directly
-            //radioMSgTblModel.addRow(new Object[]{mMessageStr});
-            radioMSgTblModel.addRow(new Object[]{mDisplayItem});
+            mRadioMSgTblModel.addRow(new Object[]{mDisplayItem});
         }
     }
     

@@ -5,6 +5,7 @@
  */
 package javapskmail;
 
+import java.awt.Color;
 import java.awt.Component;
 import javax.swing.BorderFactory;
 import javax.swing.JTable;
@@ -25,22 +26,33 @@ public class RMsgTableRenderer extends JTextArea implements TableCellRenderer
         setWrapStyleWord(true);
     }
 
-    Border paddingMyOwn = BorderFactory.createEmptyBorder(0, 400, 0, 0);
-    Border paddingReceived = BorderFactory.createEmptyBorder(0, 200, 0, 0);
+    Border paddingSent = BorderFactory.createEmptyBorder(0, 150, 0, 0);
+    Border paddingReceived = BorderFactory.createEmptyBorder(0, 0, 0, 0);
+    Color badCrcColor = new Color(255, 116, 72);
     
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
     {
-        RMsgDisplayItem mItem = (RMsgDisplayItem)value;
-        setText( (mItem == null) ? "" : mItem.mMessage.formatForList(false));//No tracking for now
-        setSize(table.getColumnModel().getColumn(column).getWidth(), table.getRowHeight(row));
-        //  Recalculate the preferred height now that the text and renderer width have been set.
-        int preferredHeight = getPreferredSize().height;
-        if (table.getRowHeight(row) != preferredHeight)
-        {
-            table.setRowHeight(row, preferredHeight);
+        if (value != null) {
+            RMsgDisplayItem mItem = (RMsgDisplayItem) value;
+            setText((mItem == null) ? "" : mItem.mMessage.formatForList(false));//No tracking for now
+            setSize(table.getColumnModel().getColumn(column).getWidth(), table.getRowHeight(row));
+            //  Recalculate the preferred height now that the text and renderer width have been set.
+            int preferredHeight = getPreferredSize().height;
+            if (table.getRowHeight(row) != preferredHeight) {
+                table.setRowHeight(row, preferredHeight);
+            }
+            setBorder(mItem.myOwn ? paddingSent : paddingReceived);
+            if (isSelected) {
+                this.setBackground(table.getSelectionBackground());
+            } else {
+                if (mItem.mMessage.crcValid || mItem.mMessage.crcValidWithPW) {
+                    this.setBackground(table.getBackground());
+                } else {
+                    this.setBackground(badCrcColor);
+                }
+            }
         }
-        setBorder(mItem.myOwn ? paddingMyOwn : paddingReceived);
         return this;
     }
 }

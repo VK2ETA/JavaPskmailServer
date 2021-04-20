@@ -1431,6 +1431,9 @@ public class RMsgProcessor {
                         //tbf announce and display new message
                         Main.mainui.msgDisplayList.addNewItem(mMessage, false); //Not my own
                         Main.log(mMessage.formatForList(false));
+                        //Update displayed jtable
+                        RMsgDisplayItem mDisplayItem = new RMsgDisplayItem(mMessage, 0.0f, 0.0f, false, false);
+                        Main.mainui.mRadioMSgTblModel.addRow(new Object[]{mDisplayItem});
                         /*
                         RadioMSG.myInstance.runOnUiThread(new Runnable() {
                             public void run() {
