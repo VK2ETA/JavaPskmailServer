@@ -282,9 +282,7 @@ public class arq {
                 } else {
                     latstring = Main.GPSD_latitude;
                     lonstring = Main.GPSD_longitude;
-
                 }
-
                 course = Main.gpsdata.getCourse();
                 speed = Main.gpsdata.getSpeed();
             } else {

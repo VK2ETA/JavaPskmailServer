@@ -26,6 +26,8 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -1594,8 +1596,20 @@ public class mainpskmailui extends javax.swing.JFrame {
         freq3 = new javax.swing.JTextField();
         freq4 = new javax.swing.JTextField();
         tabRadioMsg = new javax.swing.JPanel();
-        scrRadioMsgUpDown = new javax.swing.JScrollPane();
+        jSplitPane2 = new javax.swing.JSplitPane();
+        jPanel1 = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
+        jComboRMsgTo = new javax.swing.JComboBox();
+        jPanel2 = new javax.swing.JPanel();
+        jComboRMsgVia = new javax.swing.JComboBox();
+        scrRadioMessages = new javax.swing.JScrollPane();
         tblRadioMsgs = new javax.swing.JTable();
+        pnlRMSgButtons = new javax.swing.JPanel();
+        bRMsgSendSMS = new javax.swing.JButton();
+        bRMsgSendPos = new javax.swing.JButton();
+        bRMsgReqPos = new javax.swing.JButton();
+        bRMsgResendPlease = new javax.swing.JButton();
+        bRMsgDeleteMsg = new javax.swing.JButton();
         pnlStatus = new javax.swing.JPanel();
         snLabel = new javax.swing.JLabel();
         StatusLabel = new javax.swing.JLabel();
@@ -1887,7 +1901,7 @@ public class mainpskmailui extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Number", "Messages", "Subject", "Size"
+                "Number", "", "Subject", "Size"
             }
         ) {
             Class[] types = new Class [] {
@@ -1932,11 +1946,11 @@ public class mainpskmailui extends javax.swing.JFrame {
             tblInbox.getColumnModel().getColumn(2).setMinWidth(100);
             tblInbox.getColumnModel().getColumn(2).setPreferredWidth(200);
             tblInbox.getColumnModel().getColumn(2).setMaxWidth(400);
-            tblInbox.getColumnModel().getColumn(2).setHeaderValue(bundle.getString("mainpskmailui.tblInbox.columnModel.title2_1")); // NOI18N
+            tblInbox.getColumnModel().getColumn(2).setHeaderValue(bundle.getString("mainpskmailui.tblInbox.columnModel.title2")); // NOI18N
             tblInbox.getColumnModel().getColumn(3).setMinWidth(50);
             tblInbox.getColumnModel().getColumn(3).setPreferredWidth(50);
             tblInbox.getColumnModel().getColumn(3).setMaxWidth(150);
-            tblInbox.getColumnModel().getColumn(3).setHeaderValue(bundle.getString("mainpskmailui.tblInbox.columnModel.title3_1")); // NOI18N
+            tblInbox.getColumnModel().getColumn(3).setHeaderValue(bundle.getString("mainpskmailui.tblInbox.columnModel.title3")); // NOI18N
         }
 
         jSplitPane1.setRightComponent(scrEmailRight);
@@ -2995,7 +3009,42 @@ public class mainpskmailui extends javax.swing.JFrame {
 
                 tabRadioMsg.setLayout(new java.awt.BorderLayout());
 
-                scrRadioMsgUpDown.setPreferredSize(new java.awt.Dimension(1000, 500));
+                jSplitPane2.setDividerLocation(200);
+
+                jPanel1.setAlignmentX(0.5F);
+                jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.Y_AXIS));
+
+                jPanel3.setMaximumSize(new java.awt.Dimension(300, 30));
+                jPanel3.setMinimumSize(new java.awt.Dimension(81, 20));
+                jPanel3.setPreferredSize(new java.awt.Dimension(100, 30));
+                jPanel1.add(jPanel3);
+
+                jComboRMsgTo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "To_ALL", "vk2eta-1", "jd", "mee=" }));
+                jComboRMsgTo.setMaximumSize(new java.awt.Dimension(150, 20));
+                jComboRMsgTo.setMinimumSize(new java.awt.Dimension(120, 20));
+                jComboRMsgTo.setName(""); // NOI18N
+                jComboRMsgTo.setPreferredSize(new java.awt.Dimension(150, 20));
+                jComboRMsgTo.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        jComboRMsgToActionPerformed(evt);
+                    }
+                });
+                jPanel1.add(jComboRMsgTo);
+
+                jPanel2.setMaximumSize(new java.awt.Dimension(300, 30));
+                jPanel2.setMinimumSize(new java.awt.Dimension(81, 20));
+                jPanel2.setPreferredSize(new java.awt.Dimension(100, 30));
+                jPanel1.add(jPanel2);
+
+                jComboRMsgVia.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+                jComboRMsgVia.setMaximumSize(new java.awt.Dimension(150, 20));
+                jComboRMsgVia.setMinimumSize(new java.awt.Dimension(120, 20));
+                jComboRMsgVia.setPreferredSize(new java.awt.Dimension(150, 20));
+                jPanel1.add(jComboRMsgVia);
+
+                jSplitPane2.setLeftComponent(jPanel1);
+
+                scrRadioMessages.setPreferredSize(new java.awt.Dimension(1000, 500));
 
                 tblRadioMsgs.setBackground(new java.awt.Color(224, 251, 224));
                 tblRadioMsgs.setModel(new javax.swing.table.DefaultTableModel(
@@ -3014,6 +3063,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                         return canEdit [columnIndex];
                     }
                 });
+                tblRadioMsgs.setMaximumSize(new java.awt.Dimension(3000, 0));
                 tblRadioMsgs.setMinimumSize(new java.awt.Dimension(0, 0));
                 tblRadioMsgs.setSelectionBackground(new java.awt.Color(150, 150, 150));
                 tblRadioMsgs.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
@@ -3030,14 +3080,91 @@ public class mainpskmailui extends javax.swing.JFrame {
                         tblRadioMsgsMouseClicked(evt);
                     }
                 });
-                scrRadioMsgUpDown.setViewportView(tblRadioMsgs);
+                scrRadioMessages.setViewportView(tblRadioMsgs);
                 if (tblRadioMsgs.getColumnModel().getColumnCount() > 0) {
                     tblRadioMsgs.getColumnModel().getColumn(0).setMinWidth(80);
                     tblRadioMsgs.getColumnModel().getColumn(0).setPreferredWidth(80);
                     tblRadioMsgs.getColumnModel().getColumn(0).setHeaderValue(mainpskmailui.getString("mainpskmailui.tblRadioMsgs.columnModel.title1")); // NOI18N
                 }
 
-                tabRadioMsg.add(scrRadioMsgUpDown, java.awt.BorderLayout.CENTER);
+                jSplitPane2.setRightComponent(scrRadioMessages);
+
+                tabRadioMsg.add(jSplitPane2, java.awt.BorderLayout.CENTER);
+
+                pnlRMSgButtons.setMaximumSize(new java.awt.Dimension(32767, 40));
+                pnlRMSgButtons.setMinimumSize(new java.awt.Dimension(0, 30));
+                pnlRMSgButtons.setPreferredSize(new java.awt.Dimension(717, 35));
+                pnlRMSgButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+                bRMsgSendSMS.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+                bRMsgSendSMS.setForeground(new java.awt.Color(0, 102, 51));
+                bRMsgSendSMS.setText(bundle.getString("mainpskmailui.bRMsgSendSMS.text")); // NOI18N
+                bRMsgSendSMS.setToolTipText(bundle.getString("mainpskmailui.bRMsgSendSMS.toolTipText")); // NOI18N
+                bRMsgSendSMS.setMaximumSize(new java.awt.Dimension(110, 25));
+                bRMsgSendSMS.setMinimumSize(new java.awt.Dimension(80, 25));
+                bRMsgSendSMS.setPreferredSize(new java.awt.Dimension(100, 25));
+                bRMsgSendSMS.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        bRMsgSendSMSActionPerformed(evt);
+                    }
+                });
+                pnlRMSgButtons.add(bRMsgSendSMS);
+
+                bRMsgSendPos.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+                bRMsgSendPos.setForeground(new java.awt.Color(0, 102, 51));
+                bRMsgSendPos.setText(bundle.getString("mainpskmailui.bRMsgSendPos.text")); // NOI18N
+                bRMsgSendPos.setMaximumSize(new java.awt.Dimension(110, 27));
+                bRMsgSendPos.setMinimumSize(new java.awt.Dimension(80, 27));
+                bRMsgSendPos.setPreferredSize(new java.awt.Dimension(100, 27));
+                bRMsgSendPos.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        bRMsgSendPosActionPerformed(evt);
+                    }
+                });
+                pnlRMSgButtons.add(bRMsgSendPos);
+
+                bRMsgReqPos.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+                bRMsgReqPos.setForeground(new java.awt.Color(0, 102, 51));
+                bRMsgReqPos.setText(bundle.getString("mainpskmailui.bRMsgReqPos.text")); // NOI18N
+                bRMsgReqPos.setToolTipText(bundle.getString("mainpskmailui.bRMsgReqPos.toolTipText")); // NOI18N
+                bRMsgReqPos.setMaximumSize(new java.awt.Dimension(110, 25));
+                bRMsgReqPos.setMinimumSize(new java.awt.Dimension(80, 25));
+                bRMsgReqPos.setPreferredSize(new java.awt.Dimension(100, 25));
+                bRMsgReqPos.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        bRMsgReqPosActionPerformed(evt);
+                    }
+                });
+                pnlRMSgButtons.add(bRMsgReqPos);
+
+                bRMsgResendPlease.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+                bRMsgResendPlease.setForeground(new java.awt.Color(12, 134, 40));
+                bRMsgResendPlease.setText(bundle.getString("mainpskmailui.bRMsgResendPlease.text")); // NOI18N
+                bRMsgResendPlease.setMaximumSize(new java.awt.Dimension(110, 25));
+                bRMsgResendPlease.setMinimumSize(new java.awt.Dimension(80, 25));
+                bRMsgResendPlease.setPreferredSize(new java.awt.Dimension(100, 25));
+                bRMsgResendPlease.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        bRMsgResendPleaseActionPerformed(evt);
+                    }
+                });
+                pnlRMSgButtons.add(bRMsgResendPlease);
+
+                bRMsgDeleteMsg.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+                bRMsgDeleteMsg.setForeground(new java.awt.Color(0, 102, 51));
+                bRMsgDeleteMsg.setText(bundle.getString("mainpskmailui.bRMsgDeleteMsg.text")); // NOI18N
+                bRMsgDeleteMsg.setToolTipText(bundle.getString("mainpskmailui.bRMsgDeleteMsg.toolTipText")); // NOI18N
+                bRMsgDeleteMsg.setMaximumSize(new java.awt.Dimension(110, 25));
+                bRMsgDeleteMsg.setMinimumSize(new java.awt.Dimension(80, 25));
+                bRMsgDeleteMsg.setPreferredSize(new java.awt.Dimension(100, 25));
+                bRMsgDeleteMsg.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        bRMsgDeleteMsgActionPerformed(evt);
+                    }
+                });
+                pnlRMSgButtons.add(bRMsgDeleteMsg);
+
+                tabRadioMsg.add(pnlRMSgButtons, java.awt.BorderLayout.PAGE_START);
 
                 tabMain.addTab(mainpskmailui.getString("mainpskmailui.tabRadioMsg.TabConstraints.tabTitle"), tabRadioMsg); // NOI18N
 
@@ -3994,38 +4121,43 @@ private void txtMainEntryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
                 Main.TX_Text += (intext + "\n");
                 Main.mainwindow += "\n=>>" + intext + "\n";
             }
-
         }
-
         txtMainEntry.setText("");
     } else {
-        if (intext.startsWith(":")) {
-
-            if (intext.startsWith(":MOTD:")) {
-                Main.Motd = intext.substring(4);
+        //Which tab are we on, RadioMsg tab send radio messages (SMSs), otherwise send Pskmail unproto
+        if (tabMain.getTitleAt(tabMain.getSelectedIndex()).equals("Radio Msg")) {
+            if (!intext.equals("")) {
+                //RMsgTxList.addMessageToList(RadioMSG.selectedTo, RadioMSG.selectedVia, intext,
+                RMsgTxList.addMessageToList(selectedTo, "", intext, false, null, 0, null);
                 txtMainEntry.setText("");
-            } else if (intext.startsWith(":MH")) {
-                int i = 0;
-                Main.mainwindow += "\nServer,lastrx,average\n";
-                for (i = 0; i < 10; i++) {
-                    if (!Main.Servers[i].equals("") & Main.rxdata[i][0] > 0) {
-                        Main.mainwindow += Main.Servers[i] + "," + Main.rxdata[i][0] + "," + Main.getrxdata_avg(i) + "\n";
+            }
+        } else {
+            if (intext.startsWith(":")) {
+
+                if (intext.startsWith(":MOTD:")) {
+                    Main.Motd = intext.substring(4);
+                    txtMainEntry.setText("");
+                } else if (intext.startsWith(":MH")) {
+                    int i = 0;
+                    Main.mainwindow += "\nServer,lastrx,average\n";
+                    for (i = 0; i < 10; i++) {
+                        if (!Main.Servers[i].equals("") & Main.rxdata[i][0] > 0) {
+                            Main.mainwindow += Main.Servers[i] + "," + Main.rxdata[i][0] + "," + Main.getrxdata_avg(i) + "\n";
+                        }
                     }
                 }
-            }
-
-        } else if (intext.contains("@")) {
-            myarq.set_txstatus(txstatus.TXUImessage);
-            myarq.send_uimessage(intext);
-
-        } else {
-            try {
-                myarq.set_txstatus(txstatus.TXaprsmessage);
-                myarq.send_aprsmessage(intext + myarq.getAPRSMessageNumber());
-                Main.mainwindow += " =>>" + intext + "\n";
-                appendMSGWindow(" =>>" + intext + "\n");
-            } catch (InterruptedException ex) {
-                Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
+            } else if (intext.contains("@")) {
+                myarq.set_txstatus(txstatus.TXUImessage);
+                myarq.send_uimessage(intext);
+            } else {
+                try {
+                    myarq.set_txstatus(txstatus.TXaprsmessage);
+                    myarq.send_aprsmessage(intext + myarq.getAPRSMessageNumber());
+                    Main.mainwindow += " =>>" + intext + "\n";
+                    appendMSGWindow(" =>>" + intext + "\n");
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
@@ -7411,6 +7543,72 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         }
     }//GEN-LAST:event_tblRadioMsgsMouseClicked
 
+    private void bRMsgSendSMSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgSendSMSActionPerformed
+        // TODO add your handling code here:
+        String intext = txtMainEntry.getText();
+        if (!intext.equals("")) {
+            //RMsgTxList.addMessageToList(RadioMSG.selectedTo, RadioMSG.selectedVia, intext,
+            RMsgTxList.addMessageToList(selectedTo, "", intext, false, null, 0, null);
+            txtMainEntry.setText("");
+        }
+    }//GEN-LAST:event_bRMsgSendSMSActionPerformed
+
+    private void bRMsgSendPosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgSendPosActionPerformed
+        // TODO add your handling code here:
+        String intext = txtMainEntry.getText();
+        RMsgUtil.sendPosition(intext);
+        txtMainEntry.setText("");
+    }//GEN-LAST:event_bRMsgSendPosActionPerformed
+
+    private void bRMsgReqPosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgReqPosActionPerformed
+        // TODO add your handling code here:
+        if (selectedTo == "*") {
+            //middleToastText("CAN'T Request Positions from \"ALL\"\n\nSelect a single TO destination above");
+        } else if (RMsgProcessor.matchMyCallWith(selectedTo, false)) {
+            //middleToastText("CAN'T Request Positions from \"YOURSELF\"\n\nSelect another TO destination above");
+        } else {
+            RMsgTxList.addMessageToList(selectedTo, selectedVia, "*pos?",
+                    false, null, 0,
+                    null);
+        }
+    }//GEN-LAST:event_bRMsgReqPosActionPerformed
+
+    private void bRMsgResendPleaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgResendPleaseActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_bRMsgResendPleaseActionPerformed
+
+    private void bRMsgDeleteMsgActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgDeleteMsgActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_bRMsgDeleteMsgActionPerformed
+
+    private void jComboRMsgToActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboRMsgToActionPerformed
+        // TODO add your handling code here:
+        String to = jComboRMsgTo.getSelectedItem().toString();
+        int position = jComboRMsgTo.getSelectedIndex();
+        if (to.equals("To_ALL")) {
+            selectedTo = "*";
+            selectedToAlias = ""; //None for ALL
+        } else {
+            //Save matching destination
+            selectedTo = to;
+            /*
+            selectedToAlias = toAliasArray[position];
+            if (sendAliasAndDetails) {
+                //Send full details if they exist
+                if (selectedToAlias.length() > 0) {
+                    //We have an alias for this entry, send the full details "alias=destination"
+                    selectedTo = selectedToAlias;
+                }
+            } else {
+                if (selectedToAlias.length() > 0) {
+                    //We have an alias for this entry, append an "=" to signify it is an alias
+                    selectedTo = to + "=";
+                }
+            }
+            */
+        }
+    }//GEN-LAST:event_jComboRMsgToActionPerformed
+
     /**
      * Simple message dialog with yes and no button
      *
@@ -7901,8 +8099,21 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             mDisplayItem = msgDisplayList.getItem(i);
             mRadioMSgTblModel.addRow(new Object[]{mDisplayItem});
         }
+        //Add auto scroll to last item added
+        addScrollRadioMsgsTable();
     }
     
+    
+    public void addScrollRadioMsgsTable()
+{
+    tblRadioMsgs.addComponentListener(new ComponentAdapter() {
+        public void componentResized(ComponentEvent e) {
+            int lastIndex =tblRadioMsgs.getRowCount() - 1; 
+            tblRadioMsgs.changeSelection(lastIndex, 0,false,false);
+        }
+    });
+    
+}
 
     /**
      * @param args the command line arguments
@@ -7978,6 +8189,11 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JButton bDelete;
     private javax.swing.JButton bNewMail;
     private javax.swing.JButton bQTC;
+    private javax.swing.JButton bRMsgDeleteMsg;
+    private javax.swing.JButton bRMsgReqPos;
+    private javax.swing.JButton bRMsgResendPlease;
+    private javax.swing.JButton bRMsgSendPos;
+    private javax.swing.JButton bRMsgSendSMS;
     private javax.swing.JButton bSummon;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.ButtonGroup buttonGroup3;
@@ -7994,12 +8210,17 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JTextField freq2;
     private javax.swing.JTextField freq3;
     private javax.swing.JTextField freq4;
+    private javax.swing.JComboBox jComboRMsgTo;
+    private javax.swing.JComboBox jComboRMsgVia;
     private javax.swing.JMenuItem jGetIAC;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar3;
     private javax.swing.JMenuItem jMenuQuality;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     public javax.swing.JRadioButtonMenuItem jRadioButtonAccept;
     public javax.swing.JRadioButtonMenuItem jRadioButtonDelete;
     private javax.swing.JRadioButtonMenuItem jRadioButtonMenuDOMEX11;
@@ -8021,6 +8242,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JSplitPane jSplitPane2;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextPane jTextPane2;
     private javax.swing.JLabel labelCurrentFreq;
@@ -8109,6 +8331,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JPanel pnlGPS;
     private javax.swing.JPanel pnlMainEntry;
     private javax.swing.JPanel pnlModemArq;
+    private javax.swing.JPanel pnlRMSgButtons;
     private javax.swing.JPanel pnlStatus;
     private javax.swing.JPanel pnlStatusIndicator;
     private javax.swing.JPanel pnlSummoning;
@@ -8120,7 +8343,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JScrollPane scrEmailLeft;
     private javax.swing.JScrollPane scrEmailRight;
     private javax.swing.JScrollPane scrInMsgs;
-    private javax.swing.JScrollPane scrRadioMsgUpDown;
+    private javax.swing.JScrollPane scrRadioMessages;
     private javax.swing.JTextArea serverlist;
     private javax.swing.JLabel snLabel;
     private javax.swing.JSpinner spnMinute;

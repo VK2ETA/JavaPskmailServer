@@ -268,15 +268,50 @@ public class RMsgUtil {
         return tmp/p;
     }
 
-
+    
+    //Takes the GPS location in priority from a connected GPS (NMEA via 
+    //  serial port OR GPSD) or, if not present, from the preferences
+    private static RMsgLocation getBestPosition() {
+        double myLatitude = 0.0f;
+        double myLongitude = 0.0f;
+        try {
+            String latstring;
+            String lonstring;
+            // Get the GPS position data or the preset data
+            if (Main.gpsdata.getFixStatus()) {
+                if (!Main.HaveGPSD) {
+                    latstring = Main.gpsdata.getLatitude();
+                    lonstring = Main.gpsdata.getLongitude();
+                } else {
+                    latstring = Main.GPSD_latitude;
+                    lonstring = Main.GPSD_longitude;
+                }
+                //course = Main.gpsdata.getCourse();
+                //speed = Main.gpsdata.getSpeed();
+            } else {
+                // Preset data
+                latstring = Main.configuration.getPreference("LATITUDE", "0.0f");
+                lonstring = Main.configuration.getPreference("LONGITUDE", "0.0f");
+            }
+            myLatitude = Double.parseDouble(latstring);
+            myLongitude = Double.parseDouble(lonstring);
+            RMsgLocation myPosition = new RMsgLocation("");
+            myPosition.setLatitude(myLatitude);
+            myPosition.setLongitude(myLongitude);
+            return myPosition;
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
     //Queues a GPS position fix and sends position
     public static void sendPosition(String smsMessage) {
         long positionRequestTime = System.currentTimeMillis();
 
+        RMsgLocation myPosition = getBestPosition();
         //tbf txMessageList.addMessageToList (RadioMSG.selectedTo, RadioMSG.selectedVia, smsMessage,
         RMsgTxList.addMessageToList ("*", "", smsMessage,
-                true, null, positionRequestTime,
+                true, myPosition, positionRequestTime,
                 null);
         //Now request fast periodic updates
         //The cancellation of these requests is done on first receipt of a location fix
@@ -296,16 +331,8 @@ public class RMsgUtil {
         replyMessage.msgHasPosition = true;
         replyMessage.positionRequestTime = positionRequestTime;
         replyMessage.positionAge = 0; //no time delay here
-        double myLatitude = 0.0f;
-        double myLongitude = 0.0f;
-        try {
-            myLatitude = Double.parseDouble(Main.configuration.getPreference("LATITUDE", "0.0f"));
-            myLongitude = Double.parseDouble(Main.configuration.getPreference("LONGITUDE", "0.0f"));
-            replyMessage.position = new RMsgLocation("");
-            replyMessage.position.setLatitude(myLatitude);
-            replyMessage.position.setLongitude(myLongitude);
-        } catch (Exception e) {
-        }
+        replyMessage.position = getBestPosition();
+
         //Queue regardless
         RMsgTxList.addMessageToList(replyMessage);
     }

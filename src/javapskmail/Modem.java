@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import static javapskmail.modemmodeenum.CTSTIA;
 import static javapskmail.modemmodeenum.PSK125RC4;
 import static javapskmail.modemmodeenum.DOMINOEX5;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -1237,21 +1238,20 @@ public class Modem implements Runnable {
             if (whichFolders == 2 || whichFolders == 3) {
                 //Add to Display list
                 final RMsgObject txFinalMessage = RMsgObject.extractMsgObjectFromFile(Main.DirSent, sentFileNameString, false); //Text part only
-                //RadioMSG.myInstance.runOnUiThread(new Runnable() {
-                //    public void run() {
-                //        RadioMSG.msgDisplayList.addNewItem(txFinalMessage, true); //Is my own message
-                        //VK2ETA test debug changing filename of received SMS
-                        //RadioMSG.msgDisplayList.notifyDataSetChanged();
-                        //update the list if we are on that screen
-                //        RadioMSG.mHandler.post(RadioMSG.updateList);
-                //    }
-                //});
-                //Moved in ui thread, just above
-                //RadioMSG.mHandler.post(RadioMSG.updateList);
+                Main.mainui.msgDisplayList.addNewItem(txFinalMessage, true); //Is my own message
+                //VK2ETA test debug changing filename of received SMS
+                //RadioMSG.msgDisplayList.notifyDataSetChanged();
+                final RMsgDisplayItem sentItem = new RMsgDisplayItem(txFinalMessage, 0, 0, false, true); //My own 
+                //Add to displayed table of messages on GUI thread
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        Main.mainui.mRadioMSgTblModel.addRow(new Object[]{sentItem});
+                    }
+                });
             }
         }
     }
-   
+  
     private modemmodeenum checkmode(char c) {
         modemmodeenum mymode = modemmodeenum.CTSTIA;
 

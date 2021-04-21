@@ -409,6 +409,10 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
 
     // Create a reply email
     private void bReplyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bReplyActionPerformed
+        //mDisplayItem
+        String replyString = "Reply to: " + mDisplayItem.mMessage.sms;
+        RMsgTxList.addMessageToList(mDisplayItem.mMessage.from, mDisplayItem.mMessage.relay, replyString,
+            false, null, 0L, null);
         //Main.mainui.ReplyMail(myobject.getFrom(), myobject.getSubject());
     }//GEN-LAST:event_bReplyActionPerformed
 

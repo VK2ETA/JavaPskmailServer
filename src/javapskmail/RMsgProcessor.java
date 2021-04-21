@@ -80,6 +80,7 @@ import com.google.i18n.phonenumbers.Phonemetadata.PhoneNumberDesc;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber.CountryCodeSource;
 import com.google.i18n.phonenumbers.NumberParseException;
+import javax.swing.SwingUtilities;
 
 //import static com.RadioMSG.RadioMSG.msgArrayAdapter;
 /**
@@ -1432,8 +1433,13 @@ public class RMsgProcessor {
                         Main.mainui.msgDisplayList.addNewItem(mMessage, false); //Not my own
                         Main.log(mMessage.formatForList(false));
                         //Update displayed jtable
-                        RMsgDisplayItem mDisplayItem = new RMsgDisplayItem(mMessage, 0.0f, 0.0f, false, false);
-                        Main.mainui.mRadioMSgTblModel.addRow(new Object[]{mDisplayItem});
+                        final RMsgDisplayItem mDisplayItem = new RMsgDisplayItem(mMessage, 0.0f, 0.0f, false, false);
+                        //Add to displayed table of messages on GUI thread
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                Main.mainui.mRadioMSgTblModel.addRow(new Object[]{mDisplayItem});
+                            }
+                        });
                         /*
                         RadioMSG.myInstance.runOnUiThread(new Runnable() {
                             public void run() {
