@@ -838,7 +838,7 @@ public class RMsgProcessor {
         //Get list of messages to send
         int listCount = Main.mainui.msgDisplayList.getLength();
         ArrayList<RMsgObject> resendList = new ArrayList<RMsgObject>();
-        RMsgObject recMessage;
+        RMsgDisplayItem recDisplayItem;
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
         Calendar localCalendar = Calendar.getInstance(TimeZone.getDefault());
         Date dateNow = localCalendar.getTime();
@@ -847,29 +847,29 @@ public class RMsgProcessor {
         Boolean goodToResend;
         for (int i = listCount - 2; i >= 0; i--) {//Skip just received qtc? message
             goodToResend = false;
-            recMessage = Main.mainui.msgDisplayList.getItemMessage(i);
+            recDisplayItem = Main.mainui.msgDisplayList.getItem(i);
             //      Must be a received message
-            if (matchThisCallWith(mMessage.from, recMessage.from, false)
-                    && recMessage.sms.startsWith("*qtc?")) {
+            if (matchThisCallWith(mMessage.from, recDisplayItem.mMessage.from, false)
+                    && recDisplayItem.mMessage.sms.startsWith("*qtc?")) {
                 foundPreviousQtc = true;
             }
-            if ((!recMessage.myOwn && !matchMyCallWith(recMessage.from, false)) //Not my own message
+            if ((!recDisplayItem.myOwn && !matchMyCallWith(recDisplayItem.mMessage.from, false)) //Not my own message
                     //AND for all OR for this requesting callsign
-                    && (forAll || matchThisCallWith(mMessage.from, recMessage.to, true))
+                    && (forAll || matchThisCallWith(mMessage.from, recDisplayItem.mMessage.to, true))
                     //AND not from this requesting callsign
-                    && (!matchThisCallWith(mMessage.from, recMessage.from, false))
+                    && (!matchThisCallWith(mMessage.from, recDisplayItem.mMessage.from, false))
                     //AND be only a position message if requested so
-                    && (!positionsOnly || recMessage.msgHasPosition)
+                    && (!positionsOnly || recDisplayItem.mMessage.msgHasPosition)
                     //AND must not be a command message
-                    && (!recMessage.sms.startsWith("*cmd"))
+                    && (!recDisplayItem.mMessage.sms.startsWith("*cmd"))
                     //AND must not be an already re-sent message
-                    && (!recMessage.sms.startsWith("Re-Sending "))
+                    && (!recDisplayItem.mMessage.sms.startsWith("Re-Sending "))
                     //AND must not be a qtc? request
-                    && (!recMessage.sms.startsWith("*qtc?"))) {
+                    && (!recDisplayItem.mMessage.sms.startsWith("*qtc?"))) {
                 if (forLast > 0L) { //We have a time-based request
                     Date recMsgDate;
                     try {
-                        recMsgDate = formatter.parse(recMessage.fileName.replaceAll(".txt", ""));
+                        recMsgDate = formatter.parse(recDisplayItem.mMessage.fileName.replaceAll(".txt", ""));
                     } catch (ParseException e) {
                         //Dummy date just to prevent failure
                         recMsgDate = dateNow;
@@ -897,7 +897,7 @@ public class RMsgProcessor {
                         break; //Hard stop: enough to send
                     }
                     //Enqueue message for sorting. Get full message with binary data.
-                    RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.DirInbox, recMessage.fileName, true);
+                    RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.DirInbox, recDisplayItem.mMessage.fileName, true);
                     //Coming from this relay station
                     fullMessage.relay = Main.callsignAsServer.trim();
                     //Remove via information to make sure it is not forwarded
@@ -905,7 +905,7 @@ public class RMsgProcessor {
                     //Re-send/relay in the same mode we received in
                     fullMessage.rxMode = mMessage.rxMode;
                     //Add text to specify it was received not relayed
-                    fullMessage.sms = "Re-Sending " + recMessage.fileName.replaceAll(".txt", "")
+                    fullMessage.sms = "Re-Sending " + recDisplayItem.mMessage.fileName.replaceAll(".txt", "")
                             + ": " + fullMessage.sms;
                     //Then send save Message in list for sorting and limiting the number
                     resendList.add(fullMessage);
@@ -1123,7 +1123,7 @@ public class RMsgProcessor {
         //Get list of messages to send
         int listCount = Main.mainui.msgDisplayList.getLength();
         ArrayList<RMsgObject> resendList = new ArrayList<RMsgObject>();
-        RMsgObject recMessage;
+        RMsgDisplayItem recDisplayItem;
         DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
         Calendar localCalendar = Calendar.getInstance(TimeZone.getDefault());
         Date dateNow = localCalendar.getTime();
@@ -1132,27 +1132,27 @@ public class RMsgProcessor {
         Boolean goodToResend;
         for (int i = listCount - 2; i >= 0; i--) {//Skip just received qtc? message
             goodToResend = false;
-            recMessage = Main.mainui.msgDisplayList.getItemMessage(i);
+            recDisplayItem = Main.mainui.msgDisplayList.getItem(i);
             //      Must be a received message
-            if (matchThisCallWith(mMessage.from, recMessage.from, false)
-                    && recMessage.sms.startsWith("*qtc?")) {
+            if (matchThisCallWith(mMessage.from, recDisplayItem.mMessage.from, false)
+                    && recDisplayItem.mMessage.sms.startsWith("*qtc?")) {
                 foundPreviousQtc = true;
             }
-            if (recMessage.myOwn //My own message (a Sent message)
+            if (recDisplayItem.myOwn //My own message (a Sent message)
                     //AND for all OR for this requesting callsign
-                    && (forAll || matchThisCallWith(mMessage.from, recMessage.to, true))
+                    && (forAll || matchThisCallWith(mMessage.from, recDisplayItem.mMessage.to, true))
                     //AND not from this requesting callsign
-                    && (!matchThisCallWith(mMessage.from, recMessage.from, false))
+                    && (!matchThisCallWith(mMessage.from, recDisplayItem.mMessage.from, false))
                     //AND be only a position message if requested so
-                    && (!positionsOnly || recMessage.msgHasPosition)
+                    && (!positionsOnly || recDisplayItem.mMessage.msgHasPosition)
                     //AND must not be a qtc?, command or previously re-sent message
-                    && (!recMessage.sms.startsWith("*qtc?"))
-                    && (!recMessage.sms.startsWith("*cmd"))
-                    && (!recMessage.sms.startsWith("Re-Sending "))) {
+                    && (!recDisplayItem.mMessage.sms.startsWith("*qtc?"))
+                    && (!recDisplayItem.mMessage.sms.startsWith("*cmd"))
+                    && (!recDisplayItem.mMessage.sms.startsWith("Re-Sending "))) {
                 if (forLast > 0L) { //We have a time-based request
                     Date recMsgDate;
                     try {
-                        recMsgDate = formatter.parse(recMessage.fileName.replaceAll(".txt", ""));
+                        recMsgDate = formatter.parse(recDisplayItem.mMessage.fileName.replaceAll(".txt", ""));
                     } catch (ParseException e) {
                         //Dummy date just to prevent failure
                         recMsgDate = dateNow;
@@ -1180,7 +1180,7 @@ public class RMsgProcessor {
                         break; //Hard stop: enough to send
                     }
                     //Enqueue message for sorting. Get full message with binary data.
-                    RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.DirSent, recMessage.fileName, true);
+                    RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.DirSent, recDisplayItem.mMessage.fileName, true);
                     //Coming from this relay station
                     fullMessage.relay = Main.callsignAsServer.trim();
                     //Remove via information to make sure it is not forwarded
@@ -1188,7 +1188,7 @@ public class RMsgProcessor {
                     //Re-send/relay in the same mode we received in
                     fullMessage.rxMode = mMessage.rxMode;
                     //Add text to specify it was received not relayed
-                    fullMessage.sms = "Re-Sending " + recMessage.fileName.replaceAll(".txt", "")
+                    fullMessage.sms = "Re-Sending " + recDisplayItem.mMessage.fileName.replaceAll(".txt", "")
                             + ": " + fullMessage.sms;
                     //Then send save Message in list for sorting and limiting the number
                     resendList.add(fullMessage);
@@ -1552,8 +1552,12 @@ public class RMsgProcessor {
                                     RMsgUtil.replyWithText(mMessage, replyString);
                                 }
                             }
-                        } else if (mMessage.sms.startsWith("*qtc?") & (Main.WantRelayEmails
-                                | Main.WantRelaySMSs | Main.WantRelayOverRadio)) {
+                        } else if (mMessage.sms.startsWith("*qtc?")) {
+                            //Simplified QTC processing:
+                            //By default resends the last of any message (sent directly, heard as relay, email, sms). 
+                            //Filtered by selected relaying flags
+                            //Modifiers: n messages, L = since last QTC, r = force relay of QTC command
+                            
     /*                        //Re-send last message or last X messages/emails/SMSs or in the last minutes/Hours/Days or since last request
                             // Case 1: Request SMS or EMAIL request. Ignore TO, Via = me
                             // Case 2: Request radio relay to another station. Via = me, To = NOT (SMS/Email/To_ALL)
@@ -1663,13 +1667,14 @@ public class RMsgProcessor {
                                     //RMsgUtil.replyWithText(mMessage, "Sorry...Missing Access Password");
                                 } 
                             } */
-                                //QTC message VIA is my call, but TO is not my call OR TO is my call but VIA is blank
-                            if ((matchMyCallWith(mMessage.via, false) && !matchMyCallWith(mMessage.to, false)) ||
+                            //QTC message VIA is my call, but TO is not my call OR TO is my call but VIA is blank
+                            if (matchMyCallWith(mMessage.via, false) ||
                                     (matchMyCallWith(mMessage.to, false) && mMessage.via.equals(""))) {
-                                boolean directRequest = (matchMyCallWith(mMessage.to, false)
-                                        && mMessage.via.equals(""));
+                                //Not used anymore
+                                //boolean directRequest = (matchMyCallWith(mMessage.to, false)
+                                //        && mMessage.via.equals(""));
                                 //Only properly received (and secured) messages
-                                if (messageAuthorized || directRequest) {
+                                if (messageAuthorized) {
                                     RMsgUtil.sendBeeps(true);
                                     //Read request (last X minutes or last N messages). Default is last ONE message if nothing is sent.
                                     int numberOf = 1;
@@ -1713,20 +1718,24 @@ public class RMsgProcessor {
                                     //Blank list
                                     ArrayList<RMsgObject> resendList = new ArrayList();
                                     //What type of qtc did we receive?
-                                    if (!directRequest) {
-                                        //process email request
+                                    //process email request
+                                    if (Main.WantRelayOverRadio) {
                                         resendList = buildNonEmailResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
-                                        //We are repeating existing received messages
-                                        ArrayList<RMsgObject> emailList = new ArrayList();
-                                        if (Main.WantRelayEmails) {
-                                            emailList = buildEmailResendList(mMessage, numberOf, extractedStr.endsWith("f"), forAll);
-                                            resendList.addAll(emailList);
-                                        }
-                                    } else {
-                                        //We are just repeating messages sent directly (no Via), excluding already re-sent ones
-                                        resendList = buildTXedResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
                                     }
-
+                                    //We are repeating existing received messages
+                                    // & (Main.WantRelayEmails | Main.WantRelaySMSs | Main.WantRelayOverRadio)
+                                    ArrayList<RMsgObject> emailList;
+                                    if (Main.WantRelayEmails | Main.WantRelaySMSs) {
+                                        emailList = buildEmailResendList(mMessage, numberOf, extractedStr.endsWith("f"), forAll);
+                                        resendList.addAll(emailList);
+                                    }
+                                    //We are just repeating messages sent directly (no Via), excluding already re-sent ones
+                                    //Do not add if we ask for emails/sms only
+                                    if (!extractedStr.endsWith("f") && !extractedStr.endsWith("e")) {
+                                        ArrayList<RMsgObject> TxList;
+                                        TxList = buildTXedResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
+                                        resendList.addAll(TxList);
+                                    }
                                     //Now sort the list if not zero length
                                     if (resendList.size() > 0) {
                                         Collections.sort(resendList, new Comparator() {
@@ -1738,11 +1747,12 @@ public class RMsgProcessor {
                                         });
                                         //Send requested number of messages with a max of 20 messages. If numberof is <0, we have a time based request, limit to 20 too.
                                         int iMax = (numberOf > 0 && numberOf < 21) ? numberOf : 20;
+                                        int count = 0;
                                         int i = 0;
                                         //If we have more than requested, start down the list to send the n most recent messages as they are sorted in increasing date order
                                         if (numberOf > 0 && (resendList.size() > numberOf)) i = resendList.size() - numberOf;
                                         //Copy up to requested number or in any case max 20
-                                        for (; i < resendList.size() && i <= iMax; i++) { //i is already initialised
+                                        for (; i < resendList.size() && count++ < iMax; i++) { //i is already initialised
                                             RMsgTxList.addMessageToList(resendList.get(i));
                                         }
                                     } else {

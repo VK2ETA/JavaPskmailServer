@@ -114,7 +114,7 @@ public class mainpskmailui extends javax.swing.JFrame {
     static final String[] opModes = new String[]{"HF-Clubs", "HF-Poor", "HF-Good", "HF-Fast", "UHF-Poor", "UHF-Good", "UHF-Fast"};
     static final String[] defaultModes = new String[]{"CCIR476", "OLIVIA_8_500", "OLIVIA_8_1000", "OLIVIA_8_2000", "MFSK32", "MFSK64", "MFSK128"};
     //Keep a reference to the spinner so that we can change its colour
-    //static private Spinner toDropdown = null;
+    //static private Spinner jComboRMsgTo = null;
     static public boolean sendAliasAndDetails = false;
     //To field spinner selection
     public static String selectedTo = "*";
@@ -335,6 +335,9 @@ public class mainpskmailui extends javax.swing.JFrame {
         //Build the list of inbox and/or outbox messages to display
         buildDisplayList();
         loadRadioMsg();
+        loadRMsgComboBoxes();
+        //Set Alias only by default
+        jRadBtnAliasOnly.setSelected(true);
 
 // timer, 1 sec tick
         u = new javax.swing.Timer(1000, new ActionListener() {
@@ -1480,8 +1483,7 @@ public class mainpskmailui extends javax.swing.JFrame {
         mnuHeaders = new javax.swing.JPopupMenu();
         mnuHeadersFetch = new javax.swing.JMenuItem();
         modemnubuttons = new javax.swing.ButtonGroup();
-        buttonGroup1 = new javax.swing.ButtonGroup();
-        buttonGroup3 = new javax.swing.ButtonGroup();
+        buttonGroupAlias = new javax.swing.ButtonGroup();
         tabMain = new javax.swing.JTabbedPane();
         tabTerminal = new javax.swing.JPanel();
         pnlTerminalButtons = new javax.swing.JPanel();
@@ -1599,7 +1601,13 @@ public class mainpskmailui extends javax.swing.JFrame {
         jSplitPane2 = new javax.swing.JSplitPane();
         jPanel1 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
+        jButtonToPlus = new javax.swing.JButton();
+        jButtonToMinus = new javax.swing.JButton();
         jComboRMsgTo = new javax.swing.JComboBox();
+        jPanel5 = new javax.swing.JPanel();
+        jRadBtnAliasOnly = new javax.swing.JRadioButton();
+        jRadBtnAliasAndAddress = new javax.swing.JRadioButton();
+        jPanel4 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jComboRMsgVia = new javax.swing.JComboBox();
         scrRadioMessages = new javax.swing.JScrollPane();
@@ -3011,15 +3019,19 @@ public class mainpskmailui extends javax.swing.JFrame {
 
                 jSplitPane2.setDividerLocation(200);
 
-                jPanel1.setAlignmentX(0.5F);
                 jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.Y_AXIS));
 
-                jPanel3.setMaximumSize(new java.awt.Dimension(300, 30));
-                jPanel3.setMinimumSize(new java.awt.Dimension(81, 20));
-                jPanel3.setPreferredSize(new java.awt.Dimension(100, 30));
-                jPanel1.add(jPanel3);
+                jPanel3.setMaximumSize(new java.awt.Dimension(300, 150));
+                jPanel3.setMinimumSize(new java.awt.Dimension(81, 150));
+                jPanel3.setName(""); // NOI18N
+                jPanel3.setPreferredSize(new java.awt.Dimension(100, 100));
 
-                jComboRMsgTo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "To_ALL", "vk2eta-1", "jd", "mee=" }));
+                jButtonToPlus.setText(mainpskmailui.getString("mainpskmailui.jButtonToPlus.text")); // NOI18N
+                jPanel3.add(jButtonToPlus);
+
+                jButtonToMinus.setText(mainpskmailui.getString("mainpskmailui.jButtonToMinus.text")); // NOI18N
+                jPanel3.add(jButtonToMinus);
+
                 jComboRMsgTo.setMaximumSize(new java.awt.Dimension(150, 20));
                 jComboRMsgTo.setMinimumSize(new java.awt.Dimension(120, 20));
                 jComboRMsgTo.setName(""); // NOI18N
@@ -3029,18 +3041,74 @@ public class mainpskmailui extends javax.swing.JFrame {
                         jComboRMsgToActionPerformed(evt);
                     }
                 });
-                jPanel1.add(jComboRMsgTo);
+                jPanel3.add(jComboRMsgTo);
+
+                jPanel5.setAlignmentX(0.0F);
+                jPanel5.setMaximumSize(new java.awt.Dimension(32767, 70));
+                jPanel5.setMinimumSize(new java.awt.Dimension(10, 50));
+                jPanel5.setPreferredSize(new java.awt.Dimension(274, 50));
+
+                buttonGroupAlias.add(jRadBtnAliasOnly);
+                jRadBtnAliasOnly.setText(mainpskmailui.getString("mainpskmailui.jRadBtnAliasOnly.text")); // NOI18N
+                jRadBtnAliasOnly.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+                jRadBtnAliasOnly.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        jRadBtnAliasOnlyActionPerformed(evt);
+                    }
+                });
+
+                buttonGroupAlias.add(jRadBtnAliasAndAddress);
+                jRadBtnAliasAndAddress.setText(mainpskmailui.getString("mainpskmailui.jRadBtnAliasAndAddress.text")); // NOI18N
+                jRadBtnAliasAndAddress.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+                jRadBtnAliasAndAddress.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        jRadBtnAliasAndAddressActionPerformed(evt);
+                    }
+                });
+
+                javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+                jPanel5.setLayout(jPanel5Layout);
+                jPanel5Layout.setHorizontalGroup(
+                    jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addGap(43, 43, 43)
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jRadBtnAliasOnly)
+                            .addComponent(jRadBtnAliasAndAddress))
+                        .addGap(62, 62, 62))
+                );
+                jPanel5Layout.setVerticalGroup(
+                    jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel5Layout.createSequentialGroup()
+                        .addComponent(jRadBtnAliasOnly)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 4, Short.MAX_VALUE)
+                        .addComponent(jRadBtnAliasAndAddress))
+                );
+
+                jPanel3.add(jPanel5);
+
+                jPanel1.add(jPanel3);
+                jPanel3.getAccessibleContext().setAccessibleName(mainpskmailui.getString("SENDTO")); // NOI18N
+
+                jPanel4.setMaximumSize(new java.awt.Dimension(300, 30));
+                jPanel4.setPreferredSize(new java.awt.Dimension(100, 30));
+                jPanel1.add(jPanel4);
 
                 jPanel2.setMaximumSize(new java.awt.Dimension(300, 30));
                 jPanel2.setMinimumSize(new java.awt.Dimension(81, 20));
                 jPanel2.setPreferredSize(new java.awt.Dimension(100, 30));
-                jPanel1.add(jPanel2);
 
-                jComboRMsgVia.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
                 jComboRMsgVia.setMaximumSize(new java.awt.Dimension(150, 20));
                 jComboRMsgVia.setMinimumSize(new java.awt.Dimension(120, 20));
                 jComboRMsgVia.setPreferredSize(new java.awt.Dimension(150, 20));
-                jPanel1.add(jComboRMsgVia);
+                jComboRMsgVia.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        jComboRMsgViaActionPerformed(evt);
+                    }
+                });
+                jPanel2.add(jComboRMsgVia);
+
+                jPanel1.add(jPanel2);
 
                 jSplitPane2.setLeftComponent(jPanel1);
 
@@ -3494,16 +3562,13 @@ public class mainpskmailui extends javax.swing.JFrame {
                 jSeparator8.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
                 mnuFile2.add(jSeparator8);
 
-                buttonGroup1.add(jRadioButtonAccept);
                 jRadioButtonAccept.setSelected(true);
                 jRadioButtonAccept.setText(bundle.getString("mainpskmailui.jRadioButtonAccept.text")); // NOI18N
                 mnuFile2.add(jRadioButtonAccept);
 
-                buttonGroup1.add(jRadioButtonReject);
                 jRadioButtonReject.setText(bundle.getString("mainpskmailui.jRadioButtonReject.text")); // NOI18N
                 mnuFile2.add(jRadioButtonReject);
 
-                buttonGroup1.add(jRadioButtonDelete);
                 jRadioButtonDelete.setText(bundle.getString("mainpskmailui.jRadioButtonDelete.text")); // NOI18N
                 mnuFile2.add(jRadioButtonDelete);
                 mnuFile2.add(jSeparator5);
@@ -4128,7 +4193,7 @@ private void txtMainEntryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
         if (tabMain.getTitleAt(tabMain.getSelectedIndex()).equals("Radio Msg")) {
             if (!intext.equals("")) {
                 //RMsgTxList.addMessageToList(RadioMSG.selectedTo, RadioMSG.selectedVia, intext,
-                RMsgTxList.addMessageToList(selectedTo, "", intext, false, null, 0, null);
+                RMsgTxList.addMessageToList(selectedTo, selectedVia, intext, false, null, 0, null);
                 txtMainEntry.setText("");
             }
         } else {
@@ -7548,7 +7613,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         String intext = txtMainEntry.getText();
         if (!intext.equals("")) {
             //RMsgTxList.addMessageToList(RadioMSG.selectedTo, RadioMSG.selectedVia, intext,
-            RMsgTxList.addMessageToList(selectedTo, "", intext, false, null, 0, null);
+            RMsgTxList.addMessageToList(selectedTo, selectedVia, intext, false, null, 0, null);
             txtMainEntry.setText("");
         }
     }//GEN-LAST:event_bRMsgSendSMSActionPerformed
@@ -7591,7 +7656,6 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         } else {
             //Save matching destination
             selectedTo = to;
-            /*
             selectedToAlias = toAliasArray[position];
             if (sendAliasAndDetails) {
                 //Send full details if they exist
@@ -7605,9 +7669,44 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
                     selectedTo = to + "=";
                 }
             }
-            */
         }
     }//GEN-LAST:event_jComboRMsgToActionPerformed
+
+    private void jComboRMsgViaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboRMsgViaActionPerformed
+
+        String via = jComboRMsgVia.getSelectedItem().toString();
+        int position = jComboRMsgVia.getSelectedIndex();
+        if (via.equals("--DIRECT--")) {
+            selectedVia = "";
+            selectedViaPassword = ""; //None for Direct
+        } else {
+            selectedVia = via.substring(4); //Remove the "via " prefix
+            selectedViaPassword = viaPasswordArray[position];
+        }
+    }//GEN-LAST:event_jComboRMsgViaActionPerformed
+
+    private void jRadBtnAliasOnlyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadBtnAliasOnlyActionPerformed
+        sendAliasAndDetails = false;
+        //((TextView) v2).setTextColor(getResources().getColor(android.R.color.white));
+        //To-do change colour of the TO combo box 
+        //Update the data to be sent
+        if (selectedToAlias.length() > 0) {
+            //We have an alias for this entry, remove anything after the "=" to signify it is an alias with no details
+            selectedTo = selectedTo.replaceFirst("=.+$", "=");
+        }
+    }//GEN-LAST:event_jRadBtnAliasOnlyActionPerformed
+
+    private void jRadBtnAliasAndAddressActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadBtnAliasAndAddressActionPerformed
+        sendAliasAndDetails = true;
+        //Set the text color of the Spinner's selected view (not a drop down list view)
+        //((TextView) v2).setTextColor(Color.RED);
+        //To-do change colour of the TO combo box 
+        //Update the data to be sent
+        if (selectedToAlias.length() > 0) {
+            //We have an alias for this entry, send alias=fullDetails
+            selectedTo = selectedToAlias;
+        }
+    }//GEN-LAST:event_jRadBtnAliasAndAddressActionPerformed
 
     /**
      * Simple message dialog with yes and no button
@@ -8092,7 +8191,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         tblRadioMsgs.setModel(mRadioMSgTblModel);
         mRadioMSgTblModel.addColumn("Message");
         tblRadioMsgs.getColumnModel().getColumn(0).setCellRenderer(new RMsgTableRenderer());
-        TableColumn mycol = tblRadioMsgs.getColumnModel().getColumn(0);
+        //TableColumn mycol = tblRadioMsgs.getColumnModel().getColumn(0);
         RMsgDisplayItem mDisplayItem;
         //String mMessageStr;
         for (int i=0; i<listSize; i++) {
@@ -8103,6 +8202,120 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         addScrollRadioMsgsTable();
     }
     
+    
+    void loadRMsgComboBoxes() {
+        
+        //Fill-in spinner for To address
+        String[] toArrayOriginal = ("To_ALL," + Main.configuration.getPreference("TOLIST", "")).split(",");
+        String[] toAliasArrayOriginal = new String[toArrayOriginal.length];
+        int validEntries = 0;
+        Pattern toPattern = Pattern.compile("^\\s*([0-9a-zA-Z/\\-_@.+]+)\\s*(=?)\\s*(\\S*)\\s*$");
+        for (int i = 0; i < toArrayOriginal.length; i++) {
+            Matcher msc = toPattern.matcher(toArrayOriginal[i]);
+            if (msc.find()) {
+                String callSign = "";
+                if (msc.group(1) != null) callSign = msc.group(1);
+                String separator = "";
+                if (msc.group(2) != null) separator = msc.group(2);
+                String accessPassword = "";
+                if (msc.group(3) != null) accessPassword = msc.group(3);
+                if (!callSign.equals("")) {
+                    validEntries++;
+                    toArrayOriginal[i] = callSign;
+                    if (!separator.equals("") && !accessPassword.equals("")) {
+                        toAliasArrayOriginal[i] = accessPassword;
+                    } else {
+                        toAliasArrayOriginal[i] = ""; //As it is copied later on
+                    }
+                } else {
+                    toArrayOriginal[i] = ""; //Blank it out
+                    toAliasArrayOriginal[i] = "";
+                }
+            } else {
+                //Malformed to destination, blank it out too
+                toArrayOriginal[i] = "";
+                toAliasArrayOriginal[i] = "";
+            }
+        }
+        //Blank first password as it corresponds to the "ALL" destination
+        toAliasArrayOriginal[0] = "";
+        //Copy only non null strings to final array
+        toArray = new String[validEntries];
+        toAliasArray = new String[validEntries];
+        int j = 0;
+        for (int i = 0; i < toArrayOriginal.length; i++) {
+            if (toArrayOriginal[i].length() > 0) {
+                toArray[j] = toArrayOriginal[i];
+                if (toAliasArrayOriginal[i].length() > 0) {
+                    toAliasArray[j] = toArrayOriginal[i] + "=" + toAliasArrayOriginal[i];
+                } else {
+                    toAliasArray[j] = ""; //Must be initialized (non null)
+                }
+                j++;
+            }
+        }
+        //Load "To" jComboBox
+        for (int i=0; i<toArray.length; i++) {
+            jComboRMsgTo.addItem(toArray[i]);
+        }
+        
+        
+        //Fill-in spinner for Via relays, with passwords now
+        String[] viaArrayOriginal = ("--DIRECT--," + Main.configuration.getPreference("RELAYLIST", "")).split(",");
+        String[] viaPasswordArrayOriginal = new String[viaArrayOriginal.length];
+        int viaValidEntries = 0;
+        Pattern viaPattern = Pattern.compile("^\\s*([0-9a-zA-Z/\\-_.+]+)\\s*(:?)\\s*(\\S*)\\s*$");
+        for (int i = 0; i < viaArrayOriginal.length; i++) {
+            Matcher msc = viaPattern.matcher(viaArrayOriginal[i]);
+            if (msc.find()) {
+                String callSign = "";
+                if (msc.group(1) != null) callSign = msc.group(1);
+                String separator = "";
+                if (msc.group(2) != null) separator = msc.group(2);
+                String accessPassword = "";
+                if (msc.group(3) != null) accessPassword = msc.group(3);
+                if (!callSign.equals("")) {
+                    viaValidEntries++;
+                    viaArrayOriginal[i] = callSign;
+                    if (!separator.equals("") && !accessPassword.equals("")) {
+                        viaPasswordArrayOriginal[i] = accessPassword;
+                    } else {
+                        viaPasswordArrayOriginal[i] = ""; //As it is copied later on
+                    }
+                } else {
+                    viaArrayOriginal[i] = ""; //Blank it out
+                    viaPasswordArrayOriginal[i] = "";
+                }
+            } else {
+                //Malformed to destination, blank it out too
+                viaArrayOriginal[i] = "";
+                viaPasswordArrayOriginal[i] = "";
+            }
+        }
+        //Blank first password as it corresponds to the "--DIRECT--" entry (no relay)
+        viaPasswordArrayOriginal[0] = "";
+        //Copy only non null strings to final array
+        viaArray = new String[viaValidEntries];
+        viaPasswordArray = new String[viaValidEntries];
+        j = 0;
+        for (int i = 0; i < viaArrayOriginal.length; i++) {
+            if (viaArrayOriginal[i].length() > 0) {
+                if (i > 0) {
+                    //After the "--DIRECT--" entry
+                    viaArray[j] = "via " + viaArrayOriginal[i];
+                    viaPasswordArray[j++] = viaPasswordArrayOriginal[i];
+                } else {
+                    viaArray[j] = viaArrayOriginal[i];
+                    viaPasswordArray[j++] = ""; //Initialise to empty string, not null element
+                }
+            }
+        }
+        //Load "Via" jComboBox
+        for (int i=0; i<viaArray.length; i++) {
+            jComboRMsgVia.addItem(viaArray[i]);
+        }
+
+    }
     
     public void addScrollRadioMsgsTable()
 {
@@ -8195,8 +8408,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JButton bRMsgSendPos;
     private javax.swing.JButton bRMsgSendSMS;
     private javax.swing.JButton bSummon;
-    private javax.swing.ButtonGroup buttonGroup1;
-    private javax.swing.ButtonGroup buttonGroup3;
+    private javax.swing.ButtonGroup buttonGroupAlias;
     private javax.swing.JCheckBox cbComp;
     private javax.swing.JComboBox cboAPRS2nd;
     private javax.swing.JComboBox cboAPRSIcon;
@@ -8210,6 +8422,8 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JTextField freq2;
     private javax.swing.JTextField freq3;
     private javax.swing.JTextField freq4;
+    private javax.swing.JButton jButtonToMinus;
+    private javax.swing.JButton jButtonToPlus;
     private javax.swing.JComboBox jComboRMsgTo;
     private javax.swing.JComboBox jComboRMsgVia;
     private javax.swing.JMenuItem jGetIAC;
@@ -8221,6 +8435,10 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JRadioButton jRadBtnAliasAndAddress;
+    private javax.swing.JRadioButton jRadBtnAliasOnly;
     public javax.swing.JRadioButtonMenuItem jRadioButtonAccept;
     public javax.swing.JRadioButtonMenuItem jRadioButtonDelete;
     private javax.swing.JRadioButtonMenuItem jRadioButtonMenuDOMEX11;

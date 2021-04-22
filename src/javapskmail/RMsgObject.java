@@ -41,7 +41,6 @@ public class RMsgObject {
     boolean crcValid; //Valid with no access password
     boolean crcValidWithPW; //Valid only if access password is used
     String rxMode;
-    boolean myOwn;
     String accessPasswordUsed;
     String timeId;
 
@@ -68,7 +67,6 @@ public class RMsgObject {
         this.crcValid = false;
         this.crcValidWithPW =false;
         this.rxMode = "";
-        this.myOwn = false;
         this.accessPasswordUsed = "";
         this.timeId ="";
     }
@@ -95,7 +93,6 @@ public class RMsgObject {
         this.positionRequestTime = positionRequestTime;
         this.voiceMessage = voiceMessage;
         this.rxMode = ""; //No mode provided
-        this.myOwn = false;
         this.accessPasswordUsed = "";
         this.timeId = "";
     }

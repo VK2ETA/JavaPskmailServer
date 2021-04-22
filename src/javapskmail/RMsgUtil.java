@@ -539,14 +539,15 @@ public class RMsgUtil {
                             //int oldAudioFreq = 0;
                             //If CRC is wrong send double tone
                             if (positiveAck) {
+                                //
                                 Rigctl.Tune();
-                                Thread.sleep(150);
+                                Thread.sleep(500);
                                 Rigctl.Abort();
                             } else {
                                 //oldAudioFreq = Rigctl.SetAudiofreq(2200); //Does not work if either TX lock or reset to carrier is on
                                 for (int x = 0; x < 5; x++) {
                                     Rigctl.Tune();
-                                    Thread.sleep(100);
+                                    Thread.sleep(150);
                                     Rigctl.Abort();
                                     //Restore modem to last audio frequency
                                     Thread.sleep(300);
