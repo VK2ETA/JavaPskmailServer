@@ -66,19 +66,12 @@ import javax.mail.search.ReceivedDateTerm;
 import javax.mail.search.SearchTerm;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import static javapskmail.Main.configuration;
 
 import org.jsoup.Jsoup;
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
-import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberType;
-import com.google.i18n.phonenumbers.PhoneNumberUtil.ValidationResult;
-import com.google.i18n.phonenumbers.Phonemetadata.NumberFormat;
-import com.google.i18n.phonenumbers.Phonemetadata.PhoneMetadata;
-import com.google.i18n.phonenumbers.Phonemetadata.PhoneNumberDesc;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
-import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber.CountryCodeSource;
 import com.google.i18n.phonenumbers.NumberParseException;
 import javax.swing.SwingUtilities;
 
@@ -707,14 +700,14 @@ public class RMsgProcessor {
     // Returns "" if no match
     //Examples:
     // *,*,0 (the default, matches any incoming cellular number at any time and sends SMSs to ALL Radio recipients
-    // *,joe,0  send any incoming SMS to "joe" only, any time
-    // 0412345678,joe,0 sends SMSes from 0412345678 to joe, any time
+    // *,vk2eta,0  send any incoming SMS to "vk2eta" only, any time
+    // 0412345678,vk2eta,0 sends SMSes from 0412345678 to vk2eta, any time
     // Automatically generated entries look like:
-    // 0412345678,joe,1524632518000
+    // 0412345678,vk2eta,1524632518000
     // This entry links the sender of a radio message with the nominated cellular number it was
     //   relayed to, counting time from the epoch as shown after the last comma.
     // Receipts of incoming cellular SMSs which result in a match will update the time of the last exchange to keep the link alive (unless
-    //   the link is time persistent, i.e. "0" time.
+    //   the link is timeless, i.e. "0" time).
     private String[] passSMSFilter(String senderNo) {
         String myResult[] = new String[20]; //Max 20 links = max 20 messages to send on receipt of this SMS
         String[] filterList = {"*,*,0"}; // tbf config.getPreferenceS("SMSLISTENINGFILTER", "0,*,*").split("\\|");
@@ -767,18 +760,18 @@ public class RMsgProcessor {
     }
 
     //Tries to find a match for a given combination of email address and time
-    //Alows wildcards "*" for any incoming email address and "0" for time-persistent filters
+    //Alows wildcards "*" for any incoming email address and "0" for timeless filters
     // Returns "" if no match
     //Examples:
-    // *,*,0 (the default, matches any incoming email address at any time and sends email to ALL Radio recipients
-    // *,joe,0  send any incoming email to "joe" only, any time
-    // myaddress@myprovider.com.au,joe,0 sends SMSes from 0412345678 to joe, any time
+    // *,*,0 (matches any incoming email address at any time and sends email to ALL Radio recipients
+    // *,vk2eta,0  send any incoming email to "vk2eta" only, any time
+    // myaddress@myprovider.com.au,vk2eta,0 sends SMSes from 0412345678 to vk2eta, any time
     // Automatically generated entries look like:
-    // myaddress@myprovider.com.au,joe,1524632518000
+    // myaddress@myprovider.com.au,vk2eta,1524632518000
     // This entry links the sender of a radio message with the nominated email address it was
     //   relayed to, counting time from the epoch as shown after the last comma.
     // Receipts of incoming emails which result in a match will update the time of the last exchange to keep the link alive (unless
-    //   the link is time persistent, i.e. "0" time.
+    //   the link is timeless, i.e. "0" time).
     public static String[] passEmailFilter(String emailAddress) {
         String myResult[] = new String[20]; //Max 20 links = max 20 messages to send on receipt of this email
         //String[] filterList = {"*,*,0"}; // tbf config.getPreferenceS("EMAILLISTENINGFILTER", "*,*,0").split("\\|");
@@ -864,6 +857,8 @@ public class RMsgProcessor {
                     && (!recDisplayItem.mMessage.sms.startsWith("*cmd"))
                     //AND must not be an already re-sent message
                     && (!recDisplayItem.mMessage.sms.startsWith("Re-Sending "))
+                    && (!recDisplayItem.mMessage.sms.startsWith("*pos?"))
+                    && (!recDisplayItem.mMessage.sms.startsWith("No Messages"))
                     //AND must not be a qtc? request
                     && (!recDisplayItem.mMessage.sms.startsWith("*qtc?"))) {
                 if (forLast > 0L) { //We have a time-based request
@@ -1148,6 +1143,8 @@ public class RMsgProcessor {
                     //AND must not be a qtc?, command or previously re-sent message
                     && (!recDisplayItem.mMessage.sms.startsWith("*qtc?"))
                     && (!recDisplayItem.mMessage.sms.startsWith("*cmd"))
+                    && (!recDisplayItem.mMessage.sms.startsWith("*pos?"))
+                    && (!recDisplayItem.mMessage.sms.startsWith("No messages"))
                     && (!recDisplayItem.mMessage.sms.startsWith("Re-Sending "))) {
                 if (forLast > 0L) { //We have a time-based request
                     Date recMsgDate;
@@ -1182,7 +1179,11 @@ public class RMsgProcessor {
                     //Enqueue message for sorting. Get full message with binary data.
                     RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.DirSent, recDisplayItem.mMessage.fileName, true);
                     //Coming from this relay station
-                    fullMessage.relay = Main.callsignAsServer.trim();
+                    if (fullMessage.from.equals(Main.callsignAsServer.toLowerCase(Locale.US).trim())) {
+                        fullMessage.relay = "";
+                    } else {
+                        fullMessage.relay = Main.callsignAsServer.toLowerCase(Locale.US).trim();
+                    }
                     //Remove via information to make sure it is not forwarded
                     fullMessage.via = "";
                     //Re-send/relay in the same mode we received in
@@ -1438,6 +1439,8 @@ public class RMsgProcessor {
                         SwingUtilities.invokeLater(new Runnable() {
                             public void run() {
                                 Main.mainui.mRadioMSgTblModel.addRow(new Object[]{mDisplayItem});
+                                //Scroll to bottom
+                                Main.mainui.scrollRadioMsgsTableToLast();
                             }
                         });
                         /*
@@ -1555,119 +1558,15 @@ public class RMsgProcessor {
                         } else if (mMessage.sms.startsWith("*qtc?")) {
                             //Simplified QTC processing:
                             //By default resends the last of any message (sent directly, heard as relay, email, sms). 
-                            //Filtered by selected relaying flags
-                            //Modifiers: n messages, L = since last QTC, r = force relay of QTC command
-                            
-    /*                        //Re-send last message or last X messages/emails/SMSs or in the last minutes/Hours/Days or since last request
-                            // Case 1: Request SMS or EMAIL request. Ignore TO, Via = me
-                            // Case 2: Request radio relay to another station. Via = me, To = NOT (SMS/Email/To_ALL)
-                            // Case 3: Request re-send of last X heard messages for me or ALL. (Via = me AND To = All)
-                            // Case 4: Request re-send of last X transmitted messages (via = null AND To = me)
-                            boolean directRequest = ((matchMyCallWith(mMessage.to, false)
-                                    && mMessage.via.equals("")) && !mMessage.sms.matches(".*[ef].*"));
-                            if ((matchMyCallWith(mMessage.to, false) && !matchMyCallWith(mMessage.via, false))
-                                    || (!matchMyCallWith(mMessage.to, false) && matchMyCallWith(mMessage.via, false))) {
-                                //Read request (last X minutes or last N messages). Default is last ONE message if nothing is sent.
-                                int numberOf = 1;
-                                if (mMessage.sms.length() > 6 && mMessage.sms.substring(5, 6).equals(" ")) {
-                                    try {
-                                        //First remove all non digit characters after the "*qtc? "
-                                        String extractedStr = mMessage.sms.substring(6).replaceAll("[^0-9]", "");
-                                        //Any number following or preceding
-                                        numberOf = Integer.valueOf(extractedStr);
-                                    } catch (Exception e) {
-                                        numberOf = 1;
-                                    }
-                                }
-                                //Make sure we have at least 1
-                                numberOf = numberOf == 0 ? 1 : numberOf;
-                                //Any modifier after the numbers like "m" for last X minutes, "h" for last X hours, "d" for last X days,
-                                // "p" for last X position reports only, "a" for last X sms from "all" as in for a third party,
-                                // "e" for last e-Mails (short version), "f" for last e-Mails (fuller version),
-                                // "le" for last e-Mails since last qtc (short version), "lf" for last e-Mails since last qtc (fuller version),
-                                Long forLast = 0L;
-                                Boolean forAll = false;
-                                Boolean emailRequest = false;
-                                Boolean positionsOnly = false;
-                                String extractedStr = mMessage.sms.substring(6).replaceAll("[^a-zA-Z]", "").toLowerCase(Locale.US);
-                                if (extractedStr.startsWith("m")) { //Minutes
-                                    forLast = numberOf * 60000L;
-                                    numberOf = 0;
-                                } else if (extractedStr.startsWith("h")) { //Hours
-                                    forLast = numberOf * 3600000L;
-                                    numberOf = 0;
-                                } else if (extractedStr.startsWith("d")) { //Days
-                                    forLast = numberOf * 24 * 3600000L;
-                                    numberOf = 0;
-                                } else if (extractedStr.startsWith("p")) { //Last X positions
-                                    positionsOnly = true;
-                                } else if (extractedStr.equals("l")) { // "L" for last messages since last QTC request
-                                    numberOf = -1;
-                                } else if (extractedStr.equals("a")) { //All messages even if for someone else
-                                    forAll = true;
-                                } else if (extractedStr.startsWith("e") & Main.WantRelayEmails) { //E-Mail messages request (short version)
-                                    emailRequest = true;
-                                } else if (extractedStr.startsWith("f") & Main.WantRelayEmails) { //E-Mail messages request (Full(er) version)
-                                    emailRequest = true;
-                                } else if (extractedStr.startsWith("le") & Main.WantRelayEmails) { //E-Mail messages request (short version)
-                                    emailRequest = true;
-                                    numberOf = -1;
-                                } else if (extractedStr.startsWith("lf") & Main.WantRelayEmails) { //E-Mail messages request (Full(er) version)
-                                    emailRequest = true;
-                                    numberOf = -1;
-                                } else if (extractedStr.equals("ae") & Main.WantRelayEmails) { // All emails for anybody, short version
-                                    emailRequest = true;
-                                    forAll = true;
-                                } else if (extractedStr.equals("af") & Main.WantRelayEmails) { // All emails for anybody full version
-                                    emailRequest = true;
-                                    forAll = true;
-                                }
-                                ArrayList<RMsgObject> resendList = new ArrayList();
-                                //Only properly received (and secured) messages
-                                if (messageAuthorized) {
-                                    RMsgUtil.sendBeeps(true);
-                                    if (emailRequest && (matchMyCallWith(mMessage.via, false)
-                                            || (matchMyCallWith(mMessage.to, false) && mMessage.via.equals("")))) {
-                                        //process email request
-                                        resendList = buildEmailResendList(mMessage, numberOf, extractedStr.endsWith("f"), forAll);
-                                    } else if (!emailRequest && matchMyCallWith(mMessage.via, false)
-                                            && !isEmail(mMessage.to) && !isCellular(mMessage.to) && !mMessage.to.equals("*")) {
-                                        //We have been requested to relay a repeat request to another callsign
-                                        RMsgObject forwardedMessage = mMessage;
-                                        forwardedMessage.relay = mMessage.via;
-                                        forwardedMessage.via = "";
-                                        resendList.add(forwardedMessage);
-                                    } else if (!emailRequest && matchMyCallWith(mMessage.via, false) && !directRequest) {
-                                        //We are repeating existing received messages
-                                        resendList = buildNonEmailResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
-                                    }
-
-                                    //Now sort the list if not zero length
-                                    if (resendList.size() > 0) {
-                                        Collections.sort(resendList, new Comparator() {
-                                            public int compare(Object o1, Object o2) {
-                                                RMsgObject m1 = (RMsgObject) o1;
-                                                RMsgObject m2 = (RMsgObject) o2;
-                                                return m1.fileName.compareToIgnoreCase(m2.fileName);
-                                            }
-                                        });
-                                        //Wait for the ack to pass first
-                                        Thread.sleep(500);
-                                        for (int i = 0; i < resendList.size(); i++) {
-                                            RMsgTxList.addMessageToList(resendList.get(i));
-                                        }
-                                    }
-                                } else if (!emailRequest && matchMyCallWith(mMessage.to, false) && mMessage.via.equals("")) {
-                                    RMsgUtil.sendBeeps(true);
-                                    //We are just repeating sent messages, excluding already re-sent ones, Always allow.
-                                    //Not yet (need a Sent list first) resendList = buildTXedResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
-                                } else {
-                                    RMsgUtil.sendBeeps(false);
-                                    //We have an access password missing
-                                    //RMsgUtil.replyWithText(mMessage, "Sorry...Missing Access Password");
-                                } 
-                            } */
+                            //Filtered by selected relaying flags in preferences (E.g. will not check for emails if email relaying is not enabled)
+                            //Modifiers: n messages, l = since last QTC, e or f = emails/SMSs ONLY, r = force relay of QTC command
+                            // m = in the last X minutes, h = in the last X hours, d = in the last X days
                             //QTC message VIA is my call, but TO is not my call OR TO is my call but VIA is blank
+                            //Examples: - "*qtc? 3 e" = resend the last 3 email/SMSs messages (short version, "3 f" would be full version)
+                            //          - "*qtc? l" = resend all messages since the last resend request I made (good to catch-up on missed messages)
+                            //          - "*qtc? le" = resend all email/SMSs messages since the last resend request
+                            //          - "*qtc? 2 h" = resend all messages in the last 2 hours
+                            //Resend limit is hard coded to 20 messages to be resent
                             if (matchMyCallWith(mMessage.via, false) ||
                                     (matchMyCallWith(mMessage.to, false) && mMessage.via.equals(""))) {
                                 //Not used anymore
@@ -1696,69 +1595,110 @@ public class RMsgProcessor {
                                     // "le" for last e-Mails since last qtc (short version), "lf" for last e-Mails since last qtc (fuller version),
                                     Long forLast = 0L;
                                     Boolean forAll = false;
-                                    //Boolean emailRequest = false;
+                                    Boolean emailRequest = false;
                                     Boolean positionsOnly = false;
-                                    String extractedStr = mMessage.sms.substring(6).replaceAll("[^a-zA-Z]", "").toLowerCase(Locale.US);
-                                    if (extractedStr.startsWith("m")) { //Minutes
-                                        forLast = numberOf * 60000L;
-                                        numberOf = 0;
-                                    } else if (extractedStr.startsWith("h")) { //Hours
-                                        forLast = numberOf * 3600000L;
-                                        numberOf = 0;
-                                    } else if (extractedStr.startsWith("d")) { //Days
-                                        forLast = numberOf * 24 * 3600000L;
-                                        numberOf = 0;
-                                    } else if (extractedStr.startsWith("p")) { //Last X positions
-                                        positionsOnly = true;
-                                    } else if (extractedStr.equals("l")) { // "L" for last messages since last QTC request
-                                        numberOf = -1;
-                                    } else if (extractedStr.contains("a")) { //All messages even if for someone else
-                                        forAll = true;
-                                    }
-                                    //Blank list
-                                    ArrayList<RMsgObject> resendList = new ArrayList();
-                                    //What type of qtc did we receive?
-                                    //process email request
-                                    if (Main.WantRelayOverRadio) {
-                                        resendList = buildNonEmailResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
-                                    }
-                                    //We are repeating existing received messages
-                                    // & (Main.WantRelayEmails | Main.WantRelaySMSs | Main.WantRelayOverRadio)
-                                    ArrayList<RMsgObject> emailList;
-                                    if (Main.WantRelayEmails | Main.WantRelaySMSs) {
-                                        emailList = buildEmailResendList(mMessage, numberOf, extractedStr.endsWith("f"), forAll);
-                                        resendList.addAll(emailList);
-                                    }
-                                    //We are just repeating messages sent directly (no Via), excluding already re-sent ones
-                                    //Do not add if we ask for emails/sms only
-                                    if (!extractedStr.endsWith("f") && !extractedStr.endsWith("e")) {
-                                        ArrayList<RMsgObject> TxList;
-                                        TxList = buildTXedResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
-                                        resendList.addAll(TxList);
-                                    }
-                                    //Now sort the list if not zero length
-                                    if (resendList.size() > 0) {
-                                        Collections.sort(resendList, new Comparator() {
-                                            public int compare(Object o1, Object o2) {
-                                                RMsgObject m1 = (RMsgObject) o1;
-                                                RMsgObject m2 = (RMsgObject) o2;
-                                                return m1.fileName.compareToIgnoreCase(m2.fileName);
-                                            }
-                                        });
-                                        //Send requested number of messages with a max of 20 messages. If numberof is <0, we have a time based request, limit to 20 too.
-                                        int iMax = (numberOf > 0 && numberOf < 21) ? numberOf : 20;
-                                        int count = 0;
-                                        int i = 0;
-                                        //If we have more than requested, start down the list to send the n most recent messages as they are sorted in increasing date order
-                                        if (numberOf > 0 && (resendList.size() > numberOf)) i = resendList.size() - numberOf;
-                                        //Copy up to requested number or in any case max 20
-                                        for (; i < resendList.size() && count++ < iMax; i++) { //i is already initialised
-                                            RMsgTxList.addMessageToList(resendList.get(i));
+                                    Boolean forceRelaying = false;
+                                    String extractedStr = "";
+                                    if (mMessage.sms.length() > 6) {
+                                        extractedStr = mMessage.sms.substring(6).replaceAll("[^a-zA-Z]", "").toLowerCase(Locale.US);
+                                        if (extractedStr.startsWith("m")) { //Minutes
+                                            forLast = numberOf * 60000L;
+                                            numberOf = 0;
+                                        } else if (extractedStr.startsWith("h")) { //Hours
+                                            forLast = numberOf * 3600000L;
+                                            numberOf = 0;
+                                        } else if (extractedStr.startsWith("d")) { //Days
+                                            forLast = numberOf * 24 * 3600000L;
+                                            numberOf = 0;
+                                        } else if (extractedStr.startsWith("p")) { //Last X positions
+                                            positionsOnly = true;
+                                        } else if (extractedStr.equals("l")) { // "L" for last messages since last QTC request
+                                            numberOf = -1;
+                                        } else if (extractedStr.contains("a")) { //All messages even if for someone else
+                                            forAll = true;
+                                        } else if (extractedStr.contains("r")) { //Just force relaying this message to the final destination
+                                            forceRelaying = true;
+                                        } else if (extractedStr.startsWith("e") & Main.WantRelayEmails) { //E-Mail messages request (short version)
+                                            emailRequest = true;
+                                        } else if (extractedStr.startsWith("f") & Main.WantRelayEmails) { //E-Mail messages request (Full(er) version)
+                                            emailRequest = true;
+                                        } else if (extractedStr.startsWith("le") & Main.WantRelayEmails) { //E-Mail messages request (short version)
+                                            emailRequest = true;
+                                            numberOf = -1;
+                                        } else if (extractedStr.startsWith("lf") & Main.WantRelayEmails) { //E-Mail messages request (Full(er) version)
+                                            emailRequest = true;
+                                            numberOf = -1;
                                         }
+                                    }
+                                    //Are we asked to relay that QTC message to it's destination?
+                                    if (Main.WantRelayOverRadio && forceRelaying && !matchMyCallWith(mMessage.to, false) 
+                                            && matchMyCallWith(mMessage.via, false)) {
+                                        //Remove the "r" from the string and forward the rest of the QTC request as is
+                                        extractedStr = mMessage.sms.substring(6).replaceAll("r", "");
+                                        //Get full message with binary data
+                                        RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.DirInbox, mMessage.fileName, true);
+                                        //Add relay and remove via information
+                                        fullMessage.relay = fullMessage.via;
+                                        fullMessage.via = "";
+                                        //Relay in the same mode we received in
+                                        fullMessage.rxMode = mMessage.rxMode;
+                                        fullMessage.sms = "*qtc? " + extractedStr;
+                                        //Send the last 3 digits of the timestamp contained in the file name
+                                        // This allows receiving stations to eliminate duplicates (direct Rx and Relayed Rx)
+                                        int strLen = mMessage.fileName.length();
+                                        fullMessage.timeId = mMessage.fileName.substring(strLen - 7, strLen - 4);
+                                        //Wait for the ack to pass first
+                                        Thread.sleep(500);
+                                        //Then send Message
+                                        RMsgTxList.addMessageToList(fullMessage);
                                     } else {
-                                        //Notify of nothing to send
-                                        mMessage.via = ""; //Blank via as it's from this device
-                                        RMsgUtil.replyWithText(mMessage, "No messages");
+                                        //We are resending from this relay (default). Create blank list
+                                        ArrayList<RMsgObject> resendList = new ArrayList();
+                                        //What type of qtc did we receive?
+                                        //process email request
+                                        if (Main.WantRelayOverRadio && !emailRequest) {
+                                            resendList = buildNonEmailResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
+                                        }
+                                        //We are repeating existing received messages
+                                        // & (Main.WantRelayEmails | Main.WantRelaySMSs | Main.WantRelayOverRadio)
+                                        ArrayList<RMsgObject> emailList;
+                                        if ((Main.WantRelayEmails || Main.WantRelaySMSs) && !positionsOnly) {
+                                            emailList = buildEmailResendList(mMessage, numberOf, extractedStr.endsWith("f"), forAll);
+                                            resendList.addAll(emailList);
+                                        }
+                                        //We are just repeating messages sent directly (no Via), excluding already re-sent ones
+                                        //Do not add if we ask for emails/sms only
+                                        if (!emailRequest) {
+                                            ArrayList<RMsgObject> TxList;
+                                            TxList = buildTXedResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
+                                            resendList.addAll(TxList);
+                                        }
+                                        //Now sort the list if not zero length
+                                        if (resendList.size() > 0) {
+                                            Collections.sort(resendList, new Comparator() {
+                                                public int compare(Object o1, Object o2) {
+                                                    RMsgObject m1 = (RMsgObject) o1;
+                                                    RMsgObject m2 = (RMsgObject) o2;
+                                                    return m1.fileName.compareToIgnoreCase(m2.fileName);
+                                                }
+                                            });
+                                            //Send requested number of messages with a max of 20 messages. If numberof is <0, we have a time based request, limit to 20 too.
+                                            int iMax = (numberOf > 0 && numberOf < 21) ? numberOf : 20;
+                                            int count = 0;
+                                            int i = 0;
+                                            //If we have more than requested, start down the list to send the n most recent messages as they are sorted in increasing date order
+                                            if (numberOf > 0 && (resendList.size() > numberOf)) {
+                                                i = resendList.size() - numberOf;
+                                            }
+                                            //Copy up to requested number or in any case max 20
+                                            for (; i < resendList.size() && count++ < iMax; i++) { //i is already initialised
+                                                RMsgTxList.addMessageToList(resendList.get(i));
+                                            }
+                                        } else {
+                                            //Notify of nothing to send
+                                            mMessage.via = ""; //Blank via as it's from this device
+                                            RMsgUtil.replyWithText(mMessage, "No messages");
+                                        }
                                     }
                                 } else {
                                     //Alert with low beep to indicate invalid message

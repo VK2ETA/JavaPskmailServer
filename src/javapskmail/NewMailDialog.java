@@ -416,7 +416,7 @@ private void bOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:eve
 }//GEN-LAST:event_bOKActionPerformed
 
 /**
- * This is the send email method used before the addressbook was added
+ * This is the send email method used before the address book was added
  */
 private void OldSendMail(){
     

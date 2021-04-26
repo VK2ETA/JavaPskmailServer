@@ -1607,8 +1607,9 @@ public class mainpskmailui extends javax.swing.JFrame {
         jPanel5 = new javax.swing.JPanel();
         jRadBtnAliasOnly = new javax.swing.JRadioButton();
         jRadBtnAliasAndAddress = new javax.swing.JRadioButton();
-        jPanel4 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
+        jButtonViaPlus = new javax.swing.JButton();
+        jButtonViaMinus = new javax.swing.JButton();
         jComboRMsgVia = new javax.swing.JComboBox();
         scrRadioMessages = new javax.swing.JScrollPane();
         tblRadioMsgs = new javax.swing.JTable();
@@ -1616,7 +1617,8 @@ public class mainpskmailui extends javax.swing.JFrame {
         bRMsgSendSMS = new javax.swing.JButton();
         bRMsgSendPos = new javax.swing.JButton();
         bRMsgReqPos = new javax.swing.JButton();
-        bRMsgResendPlease = new javax.swing.JButton();
+        bRMsgResend = new javax.swing.JButton();
+        bRMsgResendPlease1 = new javax.swing.JButton();
         bRMsgDeleteMsg = new javax.swing.JButton();
         pnlStatus = new javax.swing.JPanel();
         snLabel = new javax.swing.JLabel();
@@ -3021,15 +3023,25 @@ public class mainpskmailui extends javax.swing.JFrame {
 
                 jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.Y_AXIS));
 
-                jPanel3.setMaximumSize(new java.awt.Dimension(300, 150));
-                jPanel3.setMinimumSize(new java.awt.Dimension(81, 150));
+                jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(mainpskmailui.getString("mainpskmailui.jPanel3Title.text"))); // NOI18N
+                jPanel3.setMaximumSize(new java.awt.Dimension(300, 155));
+                jPanel3.setMinimumSize(new java.awt.Dimension(81, 130));
                 jPanel3.setName(""); // NOI18N
                 jPanel3.setPreferredSize(new java.awt.Dimension(100, 100));
 
                 jButtonToPlus.setText(mainpskmailui.getString("mainpskmailui.jButtonToPlus.text")); // NOI18N
+                jButtonToPlus.setToolTipText(mainpskmailui.getString("mainpskmailui.jButtonToPlus.TooltipText")); // NOI18N
+                jButtonToPlus.setMargin(new java.awt.Insets(0, 8, 0, 8));
+                jButtonToPlus.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        jButtonToPlusActionPerformed(evt);
+                    }
+                });
                 jPanel3.add(jButtonToPlus);
 
                 jButtonToMinus.setText(mainpskmailui.getString("mainpskmailui.jButtonToMinus.text")); // NOI18N
+                jButtonToMinus.setToolTipText(mainpskmailui.getString("mainpskmailui.jButtonToMinus.TooltipText")); // NOI18N
+                jButtonToMinus.setMargin(new java.awt.Insets(0, 8, 0, 8));
                 jPanel3.add(jButtonToMinus);
 
                 jComboRMsgTo.setMaximumSize(new java.awt.Dimension(150, 20));
@@ -3046,57 +3058,63 @@ public class mainpskmailui extends javax.swing.JFrame {
                 jPanel5.setAlignmentX(0.0F);
                 jPanel5.setMaximumSize(new java.awt.Dimension(32767, 70));
                 jPanel5.setMinimumSize(new java.awt.Dimension(10, 50));
+                jPanel5.setOpaque(false);
                 jPanel5.setPreferredSize(new java.awt.Dimension(274, 50));
+                jPanel5.setLayout(new java.awt.GridBagLayout());
 
                 buttonGroupAlias.add(jRadBtnAliasOnly);
                 jRadBtnAliasOnly.setText(mainpskmailui.getString("mainpskmailui.jRadBtnAliasOnly.text")); // NOI18N
+                jRadBtnAliasOnly.setToolTipText(mainpskmailui.getString("mainpskmailui.bRMsgjRadBtnAliasOnly.toolTipText")); // NOI18N
                 jRadBtnAliasOnly.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
                 jRadBtnAliasOnly.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
                         jRadBtnAliasOnlyActionPerformed(evt);
                     }
                 });
+                gridBagConstraints = new java.awt.GridBagConstraints();
+                gridBagConstraints.gridx = 0;
+                gridBagConstraints.gridy = 0;
+                gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+                gridBagConstraints.insets = new java.awt.Insets(0, 43, 0, 0);
+                jPanel5.add(jRadBtnAliasOnly, gridBagConstraints);
 
                 buttonGroupAlias.add(jRadBtnAliasAndAddress);
                 jRadBtnAliasAndAddress.setText(mainpskmailui.getString("mainpskmailui.jRadBtnAliasAndAddress.text")); // NOI18N
+                jRadBtnAliasAndAddress.setToolTipText(mainpskmailui.getString("mainpskmailui.bRMsgjRadBtnAliasAndAddress.toolTipText")); // NOI18N
                 jRadBtnAliasAndAddress.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
                 jRadBtnAliasAndAddress.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
                         jRadBtnAliasAndAddressActionPerformed(evt);
                     }
                 });
-
-                javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
-                jPanel5.setLayout(jPanel5Layout);
-                jPanel5Layout.setHorizontalGroup(
-                    jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addGap(43, 43, 43)
-                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jRadBtnAliasOnly)
-                            .addComponent(jRadBtnAliasAndAddress))
-                        .addGap(62, 62, 62))
-                );
-                jPanel5Layout.setVerticalGroup(
-                    jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel5Layout.createSequentialGroup()
-                        .addComponent(jRadBtnAliasOnly)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 4, Short.MAX_VALUE)
-                        .addComponent(jRadBtnAliasAndAddress))
-                );
+                gridBagConstraints = new java.awt.GridBagConstraints();
+                gridBagConstraints.gridx = 0;
+                gridBagConstraints.gridy = 1;
+                gridBagConstraints.gridwidth = 2;
+                gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+                gridBagConstraints.insets = new java.awt.Insets(4, 43, 0, 62);
+                jPanel5.add(jRadBtnAliasAndAddress, gridBagConstraints);
 
                 jPanel3.add(jPanel5);
 
                 jPanel1.add(jPanel3);
                 jPanel3.getAccessibleContext().setAccessibleName(mainpskmailui.getString("SENDTO")); // NOI18N
 
-                jPanel4.setMaximumSize(new java.awt.Dimension(300, 30));
-                jPanel4.setPreferredSize(new java.awt.Dimension(100, 30));
-                jPanel1.add(jPanel4);
-
-                jPanel2.setMaximumSize(new java.awt.Dimension(300, 30));
-                jPanel2.setMinimumSize(new java.awt.Dimension(81, 20));
+                jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(mainpskmailui.getString("mainpskmailui.iPanel2Title.text"))); // NOI18N
+                jPanel2.setMaximumSize(new java.awt.Dimension(300, 90));
+                jPanel2.setMinimumSize(new java.awt.Dimension(81, 80));
+                jPanel2.setName("VIA Station"); // NOI18N
                 jPanel2.setPreferredSize(new java.awt.Dimension(100, 30));
+
+                jButtonViaPlus.setText(mainpskmailui.getString("mainpskmailui.jButtonViaPlus.text")); // NOI18N
+                jButtonViaPlus.setToolTipText(mainpskmailui.getString("mainpskmailui.jButtonViaPlus.TooltipText")); // NOI18N
+                jButtonViaPlus.setMargin(new java.awt.Insets(0, 8, 0, 8));
+                jPanel2.add(jButtonViaPlus);
+
+                jButtonViaMinus.setText(mainpskmailui.getString("mainpskmailui.jButtonViaMinus.text")); // NOI18N
+                jButtonViaMinus.setToolTipText(mainpskmailui.getString("mainpskmailui.jButtonViaMinus.TooltipText")); // NOI18N
+                jButtonViaMinus.setMargin(new java.awt.Insets(0, 8, 0, 8));
+                jPanel2.add(jButtonViaMinus);
 
                 jComboRMsgVia.setMaximumSize(new java.awt.Dimension(150, 20));
                 jComboRMsgVia.setMinimumSize(new java.awt.Dimension(120, 20));
@@ -3109,12 +3127,14 @@ public class mainpskmailui extends javax.swing.JFrame {
                 jPanel2.add(jComboRMsgVia);
 
                 jPanel1.add(jPanel2);
+                jPanel2.getAccessibleContext().setAccessibleName(mainpskmailui.getString("mainpskmailui.jPanel2.AccessibleContext.accessibleName")); // NOI18N
+                jPanel2.getAccessibleContext().setAccessibleDescription(mainpskmailui.getString("mainpskmailui.jPanel2.AccessibleContext.accessibleDescription")); // NOI18N
 
                 jSplitPane2.setLeftComponent(jPanel1);
 
                 scrRadioMessages.setPreferredSize(new java.awt.Dimension(1000, 500));
 
-                tblRadioMsgs.setBackground(new java.awt.Color(224, 251, 224));
+                tblRadioMsgs.setBackground(new java.awt.Color(255, 255, 230));
                 tblRadioMsgs.setModel(new javax.swing.table.DefaultTableModel(
                     new Object [][] {
 
@@ -3181,6 +3201,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                 bRMsgSendPos.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
                 bRMsgSendPos.setForeground(new java.awt.Color(0, 102, 51));
                 bRMsgSendPos.setText(bundle.getString("mainpskmailui.bRMsgSendPos.text")); // NOI18N
+                bRMsgSendPos.setToolTipText(mainpskmailui.getString("mainpskmailui.bRMsgSendPos.toolTipText")); // NOI18N
                 bRMsgSendPos.setMaximumSize(new java.awt.Dimension(110, 27));
                 bRMsgSendPos.setMinimumSize(new java.awt.Dimension(80, 27));
                 bRMsgSendPos.setPreferredSize(new java.awt.Dimension(100, 27));
@@ -3205,18 +3226,33 @@ public class mainpskmailui extends javax.swing.JFrame {
                 });
                 pnlRMSgButtons.add(bRMsgReqPos);
 
-                bRMsgResendPlease.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
-                bRMsgResendPlease.setForeground(new java.awt.Color(12, 134, 40));
-                bRMsgResendPlease.setText(bundle.getString("mainpskmailui.bRMsgResendPlease.text")); // NOI18N
-                bRMsgResendPlease.setMaximumSize(new java.awt.Dimension(110, 25));
-                bRMsgResendPlease.setMinimumSize(new java.awt.Dimension(80, 25));
-                bRMsgResendPlease.setPreferredSize(new java.awt.Dimension(100, 25));
-                bRMsgResendPlease.addActionListener(new java.awt.event.ActionListener() {
+                bRMsgResend.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+                bRMsgResend.setForeground(new java.awt.Color(12, 134, 40));
+                bRMsgResend.setText(bundle.getString("mainpskmailui.bRMsgResend.text")); // NOI18N
+                bRMsgResend.setToolTipText(mainpskmailui.getString("mainpskmailui.bRMsgResend.toolTipText")); // NOI18N
+                bRMsgResend.setMaximumSize(new java.awt.Dimension(110, 25));
+                bRMsgResend.setMinimumSize(new java.awt.Dimension(80, 25));
+                bRMsgResend.setPreferredSize(new java.awt.Dimension(100, 25));
+                bRMsgResend.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        bRMsgResendPleaseActionPerformed(evt);
+                        bRMsgResendActionPerformed(evt);
                     }
                 });
-                pnlRMSgButtons.add(bRMsgResendPlease);
+                pnlRMSgButtons.add(bRMsgResend);
+
+                bRMsgResendPlease1.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+                bRMsgResendPlease1.setForeground(new java.awt.Color(12, 134, 40));
+                bRMsgResendPlease1.setText(bundle.getString("mainpskmailui.bRMsgResendPlease1.text")); // NOI18N
+                bRMsgResendPlease1.setToolTipText(mainpskmailui.getString("mainpskmailui.bRMsgResendDialog.toolTipText")); // NOI18N
+                bRMsgResendPlease1.setMaximumSize(new java.awt.Dimension(110, 25));
+                bRMsgResendPlease1.setMinimumSize(new java.awt.Dimension(80, 25));
+                bRMsgResendPlease1.setPreferredSize(new java.awt.Dimension(100, 25));
+                bRMsgResendPlease1.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        bRMsgResendPlease1ActionPerformed(evt);
+                    }
+                });
+                pnlRMSgButtons.add(bRMsgResendPlease1);
 
                 bRMsgDeleteMsg.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
                 bRMsgDeleteMsg.setForeground(new java.awt.Color(0, 102, 51));
@@ -7638,9 +7674,9 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         }
     }//GEN-LAST:event_bRMsgReqPosActionPerformed
 
-    private void bRMsgResendPleaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgResendPleaseActionPerformed
+    private void bRMsgResendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgResendActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_bRMsgResendPleaseActionPerformed
+    }//GEN-LAST:event_bRMsgResendActionPerformed
 
     private void bRMsgDeleteMsgActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgDeleteMsgActionPerformed
         // TODO add your handling code here:
@@ -7707,6 +7743,39 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             selectedTo = selectedToAlias;
         }
     }//GEN-LAST:event_jRadBtnAliasAndAddressActionPerformed
+
+    private void bRMsgResendPlease1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgResendPlease1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_bRMsgResendPlease1ActionPerformed
+
+    private void jButtonToPlusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonToPlusActionPerformed
+
+                RMsgAddToDialog dialog = new RMsgAddToDialog(new javax.swing.JFrame(), true);
+                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosing(java.awt.event.WindowEvent e) {
+                        System.exit(0);
+                    }
+                });
+                dialog.setVisible(true);
+
+
+
+
+/*
+        // TODO add your handling code here:
+        RMsgAddToDialogOLD mDialog;
+        // TODO add your handling code here:
+        try {
+            //mDialog = new RMsgAddToDialog(this, true);
+            mDialog = new RMsgAddToDialogOLD(this, true);
+            //mDialog.setVisible(true);
+            mDialog.dispose();
+        } catch (Exception ex) {
+            Main.log.writelog(mainpskmailui.getString("Error_when_opening_web_dialog!"), ex, true);
+        }
+                */
+    }//GEN-LAST:event_jButtonToPlusActionPerformed
 
     /**
      * Simple message dialog with yes and no button
@@ -8194,14 +8263,14 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         //TableColumn mycol = tblRadioMsgs.getColumnModel().getColumn(0);
         RMsgDisplayItem mDisplayItem;
         //String mMessageStr;
-        for (int i=0; i<listSize; i++) {
+        for (int i = 0; i < listSize; i++) {
             mDisplayItem = msgDisplayList.getItem(i);
             mRadioMSgTblModel.addRow(new Object[]{mDisplayItem});
         }
-        //Add auto scroll to last item added
-        addScrollRadioMsgsTable();
+        //Scroll to bottom of message list
+        scrollRadioMsgsTableToLast();
     }
-    
+   
     
     void loadRMsgComboBoxes() {
         
@@ -8317,16 +8386,16 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
 
     }
     
-    public void addScrollRadioMsgsTable()
-{
-    tblRadioMsgs.addComponentListener(new ComponentAdapter() {
-        public void componentResized(ComponentEvent e) {
-            int lastIndex =tblRadioMsgs.getRowCount() - 1; 
-            tblRadioMsgs.changeSelection(lastIndex, 0,false,false);
-        }
-    });
-    
-}
+    //Scroll the displyed list of Radio Messages to the last one (received or sent)
+    public void scrollRadioMsgsTableToLast() {
+        //tblRadioMsgs.addComponentListener(new ComponentAdapter() {
+        //    public void componentResized(ComponentEvent e) {
+        int lastIndex = tblRadioMsgs.getRowCount() - 1;
+        tblRadioMsgs.changeSelection(lastIndex, 0, false, false);
+        //    }
+        //});
+
+    }
 
     /**
      * @param args the command line arguments
@@ -8404,7 +8473,8 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JButton bQTC;
     private javax.swing.JButton bRMsgDeleteMsg;
     private javax.swing.JButton bRMsgReqPos;
-    private javax.swing.JButton bRMsgResendPlease;
+    private javax.swing.JButton bRMsgResend;
+    private javax.swing.JButton bRMsgResendPlease1;
     private javax.swing.JButton bRMsgSendPos;
     private javax.swing.JButton bRMsgSendSMS;
     private javax.swing.JButton bSummon;
@@ -8424,6 +8494,8 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JTextField freq4;
     private javax.swing.JButton jButtonToMinus;
     private javax.swing.JButton jButtonToPlus;
+    private javax.swing.JButton jButtonViaMinus;
+    private javax.swing.JButton jButtonViaPlus;
     private javax.swing.JComboBox jComboRMsgTo;
     private javax.swing.JComboBox jComboRMsgVia;
     private javax.swing.JMenuItem jGetIAC;
@@ -8435,7 +8507,6 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JRadioButton jRadBtnAliasAndAddress;
     private javax.swing.JRadioButton jRadBtnAliasOnly;

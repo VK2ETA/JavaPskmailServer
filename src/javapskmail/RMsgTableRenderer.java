@@ -28,7 +28,8 @@ public class RMsgTableRenderer extends JTextArea implements TableCellRenderer
 
     Border paddingSent = BorderFactory.createEmptyBorder(0, 150, 0, 0);
     Border paddingReceived = BorderFactory.createEmptyBorder(0, 0, 0, 0);
-    Color badCrcColor = new Color(255, 116, 72);
+    Color badCrcColor = new Color(255, 150, 100);
+    Color badCrcColorSelected = new Color(210, 58, 36);
     
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
@@ -44,7 +45,11 @@ public class RMsgTableRenderer extends JTextArea implements TableCellRenderer
             }
             setBorder(mItem.myOwn ? paddingSent : paddingReceived);
             if (isSelected) {
-                this.setBackground(table.getSelectionBackground());
+                if (mItem.mMessage.crcValid || mItem.mMessage.crcValidWithPW) {
+                    this.setBackground(table.getSelectionBackground());
+                } else {
+                    this.setBackground(badCrcColorSelected);
+                }
             } else {
                 if (mItem.mMessage.crcValid || mItem.mMessage.crcValidWithPW) {
                     this.setBackground(table.getBackground());

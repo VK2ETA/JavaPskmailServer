@@ -1246,6 +1246,8 @@ public class Modem implements Runnable {
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         Main.mainui.mRadioMSgTblModel.addRow(new Object[]{sentItem});
+                        //Scroll to bottom
+                        Main.mainui.scrollRadioMsgsTableToLast();
                     }
                 });
             }

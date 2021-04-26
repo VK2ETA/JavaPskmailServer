@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "0.9.3.22";
+    static String version = "0.9.3.23";
     static String application = "jpskmailserver " + version;// Used to preset an empty status
-    static String versionDate = "20210419";
+    static String versionDate = "20210426";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -63,8 +63,8 @@ public class Main {
     static final String DirInbox = "RadioMsgInbox";
     static final String DirArchive = "RadioMsgArchive";
     static final String DirSent = "RadioMsgSentbox";
-    static final String DirTemp = "Temp";
-    static final String DirLogs = "Logs";
+    //static final String DirTemp = "Temp";
+    //static final String DirLogs = "Logs";
     static final String DirImages = "RadioMsg-Images";
     static final String messageLogFile = "RadioMsg.log";
     //
@@ -1740,15 +1740,26 @@ public class Main {
                 Mailheaderswindow += fl;
             }
             br.close();
+            
             //Create RadioMsgInbox
             File RadioMsgInbox = new File(HomePath + Dirprefix + DirInbox + Separator);
             if (!RadioMsgInbox.isDirectory()) {
                 RadioMsgInbox.mkdir();
             }
-            //Create RadioMsgInbox
-            File RadioMsgPictures = new File(HomePath + Dirprefix + DirImages + Separator);
-            if (!RadioMsgPictures.isDirectory()) {
-                RadioMsgPictures.mkdir();
+            //Create RadioMsgSentbox
+            File RadioMsgSentbox = new File(HomePath + Dirprefix + DirSent + Separator);
+            if (!RadioMsgSentbox.isDirectory()) {
+                RadioMsgSentbox.mkdir();
+            }
+            //Create RadioMsgImages
+            File RadioMsgImages = new File(HomePath + Dirprefix + DirImages + Separator);
+            if (!RadioMsgImages.isDirectory()) {
+                RadioMsgImages.mkdir();
+            }
+            //Create RadioMsgArchive Directory
+            File RadioMsgArchive = new File(HomePath + Dirprefix + DirArchive + Separator);
+            if (!RadioMsgArchive.isDirectory()) {
+                RadioMsgArchive.mkdir();
             }
         } catch (Exception ex) {
             log.writelog("Problem when handling pskmail folder structure.", ex, true);
