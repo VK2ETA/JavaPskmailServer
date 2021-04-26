@@ -438,6 +438,12 @@ public class RMsgProcessor {
                                         c1.setTime(msgDateTime);
                                         //Body
                                         smsString = getBodyTextFromMessage(msg);
+                                        if (smsString.startsWith("\n")) {
+                                            smsString = smsString.substring(1);
+                                        }
+                                        if (smsString.endsWith("\r\n\r\n")) {
+                                            smsString = smsString.substring(0, smsString.length() - 4);
+                                        }
                                         if (smsString.length() > 155) {
                                             smsString = smsString.subSequence(0, 155 - 1) + " ...>";
                                         }
@@ -452,7 +458,8 @@ public class RMsgProcessor {
                                         } else {
                                             //Not a reply to a previous radio message, add the subject line
                                             if (!smsSubject.contains("Radio Message from ")
-                                                    && !smsSubject.contains("Reply from ")) {
+                                                    && !smsSubject.contains("Reply from ")
+                                                    && !smsSubject.trim().equals("")) {
                                                 smsString = smsSubject
                                                         + "\n" + smsString;
                                             }
@@ -1038,6 +1045,12 @@ public class RMsgProcessor {
                     //Only if the filter matches the requesting callsign
                     if (tos[j] != null && (tos[j].equals("*") || mMessage.from.toLowerCase(Locale.US).equals(tos[j].toLowerCase(Locale.US)))) {
                         String smsString = getBodyTextFromMessage(msg);
+                        if (smsString.startsWith("\n")){
+                            smsString = smsString.substring(1);
+                        }
+                        if (smsString.endsWith("\r\n\r\n")){
+                            smsString = smsString.substring(0, smsString.length() - 4);
+                        }
                         if (smsString.length() > charLimit) {
                             smsString = smsString.subSequence(0, charLimit - 1) + " ...>";
                         }
@@ -1045,8 +1058,9 @@ public class RMsgProcessor {
                         //If is NOT an SMS reply, add subject line
                         if (phoneNumber.equals("")) {
                             //Not a reply to a previous radio message, add the subject line
-                           if (!smsSubject.contains("Radio Message from ")
-                                    && !smsSubject.contains("SMS received from ")) {
+                            if (!smsSubject.contains("Radio Message from ")
+                                    && !smsSubject.contains("SMS received from ")
+                                    && !smsSubject.trim().equals("")) {
                                 smsString = "Subject: " + smsSubject
                                         + "\n" + smsString;
                             }
