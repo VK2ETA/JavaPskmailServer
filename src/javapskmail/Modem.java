@@ -108,6 +108,7 @@ public class Modem implements Runnable {
     private Socket sock = null;
     private boolean fldigiRunning = false;
     private boolean cantLaunchFldigi = false;
+    private boolean exitingSoon = false;
     public RMsgObject txMessage = null;
 //   
 
@@ -345,8 +346,10 @@ public class Modem implements Runnable {
         return result;
     }
  
-    public int killFldigi() {
+    public int killFldigi(boolean killToExit) {
         int result = -1;
+        //Set flag to prevent unecessary error messages
+        exitingSoon = killToExit;
 
         String outProcLine;
         //Kill
@@ -720,7 +723,9 @@ public class Modem implements Runnable {
 //         System.out.println( myChar);
             return myChar;
         } catch (IOException e) {
-            System.out.println("Error reading from modem (IOException): " + e);
+            if (!exitingSoon) {
+                System.out.println("Error reading from modem (IOException): " + e);
+            }
             //Modem was forcibly killed either by operator or the program monitoring
             return '\0';  // should not happen.
         } catch (Exception e) {
@@ -1172,8 +1177,9 @@ public class Modem implements Runnable {
     }
 
     private void saveSentRadioMSg() {
+        RMsgObject txedMessage = RMsgTxList.getOldestSent(); //Has to be the one just sent
         //Save message into Sent folder if tx is not aborted and is not selcall
-        if (txMessage != null  && !txMessage.rxMode.equals("CCIR493")) {
+        if (txedMessage != null  && !txedMessage.rxMode.equals("CCIR493")) {
             Calendar c1 = Calendar.getInstance(TimeZone.getDefault());
             //Adjust time so that is is accurate if using GPS time
             //Not on laptops
@@ -1186,7 +1192,7 @@ public class Modem implements Runnable {
             //Save the text part of the message
             String sentFolderPath = Main.HomePath
                     + Main.Dirprefix + Main.DirSent + Main.Separator;
-            txMessage.fileName = sentFileNameString;
+            txedMessage.fileName = sentFileNameString;
             File msgSentFile = new File(sentFolderPath + sentFileNameString);
             if (msgSentFile.exists()) {
                 msgSentFile.delete();
@@ -1194,7 +1200,7 @@ public class Modem implements Runnable {
             try {
                 FileWriter sentFile = null;
                 sentFile = new FileWriter(msgSentFile, true);
-                String stringToSave = txMessage.formatForStorage(false);
+                String stringToSave = txedMessage.formatForStorage(false);
                 sentFile.write(stringToSave);
                 sentFile.close();
             } catch (IOException e) {
@@ -1237,14 +1243,17 @@ public class Modem implements Runnable {
             int whichFolders = 3;
             if (whichFolders == 2 || whichFolders == 3) {
                 //Add to Display list
-                final RMsgObject txFinalMessage = RMsgObject.extractMsgObjectFromFile(Main.DirSent, sentFileNameString, false); //Text part only
-                Main.mainui.msgDisplayList.addNewItem(txFinalMessage, true); //Is my own message
+                //final RMsgObject txFinalMessage = RMsgObject.extractMsgObjectFromFile(Main.DirSent, sentFileNameString, false); //Text part only
+                Main.mainui.msgDisplayList.addNewItem(txedMessage, true); //Is my own message
                 //VK2ETA test debug changing filename of received SMS
                 //RadioMSG.msgDisplayList.notifyDataSetChanged();
-                final RMsgDisplayItem sentItem = new RMsgDisplayItem(txFinalMessage, 0, 0, false, true); //My own 
+                //final RMsgDisplayItem sentItem = new RMsgDisplayItem(txFinalMessage, 0, 0, false, true); //My own 
                 //Add to displayed table of messages on GUI thread
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
+                        RMsgObject txedMessage = RMsgTxList.removeOldestSent(); //Must be the one just sent
+                        txedMessage.crcValid = true;
+                        final RMsgDisplayItem sentItem = new RMsgDisplayItem(txedMessage, 0, 0, false, true); //My own 
                         Main.mainui.mRadioMSgTblModel.addRow(new Object[]{sentItem});
                         //Scroll to bottom
                         Main.mainui.scrollRadioMsgsTableToLast();
@@ -1293,12 +1302,5 @@ public class Modem implements Runnable {
         GetBlock();
     }
   
-    	private double decayAverage(double average, double input, double weight) {
-        if (weight <= 1.0) {
-            return input;
-        }
-        return input * (1.0 / weight) + average * (1.0 - (1.0 / weight));
-    }
-
 }  // end Modem
 

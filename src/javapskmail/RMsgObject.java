@@ -43,6 +43,7 @@ public class RMsgObject {
     String rxMode;
     String accessPasswordUsed;
     String timeId;
+    Boolean sent;
 
     //Blank object constructor
     public RMsgObject() {
@@ -68,7 +69,8 @@ public class RMsgObject {
         this.crcValidWithPW =false;
         this.rxMode = "";
         this.accessPasswordUsed = "";
-        this.timeId ="";
+        this.timeId = "";
+        this.sent = false;
     }
 
 
@@ -95,6 +97,7 @@ public class RMsgObject {
         this.rxMode = ""; //No mode provided
         this.accessPasswordUsed = "";
         this.timeId = "";
+        this.sent = false;
     }
 
 
@@ -157,7 +160,6 @@ public class RMsgObject {
     public String formatForList(boolean trackedFormat) {
 
         String formattedString = "";
-        String timeToDestString = "";
 
         if (trackedFormat) {
 /* not yet            if (!this.sms.equals("")) {

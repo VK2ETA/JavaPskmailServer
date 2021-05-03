@@ -134,6 +134,7 @@ public class AddressBook extends javax.swing.JFrame  {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
+        jLabel9 = new javax.swing.JLabel();
         pnlButtons = new javax.swing.JPanel();
         bNew = new javax.swing.JButton();
         bProperties = new javax.swing.JButton();
@@ -163,6 +164,12 @@ public class AddressBook extends javax.swing.JFrame  {
         txtMMSI = new javax.swing.JTextField();
         lblNickname = new javax.swing.JLabel();
         txtNickname = new javax.swing.JTextField();
+        jPanel1 = new javax.swing.JPanel();
+        checkTo = new javax.swing.JCheckBox();
+        checkVia = new javax.swing.JCheckBox();
+        textEmailAlias = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        textMobileAlias = new javax.swing.JTextField();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuFile = new javax.swing.JMenu();
         mnuOpenFile = new javax.swing.JMenuItem();
@@ -174,15 +181,19 @@ public class AddressBook extends javax.swing.JFrame  {
         mnuCopy = new javax.swing.JMenuItem();
         mnuPaste = new javax.swing.JMenuItem();
 
-        setMinimumSize(new java.awt.Dimension(454, 373));
+        jLabel9.setText(bundle.getString("AddressBook.jLabel9.text")); // NOI18N
+
+        setMaximumSize(new java.awt.Dimension(550, 463));
+        setMinimumSize(new java.awt.Dimension(550, 373));
         setName("AddressBook"); // NOI18N
+        setPreferredSize(new java.awt.Dimension(550, 463));
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
         pnlButtons.setMinimumSize(new java.awt.Dimension(500, 35));
         pnlButtons.setPreferredSize(new java.awt.Dimension(100, 35));
         pnlButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        bNew.setFont(new java.awt.Font("Ubuntu", 1, 12));
+        bNew.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("javapskmail/Bundle"); // NOI18N
         bNew.setText(bundle.getString("AddressBook.bNew.text")); // NOI18N
         bNew.addActionListener(new java.awt.event.ActionListener() {
@@ -192,7 +203,7 @@ public class AddressBook extends javax.swing.JFrame  {
         });
         pnlButtons.add(bNew);
 
-        bProperties.setFont(new java.awt.Font("Ubuntu", 1, 12));
+        bProperties.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
         bProperties.setText(bundle.getString("AddressBook.bProperties.text")); // NOI18N
         bProperties.setMinimumSize(new java.awt.Dimension(85, 27));
         bProperties.setPreferredSize(new java.awt.Dimension(85, 27));
@@ -203,7 +214,7 @@ public class AddressBook extends javax.swing.JFrame  {
         });
         pnlButtons.add(bProperties);
 
-        bDelete.setFont(new java.awt.Font("Ubuntu", 1, 12));
+        bDelete.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
         bDelete.setText(bundle.getString("AddressBook.bDelete.text")); // NOI18N
         bDelete.setMinimumSize(new java.awt.Dimension(85, 27));
         bDelete.setPreferredSize(new java.awt.Dimension(85, 27));
@@ -306,7 +317,7 @@ public class AddressBook extends javax.swing.JFrame  {
         jLabel5.setText(bundle.getString("AddressBook.jLabel5.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
         pnlBottom.add(jLabel5, gridBagConstraints);
@@ -375,7 +386,7 @@ public class AddressBook extends javax.swing.JFrame  {
         txtNotes.setEditable(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -419,7 +430,7 @@ public class AddressBook extends javax.swing.JFrame  {
         jLabel8.setText(bundle.getString("AddressBook.jLabel8.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
         pnlBottom.add(jLabel8, gridBagConstraints);
@@ -429,7 +440,7 @@ public class AddressBook extends javax.swing.JFrame  {
         txtMobilePhone.setPreferredSize(new java.awt.Dimension(150, 28));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 0.1;
@@ -438,8 +449,8 @@ public class AddressBook extends javax.swing.JFrame  {
 
         lblMMSI.setText(bundle.getString("AddressBook.lblMMSI.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
         pnlBottom.add(lblMMSI, gridBagConstraints);
@@ -448,8 +459,8 @@ public class AddressBook extends javax.swing.JFrame  {
         txtMMSI.setMinimumSize(new java.awt.Dimension(130, 28));
         txtMMSI.setPreferredSize(new java.awt.Dimension(150, 28));
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 0.1;
@@ -458,14 +469,14 @@ public class AddressBook extends javax.swing.JFrame  {
 
         lblNickname.setText(bundle.getString("AddressBook.lblNickname.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
         pnlBottom.add(lblNickname, gridBagConstraints);
 
         txtNickname.setText(bundle.getString("AddressBook.txtNickname.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 0.1;
@@ -480,6 +491,67 @@ public class AddressBook extends javax.swing.JFrame  {
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         getContentPane().add(pnlBottom, gridBagConstraints);
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(bundle.getString("AddressBook.rmsgTitle.text"))); // NOI18N
+        jPanel1.setMinimumSize(new java.awt.Dimension(120, 180));
+        jPanel1.setName(""); // NOI18N
+        jPanel1.setPreferredSize(new java.awt.Dimension(120, 220));
+
+        checkTo.setText(bundle.getString("AddressBook.checkTo.text")); // NOI18N
+        checkTo.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+        checkTo.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+
+        checkVia.setText(bundle.getString("AddressBook.checkVia.text")); // NOI18N
+        checkVia.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        checkVia.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
+
+        textEmailAlias.setText(bundle.getString("AddressBook.textEmailAlias.text")); // NOI18N
+
+        jLabel10.setText(bundle.getString("AddressBook.jLabel10.text")); // NOI18N
+
+        textMobileAlias.setText(bundle.getString("AddressBook.textMobileAlias.text")); // NOI18N
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(checkVia, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(checkTo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(textEmailAlias, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(textMobileAlias))
+                .addContainerGap())
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(22, 22, 22)
+                .addComponent(jLabel10)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(checkTo)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(checkVia)
+                .addGap(24, 24, 24)
+                .addComponent(jLabel10)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(textEmailAlias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(textMobileAlias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        checkTo.getAccessibleContext().setAccessibleName(bundle.getString("AddressBook.checkTo.AccessibleContext.accessibleName")); // NOI18N
+        checkVia.getAccessibleContext().setAccessibleName(bundle.getString("AddressBook.checkVia.AccessibleContext.accessibleName")); // NOI18N
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.weightx = 0.001;
+        getContentPane().add(jPanel1, gridBagConstraints);
 
         mnuFile.setText(bundle.getString("AddressBook.mnuFile.text")); // NOI18N
 
@@ -798,7 +870,10 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private javax.swing.JButton bDelete;
     private javax.swing.JButton bNew;
     private javax.swing.JButton bProperties;
+    private javax.swing.JCheckBox checkTo;
+    private javax.swing.JCheckBox checkVia;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -806,7 +881,9 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblMMSI;
@@ -824,6 +901,8 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private javax.swing.JPanel pnlBottom;
     private javax.swing.JPanel pnlButtons;
     private javax.swing.JPanel pnlTop;
+    private javax.swing.JTextField textEmailAlias;
+    private javax.swing.JTextField textMobileAlias;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtFirstName;
     private javax.swing.JTextField txtHamCall;

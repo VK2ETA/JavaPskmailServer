@@ -32,6 +32,11 @@ public class contact {
     private String Email;
     private String MMSI;
     private String Notes;
+    //VK2ETA: add Radio Msg fields
+    private Boolean showInTO;
+    private Boolean showInVIA;
+    private String MobilePhoneAlias;
+    private String EmailAlias;    
 
     public contact(){
         super();
@@ -49,6 +54,10 @@ public class contact {
         Email="";
         MMSI="";
         Notes="";
+        showInTO = false;
+        showInVIA = false;
+        MobilePhoneAlias = "";
+        EmailAlias = "";
     }
 
     /**
@@ -104,6 +113,10 @@ public class contact {
         output += "\"" + this.getEmail()+ "\",";
         output += "\"" + this.getNotes()+ "\",";
         output += "\"" + this.getNickname()+ "\"";
+        output += "\"" + this.getShowInTO()+ "\"";
+        output += "\"" + this.getShowInVIA()+ "\"";
+        output += "\"" + this.getEmailAlias()+ "\"";
+        output += "\"" + this.getMobilePhoneAlias()+ "\"";
         return output;
     }
 
@@ -159,6 +172,22 @@ public class contact {
     public String getMobilePhone() {
         return MobilePhone;
     }
+    
+    public String getShowInTO() {
+        return (showInTO ? "Y": "N");
+    }
+   
+    public String getShowInVIA() {
+        return (showInVIA ? "Y": "N");
+    }
+
+    public String getMobilePhoneAlias() {
+        return MobilePhoneAlias;
+    }
+
+    public String getEmailAlias() {
+        return EmailAlias;
+    }
 
     public void setMobilePhone(String MobilePhone) {
         this.MobilePhone = MobilePhone;
@@ -194,5 +223,21 @@ public class contact {
     
     public void setNickname(String myNickname){
         this.Nickname = myNickname;
+    }
+    
+    public void setShowInTO(Boolean showInTO) {
+        this.showInTO = showInTO;
+    }
+   
+    public void setShowInVIA(Boolean showInVIA) {
+        this.showInVIA = showInVIA;
+    }
+
+    public void setMobilePhoneAlias(String MobilePhoneAlias) {
+        this.MobilePhoneAlias = MobilePhoneAlias;
+    }
+
+    public void setEmailAlias(String EmailAlias) {
+        this.EmailAlias = EmailAlias;
     }
 }

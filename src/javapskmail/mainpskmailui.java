@@ -469,7 +469,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                                 //We have a hang modem, request an Flgdigi restart
                                 //NO, just kill it
                                 System.out.println("Modem test period exausted, Killing modem process");
-                                Main.m.killFldigi();
+                                Main.m.killFldigi(false); //We are going to restart the modem. not final task kill
                                 //Main.requestModemRestart = true;
                                 //System.out.println("Modem test period exausted, requesting modem restart");
                                 //Reset test flag
@@ -4137,7 +4137,7 @@ private void mnuQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
             Main.m.in.close();
         }
 
-        Main.m.killFldigi();
+        Main.m.killFldigi(true); //We are exiting
 
     } catch (IOException ex) {
         Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
@@ -6107,7 +6107,7 @@ private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:even
             Main.m.in.close();
         }
 
-        Main.m.killFldigi();
+        Main.m.killFldigi(true); //Kill Fldigi to exit
 
     } catch (IOException ex) {
         Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
@@ -7676,6 +7676,18 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
 
     private void bRMsgResendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgResendActionPerformed
         // TODO add your handling code here:
+        if (selectedTo.equals("*") && selectedVia.equals("")) {
+            //middleToastText("CAN'T Request Positions from \"ALL\"\n\nSelect a single TO destination above");
+        //} else if (RMsgProcessor.matchMyCallWith(selectedTo, false)) {
+            //middleToastText("CAN'T Request Positions from \"YOURSELF\"\n\nSelect another TO destination above");
+        } else {
+            String intext = txtMainEntry.getText();
+            String toStr = selectedVia.equals("") ? selectedTo : "*";
+            RMsgTxList.addMessageToList(toStr, selectedVia, "*qtc?" + " " + intext,
+                    false, null, 0,
+                    null);
+            txtMainEntry.setText("");
+        }
     }//GEN-LAST:event_bRMsgResendActionPerformed
 
     private void bRMsgDeleteMsgActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgDeleteMsgActionPerformed

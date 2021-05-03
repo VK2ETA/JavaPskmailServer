@@ -19,7 +19,7 @@ import java.util.LinkedList;
 
 public class RMsgTxList {
 
-    public static LinkedList messageList = new LinkedList();
+    public static final LinkedList messageList = new LinkedList();
 
 
     //Get length of message list
@@ -39,7 +39,8 @@ public class RMsgTxList {
         //Iterate through the list and count only the locations with updated gps coordinates
         for (int ii=0; ii < listLength; ii++) {
             messageObject = (RMsgObject) messageList.get(ii);
-            if (!messageObject.msgHasPosition || (messageObject.msgHasPosition && messageObject.position != null)) {
+            if ((!messageObject.msgHasPosition || (messageObject.msgHasPosition && messageObject.position != null))
+                    && !messageObject.sent) {
                 availableforTx++;
             }
         }
@@ -59,20 +60,61 @@ public class RMsgTxList {
             //Iterate through the list and count only the locations with updated gps coordinates
             for (int ii=listLength - 1; ii >= 0; ii--) {
                 messageObject = (RMsgObject) messageList.get(ii);
-                if (!messageObject.msgHasPosition || (messageObject.msgHasPosition && messageObject.position != null)) {
-                    return (RMsgObject) messageList.remove(ii);
+                if ((!messageObject.msgHasPosition || (messageObject.msgHasPosition && messageObject.position != null))
+                        && !messageObject.sent) {
+                    //Mark the object as sent as this is called from the send function
+                    messageObject.sent = true;
+                    messageList.set(ii, messageObject);
+                    return (RMsgObject) messageObject;  //.remove(ii);
                 }
             }
         }
         return null;
     }
 
+    //Get last message of list (the oldest in the FIFO queue) which has been marked as SENT
+    synchronized public static RMsgObject getOldestSent() {
+        synchronized (messageList) {
+            RMsgObject messageObject = null;
+            int listLength = messageList.size();
 
+            if (listLength > 0) {
+                //Iterate through the list and return the oldest item marked as sent
+                for (int ii = listLength - 1; ii >= 0; ii--) {
+                    messageObject = (RMsgObject) messageList.get(ii);
+                    if ((!messageObject.msgHasPosition || (messageObject.msgHasPosition && messageObject.position != null))
+                            && messageObject.sent) {
+                        return (RMsgObject) messageList.get(ii);
+                    }
+                }
+            }
+            return null;
+        }
+    }
+
+    //GET AND REMOVE last message of list (the oldest in the FIFO queue) which has been marked as SENT
+    synchronized public static RMsgObject removeOldestSent() {
+        synchronized (messageList) {
+            RMsgObject messageObject = null;
+            int listLength = messageList.size();
+
+            if (listLength > 0) {
+                //Iterate through the list and return the oldest item marked as sent
+                for (int ii = listLength - 1; ii >= 0; ii--) {
+                    messageObject = (RMsgObject) messageList.get(ii);
+                    if ((!messageObject.msgHasPosition || (messageObject.msgHasPosition && messageObject.position != null))
+                            && messageObject.sent) {
+                        return (RMsgObject) messageList.remove(ii);
+                    }
+                }
+            }
+            return null;
+        }
+    }
 
     //Get (and remove) the earliest message in the list (the youngest in the FIFO queue)
     // Includes objects that are awaiting location updates
     synchronized public static RMsgObject getLatest() {
-        RMsgObject messageObject = null;
         int listLength = messageList.size();
 
         if (listLength > 0) {
@@ -80,8 +122,6 @@ public class RMsgTxList {
         }
         return null;
     }
-
-
 
     //Iterate through the list and update the locations with currently
     // passed location if the boolean msgHasPosition is true AND the location is null
@@ -91,30 +131,26 @@ public class RMsgTxList {
 
         //Iterate through the list and update the locations with currently
         // passed location if the boolean msgHasPosition is true AND the location is null
-        for (int ii=0; ii < listLength; ii++) {
+        for (int ii = 0; ii < listLength; ii++) {
             messageObject = (RMsgObject) messageList.get(ii);
             if (messageObject.msgHasPosition && messageObject.position == null) {
                 messageObject.position = msgLocation;
-                messageObject.positionAge = (int)((System.currentTimeMillis() - messageObject.positionRequestTime) / 1000);
+                messageObject.positionAge = (int) ((System.currentTimeMillis() - messageObject.positionRequestTime) / 1000);
                 messageList.set(ii, messageObject);
             }
         }
     }
 
-
-
     //Without image data
     synchronized public static void addMessageToList(String msgTo, String via, String msgSms,
-                                                          Boolean msgHasPosition, RMsgLocation msgLocation, long positionRequestTime,
-                                                          Short[] msgVoiceMessage) {
+            Boolean msgHasPosition, RMsgLocation msgLocation, long positionRequestTime,
+            Short[] msgVoiceMessage) {
 
         RMsgObject messageObject = new RMsgObject(msgTo, via, msgSms, null, 0, false, 0, msgHasPosition,
                 msgLocation, positionRequestTime, msgVoiceMessage);
         messageObject.from = RMsgProcessor.getCall();
         messageList.addFirst(messageObject);
     }
-
-
 
     //With image data
     synchronized public static void addMessageToList(String msgTo, String via, String msgSms,
