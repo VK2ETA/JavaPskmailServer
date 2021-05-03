@@ -322,6 +322,7 @@ public class AddressBook extends javax.swing.JFrame  {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
         pnlBottom.add(jLabel5, gridBagConstraints);
 
+        jLabel6.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
         jLabel6.setText(bundle.getString("AddressBook.jLabel6.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -407,6 +408,7 @@ public class AddressBook extends javax.swing.JFrame  {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 5);
         pnlBottom.add(txtEmail, gridBagConstraints);
 
+        jLabel7.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
         jLabel7.setText(bundle.getString("AddressBook.jLabel7.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -427,6 +429,7 @@ public class AddressBook extends javax.swing.JFrame  {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 5);
         pnlBottom.add(txtOtherCall, gridBagConstraints);
 
+        jLabel8.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
         jLabel8.setText(bundle.getString("AddressBook.jLabel8.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -492,15 +495,17 @@ public class AddressBook extends javax.swing.JFrame  {
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         getContentPane().add(pnlBottom, gridBagConstraints);
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(bundle.getString("AddressBook.rmsgTitle.text"))); // NOI18N
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("AddressBook.rmsgTitle.text"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 3, 12))); // NOI18N
         jPanel1.setMinimumSize(new java.awt.Dimension(120, 180));
         jPanel1.setName(""); // NOI18N
         jPanel1.setPreferredSize(new java.awt.Dimension(120, 220));
 
+        checkTo.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
         checkTo.setText(bundle.getString("AddressBook.checkTo.text")); // NOI18N
         checkTo.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
         checkTo.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
+        checkVia.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
         checkVia.setText(bundle.getString("AddressBook.checkVia.text")); // NOI18N
         checkVia.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         checkVia.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
