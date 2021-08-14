@@ -1,18 +1,7 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package javapskmail;
-
-/**
+ * RMsgUtil.java  
  *
- * @author jdouyere
- */
-/*
- * Message.java  
- *
- * Copyright (C) 2014 John Douyere (VK2ETA) 
+ * Copyright (C) 2014-2021 John Douyere (VK2ETA) 
  *
  * This program is distributed in the hope that it will be useful,  
  * but WITHOUT ANY WARRANTY; without even the implied warranty of  
@@ -24,6 +13,7 @@ package javapskmail;
  *
  */
 
+package javapskmail;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

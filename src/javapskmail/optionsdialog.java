@@ -1,7 +1,8 @@
 /*
- * optionsdalog.java  
+ * optionsdialog.java  
  *   
  * Copyright (C) 2008 Pär Crusefalk (SM0RWO)  
+ * Copyright (C) 2018-2021 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
  *   
  * This program is distributed in the hope that it will be useful,  
  * but WITHOUT ANY WARRANTY; without even the implied warranty of  
@@ -1421,7 +1422,7 @@ public class optionsdialog extends javax.swing.JDialog {
                     .addGroup(jPanel9Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jLabel30)))
-                .addContainerGap(32, Short.MAX_VALUE))
+                .addContainerGap(23, Short.MAX_VALUE))
         );
         jPanel9Layout.setVerticalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1496,7 +1497,7 @@ public class optionsdialog extends javax.swing.JDialog {
                             .addGroup(jPanel10Layout.createSequentialGroup()
                                 .addGap(18, 18, 18)
                                 .addComponent(checkboxSendUsingLocalNumber)))))
-                .addContainerGap(31, Short.MAX_VALUE))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
         jPanel10Layout.setVerticalGroup(
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2299,6 +2300,7 @@ public class optionsdialog extends javax.swing.JDialog {
         tabOptions.addTab("Modes", jPanel2);
 
         getContentPane().add(tabOptions, new java.awt.GridBagConstraints());
+        tabOptions.setEnabledAt(3, false);
 
         pnlButtons.setMinimumSize(new java.awt.Dimension(400, 35));
         pnlButtons.setPreferredSize(new java.awt.Dimension(435, 35));

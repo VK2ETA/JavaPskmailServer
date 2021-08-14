@@ -595,22 +595,26 @@ public class arq {
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXPing:
+                send_txrsid_command("ON");
                 info = pingblock();
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXPingReply:
+                send_txrsid_command("ON");
                 info = replyPingblock();
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXInq:
+                send_txrsid_command("ON");
                 //    System.out.println("INQ");
                 info = inquireblock();
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXInqReply:
+                send_txrsid_command("ON");
                 //    System.out.println("INQ Reply");
                 info = replyInquireblock();
                 Lastblockinframe = 1;
@@ -677,6 +681,8 @@ public class arq {
             case TXStat:
                 if (Main.justReceivedRSID) {
                     rxRsidCounter++;
+                } else {
+                    rxRsidCounter = 0;
                 }
                 if (rxRsidCounter > 1 && (Main.TxModem == modemmodeenum.MFSK32
                         || Main.TxModem == modemmodeenum.MFSK64

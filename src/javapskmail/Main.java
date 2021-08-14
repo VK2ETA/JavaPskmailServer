@@ -2,7 +2,7 @@
  * Main.java
  * 
  * Copyright (C) 2008 Pär Crusefalk and Rein Couperus
- * Copyright (C) 2018-2020 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
+ * Copyright (C) 2018-2021 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -12,6 +12,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package javapskmail;
 
 import java.io.*;
@@ -33,9 +34,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "0.9.3.23";
+    static String version = "0.9.4.a24";
     static String application = "jpskmailserver " + version;// Used to preset an empty status
-    static String versionDate = "20210426";
+    static String versionDate = "20210814";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -433,7 +434,7 @@ public class Main {
 
             // Main  loop
             q.send_rsid_command("ON");
-            q.send_txrsid_command("ON");
+            //q.send_txrsid_command("ON");
 
             //Launch separate thread to monitor and relay incoming emails and messages if required
             RMsgProcessor.startEmailsAndSMSsMonitor();
@@ -461,7 +462,7 @@ public class Main {
                         Main.TXActive = true; //Moved up to prevent change in mode when replying
                         m.txMessage = RMsgTxList.getOldest();
                         //Set TxId
-                        q.send_txrsid_command("ON");
+                        //q.send_txrsid_command("ON");
                         m.Sendln(SendCommand);
                         SendCommand = "";
                         Thread.sleep(100);
@@ -615,8 +616,8 @@ public class Main {
                                                 || Main.TxModem == modemmodeenum.MFSK8
                                                 || Main.TxModem == modemmodeenum.DOMINOEX5) {
                                             q.send_txrsid_command("ON");
-                                        } else {
-                                            q.send_txrsid_command("OFF");
+                                        //} else {
+                                        //    q.send_txrsid_command("OFF");
                                         }
                                         //Adjust my TX mode (as a server) AND the Client's TX modes
                                         pint = (pint - 32) * 100 / 90;
@@ -745,9 +746,8 @@ public class Main {
                                 if (Blockline.contains(q.servercall)) {
                                     //Pattern ppc = Pattern.compile(".*(\\d\\.\\d).*\\-\\d+:\\d+:(\\d+)\\-(.*)M(\\d+)");
                                     Pattern ppc = Pattern.compile(".*\\S+\\s\\S+\\s(\\S{3}).*\\-\\d+:\\d+:(\\d+)\\-(.*)M(\\d+)");
-//System.out.println(Blockline);
+                                    //System.out.println(Blockline);
                                     Matcher mpc = ppc.matcher(Blockline);
-
                                     connectsecond = "";
                                     String localmail = "";
                                     if (mpc.lookingAt()) {
@@ -773,7 +773,8 @@ public class Main {
                                             //   System.out.println(Main.TX_Text);                                        
                                         }
                                     } else {
-                                        Pattern pps = Pattern.compile(".*" + q.servercall + " V(\\d{1,2}\\.\\d{1,2}\\.\\d{1,2}),\\sHi.*");
+                                        //Mini-server connection, "Hi" message
+                                        Pattern pps = Pattern.compile(".*" + q.servercall + " V(\\d{1,2}\\.\\d{1,2}\\.\\d{1,2})(.\\d{1,2}){0,1}, Hi.*");
                                         //System.out.println(Blockline);
                                         Matcher mps = pps.matcher(Blockline);
                                         if (mps.lookingAt()) {
@@ -1303,7 +1304,7 @@ public class Main {
                                     Main.TX_Text += serverMail.getPendingList(serverCall, TTYCaller);
                                     Main.TX_Text += Motd + "\n";
                                     //We are now fully connected, stop TxIDs
-                                    q.send_txrsid_command("OFF");
+                                    //q.send_txrsid_command("OFF");
                                     myrxstatus = sm.getTXStatus();
                                     q.send_status(myrxstatus);  // send our status
                                 }
@@ -1501,7 +1502,7 @@ public class Main {
                                     }
                                     isDisconnected = true;
                                     //Set RXid ON for next connect request
-                                    q.send_txrsid_command("OFF");
+                                    //q.send_txrsid_command("OFF");
                                     q.send_rsid_command("ON");
                                     // send disconnect packet to caller...
                                     q.send_disconnect();
@@ -1572,7 +1573,7 @@ public class Main {
                                     isDisconnected = true;
                                     Main.RxDelay = Main.initialRxDelay;
                                     //Set RXid ON for next connect request
-                                    q.send_txrsid_command("OFF");
+                                    //q.send_txrsid_command("OFF");
                                     q.send_rsid_command("ON");
                                 } else if (TTYConnected.equals("Connected")) {
                                     // We are in a session, send a poll

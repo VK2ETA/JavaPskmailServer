@@ -1,8 +1,23 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * AddressBook.java
+ *
+ * Copyright (C) 2011 Pär Crusefalk (SM0RWO)
+ * Copyright (C) 2018-2021 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * This is a contact manager that handles...well, contacts.
+ * Its pretty simple but simplicity is also powerful :-)
+ * 
+ * Created on 2011-okt-02, 10:35:51
  */
+
 package javapskmail;
 
 import java.nio.ByteBuffer;

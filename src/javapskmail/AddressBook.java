@@ -2,6 +2,7 @@
  * AddressBook.java
  *
  * Copyright (C) 2011 Pär Crusefalk (SM0RWO)
+ * Copyright (C) 2018-2021 Pskmail Server, RadioMsg sections and other improvements John Douyere (VK2ETA) 
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -43,6 +44,8 @@ public class AddressBook extends javax.swing.JFrame  {
     private ArrayList<contact> contactlist = new ArrayList<contact>(); // Used to hold all the contacts
     private Boolean SaveNeed = false; // Set to true after a change and before save
 
+    private java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("javapskmail/Bundle");  
+      
     /** Creates new form NewMailDialog */
     public AddressBook() {
         initComponents();

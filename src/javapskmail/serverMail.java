@@ -1,7 +1,7 @@
 /*
- * Processor.java
+ * serverMail.java
  *
- * Copyright (C) 2018,2019,2020 John Douyere (VK2ETA)
+ * Copyright (C) 2018-2021 John Douyere (VK2ETA)
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -343,7 +344,7 @@ public class serverMail {
         //DateFormat dateFormat = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss z");
         String emailHeader = "From: " + fromString + "\n"
                 + "Date: " + dateFormat.format(sentDate).replaceAll("\\.", "") + "\n"
-                + "Subject: " + message.getSubject() + "\n";
+                + "Subject: " + message.getSubject() + "\n\n"; //Needs a blank line between header and body for proper decoding at client side
         if (message.isMimeType("text/plain")) {
             return emailHeader + message.getContent().toString();
         } else if (message.isMimeType("multipart/*")) {
@@ -700,22 +701,24 @@ public class serverMail {
             }
             //Trim required? begin: abc
             if (!begin.equals("")) {
-                if (webPage.contains(begin)) {
+                if (webPage.toLowerCase(Locale.US).contains(begin.toLowerCase(Locale.US))) {
+                    int beginIndex = webPage.toLowerCase(Locale.US).indexOf(begin.toLowerCase(Locale.US));
                     //Found, trim then
-                    webPage = webPage.substring(webPage.indexOf(begin));
+                    webPage = webPage.substring(beginIndex);
                 }
             }
             //Trim required? end: xyz
             if (!end.equals("")) {
-                if (webPage.contains(end)) {
+                if (webPage.toLowerCase(Locale.US).contains(end.toLowerCase(Locale.US))) {
+                    int endIndex = webPage.toLowerCase(Locale.US).lastIndexOf(end.toLowerCase(Locale.US));
                     //Found, trim then
-                    webPage = webPage.substring(0, webPage.lastIndexOf(end));
+                    webPage = webPage.substring(0, endIndex);
                 }
             }
             if (compressedPage) {
                 webPage = tgetZip(webPage);
             } else {
-                //Pskmail does not deal in unicode (the CRC gets corrupted), replace or strip any non ASCII character
+                //Pskmail does not handle unicode (the CRC gets corrupted), replace or strip any non ASCII character
                 webPage = webPage.replaceAll("\u2013", "-");
                 webPage = webPage.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
                 webPage = "Your wwwpage: " + webPage.length() + "\n"

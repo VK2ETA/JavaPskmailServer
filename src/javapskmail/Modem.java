@@ -1,7 +1,18 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * Modem.java
+ *
+ * Copyright (C) 2008 Pär Crusefalk and Rein Couperus
+ * Copyright (C) 2018-2021 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package javapskmail;
 
 import java.io.*;
@@ -1011,7 +1022,7 @@ public class Modem implements Runnable {
                                         //Mark time when we received an RSID to block mode and 
                                         // frequency change until we are sure we are not receiving a
                                         // Radio Message.
-                                    } else if (mi == 0) { //False alarm, not a valid RSID or an unsupported mode
+                                    } else if (mi == 0) { //False alarm, not a valid RSID or not a unsupported mode
                                         Main.TxModem = Main.RxModem;
                                     }
                                 }

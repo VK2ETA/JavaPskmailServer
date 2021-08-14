@@ -1,19 +1,22 @@
-
-package javapskmail;
-
-/**
+/*
+ * RMsgTxList.java
  *
- * @author jdouyere
+ * Copyright (C) 2016-2021 John Douyere (VK2ETA)
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//import android.graphics.Bitmap;
-//import android.location.Location;
+package javapskmail;
 
 import java.util.LinkedList;
 
 /**
- * Created by jdouyere on 31/12/16.
- *
  * Message objects list for gps position updates (when available) and TXing
  */
 

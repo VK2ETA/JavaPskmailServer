@@ -1,19 +1,7 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package javapskmail;
-
-/**
- *
- * @author jdouyere
- */
-
-/*
  * RMsgProcessor.java
  *
- * Copyright (C) 2011 John Douyere (VK2ETA)
+ * Copyright (C) 2011-2021 John Douyere (VK2ETA)
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,6 +11,9 @@ package javapskmail;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+package javapskmail;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -33,27 +24,8 @@ import java.io.*;
 
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.util.MailSSLSocketFactory;
-
-/*
-import android.Manifest;
-import android.app.Service;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
-import android.os.IBinder;
-import android.os.Vibrator;
-import android.support.v4.content.ContextCompat;
-import android.telephony.SmsManager;
- */
 import javax.mail.*;
-
 import java.util.*;
-
 import javax.mail.Session;
 import javax.mail.event.MessageCountAdapter;
 import javax.mail.event.MessageCountEvent;
@@ -66,31 +38,17 @@ import javax.mail.search.ReceivedDateTerm;
 import javax.mail.search.SearchTerm;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jsoup.Jsoup;
-
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.google.i18n.phonenumbers.NumberParseException;
 import javax.swing.SwingUtilities;
 
-//import static com.RadioMSG.RadioMSG.msgArrayAdapter;
-/**
- * @author John Douyere (VK2ETA)
- */
 public class RMsgProcessor {
 
     static boolean onWindows = true;
-    /*
-    static String ModemPreamble = "";  // String to send before any Tx Buffer
-    static String ModemPostamble = ""; // String to send after any Tx buffer
-    static String HomePath = "";
-    static String Dirprefix = "";
-    static String Separator = "";
-    static String CrcString = "";
-     static boolean TXActive = false;
-     */
+
     static String FileNameString = "";
 
     //File name of last message received for appending a newly received picture
@@ -626,7 +584,7 @@ public class RMsgProcessor {
     }
 
     private static void soundAlarm() {
-        /*tbf
+        /*To-Do
         Thread myThread = new Thread() {
             @Override
             public void run() {
@@ -784,7 +742,13 @@ public class RMsgProcessor {
         //String[] filterList = {"*,*,0"}; // tbf config.getPreferenceS("EMAILLISTENINGFILTER", "*,*,0").split("\\|");
         String[] filterList = Main.configuration.getPreference("EMAILLISTENINGFILTER", "").split("\\|");
         int toCount = 0;
-        int maxHoursSinceLastComm = 24; //tbf config.getPreferenceI("MAXHOURSSINCELASTCOMM", 24);
+        int maxHoursSinceLastComm;//tbf config.getPreferenceI("MAXHOURSSINCELASTCOMM", 24);
+        String maxHoursStr = Main.configuration.getPreference("HOURSTOKEEPLINK", "24");
+        try {
+            maxHoursSinceLastComm = Integer.parseInt(maxHoursStr.trim());
+        } catch (Exception e) {
+            maxHoursSinceLastComm = 24;
+        }
         Long nowTime = System.currentTimeMillis();
         for (int i = 0; i < filterList.length; i++) {
             //Match on time, then on incoming phone number
@@ -1185,6 +1149,12 @@ public class RMsgProcessor {
                     } else if (numberOf > 0) { //We found the number of messages required
                         break; //No point in looking any further
                     }
+                }
+                //Discard email or sms messages that have been previously sent as we always re-check for these on the internet
+                String msgFromAddress = recDisplayItem.mMessage.from;
+                if (msgFromAddress.contains("=") || isEmail(msgFromAddress) || isCellular(msgFromAddress)) {
+                    //Is an Alias OR is an email Address (w/o and alias) OR is a cellular number (w/o an alias), discard
+                    goodToResend = false;
                 }
                 if (goodToResend) {
                     if (++reSentCount >= 20) {

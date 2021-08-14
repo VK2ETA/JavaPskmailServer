@@ -4,6 +4,7 @@
  * Created on den 25 november 2008, 21:55
  *
  * Copyright (C) 2008 Pär Crusefalk (SM0RWO)
+ * Copyright (C) 2018-2021 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -3277,6 +3278,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                 gridBagConstraints.weightx = 0.5;
                 gridBagConstraints.weighty = 0.5;
                 getContentPane().add(tabMain, gridBagConstraints);
+                tabMain.setEnabledAt(7, false);
 
                 pnlStatus.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
                 pnlStatus.setMaximumSize(new java.awt.Dimension(2000, 30));

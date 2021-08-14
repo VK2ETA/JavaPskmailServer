@@ -1,18 +1,7 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package javapskmail;
-
-/**
- *
- * @author jdouyere
- */
-/*
- * misc.java  
+ * RMsgMisc.java  
  *   
- * Copyright (C) 2011 John Douyere (VK2ETA)  
+ * Copyright (C) 2011-2021 John Douyere (VK2ETA)  
  * Translated and adapted into Java class from Fldigi
  * as per Fldigi code from Dave Freese, W1HKJ and Stelios Bounanos, M0GLD
  * 
@@ -24,6 +13,9 @@ package javapskmail;
  * You should have received a copy of the GNU General Public License  
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.  
  */
+
+package javapskmail;
+
 public class RMsgMisc {
 
     public static double decayavg(double average, double input, double weight) {
