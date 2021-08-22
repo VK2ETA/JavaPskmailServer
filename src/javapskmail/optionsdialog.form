@@ -105,7 +105,7 @@
         </Property>
       </Properties>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="tabOptions.setEnabledAt(3, false);"/>
+        <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="tabOptions.setEnabledAt(3, true);"/>
       </AuxValues>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">

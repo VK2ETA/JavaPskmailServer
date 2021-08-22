@@ -33,8 +33,10 @@ public class contact {
     private String MMSI;
     private String Notes;
     //VK2ETA: add Radio Msg fields
-    private Boolean showInTO;
     private Boolean showInVIA;
+    private Boolean showInTO;
+    private Boolean showMobileInTO;
+    private Boolean showEmailInTO;
     private String MobilePhoneAlias;
     private String EmailAlias;    
 
@@ -54,8 +56,10 @@ public class contact {
         Email="";
         MMSI="";
         Notes="";
-        showInTO = false;
         showInVIA = false;
+        showInTO = false;
+        showMobileInTO = false;
+        showEmailInTO = false;
         MobilePhoneAlias = "";
         EmailAlias = "";
     }
@@ -79,7 +83,7 @@ public class contact {
         }
 
         // Save all the fields, more fields could follow later
-        if (temp.length > 8){
+        if (temp.length > 15){
             setFirstName(temp[0]);
             setLastName(temp[1]);
             this.setPhone(temp[2]);
@@ -90,8 +94,24 @@ public class contact {
             this.setEmail(temp[7]);
             this.setNotes(temp[8]);
             this.setNickname(temp[9]);
-        }
-        else
+            this.setShowInVIA(temp[11].equals("Y"));
+            this.setShowInTO(temp[10].equals("Y"));
+            this.setMobilePhoneAlias(temp[12]);
+            this.setEmailAlias(temp[13]);
+            this.setShowMobileInTO(temp[14].equals("Y"));
+            this.setShowEmailInTO(temp[15].equals("Y"));
+        } else if (temp.length > 8){ //Make it compatible with old contact files
+            setFirstName(temp[0]);
+            setLastName(temp[1]);
+            this.setPhone(temp[2]);
+            this.setMobilePhone(temp[3]);
+            this.setHamCallsign(temp[4]);
+            this.setOtherCallsign(temp[5]);
+            this.setMMSI(temp[6]);
+            this.setEmail(temp[7]);
+            this.setNotes(temp[8]);
+            this.setNickname(temp[9]);
+        } else
             myreturn = false;
 
         return myreturn;
@@ -112,10 +132,10 @@ public class contact {
         output += "\"" + this.getMMSI()+ "\",";
         output += "\"" + this.getEmail()+ "\",";
         output += "\"" + this.getNotes()+ "\",";
-        output += "\"" + this.getNickname()+ "\"";
-        output += "\"" + this.getShowInTO()+ "\"";
-        output += "\"" + this.getShowInVIA()+ "\"";
-        output += "\"" + this.getEmailAlias()+ "\"";
+        output += "\"" + this.getNickname()+ "\",";
+        output += "\"" + this.getShowInTO()+ "\",";
+        output += "\"" + this.getShowInVIA()+ "\",";
+        output += "\"" + this.getEmailAlias()+ "\",";
         output += "\"" + this.getMobilePhoneAlias()+ "\"";
         return output;
     }
@@ -173,14 +193,22 @@ public class contact {
         return MobilePhone;
     }
     
-    public String getShowInTO() {
-        return (showInTO ? "Y": "N");
-    }
-   
     public String getShowInVIA() {
         return (showInVIA ? "Y": "N");
     }
 
+    public String getShowInTO() {
+        return (showInTO ? "Y": "N");
+    }
+   
+    public String getShowMobileInTO() {
+        return (showMobileInTO ? "Y": "N");
+    }
+   
+    public String getShowEmailInTO() {
+        return (showEmailInTO ? "Y": "N");
+    }
+   
     public String getMobilePhoneAlias() {
         return MobilePhoneAlias;
     }
@@ -225,19 +253,27 @@ public class contact {
         this.Nickname = myNickname;
     }
     
-    public void setShowInTO(Boolean showInTO) {
-        this.showInTO = showInTO;
-    }
-   
     public void setShowInVIA(Boolean showInVIA) {
         this.showInVIA = showInVIA;
     }
 
+    public void setShowInTO(Boolean showInTO) {
+        this.showInTO = showInTO;
+    }
+   
+    public void setShowMobileInTO(Boolean showMobileInTO) {
+        this.showMobileInTO = showMobileInTO;
+    }
+   
+    public void setShowEmailInTO(Boolean showEmailInTO) {
+        this.showEmailInTO = showEmailInTO;
+    }
+   
     public void setMobilePhoneAlias(String MobilePhoneAlias) {
         this.MobilePhoneAlias = MobilePhoneAlias;
     }
 
     public void setEmailAlias(String EmailAlias) {
         this.EmailAlias = EmailAlias;
-    }
+    }     
 }

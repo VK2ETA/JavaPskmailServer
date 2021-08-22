@@ -449,7 +449,7 @@ public class EmailAddressForm extends javax.swing.JDialog {
         });
     }
 
-        /**
+    /**
      * Try to read all the contacts in the file
      */
     private void FetchContacts(){

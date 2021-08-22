@@ -29,6 +29,8 @@ public class AddressEdit extends javax.swing.JDialog {
     private contact myContact;          // Holds the edited contact
     private boolean exitstatus=false;   // Shows if the window was closed using ok or cancel
     
+    //private java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("javapskmail/Bundle");  
+        
     /** Creates new form AddressEdit */
     public AddressEdit(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
@@ -43,7 +45,6 @@ public class AddressEdit extends javax.swing.JDialog {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
 
         pBottom = new javax.swing.JPanel();
         bCancel = new javax.swing.JButton();
@@ -55,24 +56,30 @@ public class AddressEdit extends javax.swing.JDialog {
         lblEmail = new javax.swing.JLabel();
         txtFirstName = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
-        txtLastName = new javax.swing.JTextField();
         txtNickname = new javax.swing.JTextField();
         txtEmail = new javax.swing.JTextField();
         txtHamCallsign = new javax.swing.JTextField();
         lblOtherCall = new javax.swing.JLabel();
         txtOtherCallsign = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         txtNotes = new javax.swing.JTextField();
         txtPhone = new javax.swing.JTextField();
-        txtMobile = new javax.swing.JTextField();
+        txtLastName = new javax.swing.JTextField();
         txtMMSI = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        txtMobile = new javax.swing.JTextField();
+        jLabel3 = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        checkVia = new javax.swing.JCheckBox();
+        textEmailAlias = new javax.swing.JTextField();
+        textMobileAlias = new javax.swing.JTextField();
+        checkToEmail = new javax.swing.JCheckBox();
+        checkToMobile = new javax.swing.JCheckBox();
+        checkTo = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(402, 232));
-        getContentPane().setLayout(new java.awt.GridBagLayout());
 
         pBottom.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
 
@@ -80,7 +87,7 @@ public class AddressEdit extends javax.swing.JDialog {
         bCancel.setText(bundle.getString("AddressEdit.bCancel.text")); // NOI18N
         bCancel.setMaximumSize(new java.awt.Dimension(90, 30));
         bCancel.setMinimumSize(new java.awt.Dimension(70, 30));
-        bCancel.setPreferredSize(new java.awt.Dimension(80, 30));
+        bCancel.setPreferredSize(new java.awt.Dimension(90, 30));
         bCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 bCancelActionPerformed(evt);
@@ -98,197 +105,278 @@ public class AddressEdit extends javax.swing.JDialog {
         });
         pBottom.add(bOk);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHEAST;
-        gridBagConstraints.weightx = 0.1;
-        getContentPane().add(pBottom, gridBagConstraints);
-
-        pMain.setLayout(new java.awt.GridBagLayout());
-
         lblFirstName.setText(bundle.getString("AddressEdit.lblFirstName.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 3);
-        pMain.add(lblFirstName, gridBagConstraints);
 
         lblLastName.setText(bundle.getString("AddressEdit.lblLastName.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 2);
-        pMain.add(lblLastName, gridBagConstraints);
 
         lblNickname.setText(bundle.getString("AddressEdit.lblNickname.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 3);
-        pMain.add(lblNickname, gridBagConstraints);
 
         lblEmail.setText(bundle.getString("AddressEdit.lblEmail.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 3);
-        pMain.add(lblEmail, gridBagConstraints);
 
         txtFirstName.setMinimumSize(new java.awt.Dimension(100, 28));
         txtFirstName.setPreferredSize(new java.awt.Dimension(120, 28));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(1, 2, 1, 0);
-        pMain.add(txtFirstName, gridBagConstraints);
 
         jLabel1.setText(bundle.getString("AddressEdit.jLabel1.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 3);
-        pMain.add(jLabel1, gridBagConstraints);
-
-        txtLastName.setMinimumSize(new java.awt.Dimension(100, 28));
-        txtLastName.setPreferredSize(new java.awt.Dimension(120, 28));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(1, 2, 1, 0);
-        pMain.add(txtLastName, gridBagConstraints);
 
         txtNickname.setMinimumSize(new java.awt.Dimension(100, 28));
         txtNickname.setPreferredSize(new java.awt.Dimension(120, 28));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(1, 2, 1, 0);
-        pMain.add(txtNickname, gridBagConstraints);
 
+        txtEmail.setMinimumSize(new java.awt.Dimension(90, 28));
         txtEmail.setPreferredSize(new java.awt.Dimension(90, 28));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(1, 2, 1, 0);
-        pMain.add(txtEmail, gridBagConstraints);
 
         txtHamCallsign.setMinimumSize(new java.awt.Dimension(100, 28));
         txtHamCallsign.setPreferredSize(new java.awt.Dimension(120, 28));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(1, 2, 1, 0);
-        pMain.add(txtHamCallsign, gridBagConstraints);
 
         lblOtherCall.setText(bundle.getString("AddressEdit.lblOtherCall.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
-        pMain.add(lblOtherCall, gridBagConstraints);
 
         txtOtherCallsign.setMinimumSize(new java.awt.Dimension(100, 28));
         txtOtherCallsign.setPreferredSize(new java.awt.Dimension(120, 28));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(1, 2, 1, 0);
-        pMain.add(txtOtherCallsign, gridBagConstraints);
 
         jLabel2.setText(bundle.getString("AddressEdit.jLabel2.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 3);
-        pMain.add(jLabel2, gridBagConstraints);
-
-        jLabel3.setText(bundle.getString("AddressEdit.jLabel3.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
-        pMain.add(jLabel3, gridBagConstraints);
-
-        jLabel4.setText(bundle.getString("AddressEdit.jLabel4.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
-        pMain.add(jLabel4, gridBagConstraints);
 
         jLabel6.setText(bundle.getString("AddressEdit.jLabel6.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 3);
-        pMain.add(jLabel6, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 5;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(1, 2, 1, 0);
-        pMain.add(txtNotes, gridBagConstraints);
+
+        txtNotes.setMinimumSize(new java.awt.Dimension(4, 28));
+        txtNotes.setPreferredSize(new java.awt.Dimension(4, 28));
 
         txtPhone.setMinimumSize(new java.awt.Dimension(100, 28));
         txtPhone.setPreferredSize(new java.awt.Dimension(120, 28));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(1, 2, 1, 0);
-        pMain.add(txtPhone, gridBagConstraints);
 
-        txtMobile.setMinimumSize(new java.awt.Dimension(100, 28));
-        txtMobile.setPreferredSize(new java.awt.Dimension(120, 28));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(1, 2, 1, 0);
-        pMain.add(txtMobile, gridBagConstraints);
+        txtLastName.setMinimumSize(new java.awt.Dimension(100, 28));
+        txtLastName.setPreferredSize(new java.awt.Dimension(120, 28));
 
         txtMMSI.setMinimumSize(new java.awt.Dimension(100, 28));
         txtMMSI.setPreferredSize(new java.awt.Dimension(120, 28));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.insets = new java.awt.Insets(1, 2, 1, 0);
-        pMain.add(txtMMSI, gridBagConstraints);
 
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.weighty = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        getContentPane().add(pMain, gridBagConstraints);
+        jLabel4.setText(bundle.getString("AddressEdit.jLabel4.text")); // NOI18N
+
+        txtMobile.setMinimumSize(new java.awt.Dimension(100, 28));
+        txtMobile.setPreferredSize(new java.awt.Dimension(120, 28));
+
+        jLabel3.setText(bundle.getString("AddressEdit.jLabel3.text")); // NOI18N
+
+        javax.swing.GroupLayout pMainLayout = new javax.swing.GroupLayout(pMain);
+        pMain.setLayout(pMainLayout);
+        pMainLayout.setHorizontalGroup(
+            pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pMainLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(lblEmail)
+                .addGap(31, 31, 31)
+                .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 363, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pMainLayout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addGroup(pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pMainLayout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtNotes, javax.swing.GroupLayout.PREFERRED_SIZE, 364, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(pMainLayout.createSequentialGroup()
+                            .addGroup(pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(pMainLayout.createSequentialGroup()
+                                    .addGap(3, 3, 3)
+                                    .addGroup(pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addGroup(pMainLayout.createSequentialGroup()
+                                            .addComponent(jLabel1)
+                                            .addGap(5, 5, 5)
+                                            .addComponent(txtHamCallsign, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(pMainLayout.createSequentialGroup()
+                                            .addComponent(jLabel2)
+                                            .addGap(5, 5, 5)
+                                            .addComponent(txtPhone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(txtFirstName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGap(44, 44, 44)
+                                    .addComponent(lblNickname))
+                                .addGroup(pMainLayout.createSequentialGroup()
+                                    .addGap(18, 18, 18)
+                                    .addComponent(lblFirstName)
+                                    .addGap(151, 151, 151)
+                                    .addComponent(lblLastName)))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addGroup(pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(txtLastName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtOtherCallsign, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txtNickname, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(pMainLayout.createSequentialGroup()
+                            .addGap(231, 231, 231)
+                            .addComponent(lblOtherCall)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pMainLayout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtMMSI, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(4, 4, 4)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtMobile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+        );
+        pMainLayout.setVerticalGroup(
+            pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pMainLayout.createSequentialGroup()
+                .addGap(7, 7, 7)
+                .addGroup(pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblFirstName)
+                    .addGroup(pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(lblLastName)
+                        .addComponent(txtLastName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtFirstName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(7, 7, 7)
+                .addGroup(pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(txtHamCallsign, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(pMainLayout.createSequentialGroup()
+                            .addGap(6, 6, 6)
+                            .addComponent(jLabel1)))
+                    .addGroup(pMainLayout.createSequentialGroup()
+                        .addGroup(pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtOtherCallsign, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblOtherCall))
+                        .addGap(1, 1, 1)))
+                .addGroup(pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pMainLayout.createSequentialGroup()
+                        .addGap(10, 10, 10)
+                        .addGroup(pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtNickname, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(pMainLayout.createSequentialGroup()
+                                .addGap(6, 6, 6)
+                                .addComponent(lblNickname))))
+                    .addGroup(pMainLayout.createSequentialGroup()
+                        .addGap(9, 9, 9)
+                        .addGroup(pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtPhone, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(pMainLayout.createSequentialGroup()
+                                .addGap(6, 6, 6)
+                                .addComponent(jLabel2)))))
+                .addGap(6, 6, 6)
+                .addGroup(pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtNotes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6))
+                .addGap(7, 7, 7)
+                .addGroup(pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pMainLayout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(lblEmail))
+                    .addComponent(txtEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(7, 7, 7)
+                .addGroup(pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pMainLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(txtMMSI, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel4)
+                        .addComponent(jLabel3))
+                    .addComponent(txtMobile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("AddressEdit.jPanel1.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 3, 12))); // NOI18N
+        jPanel1.setMinimumSize(new java.awt.Dimension(140, 180));
+        jPanel1.setName(""); // NOI18N
+        jPanel1.setPreferredSize(new java.awt.Dimension(140, 220));
+
+        checkVia.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
+        checkVia.setText(bundle.getString("AddressEdit.checkVia.text")); // NOI18N
+        checkVia.setToolTipText(bundle.getString("AddressBook.checkVia.text")); // NOI18N
+        checkVia.setMaximumSize(new java.awt.Dimension(115, 19));
+        checkVia.setMinimumSize(new java.awt.Dimension(115, 19));
+        checkVia.setPreferredSize(new java.awt.Dimension(115, 19));
+        checkVia.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        checkVia.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
+        checkVia.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkViaActionPerformed(evt);
+            }
+        });
+
+        textEmailAlias.setText(bundle.getString("AddressEdit.textEmailAlias.text")); // NOI18N
+        textEmailAlias.setMaximumSize(new java.awt.Dimension(90, 28));
+        textEmailAlias.setMinimumSize(new java.awt.Dimension(90, 28));
+        textEmailAlias.setPreferredSize(new java.awt.Dimension(90, 28));
+
+        textMobileAlias.setText(bundle.getString("AddressEdit.textMobileAlias.text")); // NOI18N
+        textMobileAlias.setMaximumSize(new java.awt.Dimension(2147483647, 19));
+        textMobileAlias.setMinimumSize(new java.awt.Dimension(110, 19));
+        textMobileAlias.setName(""); // NOI18N
+        textMobileAlias.setPreferredSize(new java.awt.Dimension(110, 19));
+
+        checkToEmail.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
+        checkToEmail.setToolTipText(bundle.getString("AddressEdit.checkToEmail.toolTipText")); // NOI18N
+        checkToEmail.setMaximumSize(new java.awt.Dimension(111, 19));
+        checkToEmail.setMinimumSize(new java.awt.Dimension(111, 19));
+        checkToEmail.setPreferredSize(new java.awt.Dimension(111, 19));
+        checkToEmail.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+        checkToEmail.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+
+        checkToMobile.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
+        checkToMobile.setToolTipText(bundle.getString("AddressEdit.checkToMobile.toolTipText")); // NOI18N
+        checkToMobile.setMaximumSize(new java.awt.Dimension(111, 19));
+        checkToMobile.setMinimumSize(new java.awt.Dimension(111, 19));
+        checkToMobile.setPreferredSize(new java.awt.Dimension(111, 19));
+        checkToMobile.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+        checkToMobile.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+
+        checkTo.setText(bundle.getString("AddressEdit.checkTo.text")); // NOI18N
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addComponent(checkVia, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(7, 7, 7))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addComponent(checkToMobile, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(textMobileAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addComponent(checkToEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(textEmailAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(checkTo))
+                .addContainerGap(7, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(11, 11, 11)
+                .addComponent(checkVia, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(checkTo, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 75, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(textEmailAlias, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(checkToEmail, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(textMobileAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(checkToMobile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(5, 5, 5)
+                .addComponent(pMain, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(5, 5, 5)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(pBottom, javax.swing.GroupLayout.PREFERRED_SIZE, 496, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(5, 5, 5)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pMain, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(8, 8, 8)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(pBottom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -312,6 +400,10 @@ public class AddressEdit extends javax.swing.JDialog {
         this.exitstatus = false;
         this.setVisible(false);
     }//GEN-LAST:event_bCancelActionPerformed
+
+    private void checkViaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkViaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_checkViaActionPerformed
 
     /**
      * @param args the command line arguments
@@ -374,6 +466,10 @@ public class AddressEdit extends javax.swing.JDialog {
                 this.txtPhone.setText(myContact.getPhone().toString());
                 this.txtOtherCallsign.setText(myContact.getOtherCallsign().toString());
                 this.txtMMSI.setText(myContact.getMMSI().toString());
+                this.checkTo.setSelected(myContact.getShowInTO().equals("Y"));
+                this.checkVia.setSelected(myContact.getShowInVIA().equals("Y"));
+                this.textEmailAlias.setText(myContact.getEmailAlias().toString());
+                this.textMobileAlias.setText(myContact.getMobilePhoneAlias().toString());
             }
         } catch (Exception e) {
             Main.log.writelog("Error showing contacts info.", e, true);
@@ -396,6 +492,12 @@ public class AddressEdit extends javax.swing.JDialog {
                 myContact.setMobilePhone(this.txtMobile.getText().toString());
                 myContact.setPhone(this.txtPhone.getText().toString());
                 myContact.setNotes(this.txtNotes.getText().toString());
+                myContact.setShowInVIA(this.checkVia.isSelected());
+                myContact.setShowInTO(this.checkTo.isSelected());
+                myContact.setShowMobileInTO(this.checkToMobile.isSelected());
+                myContact.setShowEmailInTO(this.checkToEmail.isSelected());
+                myContact.setEmailAlias(this.textEmailAlias.getText().toString());
+                myContact.setMobilePhoneAlias(this.textMobileAlias.getText().toString());
             }
         } catch (Exception e) {
             Main.log.writelog("Error updating contact info object. Could not save edited data.", e, true);
@@ -422,11 +524,16 @@ public class AddressEdit extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton bCancel;
     private javax.swing.JButton bOk;
+    private javax.swing.JCheckBox checkTo;
+    private javax.swing.JCheckBox checkToEmail;
+    private javax.swing.JCheckBox checkToMobile;
+    private javax.swing.JCheckBox checkVia;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel lblEmail;
     private javax.swing.JLabel lblFirstName;
     private javax.swing.JLabel lblLastName;
@@ -434,6 +541,8 @@ public class AddressEdit extends javax.swing.JDialog {
     private javax.swing.JLabel lblOtherCall;
     private javax.swing.JPanel pBottom;
     private javax.swing.JPanel pMain;
+    private javax.swing.JTextField textEmailAlias;
+    private javax.swing.JTextField textMobileAlias;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtFirstName;
     private javax.swing.JTextField txtHamCallsign;

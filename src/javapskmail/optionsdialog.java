@@ -2300,7 +2300,7 @@ public class optionsdialog extends javax.swing.JDialog {
         tabOptions.addTab("Modes", jPanel2);
 
         getContentPane().add(tabOptions, new java.awt.GridBagConstraints());
-        tabOptions.setEnabledAt(3, false);
+        tabOptions.setEnabledAt(3, true);
 
         pnlButtons.setMinimumSize(new java.awt.Dimension(400, 35));
         pnlButtons.setPreferredSize(new java.awt.Dimension(435, 35));

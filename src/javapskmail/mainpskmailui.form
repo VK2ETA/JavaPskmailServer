@@ -966,7 +966,7 @@
         </Property>
       </Properties>
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="tabMain.setEnabledAt(7, false);"/>
+        <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="tabMain.setEnabledAt(7, true);"/>
       </AuxValues>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -3310,6 +3310,54 @@
                     <Property name="axis" type="int" value="1"/>
                   </Layout>
                   <SubComponents>
+                    <Container class="javax.swing.JPanel" name="jPanel4">
+                      <Properties>
+                        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                          <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
+                            <TitledBorder/>
+                          </Border>
+                        </Property>
+                        <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                          <Dimension value="[300, 50]"/>
+                        </Property>
+                        <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                          <Dimension value="[81, 50]"/>
+                        </Property>
+                        <Property name="name" type="java.lang.String" value="VIA Station" noResource="true"/>
+                        <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                          <Dimension value="[100, 50]"/>
+                        </Property>
+                      </Properties>
+
+                      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout"/>
+                      <SubComponents>
+                        <Component class="javax.swing.JButton" name="bContacts1">
+                          <Properties>
+                            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                              <Font name="Ubuntu" size="12" style="1"/>
+                            </Property>
+                            <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                              <Color blue="33" green="66" red="0" type="rgb"/>
+                            </Property>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.bContacts1.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                            </Property>
+                            <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                              <Dimension value="[110, 27]"/>
+                            </Property>
+                            <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                              <Dimension value="[75, 27]"/>
+                            </Property>
+                            <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                              <Dimension value="[100, 27]"/>
+                            </Property>
+                          </Properties>
+                          <Events>
+                            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="bContacts1ActionPerformed"/>
+                          </Events>
+                        </Component>
+                      </SubComponents>
+                    </Container>
                     <Container class="javax.swing.JPanel" name="jPanel3">
                       <Properties>
                         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
@@ -3338,35 +3386,6 @@
 
                       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout"/>
                       <SubComponents>
-                        <Component class="javax.swing.JButton" name="jButtonToPlus">
-                          <Properties>
-                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                              <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.jButtonToPlus.text" replaceFormat="mainpskmailui.getString(&quot;{key}&quot;)"/>
-                            </Property>
-                            <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                              <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.jButtonToPlus.TooltipText" replaceFormat="mainpskmailui.getString(&quot;{key}&quot;)"/>
-                            </Property>
-                            <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
-                              <Insets value="[0, 8, 0, 8]"/>
-                            </Property>
-                          </Properties>
-                          <Events>
-                            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonToPlusActionPerformed"/>
-                          </Events>
-                        </Component>
-                        <Component class="javax.swing.JButton" name="jButtonToMinus">
-                          <Properties>
-                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                              <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.jButtonToMinus.text" replaceFormat="mainpskmailui.getString(&quot;{key}&quot;)"/>
-                            </Property>
-                            <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                              <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.jButtonToMinus.TooltipText" replaceFormat="mainpskmailui.getString(&quot;{key}&quot;)"/>
-                            </Property>
-                            <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
-                              <Insets value="[0, 8, 0, 8]"/>
-                            </Property>
-                          </Properties>
-                        </Component>
                         <Component class="javax.swing.JComboBox" name="jComboRMsgTo">
                           <Properties>
                             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
@@ -3435,12 +3454,16 @@
                                   <ComponentRef name="buttonGroupAlias"/>
                                 </Property>
                                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                                  <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.jRadBtnAliasAndAddress.text" replaceFormat="mainpskmailui.getString(&quot;{key}&quot;)"/>
+                                  <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.text" replaceFormat="mainpskmailui.getString(&quot;{key}&quot;)"/>
                                 </Property>
                                 <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
                                   <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.bRMsgjRadBtnAliasAndAddress.toolTipText" replaceFormat="mainpskmailui.getString(&quot;{key}&quot;)"/>
                                 </Property>
                                 <Property name="horizontalAlignment" type="int" value="2"/>
+                                <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                                  <Dimension value="[100, 23]"/>
+                                </Property>
+                                <Property name="name" type="java.lang.String" value="" noResource="true"/>
                               </Properties>
                               <Events>
                                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jRadBtnAliasAndAddressActionPerformed"/>
@@ -3486,32 +3509,6 @@
 
                       <Layout class="org.netbeans.modules.form.compat2.layouts.DesignFlowLayout"/>
                       <SubComponents>
-                        <Component class="javax.swing.JButton" name="jButtonViaPlus">
-                          <Properties>
-                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                              <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.jButtonViaPlus.text" replaceFormat="mainpskmailui.getString(&quot;{key}&quot;)"/>
-                            </Property>
-                            <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                              <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.jButtonViaPlus.TooltipText" replaceFormat="mainpskmailui.getString(&quot;{key}&quot;)"/>
-                            </Property>
-                            <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
-                              <Insets value="[0, 8, 0, 8]"/>
-                            </Property>
-                          </Properties>
-                        </Component>
-                        <Component class="javax.swing.JButton" name="jButtonViaMinus">
-                          <Properties>
-                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                              <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.jButtonViaMinus.text" replaceFormat="mainpskmailui.getString(&quot;{key}&quot;)"/>
-                            </Property>
-                            <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                              <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.jButtonViaMinus.TooltipText" replaceFormat="mainpskmailui.getString(&quot;{key}&quot;)"/>
-                            </Property>
-                            <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
-                              <Insets value="[0, 8, 0, 8]"/>
-                            </Property>
-                          </Properties>
-                        </Component>
                         <Component class="javax.swing.JComboBox" name="jComboRMsgVia">
                           <Properties>
                             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">

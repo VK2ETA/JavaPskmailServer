@@ -20,14 +20,16 @@
 
 package javapskmail;
 
-import java.awt.HeadlessException;
+import java.awt.Graphics;
+import java.awt.Color;
+import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EventListener;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -53,7 +55,31 @@ public class AddressBook extends javax.swing.JFrame  {
         FetchContacts();
         DisplayContacts();
     }
+    
 
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        //Draw lines between the "CheckTo..." checkboxes and associated label to show identical action
+        int xOff = RMsgPanel.getX();
+        int yOff = RMsgPanel.getLocationOnScreen().y;
+        int horizontalPos = xOff + checkToEmail.getX() + checkToEmail.getWidth() / 2;
+        int startY = checkToCallsign.getLocationOnScreen().y + checkToCallsign.getHeight() - this.getLocationOnScreen().y;
+        int endY = checkToEmail.getLocationOnScreen().y - this.getLocationOnScreen().y;
+        g.setColor(Color.BLUE);
+        g.drawLine(horizontalPos, startY, horizontalPos, endY);
+        g.drawLine(horizontalPos + 1, startY, horizontalPos + 1, endY);
+        startY = yOff + checkToEmail.getY() + checkToEmail.getHeight() - this.getLocationOnScreen().y;
+        endY = yOff + checkToMobile.getY() - this.getLocationOnScreen().y;
+        g.drawLine(horizontalPos, startY, horizontalPos, endY );
+        g.drawLine(horizontalPos + 1, startY, horizontalPos + 1, endY);
+        int endX = xOff + showInToLabel.getX();
+        int yPos = yOff + showInToLabel.getY() - this.getLocationOnScreen().y + showInToLabel.getHeight()/2;
+        g.drawLine(horizontalPos, yPos, endX, yPos );
+        g.drawLine(horizontalPos, yPos + 1, endX, yPos + 1);
+    }
+
+   
     /**
      * Update the need to save, check before exiting
      * @param set 
@@ -146,6 +172,15 @@ public class AddressBook extends javax.swing.JFrame  {
         jScrollPane1 = new javax.swing.JScrollPane();
         lstContacts = new javax.swing.JList();
         jSeparator1 = new javax.swing.JSeparator();
+        RMsgPanel = new javax.swing.JPanel();
+        checkToCallsign = new javax.swing.JCheckBox();
+        checkVia = new javax.swing.JCheckBox();
+        textEmailAlias = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        textMobileAlias = new javax.swing.JTextField();
+        checkToEmail = new javax.swing.JCheckBox();
+        checkToMobile = new javax.swing.JCheckBox();
+        showInToLabel = new javax.swing.JLabel();
         pnlBottom = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
@@ -167,12 +202,6 @@ public class AddressBook extends javax.swing.JFrame  {
         txtMMSI = new javax.swing.JTextField();
         lblNickname = new javax.swing.JLabel();
         txtNickname = new javax.swing.JTextField();
-        jPanel1 = new javax.swing.JPanel();
-        checkTo = new javax.swing.JCheckBox();
-        checkVia = new javax.swing.JCheckBox();
-        textEmailAlias = new javax.swing.JTextField();
-        jLabel10 = new javax.swing.JLabel();
-        textMobileAlias = new javax.swing.JTextField();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuFile = new javax.swing.JMenu();
         mnuOpenFile = new javax.swing.JMenuItem();
@@ -186,10 +215,8 @@ public class AddressBook extends javax.swing.JFrame  {
 
         jLabel9.setText(bundle.getString("AddressBook.jLabel9.text")); // NOI18N
 
-        setMaximumSize(new java.awt.Dimension(550, 463));
         setMinimumSize(new java.awt.Dimension(550, 373));
         setName("AddressBook"); // NOI18N
-        setPreferredSize(new java.awt.Dimension(550, 463));
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
         pnlButtons.setMinimumSize(new java.awt.Dimension(500, 35));
@@ -281,6 +308,135 @@ public class AddressBook extends javax.swing.JFrame  {
         gridBagConstraints.insets = new java.awt.Insets(12, 12, 0, 12);
         getContentPane().add(jSeparator1, gridBagConstraints);
 
+        RMsgPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("AddressBook.rmsgTitle.text"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 3, 12))); // NOI18N
+        RMsgPanel.setMinimumSize(new java.awt.Dimension(160, 180));
+        RMsgPanel.setName(""); // NOI18N
+        RMsgPanel.setPreferredSize(new java.awt.Dimension(160, 220));
+
+        checkToCallsign.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
+        checkToCallsign.setText(bundle.getString("AddressBook.checkToCallsign.text")); // NOI18N
+        checkToCallsign.setMaximumSize(new java.awt.Dimension(111, 19));
+        checkToCallsign.setMinimumSize(new java.awt.Dimension(111, 19));
+        checkToCallsign.setPreferredSize(new java.awt.Dimension(111, 19));
+        checkToCallsign.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+        checkToCallsign.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        checkToCallsign.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkToCallsignActionPerformed(evt);
+            }
+        });
+
+        checkVia.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
+        checkVia.setText(bundle.getString("AddressBook.checkVia.text")); // NOI18N
+        checkVia.setMaximumSize(new java.awt.Dimension(115, 19));
+        checkVia.setMinimumSize(new java.awt.Dimension(115, 19));
+        checkVia.setPreferredSize(new java.awt.Dimension(115, 19));
+        checkVia.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        checkVia.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
+
+        textEmailAlias.setEditable(false);
+        textEmailAlias.setText(bundle.getString("AddressBook.textEmailAlias.text")); // NOI18N
+        textEmailAlias.setMinimumSize(new java.awt.Dimension(4, 28));
+        textEmailAlias.setPreferredSize(new java.awt.Dimension(4, 28));
+
+        jLabel10.setText(bundle.getString("AddressBook.jLabel10.text")); // NOI18N
+
+        textMobileAlias.setEditable(false);
+        textMobileAlias.setText(bundle.getString("AddressBook.text")); // NOI18N
+        textMobileAlias.setMaximumSize(new java.awt.Dimension(110, 28));
+        textMobileAlias.setMinimumSize(new java.awt.Dimension(110, 28));
+        textMobileAlias.setName(""); // NOI18N
+        textMobileAlias.setPreferredSize(new java.awt.Dimension(110, 28));
+        textMobileAlias.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                textMobileAliasActionPerformed(evt);
+            }
+        });
+
+        checkToEmail.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
+        checkToEmail.setMaximumSize(new java.awt.Dimension(111, 19));
+        checkToEmail.setMinimumSize(new java.awt.Dimension(111, 19));
+        checkToEmail.setPreferredSize(new java.awt.Dimension(111, 19));
+        checkToEmail.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+        checkToEmail.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        checkToEmail.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkToEmailActionPerformed(evt);
+            }
+        });
+
+        checkToMobile.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
+        checkToMobile.setMaximumSize(new java.awt.Dimension(111, 19));
+        checkToMobile.setMinimumSize(new java.awt.Dimension(111, 19));
+        checkToMobile.setPreferredSize(new java.awt.Dimension(111, 19));
+        checkToMobile.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+        checkToMobile.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        checkToMobile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkToMobileActionPerformed(evt);
+            }
+        });
+
+        showInToLabel.setText(bundle.getString("AddressBook.showInToLabel.text")); // NOI18N
+
+        javax.swing.GroupLayout RMsgPanelLayout = new javax.swing.GroupLayout(RMsgPanel);
+        RMsgPanel.setLayout(RMsgPanelLayout);
+        RMsgPanelLayout.setHorizontalGroup(
+            RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(RMsgPanelLayout.createSequentialGroup()
+                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(checkToEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(checkToMobile, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel10)
+                    .addComponent(textMobileAlias, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
+                    .addComponent(textEmailAlias, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(RMsgPanelLayout.createSequentialGroup()
+                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(checkToCallsign, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(checkVia, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 149, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(RMsgPanelLayout.createSequentialGroup()
+                .addGap(21, 21, 21)
+                .addComponent(showInToLabel)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        RMsgPanelLayout.setVerticalGroup(
+            RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(RMsgPanelLayout.createSequentialGroup()
+                .addGap(28, 28, 28)
+                .addComponent(checkVia, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(checkToCallsign, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(showInToLabel)
+                .addGap(18, 18, 18)
+                .addComponent(jLabel10)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(RMsgPanelLayout.createSequentialGroup()
+                        .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(textEmailAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(checkToEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(textMobileAlias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(checkToMobile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(14, Short.MAX_VALUE))
+        );
+
+        checkToCallsign.getAccessibleContext().setAccessibleName(bundle.getString("AddressBook.checkToCallsign.AccessibleContext.accessibleName")); // NOI18N
+        checkVia.getAccessibleContext().setAccessibleName(bundle.getString("AddressBook.checkVia.AccessibleContext.accessibleName")); // NOI18N
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.weightx = 0.001;
+        getContentPane().add(RMsgPanel, gridBagConstraints);
+
+        pnlBottom.setMaximumSize(new java.awt.Dimension(500, 180));
         pnlBottom.setMinimumSize(new java.awt.Dimension(500, 180));
         pnlBottom.setPreferredSize(new java.awt.Dimension(400, 220));
         pnlBottom.setLayout(new java.awt.GridBagLayout());
@@ -388,6 +544,8 @@ public class AddressBook extends javax.swing.JFrame  {
         pnlBottom.add(txtPhone, gridBagConstraints);
 
         txtNotes.setEditable(false);
+        txtNotes.setMinimumSize(new java.awt.Dimension(4, 28));
+        txtNotes.setPreferredSize(new java.awt.Dimension(4, 28));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
@@ -423,6 +581,11 @@ public class AddressBook extends javax.swing.JFrame  {
         txtOtherCall.setEditable(false);
         txtOtherCall.setMinimumSize(new java.awt.Dimension(130, 28));
         txtOtherCall.setPreferredSize(new java.awt.Dimension(150, 28));
+        txtOtherCall.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtOtherCallActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 1;
@@ -479,87 +642,33 @@ public class AddressBook extends javax.swing.JFrame  {
         gridBagConstraints.gridy = 2;
         pnlBottom.add(lblNickname, gridBagConstraints);
 
+        txtNickname.setEditable(false);
         txtNickname.setText(bundle.getString("AddressBook.txtNickname.text")); // NOI18N
+        txtNickname.setMinimumSize(new java.awt.Dimension(130, 28));
+        txtNickname.setPreferredSize(new java.awt.Dimension(130, 28));
+        txtNickname.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtNicknameActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 2);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 5);
         pnlBottom.add(txtNickname, gridBagConstraints);
+        txtNickname.getAccessibleContext().setAccessibleName(bundle.getString("AddressBook.txtNickname.AccessibleContext.accessibleName")); // NOI18N
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         getContentPane().add(pnlBottom, gridBagConstraints);
-
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("AddressBook.rmsgTitle.text"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 3, 12))); // NOI18N
-        jPanel1.setMinimumSize(new java.awt.Dimension(120, 180));
-        jPanel1.setName(""); // NOI18N
-        jPanel1.setPreferredSize(new java.awt.Dimension(120, 220));
-
-        checkTo.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
-        checkTo.setText(bundle.getString("AddressBook.checkTo.text")); // NOI18N
-        checkTo.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
-        checkTo.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-
-        checkVia.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
-        checkVia.setText(bundle.getString("AddressBook.checkVia.text")); // NOI18N
-        checkVia.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-        checkVia.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
-
-        textEmailAlias.setText(bundle.getString("AddressBook.textEmailAlias.text")); // NOI18N
-
-        jLabel10.setText(bundle.getString("AddressBook.jLabel10.text")); // NOI18N
-
-        textMobileAlias.setText(bundle.getString("AddressBook.textMobileAlias.text")); // NOI18N
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(checkVia, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(checkTo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(textEmailAlias, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(textMobileAlias))
-                .addContainerGap())
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(22, 22, 22)
-                .addComponent(jLabel10)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(checkTo)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(checkVia)
-                .addGap(24, 24, 24)
-                .addComponent(jLabel10)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(textEmailAlias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(textMobileAlias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        checkTo.getAccessibleContext().setAccessibleName(bundle.getString("AddressBook.checkTo.AccessibleContext.accessibleName")); // NOI18N
-        checkVia.getAccessibleContext().setAccessibleName(bundle.getString("AddressBook.checkVia.AccessibleContext.accessibleName")); // NOI18N
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.weightx = 0.001;
-        getContentPane().add(jPanel1, gridBagConstraints);
 
         mnuFile.setText(bundle.getString("AddressBook.mnuFile.text")); // NOI18N
 
@@ -813,6 +922,30 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         Saveas();
     }//GEN-LAST:event_mnuSaveAsActionPerformed
 
+    private void txtOtherCallActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtOtherCallActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtOtherCallActionPerformed
+
+    private void txtNicknameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNicknameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtNicknameActionPerformed
+
+    private void checkToMobileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkToMobileActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_checkToMobileActionPerformed
+
+    private void checkToEmailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkToEmailActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_checkToEmailActionPerformed
+
+    private void textMobileAliasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textMobileAliasActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_textMobileAliasActionPerformed
+
+    private void checkToCallsignActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkToCallsignActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_checkToCallsignActionPerformed
+
     /**
      * Save the contacts to a file selected by the user
      */
@@ -859,6 +992,33 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
             txtNotes.setText(mycontact.getNotes());
             txtNickname.setText(mycontact.getNickname());
             txtPhone.setText(mycontact.getPhone());
+            textEmailAlias.setText(mycontact.getEmailAlias());
+            textMobileAlias.setText(mycontact.getMobilePhoneAlias());
+            checkToCallsign.setSelected(mycontact.getShowInTO().equals("Y"));
+            checkVia.setSelected(mycontact.getShowInVIA().equals("Y"));
+            checkToMobile.setSelected(mycontact.getShowMobileInTO().equals("Y"));
+            checkToEmail.setSelected(mycontact.getShowEmailInTO().equals("Y"));
+            //Make checkboxes "read only" (prevent from being changed)
+            EventListener[] listeners = checkToCallsign.getListeners(MouseListener.class);
+            for (EventListener eventListener : listeners) {
+                checkToCallsign.removeMouseListener((MouseListener) eventListener);
+            }
+            checkToCallsign.setFocusable(false);
+            listeners = checkVia.getListeners(MouseListener.class);
+            for (EventListener eventListener : listeners) {
+                checkVia.removeMouseListener((MouseListener) eventListener);
+            }
+            checkVia.setFocusable(false);
+            listeners = checkToEmail.getListeners(MouseListener.class);
+            for (EventListener eventListener : listeners) {
+                checkToEmail.removeMouseListener((MouseListener) eventListener);
+            }
+            checkToEmail.setFocusable(false);
+            listeners = checkToMobile.getListeners(MouseListener.class);
+            for (EventListener eventListener : listeners) {
+                checkToMobile.removeMouseListener((MouseListener) eventListener);
+            }
+            checkToMobile.setFocusable(false);
         }
     }
 
@@ -875,10 +1035,13 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel RMsgPanel;
     private javax.swing.JButton bDelete;
     private javax.swing.JButton bNew;
     private javax.swing.JButton bProperties;
-    private javax.swing.JCheckBox checkTo;
+    private javax.swing.JCheckBox checkToCallsign;
+    private javax.swing.JCheckBox checkToEmail;
+    private javax.swing.JCheckBox checkToMobile;
     private javax.swing.JCheckBox checkVia;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -891,7 +1054,6 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblMMSI;
@@ -909,6 +1071,7 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private javax.swing.JPanel pnlBottom;
     private javax.swing.JPanel pnlButtons;
     private javax.swing.JPanel pnlTop;
+    private javax.swing.JLabel showInToLabel;
     private javax.swing.JTextField textEmailAlias;
     private javax.swing.JTextField textMobileAlias;
     private javax.swing.JTextField txtEmail;

@@ -1601,16 +1601,14 @@ public class mainpskmailui extends javax.swing.JFrame {
         tabRadioMsg = new javax.swing.JPanel();
         jSplitPane2 = new javax.swing.JSplitPane();
         jPanel1 = new javax.swing.JPanel();
+        jPanel4 = new javax.swing.JPanel();
+        bContacts1 = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
-        jButtonToPlus = new javax.swing.JButton();
-        jButtonToMinus = new javax.swing.JButton();
         jComboRMsgTo = new javax.swing.JComboBox();
         jPanel5 = new javax.swing.JPanel();
         jRadBtnAliasOnly = new javax.swing.JRadioButton();
         jRadBtnAliasAndAddress = new javax.swing.JRadioButton();
         jPanel2 = new javax.swing.JPanel();
-        jButtonViaPlus = new javax.swing.JButton();
-        jButtonViaMinus = new javax.swing.JButton();
         jComboRMsgVia = new javax.swing.JComboBox();
         scrRadioMessages = new javax.swing.JScrollPane();
         tblRadioMsgs = new javax.swing.JTable();
@@ -3024,26 +3022,32 @@ public class mainpskmailui extends javax.swing.JFrame {
 
                 jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.Y_AXIS));
 
+                jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
+                jPanel4.setMaximumSize(new java.awt.Dimension(300, 50));
+                jPanel4.setMinimumSize(new java.awt.Dimension(81, 50));
+                jPanel4.setName("VIA Station"); // NOI18N
+                jPanel4.setPreferredSize(new java.awt.Dimension(100, 50));
+
+                bContacts1.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+                bContacts1.setForeground(new java.awt.Color(0, 102, 51));
+                bContacts1.setText(bundle.getString("mainpskmailui.bContacts1.text")); // NOI18N
+                bContacts1.setMaximumSize(new java.awt.Dimension(110, 27));
+                bContacts1.setMinimumSize(new java.awt.Dimension(75, 27));
+                bContacts1.setPreferredSize(new java.awt.Dimension(100, 27));
+                bContacts1.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        bContacts1ActionPerformed(evt);
+                    }
+                });
+                jPanel4.add(bContacts1);
+
+                jPanel1.add(jPanel4);
+
                 jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(mainpskmailui.getString("mainpskmailui.jPanel3Title.text"))); // NOI18N
                 jPanel3.setMaximumSize(new java.awt.Dimension(300, 155));
                 jPanel3.setMinimumSize(new java.awt.Dimension(81, 130));
                 jPanel3.setName(""); // NOI18N
                 jPanel3.setPreferredSize(new java.awt.Dimension(100, 100));
-
-                jButtonToPlus.setText(mainpskmailui.getString("mainpskmailui.jButtonToPlus.text")); // NOI18N
-                jButtonToPlus.setToolTipText(mainpskmailui.getString("mainpskmailui.jButtonToPlus.TooltipText")); // NOI18N
-                jButtonToPlus.setMargin(new java.awt.Insets(0, 8, 0, 8));
-                jButtonToPlus.addActionListener(new java.awt.event.ActionListener() {
-                    public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        jButtonToPlusActionPerformed(evt);
-                    }
-                });
-                jPanel3.add(jButtonToPlus);
-
-                jButtonToMinus.setText(mainpskmailui.getString("mainpskmailui.jButtonToMinus.text")); // NOI18N
-                jButtonToMinus.setToolTipText(mainpskmailui.getString("mainpskmailui.jButtonToMinus.TooltipText")); // NOI18N
-                jButtonToMinus.setMargin(new java.awt.Insets(0, 8, 0, 8));
-                jPanel3.add(jButtonToMinus);
 
                 jComboRMsgTo.setMaximumSize(new java.awt.Dimension(150, 20));
                 jComboRMsgTo.setMinimumSize(new java.awt.Dimension(120, 20));
@@ -3080,9 +3084,11 @@ public class mainpskmailui extends javax.swing.JFrame {
                 jPanel5.add(jRadBtnAliasOnly, gridBagConstraints);
 
                 buttonGroupAlias.add(jRadBtnAliasAndAddress);
-                jRadBtnAliasAndAddress.setText(mainpskmailui.getString("mainpskmailui.jRadBtnAliasAndAddress.text")); // NOI18N
+                jRadBtnAliasAndAddress.setText(mainpskmailui.getString("mainpskmailui.text")); // NOI18N
                 jRadBtnAliasAndAddress.setToolTipText(mainpskmailui.getString("mainpskmailui.bRMsgjRadBtnAliasAndAddress.toolTipText")); // NOI18N
                 jRadBtnAliasAndAddress.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+                jRadBtnAliasAndAddress.setMinimumSize(new java.awt.Dimension(100, 23));
+                jRadBtnAliasAndAddress.setName(""); // NOI18N
                 jRadBtnAliasAndAddress.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
                         jRadBtnAliasAndAddressActionPerformed(evt);
@@ -3106,16 +3112,6 @@ public class mainpskmailui extends javax.swing.JFrame {
                 jPanel2.setMinimumSize(new java.awt.Dimension(81, 80));
                 jPanel2.setName("VIA Station"); // NOI18N
                 jPanel2.setPreferredSize(new java.awt.Dimension(100, 30));
-
-                jButtonViaPlus.setText(mainpskmailui.getString("mainpskmailui.jButtonViaPlus.text")); // NOI18N
-                jButtonViaPlus.setToolTipText(mainpskmailui.getString("mainpskmailui.jButtonViaPlus.TooltipText")); // NOI18N
-                jButtonViaPlus.setMargin(new java.awt.Insets(0, 8, 0, 8));
-                jPanel2.add(jButtonViaPlus);
-
-                jButtonViaMinus.setText(mainpskmailui.getString("mainpskmailui.jButtonViaMinus.text")); // NOI18N
-                jButtonViaMinus.setToolTipText(mainpskmailui.getString("mainpskmailui.jButtonViaMinus.TooltipText")); // NOI18N
-                jButtonViaMinus.setMargin(new java.awt.Insets(0, 8, 0, 8));
-                jPanel2.add(jButtonViaMinus);
 
                 jComboRMsgVia.setMaximumSize(new java.awt.Dimension(150, 20));
                 jComboRMsgVia.setMinimumSize(new java.awt.Dimension(120, 20));
@@ -3278,7 +3274,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                 gridBagConstraints.weightx = 0.5;
                 gridBagConstraints.weighty = 0.5;
                 getContentPane().add(tabMain, gridBagConstraints);
-                tabMain.setEnabledAt(7, false);
+                tabMain.setEnabledAt(7, true);
 
                 pnlStatus.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
                 pnlStatus.setMaximumSize(new java.awt.Dimension(2000, 30));
@@ -7762,34 +7758,16 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         // TODO add your handling code here:
     }//GEN-LAST:event_bRMsgResendPlease1ActionPerformed
 
-    private void jButtonToPlusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonToPlusActionPerformed
-
-                RMsgAddToDialog dialog = new RMsgAddToDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-
-
-
-
-/*
-        // TODO add your handling code here:
-        RMsgAddToDialogOLD mDialog;
-        // TODO add your handling code here:
+    private void bContacts1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bContacts1ActionPerformed
         try {
-            //mDialog = new RMsgAddToDialog(this, true);
-            mDialog = new RMsgAddToDialogOLD(this, true);
-            //mDialog.setVisible(true);
-            mDialog.dispose();
-        } catch (Exception ex) {
-            Main.log.writelog(mainpskmailui.getString("Error_when_opening_web_dialog!"), ex, true);
+            AddressBook myBook;
+            myBook = new AddressBook();
+            myBook.setLocationRelativeTo(null);
+            myBook.setVisible(true);
+        } catch (Exception e) {
+            Main.log.writelog(mainpskmailui.getString("Error_when_handling_AddressBook"), e, true);
         }
-                */
-    }//GEN-LAST:event_jButtonToPlusActionPerformed
+    }//GEN-LAST:event_bContacts1ActionPerformed
 
     /**
      * Simple message dialog with yes and no button
@@ -8287,32 +8265,87 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
    
     
     void loadRMsgComboBoxes() {
+        ArrayList<contact> contactlist = new ArrayList<contact>(); // Used to hold all the contacts
         
+        //Read all the contacts in the file
+        try {
+            String contfilename = Main.HomePath + Main.Dirprefix + "contacts.csv";
+            String linestring;  // Used to hold lines of the files
+            File contfile;          // File handle for contacts.csv
+            contact contact;        // A contact object
+            contfile = new File(contfilename);
+
+            // First check most common problems
+            if (contfile == null) {
+                throw new IllegalArgumentException("File should not be null.");
+            }
+            if (!contfile.exists()) {
+                // File did not exist, create it
+                contfile.createNewFile();
+            }
+            if (!contfile.isFile()) {
+                throw new IllegalArgumentException("Should not be a directory: " + contfile);
+            }
+
+            // We should have a file now, lets fetch stuff
+            FileReader fin = new FileReader(contfilename);
+            BufferedReader br = new BufferedReader(fin);
+
+            while ((linestring = br.readLine()) != null) {
+                // Create another contact object and feed it the csv string
+                contact = new contact();
+                contact.LoadCSV(linestring);
+                contactlist.add(contact);
+            }
+            fin.close();
+        } catch (Exception e) {
+            Main.log.writelog("Could not fetch contact information.", true);
+        }
+
         //Fill-in spinner for To address
-        String[] toArrayOriginal = ("To_ALL," + Main.configuration.getPreference("TOLIST", "")).split(",");
+        //String[] toArrayOriginal = ("To_ALL," + Main.configuration.getPreference("TOLIST", "")).split(",");
+        String[] toArrayOriginal = new String[contactlist.size() * 3]; //One for callsign, one for emails and one for cellular numbers
         String[] toAliasArrayOriginal = new String[toArrayOriginal.length];
+        for (int i = 0; i < contactlist.size(); i++) {
+                contact mycontact = contactlist.get(i);
+            if (mycontact.getShowInTO().equals("Y")) {
+                if (mycontact.getMobilePhone().trim().length() > 0) {
+                    toArrayOriginal[i] = mycontact.getHamCallsign().trim().length() > 0 ? mycontact.getHamCallsign().trim() : mycontact.getOtherCallsign();
+                    toAliasArrayOriginal[i] = mycontact.getMobilePhoneAlias();
+                }
+            }
+        }
+        //Filter for valid entries only
         int validEntries = 0;
         Pattern toPattern = Pattern.compile("^\\s*([0-9a-zA-Z/\\-_@.+]+)\\s*(=?)\\s*(\\S*)\\s*$");
         for (int i = 0; i < toArrayOriginal.length; i++) {
-            Matcher msc = toPattern.matcher(toArrayOriginal[i]);
-            if (msc.find()) {
-                String callSign = "";
-                if (msc.group(1) != null) callSign = msc.group(1);
-                String separator = "";
-                if (msc.group(2) != null) separator = msc.group(2);
-                String accessPassword = "";
-                if (msc.group(3) != null) accessPassword = msc.group(3);
-                if (!callSign.equals("")) {
-                    validEntries++;
-                    toArrayOriginal[i] = callSign;
-                    if (!separator.equals("") && !accessPassword.equals("")) {
-                        toAliasArrayOriginal[i] = accessPassword;
-                    } else {
-                        toAliasArrayOriginal[i] = ""; //As it is copied later on
+            if (toArrayOriginal[i] != null) {
+                Matcher msc = toPattern.matcher(toArrayOriginal[i]);
+                if (msc.find()) {
+                    String callSign = "";
+                    if (msc.group(1) != null) {
+                        callSign = msc.group(1);
                     }
-                } else {
-                    toArrayOriginal[i] = ""; //Blank it out
-                    toAliasArrayOriginal[i] = "";
+                    String separator = "";
+                    if (msc.group(2) != null) {
+                        separator = msc.group(2);
+                    }
+                    String accessPassword = "";
+                    if (msc.group(3) != null) {
+                        accessPassword = msc.group(3);
+                    }
+                    if (!callSign.equals("")) {
+                        validEntries++;
+                        toArrayOriginal[i] = callSign;
+                        if (!separator.equals("") && !accessPassword.equals("")) {
+                            toAliasArrayOriginal[i] = accessPassword;
+                        } else {
+                            toAliasArrayOriginal[i] = ""; //As it is copied later on
+                        }
+                    } else {
+                        toArrayOriginal[i] = ""; //Blank it out
+                        toAliasArrayOriginal[i] = "";
+                    }
                 }
             } else {
                 //Malformed to destination, blank it out too
@@ -8482,6 +8515,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JMenuItem WWV_menu_item;
     private javax.swing.JButton bConnect;
     private javax.swing.JButton bContacts;
+    private javax.swing.JButton bContacts1;
     private javax.swing.JButton bDelete;
     private javax.swing.JButton bNewMail;
     private javax.swing.JButton bQTC;
@@ -8506,10 +8540,6 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JTextField freq2;
     private javax.swing.JTextField freq3;
     private javax.swing.JTextField freq4;
-    private javax.swing.JButton jButtonToMinus;
-    private javax.swing.JButton jButtonToPlus;
-    private javax.swing.JButton jButtonViaMinus;
-    private javax.swing.JButton jButtonViaPlus;
     private javax.swing.JComboBox jComboRMsgTo;
     private javax.swing.JComboBox jComboRMsgVia;
     private javax.swing.JMenuItem jGetIAC;
@@ -8521,6 +8551,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JRadioButton jRadBtnAliasAndAddress;
     private javax.swing.JRadioButton jRadBtnAliasOnly;
