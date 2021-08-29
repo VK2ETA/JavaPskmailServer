@@ -1227,7 +1227,7 @@ public class RMsgProcessor {
         //Pattern quotedTextStart = Pattern.compile("(?i)(?:(?:" + leadInLine + ")?" +
         //    "(?:(?:(>\\s{0,3})?" + subjectOrAddressLine + ")|(?:" + dateLine + ")){2,6})");
 
-        //first extract compete message text
+        //first extract complete message text
         String result = "";
         if (message.isMimeType("text/plain")) {
             result = message.getContent().toString();
@@ -1329,6 +1329,25 @@ public class RMsgProcessor {
     public static boolean isCellular(String destination) {
 
         return destination.matches("^([\\w-]+=)?\\+?\\d{7,16}"); //"^\\+?\\d{8,16}"
+    }
+
+    //Search through current list of via stations for the one contained in the message
+    public static String getRequiredAccessPassword(RMsgObject txMessage) {
+        String accessPw = "";
+
+        //For all relay requests
+        //if (!txMessage.via.equals("") &&
+        //        (txMessage.sms.contains("*qtc?") || txMessage.sms.contains("*cmd") || isCellular(txMessage.to)
+        //                || isEmail(txMessage.to) || txMessage.to.matches(".+=.*"))) {
+        if (!txMessage.via.equals("")) {            
+            for (int i = 0; i < Main.mainui.viaArray.length; i++) {
+                if (Main.mainui.viaArray[i].equals("via " + txMessage.via)) {
+                    accessPw = Main.mainui.viaPasswordArray[i];
+                    break;
+                }
+            }
+        }
+        return accessPw;
     }
 
     public static String convertNumberToE164(String phoneNumber) {

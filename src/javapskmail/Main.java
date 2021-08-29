@@ -34,9 +34,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "0.9.4.a24-RMSG_branch";
+    static String version = "0.9.4.a25-RMSG";
     static String application = "jpskmailserver " + version;// Used to preset an empty status
-    static String versionDate = "20210823";
+    static String versionDate = "20210830";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -330,7 +330,7 @@ public class Main {
             // Get settings and initialize
             handleinitialization();
             /* Moved modem init to after gui to allow for auto launch of Fldigi without slowing 
-  the gui down and allows for a message to be displayed while fldigi is launched
+            the gui down and allows for a message to be displayed while fldigi is launched
             // start the modem thread
             System.out.println("About to create new Modem.");
             m = new Modem(host, port);
@@ -461,16 +461,16 @@ public class Main {
                     if (RMsgTxList.getAvailableLength() > 0) {
                         Main.TXActive = true; //Moved up to prevent change in mode when replying
                         m.txMessage = RMsgTxList.getOldest();
-                        //Set TxId
-                        //q.send_txrsid_command("ON");
-                        m.Sendln(SendCommand);
-                        SendCommand = "";
-                        Thread.sleep(100);
                         //Set Mode
                         SendCommand += "<cmd><mode>" + m.txMessage.rxMode + "</mode></cmd>";
                         m.Sendln(SendCommand);
                         SendCommand = "";
                         Thread.sleep(250);
+                        //Set TX Rsid
+                        q.send_txrsid_command("ON");
+                        m.Sendln(SendCommand);
+                        SendCommand = "";
+                        Thread.sleep(100);
                         //Send message
                         Sendline = "\n\n" + m.txMessage.formatForTx(false) + "\n"; //No CCIR modes for now
                         m.Sendln(Sendline);

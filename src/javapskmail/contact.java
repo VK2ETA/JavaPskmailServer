@@ -34,11 +34,12 @@ public class contact {
     private String Notes;
     //VK2ETA: add Radio Msg fields
     private Boolean showInVIA;
+    private String password;
     private Boolean showInTO;
     private Boolean showMobileInTO;
     private Boolean showEmailInTO;
     private String MobilePhoneAlias;
-    private String EmailAlias;    
+    private String EmailAlias;
 
     public contact(){
         super();
@@ -57,6 +58,7 @@ public class contact {
         MMSI="";
         Notes="";
         showInVIA = false;
+        password = "";
         showInTO = false;
         showMobileInTO = false;
         showEmailInTO = false;
@@ -83,7 +85,7 @@ public class contact {
         }
 
         // Save all the fields, more fields could follow later
-        if (temp.length > 15){
+        if (temp.length > 16){
             setFirstName(temp[0]);
             setLastName(temp[1]);
             this.setPhone(temp[2]);
@@ -94,12 +96,13 @@ public class contact {
             this.setEmail(temp[7]);
             this.setNotes(temp[8]);
             this.setNickname(temp[9]);
-            this.setShowInVIA(temp[11].equals("Y"));
-            this.setShowInTO(temp[10].equals("Y"));
-            this.setMobilePhoneAlias(temp[12]);
-            this.setEmailAlias(temp[13]);
-            this.setShowMobileInTO(temp[14].equals("Y"));
+            this.setShowInVIA(temp[10].equals("Y"));
+            this.setPassword(temp[11]);
+            this.setShowInTO(temp[12].equals("Y"));
+            this.setShowMobileInTO(temp[13].equals("Y"));
+            this.setMobilePhoneAlias(temp[14]);
             this.setShowEmailInTO(temp[15].equals("Y"));
+            this.setEmailAlias(temp[16]);
         } else if (temp.length > 8){ //Make it compatible with old contact files
             setFirstName(temp[0]);
             setLastName(temp[1]);
@@ -111,6 +114,14 @@ public class contact {
             this.setEmail(temp[7]);
             this.setNotes(temp[8]);
             this.setNickname(temp[9]);
+            //Blank out unknown fields
+            this.setShowInTO(false);
+            this.setShowInVIA(false);
+            this.setPassword("");
+            this.setShowMobileInTO(false);
+            this.setShowEmailInTO(false);
+            this.setMobilePhoneAlias("");
+            this.setEmailAlias("");
         } else
             myreturn = false;
 
@@ -123,20 +134,23 @@ public class contact {
      */
     public String GetDataAsCSV(){
         String output="";
-        output =  "\""+this.getFirstName()+"\",";
-        output += "\"" + this.getLastName() + "\",";
-        output += "\"" + this.getPhone()+ "\",";
-        output += "\"" + this.getMobilePhone()+ "\",";
-        output += "\"" + this.getHamCallsign()+ "\",";
-        output += "\"" + this.getOtherCallsign()+ "\",";
-        output += "\"" + this.getMMSI()+ "\",";
-        output += "\"" + this.getEmail()+ "\",";
-        output += "\"" + this.getNotes()+ "\",";
-        output += "\"" + this.getNickname()+ "\",";
-        output += "\"" + this.getShowInTO()+ "\",";
-        output += "\"" + this.getShowInVIA()+ "\",";
-        output += "\"" + this.getEmailAlias()+ "\",";
-        output += "\"" + this.getMobilePhoneAlias()+ "\"";
+        output =  "\""+this.getFirstName()+"\"," + 
+        "\"" + this.getLastName() + "\"," +
+        "\"" + this.getPhone()+ "\"," +
+        "\"" + this.getMobilePhone()+ "\"," +
+        "\"" + this.getHamCallsign()+ "\"," +
+        "\"" + this.getOtherCallsign()+ "\"," +
+        "\"" + this.getMMSI()+ "\"," +
+        "\"" + this.getEmail()+ "\"," +
+        "\"" + this.getNotes()+ "\"," +
+        "\"" + this.getNickname()+ "\"," +
+        "\"" + this.getShowInVIA()+ "\"," +
+        "\"" + this.getPassword()+ "\"," +        
+        "\"" + this.getShowInTO()+ "\"," +
+        "\"" + this.getShowMobileInTO()+ "\"," +
+        "\"" + this.getMobilePhoneAlias()+ "\"," +
+        "\"" + this.getShowEmailInTO()+ "\"," +
+        "\"" + this.getEmailAlias()+ "\"";
         return output;
     }
 
@@ -196,7 +210,11 @@ public class contact {
     public String getShowInVIA() {
         return (showInVIA ? "Y": "N");
     }
-
+    
+    public String getPassword() {
+        return password;
+    }
+    
     public String getShowInTO() {
         return (showInTO ? "Y": "N");
     }
@@ -257,6 +275,10 @@ public class contact {
         this.showInVIA = showInVIA;
     }
 
+    public void setPassword(String password){
+        this.password = password;
+    }
+    
     public void setShowInTO(Boolean showInTO) {
         this.showInTO = showInTO;
     }

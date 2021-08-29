@@ -20,6 +20,9 @@
  */
 package javapskmail;
 
+import java.awt.Color;
+import java.awt.Graphics;
+
 /**
  *
  * @author per
@@ -28,13 +31,46 @@ public class AddressEdit extends javax.swing.JDialog {
 
     private contact myContact;          // Holds the edited contact
     private boolean exitstatus=false;   // Shows if the window was closed using ok or cancel
-    
-    //private java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("javapskmail/Bundle");  
         
     /** Creates new form AddressEdit */
     public AddressEdit(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+    }
+    
+        //Custom paint method to add lines between the RadioMsg "To" checkboxes
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        //Draw lines between the "CheckTo..." checkboxes and associated label to show identical action
+        int xOff = RMsgPanel.getX();
+        int yOff = RMsgPanel.getLocationOnScreen().y;
+        int horizontalPos = xOff + checkToEmail.getX() + checkToEmail.getWidth() / 2;
+        int startY = checkToCallsign.getLocationOnScreen().y + checkToCallsign.getHeight() - this.getLocationOnScreen().y;
+        int endY = checkToEmail.getLocationOnScreen().y - this.getLocationOnScreen().y;
+        g.setColor(Color.BLUE);
+        g.drawLine(horizontalPos, startY, horizontalPos, endY);
+        g.drawLine(horizontalPos + 1, startY, horizontalPos + 1, endY);
+        startY = yOff + checkToEmail.getY() + checkToEmail.getHeight() - this.getLocationOnScreen().y;
+        endY = yOff + checkToMobile.getY() - this.getLocationOnScreen().y;
+        g.drawLine(horizontalPos, startY, horizontalPos, endY );
+        g.drawLine(horizontalPos + 1, startY, horizontalPos + 1, endY);
+        int endX = xOff + showInToLabel.getX();
+        int yPos = yOff + showInToLabel.getY() - this.getLocationOnScreen().y + showInToLabel.getHeight()/2;
+        g.drawLine(horizontalPos, yPos, endX, yPos );
+        g.drawLine(horizontalPos, yPos + 1, endX, yPos + 1);
+                //Draw lines between the "CheckVia" checkbox and associated label
+        g.setColor(Color.RED);
+        //Vertical part
+        startY = showInViaLabel.getLocationOnScreen().y + showInViaLabel.getHeight()/2 - this.getLocationOnScreen().y;
+        endY = checkVia.getLocationOnScreen().y - this.getLocationOnScreen().y;
+        g.drawLine(horizontalPos, startY, horizontalPos, endY);
+        g.drawLine(horizontalPos + 1, startY, horizontalPos + 1, endY);
+        //Horizontal part
+        endX = xOff + showInViaLabel.getX();
+        yPos = yOff + showInViaLabel.getY() - this.getLocationOnScreen().y + showInViaLabel.getHeight()/2;
+        g.drawLine(horizontalPos, yPos, endX, yPos );
+        g.drawLine(horizontalPos, yPos + 1, endX, yPos + 1);
     }
 
     /** This method is called from within the constructor to
@@ -70,13 +106,17 @@ public class AddressEdit extends javax.swing.JDialog {
         jLabel4 = new javax.swing.JLabel();
         txtMobile = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        jPanel1 = new javax.swing.JPanel();
+        RMsgPanel = new javax.swing.JPanel();
         checkVia = new javax.swing.JCheckBox();
         textEmailAlias = new javax.swing.JTextField();
         textMobileAlias = new javax.swing.JTextField();
         checkToEmail = new javax.swing.JCheckBox();
         checkToMobile = new javax.swing.JCheckBox();
-        checkTo = new javax.swing.JCheckBox();
+        checkToCallsign = new javax.swing.JCheckBox();
+        showInToLabel = new javax.swing.JLabel();
+        showInViaLabel = new javax.swing.JLabel();
+        passwordLabel = new javax.swing.JLabel();
+        textPassword = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(402, 232));
@@ -104,6 +144,10 @@ public class AddressEdit extends javax.swing.JDialog {
             }
         });
         pBottom.add(bOk);
+
+        pMain.setMinimumSize(new java.awt.Dimension(463, 250));
+        pMain.setName(""); // NOI18N
+        pMain.setPreferredSize(new java.awt.Dimension(463, 250));
 
         lblFirstName.setText(bundle.getString("AddressEdit.lblFirstName.text")); // NOI18N
 
@@ -267,14 +311,12 @@ public class AddressEdit extends javax.swing.JDialog {
                 .addContainerGap())
         );
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("AddressEdit.jPanel1.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 3, 12))); // NOI18N
-        jPanel1.setMinimumSize(new java.awt.Dimension(140, 180));
-        jPanel1.setName(""); // NOI18N
-        jPanel1.setPreferredSize(new java.awt.Dimension(140, 220));
+        RMsgPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("AddressEdit.RMsgPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 3, 12))); // NOI18N
+        RMsgPanel.setMinimumSize(new java.awt.Dimension(140, 250));
+        RMsgPanel.setName(""); // NOI18N
+        RMsgPanel.setPreferredSize(new java.awt.Dimension(140, 250));
 
         checkVia.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
-        checkVia.setText(bundle.getString("AddressEdit.checkVia.text")); // NOI18N
-        checkVia.setToolTipText(bundle.getString("AddressBook.checkVia.text")); // NOI18N
         checkVia.setMaximumSize(new java.awt.Dimension(115, 19));
         checkVia.setMinimumSize(new java.awt.Dimension(115, 19));
         checkVia.setPreferredSize(new java.awt.Dimension(115, 19));
@@ -313,45 +355,74 @@ public class AddressEdit extends javax.swing.JDialog {
         checkToMobile.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
         checkToMobile.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
-        checkTo.setText(bundle.getString("AddressEdit.checkTo.text")); // NOI18N
+        showInToLabel.setText(bundle.getString("AddressEdit.showInToLabel.text")); // NOI18N
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(checkVia, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(7, 7, 7))
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addGroup(jPanel1Layout.createSequentialGroup()
+        showInViaLabel.setText(bundle.getString("AddressEdit.showInViaLabel.text")); // NOI18N
+
+        passwordLabel.setText(bundle.getString("AddressEdit.passwordLabel.text")); // NOI18N
+
+        textPassword.setText(bundle.getString("AddressEdit.textPassword.text")); // NOI18N
+        textPassword.setMaximumSize(new java.awt.Dimension(90, 28));
+        textPassword.setMinimumSize(new java.awt.Dimension(90, 28));
+        textPassword.setPreferredSize(new java.awt.Dimension(90, 28));
+
+        javax.swing.GroupLayout RMsgPanelLayout = new javax.swing.GroupLayout(RMsgPanel);
+        RMsgPanel.setLayout(RMsgPanelLayout);
+        RMsgPanelLayout.setHorizontalGroup(
+            RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(RMsgPanelLayout.createSequentialGroup()
+                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(RMsgPanelLayout.createSequentialGroup()
+                        .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(checkToMobile, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(textMobileAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addComponent(checkToEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(checkToEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(textMobileAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                             .addComponent(textEmailAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(checkTo))
-                .addContainerGap(7, Short.MAX_VALUE))
+                    .addGroup(RMsgPanelLayout.createSequentialGroup()
+                        .addGap(21, 21, 21)
+                        .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(showInViaLabel)
+                            .addComponent(showInToLabel)))
+                    .addGroup(RMsgPanelLayout.createSequentialGroup()
+                        .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(checkToCallsign)
+                            .addComponent(checkVia, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(1, 1, 1)
+                        .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(passwordLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(textPassword, javax.swing.GroupLayout.DEFAULT_SIZE, 107, Short.MAX_VALUE))))
+                .addGap(1, 1, 1))
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(11, 11, 11)
-                .addComponent(checkVia, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(checkTo, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 75, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(textEmailAlias, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(checkToEmail, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(textMobileAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(checkToMobile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+        RMsgPanelLayout.setVerticalGroup(
+            RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(RMsgPanelLayout.createSequentialGroup()
+                .addComponent(showInViaLabel)
+                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(RMsgPanelLayout.createSequentialGroup()
+                        .addGap(31, 31, 31)
+                        .addComponent(checkVia, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(checkToCallsign, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, RMsgPanelLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(passwordLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(textPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(18, 18, 18)
+                .addComponent(showInToLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
+                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(RMsgPanelLayout.createSequentialGroup()
+                        .addComponent(textEmailAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(textMobileAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(RMsgPanelLayout.createSequentialGroup()
+                        .addComponent(checkToEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(15, 15, 15)
+                        .addComponent(checkToMobile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(16, 16, 16))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -362,20 +433,22 @@ public class AddressEdit extends javax.swing.JDialog {
                 .addGap(5, 5, 5)
                 .addComponent(pMain, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(5, 5, 5)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(RMsgPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addComponent(pBottom, javax.swing.GroupLayout.PREFERRED_SIZE, 496, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(5, 5, 5)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(pMain, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(8, 8, 8)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(50, 50, 50)
+                        .addComponent(pMain, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(22, 22, 22)
+                        .addComponent(RMsgPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 260, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(pBottom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(pBottom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -466,10 +539,13 @@ public class AddressEdit extends javax.swing.JDialog {
                 this.txtPhone.setText(myContact.getPhone().toString());
                 this.txtOtherCallsign.setText(myContact.getOtherCallsign().toString());
                 this.txtMMSI.setText(myContact.getMMSI().toString());
-                this.checkTo.setSelected(myContact.getShowInTO().equals("Y"));
+                this.checkToCallsign.setSelected(myContact.getShowInTO().equals("Y"));
                 this.checkVia.setSelected(myContact.getShowInVIA().equals("Y"));
+                this.textPassword.setText(myContact.getPassword().toString());
                 this.textEmailAlias.setText(myContact.getEmailAlias().toString());
                 this.textMobileAlias.setText(myContact.getMobilePhoneAlias().toString());
+                this.checkToMobile.setSelected(myContact.getShowMobileInTO().equals("Y"));
+                this.checkToEmail.setSelected(myContact.getShowEmailInTO().equals("Y"));
             }
         } catch (Exception e) {
             Main.log.writelog("Error showing contacts info.", e, true);
@@ -493,7 +569,8 @@ public class AddressEdit extends javax.swing.JDialog {
                 myContact.setPhone(this.txtPhone.getText().toString());
                 myContact.setNotes(this.txtNotes.getText().toString());
                 myContact.setShowInVIA(this.checkVia.isSelected());
-                myContact.setShowInTO(this.checkTo.isSelected());
+                myContact.setPassword(this.textPassword.getText().toString());
+                myContact.setShowInTO(this.checkToCallsign.isSelected());
                 myContact.setShowMobileInTO(this.checkToMobile.isSelected());
                 myContact.setShowEmailInTO(this.checkToEmail.isSelected());
                 myContact.setEmailAlias(this.textEmailAlias.getText().toString());
@@ -522,9 +599,10 @@ public class AddressEdit extends javax.swing.JDialog {
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel RMsgPanel;
     private javax.swing.JButton bCancel;
     private javax.swing.JButton bOk;
-    private javax.swing.JCheckBox checkTo;
+    private javax.swing.JCheckBox checkToCallsign;
     private javax.swing.JCheckBox checkToEmail;
     private javax.swing.JCheckBox checkToMobile;
     private javax.swing.JCheckBox checkVia;
@@ -533,7 +611,6 @@ public class AddressEdit extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel lblEmail;
     private javax.swing.JLabel lblFirstName;
     private javax.swing.JLabel lblLastName;
@@ -541,8 +618,12 @@ public class AddressEdit extends javax.swing.JDialog {
     private javax.swing.JLabel lblOtherCall;
     private javax.swing.JPanel pBottom;
     private javax.swing.JPanel pMain;
+    private javax.swing.JLabel passwordLabel;
+    private javax.swing.JLabel showInToLabel;
+    private javax.swing.JLabel showInViaLabel;
     private javax.swing.JTextField textEmailAlias;
     private javax.swing.JTextField textMobileAlias;
+    private javax.swing.JTextField textPassword;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtFirstName;
     private javax.swing.JTextField txtHamCallsign;

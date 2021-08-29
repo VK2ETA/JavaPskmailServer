@@ -18,7 +18,6 @@
 package javapskmail;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -27,8 +26,6 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -36,8 +33,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
-import static javapskmail.Main.HomePath;
-import static javapskmail.modemmodeenum.DOMINOEX5;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -1616,9 +1611,9 @@ public class mainpskmailui extends javax.swing.JFrame {
         bRMsgSendSMS = new javax.swing.JButton();
         bRMsgSendPos = new javax.swing.JButton();
         bRMsgReqPos = new javax.swing.JButton();
+        bRMsgResendLast = new javax.swing.JButton();
         bRMsgResend = new javax.swing.JButton();
-        bRMsgResendPlease1 = new javax.swing.JButton();
-        bRMsgDeleteMsg = new javax.swing.JButton();
+        bRMsgManageMsg = new javax.swing.JButton();
         pnlStatus = new javax.swing.JPanel();
         snLabel = new javax.swing.JLabel();
         StatusLabel = new javax.swing.JLabel();
@@ -3223,10 +3218,24 @@ public class mainpskmailui extends javax.swing.JFrame {
                 });
                 pnlRMSgButtons.add(bRMsgReqPos);
 
+                bRMsgResendLast.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+                bRMsgResendLast.setForeground(new java.awt.Color(12, 134, 40));
+                bRMsgResendLast.setText(bundle.getString("mainpskmailui.bRMsgResendLast.text")); // NOI18N
+                bRMsgResendLast.setToolTipText(mainpskmailui.getString("mainpskmailui.bRMsgResendLast.toolTipText")); // NOI18N
+                bRMsgResendLast.setMaximumSize(new java.awt.Dimension(110, 25));
+                bRMsgResendLast.setMinimumSize(new java.awt.Dimension(80, 25));
+                bRMsgResendLast.setPreferredSize(new java.awt.Dimension(100, 25));
+                bRMsgResendLast.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        bRMsgResendLastActionPerformed(evt);
+                    }
+                });
+                pnlRMSgButtons.add(bRMsgResendLast);
+
                 bRMsgResend.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
                 bRMsgResend.setForeground(new java.awt.Color(12, 134, 40));
                 bRMsgResend.setText(bundle.getString("mainpskmailui.bRMsgResend.text")); // NOI18N
-                bRMsgResend.setToolTipText(mainpskmailui.getString("mainpskmailui.bRMsgResend.toolTipText")); // NOI18N
+                bRMsgResend.setToolTipText(mainpskmailui.getString("mainpskmailui.bRMsgResendDialog.toolTipText")); // NOI18N
                 bRMsgResend.setMaximumSize(new java.awt.Dimension(110, 25));
                 bRMsgResend.setMinimumSize(new java.awt.Dimension(80, 25));
                 bRMsgResend.setPreferredSize(new java.awt.Dimension(100, 25));
@@ -3237,33 +3246,19 @@ public class mainpskmailui extends javax.swing.JFrame {
                 });
                 pnlRMSgButtons.add(bRMsgResend);
 
-                bRMsgResendPlease1.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
-                bRMsgResendPlease1.setForeground(new java.awt.Color(12, 134, 40));
-                bRMsgResendPlease1.setText(bundle.getString("mainpskmailui.bRMsgResendPlease1.text")); // NOI18N
-                bRMsgResendPlease1.setToolTipText(mainpskmailui.getString("mainpskmailui.bRMsgResendDialog.toolTipText")); // NOI18N
-                bRMsgResendPlease1.setMaximumSize(new java.awt.Dimension(110, 25));
-                bRMsgResendPlease1.setMinimumSize(new java.awt.Dimension(80, 25));
-                bRMsgResendPlease1.setPreferredSize(new java.awt.Dimension(100, 25));
-                bRMsgResendPlease1.addActionListener(new java.awt.event.ActionListener() {
+                bRMsgManageMsg.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+                bRMsgManageMsg.setForeground(new java.awt.Color(0, 102, 51));
+                bRMsgManageMsg.setText(bundle.getString("mainpskmailui.bRMsgManageMsg.text")); // NOI18N
+                bRMsgManageMsg.setToolTipText(bundle.getString("mainpskmailui.bRMsgManageMsg.toolTipText")); // NOI18N
+                bRMsgManageMsg.setMaximumSize(new java.awt.Dimension(110, 25));
+                bRMsgManageMsg.setMinimumSize(new java.awt.Dimension(80, 25));
+                bRMsgManageMsg.setPreferredSize(new java.awt.Dimension(100, 25));
+                bRMsgManageMsg.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        bRMsgResendPlease1ActionPerformed(evt);
+                        bRMsgManageMsgActionPerformed(evt);
                     }
                 });
-                pnlRMSgButtons.add(bRMsgResendPlease1);
-
-                bRMsgDeleteMsg.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
-                bRMsgDeleteMsg.setForeground(new java.awt.Color(0, 102, 51));
-                bRMsgDeleteMsg.setText(bundle.getString("mainpskmailui.bRMsgDeleteMsg.text")); // NOI18N
-                bRMsgDeleteMsg.setToolTipText(bundle.getString("mainpskmailui.bRMsgDeleteMsg.toolTipText")); // NOI18N
-                bRMsgDeleteMsg.setMaximumSize(new java.awt.Dimension(110, 25));
-                bRMsgDeleteMsg.setMinimumSize(new java.awt.Dimension(80, 25));
-                bRMsgDeleteMsg.setPreferredSize(new java.awt.Dimension(100, 25));
-                bRMsgDeleteMsg.addActionListener(new java.awt.event.ActionListener() {
-                    public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        bRMsgDeleteMsgActionPerformed(evt);
-                    }
-                });
-                pnlRMSgButtons.add(bRMsgDeleteMsg);
+                pnlRMSgButtons.add(bRMsgManageMsg);
 
                 tabRadioMsg.add(pnlRMSgButtons, java.awt.BorderLayout.PAGE_START);
 
@@ -4222,17 +4217,16 @@ private void txtMainEntryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
             }
         }
         txtMainEntry.setText("");
-    } else {
-        //Which tab are we on, RadioMsg tab send radio messages (SMSs), otherwise send Pskmail unproto
+    } else { //Unconnected
+        //On RadioMsg tab: send radio messages (SMSs), otherwise send Pskmail unproto
         if (tabMain.getTitleAt(tabMain.getSelectedIndex()).equals("Radio Msg")) {
             if (!intext.equals("")) {
                 //RMsgTxList.addMessageToList(RadioMSG.selectedTo, RadioMSG.selectedVia, intext,
                 RMsgTxList.addMessageToList(selectedTo, selectedVia, intext, false, null, 0, null);
                 txtMainEntry.setText("");
             }
-        } else {
+        } else { //Not RadioMsg, so use Pskmail actions
             if (intext.startsWith(":")) {
-
                 if (intext.startsWith(":MOTD:")) {
                     Main.Motd = intext.substring(4);
                     txtMainEntry.setText("");
@@ -4246,10 +4240,12 @@ private void txtMainEntryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
                     }
                 }
             } else if (intext.contains("@")) {
+                //Unproto email (Pskmail version)
                 myarq.set_txstatus(txstatus.TXUImessage);
                 myarq.send_uimessage(intext);
             } else {
                 try {
+                    //Unproto APRS message to another station
                     myarq.set_txstatus(txstatus.TXaprsmessage);
                     myarq.send_aprsmessage(intext + myarq.getAPRSMessageNumber());
                     Main.mainwindow += " =>>" + intext + "\n";
@@ -7275,7 +7271,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         Main.filetype = "b";
 
 //          if (evt.getSource() == FileSendButton) {
-        File uploads = new File(HomePath + Main.Dirprefix + "Uploads" + Main.Separator);
+        File uploads = new File(Main.HomePath + Main.Dirprefix + "Uploads" + Main.Separator);
         JFileChooser chooser = new JFileChooser(uploads);
         int returnVal = chooser.showOpenDialog(chooser);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -7620,7 +7616,6 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     }//GEN-LAST:event_tblRadioMsgsMouseReleased
 
     private void tblRadioMsgsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblRadioMsgsMouseClicked
-        // TODO add your handling code here:
         JTable source = (JTable) evt.getSource();
         int nrow = source.rowAtPoint(evt.getPoint());
         int ncolumn = source.columnAtPoint(evt.getPoint());
@@ -7643,7 +7638,6 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     }//GEN-LAST:event_tblRadioMsgsMouseClicked
 
     private void bRMsgSendSMSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgSendSMSActionPerformed
-        // TODO add your handling code here:
         String intext = txtMainEntry.getText();
         if (!intext.equals("")) {
             //RMsgTxList.addMessageToList(RadioMSG.selectedTo, RadioMSG.selectedVia, intext,
@@ -7653,16 +7647,15 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     }//GEN-LAST:event_bRMsgSendSMSActionPerformed
 
     private void bRMsgSendPosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgSendPosActionPerformed
-        // TODO add your handling code here:
         String intext = txtMainEntry.getText();
         RMsgUtil.sendPosition(intext);
         txtMainEntry.setText("");
     }//GEN-LAST:event_bRMsgSendPosActionPerformed
 
     private void bRMsgReqPosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgReqPosActionPerformed
-        // TODO add your handling code here:
         if (selectedTo == "*") {
             //middleToastText("CAN'T Request Positions from \"ALL\"\n\nSelect a single TO destination above");
+            myarq.Message(mainpskmailui.getString("you_must_select_to"), 5);
         } else if (RMsgProcessor.matchMyCallWith(selectedTo, false)) {
             //middleToastText("CAN'T Request Positions from \"YOURSELF\"\n\nSelect another TO destination above");
         } else {
@@ -7672,9 +7665,9 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         }
     }//GEN-LAST:event_bRMsgReqPosActionPerformed
 
-    private void bRMsgResendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgResendActionPerformed
-        // TODO add your handling code here:
+    private void bRMsgResendLastActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgResendLastActionPerformed
         if (selectedTo.equals("*") && selectedVia.equals("")) {
+            myarq.Message(mainpskmailui.getString("you_must_select_to"), 5);
             //middleToastText("CAN'T Request Positions from \"ALL\"\n\nSelect a single TO destination above");
         //} else if (RMsgProcessor.matchMyCallWith(selectedTo, false)) {
             //middleToastText("CAN'T Request Positions from \"YOURSELF\"\n\nSelect another TO destination above");
@@ -7686,48 +7679,50 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
                     null);
             txtMainEntry.setText("");
         }
-    }//GEN-LAST:event_bRMsgResendActionPerformed
+    }//GEN-LAST:event_bRMsgResendLastActionPerformed
 
-    private void bRMsgDeleteMsgActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgDeleteMsgActionPerformed
+    private void bRMsgManageMsgActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgManageMsgActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_bRMsgDeleteMsgActionPerformed
+    }//GEN-LAST:event_bRMsgManageMsgActionPerformed
 
     private void jComboRMsgToActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboRMsgToActionPerformed
-        // TODO add your handling code here:
-        String to = jComboRMsgTo.getSelectedItem().toString();
-        int position = jComboRMsgTo.getSelectedIndex();
-        if (to.equals("To_ALL")) {
-            selectedTo = "*";
-            selectedToAlias = ""; //None for ALL
-        } else {
-            //Save matching destination
-            selectedTo = to;
-            selectedToAlias = toAliasArray[position];
-            if (sendAliasAndDetails) {
-                //Send full details if they exist
-                if (selectedToAlias.length() > 0) {
-                    //We have an alias for this entry, send the full details "alias=destination"
-                    selectedTo = selectedToAlias;
-                }
+        if (jComboRMsgTo.getItemCount() > 0) {
+            String to = jComboRMsgTo.getSelectedItem().toString();
+            int position = jComboRMsgTo.getSelectedIndex();
+            if (to.equals("To_ALL")) {
+                selectedTo = "*";
+                selectedToAlias = ""; //None for ALL
             } else {
-                if (selectedToAlias.length() > 0) {
-                    //We have an alias for this entry, append an "=" to signify it is an alias
-                    selectedTo = to + "=";
+                //Save matching destination
+                selectedTo = to;
+                selectedToAlias = toAliasArray[position];
+                if (sendAliasAndDetails) {
+                    //Send full details if they exist
+                    if (selectedToAlias.length() > 0) {
+                        //We have an alias for this entry, send the full details "alias=destination"
+                        selectedTo = selectedToAlias;
+                    }
+                } else {
+                    if (selectedToAlias.length() > 0) {
+                        //We have an alias for this entry, append an "=" to signify it is an alias
+                        selectedTo = to + "=";
+                    }
                 }
             }
         }
     }//GEN-LAST:event_jComboRMsgToActionPerformed
 
     private void jComboRMsgViaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboRMsgViaActionPerformed
-
-        String via = jComboRMsgVia.getSelectedItem().toString();
-        int position = jComboRMsgVia.getSelectedIndex();
-        if (via.equals("--DIRECT--")) {
-            selectedVia = "";
-            selectedViaPassword = ""; //None for Direct
-        } else {
-            selectedVia = via.substring(4); //Remove the "via " prefix
-            selectedViaPassword = viaPasswordArray[position];
+        if (jComboRMsgVia.getItemCount() > 0) {
+            String via = jComboRMsgVia.getSelectedItem().toString();
+            int position = jComboRMsgVia.getSelectedIndex();
+            if (via.equals("--DIRECT--")) {
+                selectedVia = "";
+                selectedViaPassword = ""; //None for Direct
+            } else {
+                selectedVia = via.substring(4); //Remove the "via " prefix
+                selectedViaPassword = viaPasswordArray[position];
+            }
         }
     }//GEN-LAST:event_jComboRMsgViaActionPerformed
 
@@ -7754,9 +7749,9 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         }
     }//GEN-LAST:event_jRadBtnAliasAndAddressActionPerformed
 
-    private void bRMsgResendPlease1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgResendPlease1ActionPerformed
+    private void bRMsgResendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgResendActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_bRMsgResendPlease1ActionPerformed
+    }//GEN-LAST:event_bRMsgResendActionPerformed
 
     private void bContacts1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bContacts1ActionPerformed
         try {
@@ -8302,16 +8297,41 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             Main.log.writelog("Could not fetch contact information.", true);
         }
 
+        buildRMsgComboBoxes(contactlist);
+    }
+
+    //Build a list of valid Via and To stataions and To mobile and email addresses
+    private void buildRMsgComboBoxes(ArrayList<contact> contactlist) {
+        
         //Fill-in spinner for To address
         //String[] toArrayOriginal = ("To_ALL," + Main.configuration.getPreference("TOLIST", "")).split(",");
-        String[] toArrayOriginal = new String[contactlist.size() * 3]; //One for callsign, one for emails and one for cellular numbers
+        String[] toArrayOriginal = new String[contactlist.size() * 3 + 1]; //One for callsign, one for emails and one for cellular numbers
         String[] toAliasArrayOriginal = new String[toArrayOriginal.length];
+        //First "to All" entry
+        toArrayOriginal[0] = "To_ALL";
+        int j = 1;
         for (int i = 0; i < contactlist.size(); i++) {
-                contact mycontact = contactlist.get(i);
-            if (mycontact.getShowInTO().equals("Y")) {
-                if (mycontact.getMobilePhone().trim().length() > 0) {
-                    toArrayOriginal[i] = mycontact.getHamCallsign().trim().length() > 0 ? mycontact.getHamCallsign().trim() : mycontact.getOtherCallsign();
-                    toAliasArrayOriginal[i] = mycontact.getMobilePhoneAlias();
+            contact mycontact = contactlist.get(i);
+            //Add callsign to "TO"
+            if (mycontact.getShowInTO().equals("Y") &&
+                    (mycontact.getHamCallsign().trim().length() > 0 || 
+                    mycontact.getOtherCallsign().trim().length() > 0)) {
+                toArrayOriginal[j++] = mycontact.getHamCallsign().trim().length() > 0 ? mycontact.getHamCallsign().trim() : mycontact.getOtherCallsign().trim();
+            }
+            //Add mobile phone (and possibly alias) to "TO"
+            if (mycontact.getShowMobileInTO().equals("Y") && mycontact.getMobilePhone().trim().length() > 0) {
+                if (mycontact.getMobilePhoneAlias().trim().length() > 0) {
+                    toArrayOriginal[j++] = mycontact.getMobilePhoneAlias().trim() + "=" + mycontact.getMobilePhone().trim();
+                } else {
+                    toArrayOriginal[j++] = mycontact.getMobilePhone().trim();
+                }
+            }
+            //Add email (and possibly alias) to "TO"
+            if (mycontact.getShowEmailInTO().equals("Y") && mycontact.getEmail().trim().length() > 0) {
+                if (mycontact.getEmailAlias().trim().length() > 0) {
+                     toArrayOriginal[j++] = mycontact.getEmailAlias().trim() + "=" + mycontact.getEmail().trim();
+                } else {
+                    toArrayOriginal[j++] = mycontact.getEmail().trim();
                 }
             }
         }
@@ -8330,15 +8350,15 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
                     if (msc.group(2) != null) {
                         separator = msc.group(2);
                     }
-                    String accessPassword = "";
+                    String toAlias = "";
                     if (msc.group(3) != null) {
-                        accessPassword = msc.group(3);
+                        toAlias = msc.group(3);
                     }
                     if (!callSign.equals("")) {
                         validEntries++;
                         toArrayOriginal[i] = callSign;
-                        if (!separator.equals("") && !accessPassword.equals("")) {
-                            toAliasArrayOriginal[i] = accessPassword;
+                        if (!separator.equals("") && !toAlias.equals("")) {
+                            toAliasArrayOriginal[i] = toAlias;
                         } else {
                             toAliasArrayOriginal[i] = ""; //As it is copied later on
                         }
@@ -8353,12 +8373,12 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
                 toAliasArrayOriginal[i] = "";
             }
         }
-        //Blank first password as it corresponds to the "ALL" destination
+        //Blank first alias as it corresponds to the "ALL" destination
         toAliasArrayOriginal[0] = "";
         //Copy only non null strings to final array
         toArray = new String[validEntries];
         toAliasArray = new String[validEntries];
-        int j = 0;
+        j = 0;
         for (int i = 0; i < toArrayOriginal.length; i++) {
             if (toArrayOriginal[i].length() > 0) {
                 toArray[j] = toArrayOriginal[i];
@@ -8374,15 +8394,27 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         for (int i=0; i<toArray.length; i++) {
             jComboRMsgTo.addItem(toArray[i]);
         }
-        
-        
         //Fill-in spinner for Via relays, with passwords now
-        String[] viaArrayOriginal = ("--DIRECT--," + Main.configuration.getPreference("RELAYLIST", "")).split(",");
+        //String[] viaArrayOriginal = ("--DIRECT--," + Main.configuration.getPreference("RELAYLIST", "")).split(",");
+        String[] viaArrayOriginal = new String[contactlist.size() + 1];
         String[] viaPasswordArrayOriginal = new String[viaArrayOriginal.length];
-        int viaValidEntries = 0;
+        viaArrayOriginal[0] = "--DIRECT--";
+        viaPasswordArrayOriginal[0] = "";
+        int viaValidEntries = 1;
         Pattern viaPattern = Pattern.compile("^\\s*([0-9a-zA-Z/\\-_.+]+)\\s*(:?)\\s*(\\S*)\\s*$");
-        for (int i = 0; i < viaArrayOriginal.length; i++) {
-            Matcher msc = viaPattern.matcher(viaArrayOriginal[i]);
+        //for (int i = 0; i < viaArrayOriginal.length; i++) {
+        for (int i = 0; i < contactlist.size(); i++) {
+            contact mycontact = contactlist.get(i);
+            String data = "";
+            if (mycontact.getShowInVIA().equals("Y") &&
+                    (mycontact.getHamCallsign().trim().length() > 0 || 
+                    mycontact.getOtherCallsign().trim().length() > 0)) {
+                data = mycontact.getHamCallsign().trim().length() > 0 ? mycontact.getHamCallsign().trim() : mycontact.getOtherCallsign().trim();
+            }
+            if (mycontact.getPassword().trim().length() > 0 ) {
+                data += ":" + mycontact.getPassword();
+            }
+            Matcher msc = viaPattern.matcher(data);
             if (msc.find()) {
                 String callSign = "";
                 if (msc.group(1) != null) callSign = msc.group(1);
@@ -8392,20 +8424,20 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
                 if (msc.group(3) != null) accessPassword = msc.group(3);
                 if (!callSign.equals("")) {
                     viaValidEntries++;
-                    viaArrayOriginal[i] = callSign;
+                    viaArrayOriginal[i + 1] = callSign;
                     if (!separator.equals("") && !accessPassword.equals("")) {
-                        viaPasswordArrayOriginal[i] = accessPassword;
+                        viaPasswordArrayOriginal[i + 1] = accessPassword;
                     } else {
-                        viaPasswordArrayOriginal[i] = ""; //As it is copied later on
+                        viaPasswordArrayOriginal[i + 1] = ""; //As it is copied later on
                     }
                 } else {
-                    viaArrayOriginal[i] = ""; //Blank it out
-                    viaPasswordArrayOriginal[i] = "";
+                    viaArrayOriginal[i + 1] = ""; //Blank it out
+                    viaPasswordArrayOriginal[i + 1] = "";
                 }
             } else {
                 //Malformed to destination, blank it out too
-                viaArrayOriginal[i] = "";
-                viaPasswordArrayOriginal[i] = "";
+                viaArrayOriginal[i + 1] = "";
+                viaPasswordArrayOriginal[i + 1] = "";
             }
         }
         //Blank first password as it corresponds to the "--DIRECT--" entry (no relay)
@@ -8430,10 +8462,48 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         for (int i=0; i<viaArray.length; i++) {
             jComboRMsgVia.addItem(viaArray[i]);
         }
-
     }
+
     
-    //Scroll the displyed list of Radio Messages to the last one (received or sent)
+    public void refreshRMsgComboBoxes(ArrayList<contact> contactlist) {
+
+        //Save currently selected values
+        String savedTo = selectedTo; //"*" or "alias/value", value = callsign or email or mobile #
+        String savedVia = selectedVia;// "--DIRECT--" or callsign
+        if (!savedVia.equals("--DIRECT--")) {
+            savedVia = "via " + savedVia;
+        }
+        //Blank the combo boxes
+        jComboRMsgTo.removeAllItems(); 
+        jComboRMsgVia.removeAllItems();
+        //Rebuild in case it changed
+        buildRMsgComboBoxes(contactlist);
+        //Re-position to top of list if not in list anymore
+        boolean found = false;
+        for (int i=0; i < toArray.length; i ++) {
+            if (toArray[i].equals(savedTo)) {
+                found = true;
+                jComboRMsgTo.setSelectedIndex(i);
+                break;
+            }
+        }
+        if (!found) {
+            jComboRMsgTo.setSelectedIndex(0);
+        }
+        found = false;
+        for (int i=0; i < viaArray.length; i ++) {
+            if (viaArray[i].equals(savedVia)) {
+                found = true;
+                jComboRMsgVia.setSelectedIndex(i);
+                break;
+            }
+        }
+        if (!found) {
+            jComboRMsgVia.setSelectedIndex(0);
+        }     
+    }
+        
+    //Scroll the displayed list of Radio Messages to the last one (received or sent)
     public void scrollRadioMsgsTableToLast() {
         //tblRadioMsgs.addComponentListener(new ComponentAdapter() {
         //    public void componentResized(ComponentEvent e) {
@@ -8519,10 +8589,10 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JButton bDelete;
     private javax.swing.JButton bNewMail;
     private javax.swing.JButton bQTC;
-    private javax.swing.JButton bRMsgDeleteMsg;
+    private javax.swing.JButton bRMsgManageMsg;
     private javax.swing.JButton bRMsgReqPos;
     private javax.swing.JButton bRMsgResend;
-    private javax.swing.JButton bRMsgResendPlease1;
+    private javax.swing.JButton bRMsgResendLast;
     private javax.swing.JButton bRMsgSendPos;
     private javax.swing.JButton bRMsgSendSMS;
     private javax.swing.JButton bSummon;

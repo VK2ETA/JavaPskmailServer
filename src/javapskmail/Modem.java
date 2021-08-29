@@ -406,6 +406,7 @@ public class Modem implements Runnable {
                     }
                 } else if (!outLine.contains("<cmd>")) {
                     //Must be a data block, reset receive marker of RSID for next RX
+                    //VK2ETA: TO-DO: check if logic (and place of decision) is consistent with RadioMsg
                     Main.justReceivedRSID = false;
                 }
             }

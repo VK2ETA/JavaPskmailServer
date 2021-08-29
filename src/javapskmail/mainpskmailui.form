@@ -3706,7 +3706,7 @@
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="bRMsgReqPosActionPerformed"/>
                   </Events>
                 </Component>
-                <Component class="javax.swing.JButton" name="bRMsgResend">
+                <Component class="javax.swing.JButton" name="bRMsgResendLast">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Ubuntu" size="12" style="1"/>
@@ -3715,10 +3715,10 @@
                       <Color blue="28" green="86" red="c" type="rgb"/>
                     </Property>
                     <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                      <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.bRMsgResend.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                      <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.bRMsgResendLast.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                     <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                      <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.bRMsgResend.toolTipText" replaceFormat="mainpskmailui.getString(&quot;{key}&quot;)"/>
+                      <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.bRMsgResendLast.toolTipText" replaceFormat="mainpskmailui.getString(&quot;{key}&quot;)"/>
                     </Property>
                     <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[110, 25]"/>
@@ -3731,10 +3731,10 @@
                     </Property>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="bRMsgResendActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="bRMsgResendLastActionPerformed"/>
                   </Events>
                 </Component>
-                <Component class="javax.swing.JButton" name="bRMsgResendPlease1">
+                <Component class="javax.swing.JButton" name="bRMsgResend">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Ubuntu" size="12" style="1"/>
@@ -3743,7 +3743,7 @@
                       <Color blue="28" green="86" red="c" type="rgb"/>
                     </Property>
                     <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                      <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.bRMsgResendPlease1.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                      <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.bRMsgResend.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                     <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
                       <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.bRMsgResendDialog.toolTipText" replaceFormat="mainpskmailui.getString(&quot;{key}&quot;)"/>
@@ -3759,10 +3759,10 @@
                     </Property>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="bRMsgResendPlease1ActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="bRMsgResendActionPerformed"/>
                   </Events>
                 </Component>
-                <Component class="javax.swing.JButton" name="bRMsgDeleteMsg">
+                <Component class="javax.swing.JButton" name="bRMsgManageMsg">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Ubuntu" size="12" style="1"/>
@@ -3771,10 +3771,10 @@
                       <Color blue="33" green="66" red="0" type="rgb"/>
                     </Property>
                     <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                      <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.bRMsgDeleteMsg.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                      <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.bRMsgManageMsg.text" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                     <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                      <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.bRMsgDeleteMsg.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                      <ResourceString bundle="javapskmail/mainpskmailui.properties" key="mainpskmailui.bRMsgManageMsg.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
                     </Property>
                     <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[110, 25]"/>
@@ -3787,7 +3787,7 @@
                     </Property>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="bRMsgDeleteMsgActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="bRMsgManageMsgActionPerformed"/>
                   </Events>
                 </Component>
               </SubComponents>

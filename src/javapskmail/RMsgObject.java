@@ -439,16 +439,17 @@ public class RMsgObject {
     }
 
 
-
     //Takes a message object and returns a formatted string ready for Txing via Radio Modems
-    public String formatForTx(boolean allCharsToLowerCase) {
+    public String formatForTx(boolean isCCIR476) {
 
-        String txBuffer = createBufferNoCRC(allCharsToLowerCase, false); //Not for storage
-
+        String txBuffer = createBufferNoCRC(isCCIR476, false); //Not for storage
+        //Find the password for this particular message's Via station 
+        //Note: it may not be the via station selected on the screen right now (if we reply to a message for example)
+        String password = RMsgProcessor.getRequiredAccessPassword(this);
+        //Build the checksum using password if required
+        String chksumString = RMsgCheckSum.Crc16(txBuffer + password);
         //Add enclosing new lines and crc
-        String chksumString = RMsgCheckSum.Crc16(txBuffer); ///Not yet Txing + RadioMSG.selectedViaPassword);
         txBuffer = txBuffer + chksumString + Character.toString((char)4);
-
         return txBuffer;
     }
 
@@ -460,7 +461,6 @@ public class RMsgObject {
         //Build the checksum WITHOUT password
         String chksumString = RMsgCheckSum.Crc16(txBuffer);
         txBuffer = txBuffer + chksumString + Character.toString((char)4);
-
         return txBuffer;
     }
 
@@ -501,7 +501,6 @@ public class RMsgObject {
         if (allCharsToLowerCase) {
             txBuffer = txBuffer.toLowerCase(Locale.US);
         }
-
         return txBuffer;
     }
 
@@ -724,13 +723,14 @@ public class RMsgObject {
     //Generates a geo string for passing to goople maps, etc...
     public static String getGeoFormat(RMsgObject mMessage) {
 
-
+        //On desktop must be the full Google map URI
+        //E.g: https://www.google.com/maps/search/?api=1&query=47.5951518%2C-122.3316393
         String format = "";
 
         if (mMessage.msgHasPosition && mMessage.position != null) {
             String locationString = mMessage.getLatLongString();
-            format = "geo:" + locationString +
-                    "?q=" + locationString;
+            format = "https://www.google.com/maps/search/?api=1&query=" + locationString;
+            /* Check URI parsing error
             String posAgeString = "";
             String posSpeedString = "";
             if (mMessage.position.getSpeed() > 0) {
@@ -740,8 +740,9 @@ public class RMsgObject {
                 posAgeString = " / " + mMessage.positionAge + " Secs late";
             }
             if (!mMessage.sms.equals("") || !posAgeString.equals("") || !posSpeedString.equals("")) {
-                format += "(" + mMessage.sms + posSpeedString + posAgeString + ")";
+                format += " " + mMessage.sms + posSpeedString + posAgeString + "";
             }
+            */
         }
 
         return format;

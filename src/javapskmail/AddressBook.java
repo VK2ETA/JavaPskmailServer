@@ -33,6 +33,7 @@ import java.util.EventListener;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -55,8 +56,8 @@ public class AddressBook extends javax.swing.JFrame  {
         FetchContacts();
         DisplayContacts();
     }
-    
 
+    //Custom paint method to add lines between the RadioMsg "To" checkboxes
     @Override
     public void paint(Graphics g) {
         super.paint(g);
@@ -77,8 +78,19 @@ public class AddressBook extends javax.swing.JFrame  {
         int yPos = yOff + showInToLabel.getY() - this.getLocationOnScreen().y + showInToLabel.getHeight()/2;
         g.drawLine(horizontalPos, yPos, endX, yPos );
         g.drawLine(horizontalPos, yPos + 1, endX, yPos + 1);
+        //Draw lines between the "CheckVia" checkbox and associated label
+        g.setColor(Color.RED);
+        //Vertical part
+        startY = showInViaLabel.getLocationOnScreen().y + showInViaLabel.getHeight()/2 - this.getLocationOnScreen().y;
+        endY = checkVia.getLocationOnScreen().y - this.getLocationOnScreen().y;
+        g.drawLine(horizontalPos, startY, horizontalPos, endY);
+        g.drawLine(horizontalPos + 1, startY, horizontalPos + 1, endY);
+        //Horizontal part
+        endX = xOff + showInViaLabel.getX();
+        yPos = yOff + showInViaLabel.getY() - this.getLocationOnScreen().y + showInViaLabel.getHeight()/2;
+        g.drawLine(horizontalPos, yPos, endX, yPos );
+        g.drawLine(horizontalPos, yPos + 1, endX, yPos + 1);
     }
-
    
     /**
      * Update the need to save, check before exiting
@@ -139,7 +151,8 @@ public class AddressBook extends javax.swing.JFrame  {
             // We should have a file now, lets fetch stuff                
             FileReader fin = new FileReader(contfilename);
             BufferedReader br = new BufferedReader(fin); 
-            
+            //Reset list in case it is not blank
+            contactlist.clear();
             while((linestring = br.readLine()) != null) { 
                 // Create another contact object and feed it the csv string
                 contact = new contact();
@@ -151,6 +164,16 @@ public class AddressBook extends javax.swing.JFrame  {
         catch(Exception e) {
             Main.log.writelog("Could not fetch contact information.", true);
         }
+    }
+    
+    /**
+     * Refreshes the contact list and then request refresh of the drop down boxes
+     */
+    private void refreshToAndViaLists() {
+
+        //First refresh list
+        FetchContacts();
+        Main.mainui.refreshRMsgComboBoxes(contactlist);
     }
     
     /** This method is called from within the constructor to
@@ -175,12 +198,15 @@ public class AddressBook extends javax.swing.JFrame  {
         RMsgPanel = new javax.swing.JPanel();
         checkToCallsign = new javax.swing.JCheckBox();
         checkVia = new javax.swing.JCheckBox();
-        textEmailAlias = new javax.swing.JTextField();
+        textPassword = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
-        textMobileAlias = new javax.swing.JTextField();
         checkToEmail = new javax.swing.JCheckBox();
+        textMobileAlias = new javax.swing.JTextField();
         checkToMobile = new javax.swing.JCheckBox();
         showInToLabel = new javax.swing.JLabel();
+        showInViaLabel = new javax.swing.JLabel();
+        passwordLabel = new javax.swing.JLabel();
+        textEmailAlias = new javax.swing.JTextField();
         pnlBottom = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
@@ -215,7 +241,7 @@ public class AddressBook extends javax.swing.JFrame  {
 
         jLabel9.setText(bundle.getString("AddressBook.jLabel9.text")); // NOI18N
 
-        setMinimumSize(new java.awt.Dimension(550, 373));
+        setMinimumSize(new java.awt.Dimension(550, 469));
         setName("AddressBook"); // NOI18N
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
@@ -261,7 +287,7 @@ public class AddressBook extends javax.swing.JFrame  {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         getContentPane().add(pnlButtons, gridBagConstraints);
 
-        pnlTop.setMinimumSize(new java.awt.Dimension(500, 150));
+        pnlTop.setMinimumSize(new java.awt.Dimension(450, 150));
         pnlTop.setPreferredSize(new java.awt.Dimension(400, 200));
         pnlTop.setLayout(new java.awt.GridBagLayout());
 
@@ -309,12 +335,13 @@ public class AddressBook extends javax.swing.JFrame  {
         getContentPane().add(jSeparator1, gridBagConstraints);
 
         RMsgPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("AddressBook.rmsgTitle.text"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 3, 12))); // NOI18N
-        RMsgPanel.setMinimumSize(new java.awt.Dimension(160, 180));
+        RMsgPanel.setMaximumSize(new java.awt.Dimension(190, 230));
+        RMsgPanel.setMinimumSize(new java.awt.Dimension(190, 230));
         RMsgPanel.setName(""); // NOI18N
-        RMsgPanel.setPreferredSize(new java.awt.Dimension(160, 220));
 
         checkToCallsign.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
         checkToCallsign.setText(bundle.getString("AddressBook.checkToCallsign.text")); // NOI18N
+        checkToCallsign.setMargin(new java.awt.Insets(1, 1, 1, 1));
         checkToCallsign.setMaximumSize(new java.awt.Dimension(111, 19));
         checkToCallsign.setMinimumSize(new java.awt.Dimension(111, 19));
         checkToCallsign.setPreferredSize(new java.awt.Dimension(111, 19));
@@ -327,19 +354,32 @@ public class AddressBook extends javax.swing.JFrame  {
         });
 
         checkVia.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
-        checkVia.setText(bundle.getString("AddressBook.checkVia.text")); // NOI18N
+        checkVia.setMargin(new java.awt.Insets(1, 1, 1, 1));
         checkVia.setMaximumSize(new java.awt.Dimension(115, 19));
         checkVia.setMinimumSize(new java.awt.Dimension(115, 19));
         checkVia.setPreferredSize(new java.awt.Dimension(115, 19));
         checkVia.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         checkVia.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
 
-        textEmailAlias.setEditable(false);
-        textEmailAlias.setText(bundle.getString("AddressBook.textEmailAlias.text")); // NOI18N
-        textEmailAlias.setMinimumSize(new java.awt.Dimension(4, 28));
-        textEmailAlias.setPreferredSize(new java.awt.Dimension(4, 28));
+        textPassword.setEditable(false);
+        textPassword.setText(bundle.getString("AddressBook.textPassword.text")); // NOI18N
+        textPassword.setMinimumSize(new java.awt.Dimension(4, 28));
+        textPassword.setPreferredSize(new java.awt.Dimension(4, 28));
 
         jLabel10.setText(bundle.getString("AddressBook.jLabel10.text")); // NOI18N
+
+        checkToEmail.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
+        checkToEmail.setMargin(new java.awt.Insets(1, 1, 1, 1));
+        checkToEmail.setMaximumSize(new java.awt.Dimension(111, 19));
+        checkToEmail.setMinimumSize(new java.awt.Dimension(111, 19));
+        checkToEmail.setPreferredSize(new java.awt.Dimension(111, 19));
+        checkToEmail.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+        checkToEmail.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        checkToEmail.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkToEmailActionPerformed(evt);
+            }
+        });
 
         textMobileAlias.setEditable(false);
         textMobileAlias.setText(bundle.getString("AddressBook.text")); // NOI18N
@@ -353,19 +393,8 @@ public class AddressBook extends javax.swing.JFrame  {
             }
         });
 
-        checkToEmail.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
-        checkToEmail.setMaximumSize(new java.awt.Dimension(111, 19));
-        checkToEmail.setMinimumSize(new java.awt.Dimension(111, 19));
-        checkToEmail.setPreferredSize(new java.awt.Dimension(111, 19));
-        checkToEmail.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
-        checkToEmail.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        checkToEmail.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                checkToEmailActionPerformed(evt);
-            }
-        });
-
         checkToMobile.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
+        checkToMobile.setMargin(new java.awt.Insets(1, 1, 1, 1));
         checkToMobile.setMaximumSize(new java.awt.Dimension(111, 19));
         checkToMobile.setMinimumSize(new java.awt.Dimension(111, 19));
         checkToMobile.setPreferredSize(new java.awt.Dimension(111, 19));
@@ -379,51 +408,78 @@ public class AddressBook extends javax.swing.JFrame  {
 
         showInToLabel.setText(bundle.getString("AddressBook.showInToLabel.text")); // NOI18N
 
+        showInViaLabel.setText(bundle.getString("AddressBook.showInViaLabel.text")); // NOI18N
+
+        passwordLabel.setText(bundle.getString("AddressBook.passwordLabel.text")); // NOI18N
+
+        textEmailAlias.setEditable(false);
+        textEmailAlias.setText(bundle.getString("AddressBook.textEmailAlias.text")); // NOI18N
+        textEmailAlias.setMinimumSize(new java.awt.Dimension(4, 28));
+        textEmailAlias.setPreferredSize(new java.awt.Dimension(4, 28));
+
         javax.swing.GroupLayout RMsgPanelLayout = new javax.swing.GroupLayout(RMsgPanel);
         RMsgPanel.setLayout(RMsgPanelLayout);
         RMsgPanelLayout.setHorizontalGroup(
             RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(RMsgPanelLayout.createSequentialGroup()
-                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(checkToEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(checkToMobile, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel10)
-                    .addComponent(textMobileAlias, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
-                    .addComponent(textEmailAlias, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(RMsgPanelLayout.createSequentialGroup()
+                        .addGap(20, 20, 20)
+                        .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(showInViaLabel)
+                            .addComponent(showInToLabel)))
+                    .addGroup(RMsgPanelLayout.createSequentialGroup()
+                        .addGap(43, 43, 43)
+                        .addComponent(passwordLabel)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(RMsgPanelLayout.createSequentialGroup()
-                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(checkToCallsign, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(checkVia, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 149, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(RMsgPanelLayout.createSequentialGroup()
-                .addGap(21, 21, 21)
-                .addComponent(showInToLabel)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(1, 1, 1)
+                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(RMsgPanelLayout.createSequentialGroup()
+                        .addComponent(checkToMobile, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(textMobileAlias, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, RMsgPanelLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(RMsgPanelLayout.createSequentialGroup()
+                        .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(checkVia, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(checkToCallsign, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(textPassword, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(RMsgPanelLayout.createSequentialGroup()
+                        .addComponent(checkToEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(textEmailAlias, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         RMsgPanelLayout.setVerticalGroup(
             RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(RMsgPanelLayout.createSequentialGroup()
-                .addGap(28, 28, 28)
-                .addComponent(checkVia, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(showInViaLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(checkToCallsign, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(passwordLabel)
+                .addGap(3, 3, 3)
+                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(textPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(RMsgPanelLayout.createSequentialGroup()
+                        .addComponent(checkVia, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(checkToCallsign, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(9, 9, 9)
                 .addComponent(showInToLabel)
-                .addGap(18, 18, 18)
+                .addGap(9, 9, 9)
                 .addComponent(jLabel10)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(3, 3, 3)
                 .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(checkToMobile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(RMsgPanelLayout.createSequentialGroup()
                         .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(textEmailAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(checkToEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(textMobileAlias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(checkToMobile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(14, Short.MAX_VALUE))
+                            .addComponent(checkToEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(textEmailAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(3, 3, 3)
+                        .addComponent(textMobileAlias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(20, Short.MAX_VALUE))
         );
 
         checkToCallsign.getAccessibleContext().setAccessibleName(bundle.getString("AddressBook.checkToCallsign.AccessibleContext.accessibleName")); // NOI18N
@@ -433,12 +489,13 @@ public class AddressBook extends javax.swing.JFrame  {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
-        gridBagConstraints.weightx = 0.001;
+        gridBagConstraints.weighty = 0.5;
         getContentPane().add(RMsgPanel, gridBagConstraints);
 
-        pnlBottom.setMaximumSize(new java.awt.Dimension(500, 180));
-        pnlBottom.setMinimumSize(new java.awt.Dimension(500, 180));
-        pnlBottom.setPreferredSize(new java.awt.Dimension(400, 220));
+        pnlBottom.setMaximumSize(new java.awt.Dimension(400, 210));
+        pnlBottom.setMinimumSize(new java.awt.Dimension(400, 210));
+        pnlBottom.setName(""); // NOI18N
+        pnlBottom.setPreferredSize(new java.awt.Dimension(400, 210));
         pnlBottom.setLayout(new java.awt.GridBagLayout());
 
         jLabel1.setText(bundle.getString("AddressBook.jLabel1.text")); // NOI18N
@@ -764,6 +821,8 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                 SaveToFile();
             }
             myEditwindow.dispose();
+            repaint(); //Repaints window and lines between "To" and "Via" checkboxes
+            refreshToAndViaLists(); //To reflect changes in the address list
         }
         catch (Exception e) {
             Main.log.writelog("Error showing contacts edit window.", e, true);
@@ -820,6 +879,8 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                     SaveToFile();
                 }
                 myEditwindow.dispose();
+                repaint(); //Repaints window and lines between "To" and "Via" checkboxes
+                refreshToAndViaLists(); //To reflect changes in the address list
             }
         } catch (Exception e) {
             Main.log.writelog("Error showing contacts edit window: "+e.getMessage(), e, true);
@@ -853,7 +914,8 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                 options[1]);
                 if (n==0){
                     int x = lstContacts.getSelectedIndex();
-                    myListModel.remove(n);
+                    //myListModel.remove(n); //Bug
+                    myListModel.remove(x);
                     // Update internal list
                     contactlist.clear();
                     for (int i = 0; i < myListModel.getSize(); i++) {
@@ -863,6 +925,7 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                     }
                     this.DisplayContacts();
                     this.SaveToFile();
+                    refreshToAndViaLists(); //To reflect changes in the address list
                 }
             }
         }
@@ -996,6 +1059,7 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
             textMobileAlias.setText(mycontact.getMobilePhoneAlias());
             checkToCallsign.setSelected(mycontact.getShowInTO().equals("Y"));
             checkVia.setSelected(mycontact.getShowInVIA().equals("Y"));
+            textPassword.setText(mycontact.getPassword());
             checkToMobile.setSelected(mycontact.getShowMobileInTO().equals("Y"));
             checkToEmail.setSelected(mycontact.getShowEmailInTO().equals("Y"));
             //Make checkboxes "read only" (prevent from being changed)
@@ -1068,12 +1132,15 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private javax.swing.JMenuItem mnuPaste;
     private javax.swing.JMenuItem mnuSave;
     private javax.swing.JMenuItem mnuSaveAs;
+    private javax.swing.JLabel passwordLabel;
     private javax.swing.JPanel pnlBottom;
     private javax.swing.JPanel pnlButtons;
     private javax.swing.JPanel pnlTop;
     private javax.swing.JLabel showInToLabel;
+    private javax.swing.JLabel showInViaLabel;
     private javax.swing.JTextField textEmailAlias;
     private javax.swing.JTextField textMobileAlias;
+    private javax.swing.JTextField textPassword;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtFirstName;
     private javax.swing.JTextField txtHamCall;

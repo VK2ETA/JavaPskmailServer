@@ -15,6 +15,16 @@
 
 package javapskmail;
 
+import java.awt.Desktop;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 
 public class RMsgMessageViewer extends javax.swing.JFrame {
     
@@ -33,25 +43,29 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
         try {
 
             // Clear the form
-            this.lblDate.setText("");
-            this.lblFrom.setText("");
-            this.lblTo.setText("");
-            this.lblSubject.setText("");
-            this.txtContent.setText("");
-            this.lblReplyTo.setText("");
-            this.lblAttachmentFilename.setText("");
+            this.lblRmsgViewerFn.setText("");
+            this.lblRmsgViewerFrom.setText("");
+            this.lblRmsgViewerCoord.setText("");
+            this.txtRMsgViewerSms.setText("");
+            this.lblRmsgViewerVia.setText("");
+            this.txtRMsgViewerEntry.setText("");
 
             // First check the object!!!!!
             if (mDisplayItem != null) {
-                this.txtContent.setText(mDisplayItem.mMessage.formatForList(false)); //No tracking
-                // Check for an attachment
-                
+                this.txtRMsgViewerSms.setText(mDisplayItem.mMessage.sms); //No tracking
+                this.lblRmsgViewerFn.setText(mDisplayItem.mMessage.fileName);
+                this.lblRmsgViewerFrom.setText(mDisplayItem.mMessage.from);
+                this.lblRmsgViewerVia.setText(mDisplayItem.myOwn ? mDisplayItem.mMessage.via : mDisplayItem.mMessage.relay);
+                if (mDisplayItem.mMessage.msgHasPosition) {
+                    RMsgLocation pos = mDisplayItem.mMessage.position;
+                    this.lblRmsgViewerCoord.setText(pos.getLatitude() + "," + pos.getLongitude());
+                }
             }
 
             // resize the textarea for scrollbars
-            this.txtContent.setRows(calculaterows());
+            this.txtRMsgViewerSms.setRows(calculaterows());
             // Move to the top
-            this.txtContent.setCaretPosition(0);
+            this.txtRMsgViewerSms.setCaretPosition(0);
         } catch (Exception e) {
             Main.log.writelog("RadioMSg window error, faulty message object?", e, true);
         }
@@ -86,35 +100,31 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
         java.awt.GridBagConstraints gridBagConstraints;
 
         pnlTop = new javax.swing.JPanel();
-        lblSubjectLabel = new javax.swing.JLabel();
         lblFromLabel = new javax.swing.JLabel();
-        lblReplytoLabel = new javax.swing.JLabel();
-        lblDateLabel = new javax.swing.JLabel();
-        lblToLabel = new javax.swing.JLabel();
-        lblSubject = new javax.swing.JLabel();
-        lblFrom = new javax.swing.JLabel();
-        lblReplyTo = new javax.swing.JLabel();
-        lblDate = new javax.swing.JLabel();
         lblTo = new javax.swing.JLabel();
+        lblDateTime = new javax.swing.JLabel();
+        lblCoordinates = new javax.swing.JLabel();
+        lblRmsgViewerFrom = new javax.swing.JLabel();
+        lblRmsgViewerVia = new javax.swing.JLabel();
+        lblRmsgViewerFn = new javax.swing.JLabel();
+        lblRmsgViewerCoord = new javax.swing.JLabel();
         pnlBottom = new javax.swing.JPanel();
-        lAttach = new javax.swing.JLabel();
-        bSaveAttachment = new javax.swing.JButton();
-        jPanel1 = new javax.swing.JPanel();
-        lblAttachmentFilename = new javax.swing.JLabel();
+        txtRMsgViewerEntry = new javax.swing.JTextField();
         pnlContent = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        txtContent = new javax.swing.JTextArea();
+        txtRMsgViewerSms = new javax.swing.JTextArea();
         pnlTopButtons = new javax.swing.JPanel();
         bReply = new javax.swing.JButton();
         bForward = new javax.swing.JButton();
+        bShowOnMap = new javax.swing.JButton();
+        bDelete = new javax.swing.JButton();
+        bTxAgain = new javax.swing.JButton();
         mnuEmailViewer = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         mnuPrint = new javax.swing.JMenuItem();
         mnuClose = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
-        mnuCut = new javax.swing.JMenuItem();
         mnuCopy = new javax.swing.JMenuItem();
-        mnuPaste = new javax.swing.JMenuItem();
         mnuMessage = new javax.swing.JMenu();
         mnuReply = new javax.swing.JMenuItem();
         mnuForward = new javax.swing.JMenuItem();
@@ -130,12 +140,6 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
         pnlTop.setPreferredSize(new java.awt.Dimension(515, 100));
         pnlTop.setLayout(new java.awt.GridBagLayout());
 
-        lblSubjectLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
-        lblSubjectLabel.setText(bundle.getString("RMsgMessageViewer.lblSubjectLabel.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        pnlTop.add(lblSubjectLabel, gridBagConstraints);
-
         lblFromLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
         lblFromLabel.setText(bundle.getString("RMsgMessageViewer.lblFromLabel.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -144,72 +148,65 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         pnlTop.add(lblFromLabel, gridBagConstraints);
 
-        lblReplytoLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
-        lblReplytoLabel.setText(bundle.getString("RMsgMessageViewer.lblReplytoLabel.text")); // NOI18N
+        lblTo.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
+        lblTo.setText(bundle.getString("RMsgMessageViewer.lblTo.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        pnlTop.add(lblReplytoLabel, gridBagConstraints);
+        pnlTop.add(lblTo, gridBagConstraints);
 
-        lblDateLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
-        lblDateLabel.setText(bundle.getString("RMsgMessageViewer.lblDateLabel.text")); // NOI18N
+        lblDateTime.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
+        lblDateTime.setText(bundle.getString("RMsgMessageViewer.lblDateTime.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        pnlTop.add(lblDateLabel, gridBagConstraints);
+        pnlTop.add(lblDateTime, gridBagConstraints);
 
-        lblToLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
-        lblToLabel.setText(bundle.getString("RMsgMessageViewer.lblToLabel.text")); // NOI18N
+        lblCoordinates.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
+        lblCoordinates.setText(bundle.getString("RMsgMessageViewer.lblCoordinates.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        pnlTop.add(lblToLabel, gridBagConstraints);
+        pnlTop.add(lblCoordinates, gridBagConstraints);
 
-        lblSubject.setText(bundle.getString("RMsgMessageViewer.lblSubject.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 0.5;
-        gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
-        pnlTop.add(lblSubject, gridBagConstraints);
-
-        lblFrom.setText(bundle.getString("RMsgMessageViewer.lblFrom.text")); // NOI18N
+        lblRmsgViewerFrom.setText(bundle.getString("RMsgMessageViewer.lblRmsgViewerFrom.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
-        pnlTop.add(lblFrom, gridBagConstraints);
+        pnlTop.add(lblRmsgViewerFrom, gridBagConstraints);
 
-        lblReplyTo.setText(bundle.getString("RMsgMessageViewer.lblReplyTo.text")); // NOI18N
+        lblRmsgViewerVia.setText(bundle.getString("RMsgMessageViewer.lblRmsgViewerVia.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
-        pnlTop.add(lblReplyTo, gridBagConstraints);
+        pnlTop.add(lblRmsgViewerVia, gridBagConstraints);
 
-        lblDate.setText(bundle.getString("RMsgMessageViewer.lblDate.text")); // NOI18N
+        lblRmsgViewerFn.setText(bundle.getString("RMsgMessageViewer.lblRmsgViewerFn.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
-        pnlTop.add(lblDate, gridBagConstraints);
+        pnlTop.add(lblRmsgViewerFn, gridBagConstraints);
 
-        lblTo.setText(bundle.getString("RMsgMessageViewer.lblTo.text")); // NOI18N
+        lblRmsgViewerCoord.setText(bundle.getString("RMsgMessageViewer.lblRmsgViewerCoord.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
-        pnlTop.add(lblTo, gridBagConstraints);
+        pnlTop.add(lblRmsgViewerCoord, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -221,46 +218,34 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
         pnlBottom.setMinimumSize(new java.awt.Dimension(400, 20));
         pnlBottom.setPreferredSize(new java.awt.Dimension(515, 30));
         pnlBottom.setRequestFocusEnabled(false);
-        pnlBottom.setLayout(new java.awt.GridBagLayout());
 
-        lAttach.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
-        lAttach.setText(bundle.getString("RMsgMessageViewer.lAttach.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 5);
-        pnlBottom.add(lAttach, gridBagConstraints);
-
-        bSaveAttachment.setText(bundle.getString("RMsgMessageViewer.bSaveAttachment.text_1")); // NOI18N
-        bSaveAttachment.setEnabled(false);
-        bSaveAttachment.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                bSaveAttachmentActionPerformed(evt);
+        txtRMsgViewerEntry.setBorder(javax.swing.BorderFactory.createEtchedBorder(null, new java.awt.Color(0, 102, 102)));
+        txtRMsgViewerEntry.setMaximumSize(new java.awt.Dimension(1400, 27));
+        txtRMsgViewerEntry.setMinimumSize(new java.awt.Dimension(400, 27));
+        txtRMsgViewerEntry.setPreferredSize(new java.awt.Dimension(510, 27));
+        txtRMsgViewerEntry.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                txtRMsgViewerEntryMouseClicked(evt);
             }
         });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(3, 3, 0, 0);
-        pnlBottom.add(bSaveAttachment, gridBagConstraints);
+        txtRMsgViewerEntry.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtRMsgViewerEntryActionPerformed(evt);
+            }
+        });
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        jPanel1.setMinimumSize(new java.awt.Dimension(14, 25));
-        jPanel1.setPreferredSize(new java.awt.Dimension(100, 25));
-
-        lblAttachmentFilename.setText(bundle.getString("RMsgMessageViewer.lblAttachmentFilename.text")); // NOI18N
-        jPanel1.add(lblAttachmentFilename);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
-        pnlBottom.add(jPanel1, gridBagConstraints);
+        javax.swing.GroupLayout pnlBottomLayout = new javax.swing.GroupLayout(pnlBottom);
+        pnlBottom.setLayout(pnlBottomLayout);
+        pnlBottomLayout.setHorizontalGroup(
+            pnlBottomLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(txtRMsgViewerEntry, javax.swing.GroupLayout.DEFAULT_SIZE, 516, Short.MAX_VALUE)
+        );
+        pnlBottomLayout.setVerticalGroup(
+            pnlBottomLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlBottomLayout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(txtRMsgViewerEntry, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -276,13 +261,13 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
         jScrollPane1.setMinimumSize(new java.awt.Dimension(400, 100));
         jScrollPane1.setPreferredSize(new java.awt.Dimension(515, 120));
 
-        txtContent.setColumns(10);
-        txtContent.setEditable(false);
-        txtContent.setLineWrap(true);
-        txtContent.setRows(20);
-        txtContent.setWrapStyleWord(true);
-        txtContent.setMinimumSize(new java.awt.Dimension(400, 100));
-        jScrollPane1.setViewportView(txtContent);
+        txtRMsgViewerSms.setEditable(false);
+        txtRMsgViewerSms.setColumns(10);
+        txtRMsgViewerSms.setLineWrap(true);
+        txtRMsgViewerSms.setRows(20);
+        txtRMsgViewerSms.setWrapStyleWord(true);
+        txtRMsgViewerSms.setMinimumSize(new java.awt.Dimension(400, 100));
+        jScrollPane1.setViewportView(txtRMsgViewerSms);
 
         pnlContent.add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
@@ -325,6 +310,45 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
         });
         pnlTopButtons.add(bForward);
 
+        bShowOnMap.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+        bShowOnMap.setForeground(new java.awt.Color(0, 102, 51));
+        bShowOnMap.setText(bundle.getString("RMsgMessageViewer.bShowOnMap.text")); // NOI18N
+        bShowOnMap.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        bShowOnMap.setMaximumSize(new java.awt.Dimension(100, 30));
+        bShowOnMap.setPreferredSize(new java.awt.Dimension(95, 30));
+        bShowOnMap.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bShowOnMapActionPerformed(evt);
+            }
+        });
+        pnlTopButtons.add(bShowOnMap);
+
+        bDelete.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+        bDelete.setForeground(new java.awt.Color(0, 102, 51));
+        bDelete.setText(bundle.getString("RMsgMessageViewer.bDelete.text")); // NOI18N
+        bDelete.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        bDelete.setMaximumSize(new java.awt.Dimension(100, 30));
+        bDelete.setPreferredSize(new java.awt.Dimension(95, 30));
+        bDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bDeleteActionPerformed(evt);
+            }
+        });
+        pnlTopButtons.add(bDelete);
+
+        bTxAgain.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+        bTxAgain.setForeground(new java.awt.Color(0, 102, 51));
+        bTxAgain.setText(bundle.getString("RMsgMessageViewer.bTxAgain.text")); // NOI18N
+        bTxAgain.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        bTxAgain.setMaximumSize(new java.awt.Dimension(100, 30));
+        bTxAgain.setPreferredSize(new java.awt.Dimension(95, 30));
+        bTxAgain.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bTxAgainActionPerformed(evt);
+            }
+        });
+        pnlTopButtons.add(bTxAgain);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -350,17 +374,9 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
 
         jMenu2.setText(bundle.getString("RMsgMessageViewer.jMenu2.text")); // NOI18N
 
-        mnuCut.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_X, java.awt.event.InputEvent.CTRL_MASK));
-        mnuCut.setText(bundle.getString("RMsgMessageViewer.mnuCut.text")); // NOI18N
-        jMenu2.add(mnuCut);
-
         mnuCopy.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_C, java.awt.event.InputEvent.CTRL_MASK));
         mnuCopy.setText(bundle.getString("RMsgMessageViewer.mnuCopy.text")); // NOI18N
         jMenu2.add(mnuCopy);
-
-        mnuPaste.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_P, java.awt.event.InputEvent.CTRL_MASK));
-        mnuPaste.setText(bundle.getString("RMsgMessageViewer.mnuPaste.text")); // NOI18N
-        jMenu2.add(mnuPaste);
 
         mnuEmailViewer.add(jMenu2);
 
@@ -409,57 +425,91 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
 
     // Create a reply email
     private void bReplyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bReplyActionPerformed
-        //mDisplayItem
-        String replyString = "Reply to: " + mDisplayItem.mMessage.sms;
-        RMsgTxList.addMessageToList(mDisplayItem.mMessage.from, mDisplayItem.mMessage.relay, replyString,
+        String intext = txtRMsgViewerEntry.getText();
+        if (intext.trim().length() > 0) {
+        RMsgTxList.addMessageToList(mDisplayItem.mMessage.from, mDisplayItem.mMessage.relay, intext,
             false, null, 0L, null);
-        //Main.mainui.ReplyMail(myobject.getFrom(), myobject.getSubject());
+        } else {
+           //Main.mainui.myarq.Message(mainpskmailui.getString("you_must_select_to"), 5); 
+        }
     }//GEN-LAST:event_bReplyActionPerformed
 
     private void bForwardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bForwardActionPerformed
-        //Main.mainui.ForwardMail(myobject.getSubject(), myobject.getContent());
+        //String intext = txtRMsgViewerEntry.getText();
+        //if (intext.trim().length() > 0) {
+        RMsgObject fwRMsg = mDisplayItem.mMessage;
+        fwRMsg.to = mainpskmailui.selectedTo; //As selected in the Main UI
+        fwRMsg.via = fwRMsg.relay; //Use the same route in reverse
+        fwRMsg.to = mainpskmailui.selectedTo;
+        RMsgTxList.addMessageToList(fwRMsg);
+        //} else {
+           //Main.mainui.myarq.Message(mainpskmailui.getString("you_must_select_to"), 5); 
+        //}
     }//GEN-LAST:event_bForwardActionPerformed
 
-    private void bSaveAttachmentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bSaveAttachmentActionPerformed
-        //SaveAttachment();
-    }//GEN-LAST:event_bSaveAttachmentActionPerformed
+    private void bShowOnMapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bShowOnMapActionPerformed
+        if (mDisplayItem.mMessage.position != null) {
+            String geoFormat = "";
+            try {
+                geoFormat = RMsgObject.getGeoFormat(mDisplayItem.mMessage);
+                URI uri = new URI(geoFormat);
+                Desktop.getDesktop().browse(uri);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            } catch (URISyntaxException e1) {
+                e1.printStackTrace();
+            }
+        }
+    }//GEN-LAST:event_bShowOnMapActionPerformed
+
+    private void bDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bDeleteActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_bDeleteActionPerformed
+
+    private void txtRMsgViewerEntryMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtRMsgViewerEntryMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtRMsgViewerEntryMouseClicked
+
+    private void txtRMsgViewerEntryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtRMsgViewerEntryActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtRMsgViewerEntryActionPerformed
+
+    private void bTxAgainActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bTxAgainActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_bTxAgainActionPerformed
 
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton bDelete;
     private javax.swing.JButton bForward;
     private javax.swing.JButton bReply;
-    private javax.swing.JButton bSaveAttachment;
+    private javax.swing.JButton bShowOnMap;
+    private javax.swing.JButton bTxAgain;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JLabel lAttach;
-    private javax.swing.JLabel lblAttachmentFilename;
-    private javax.swing.JLabel lblDate;
-    private javax.swing.JLabel lblDateLabel;
-    private javax.swing.JLabel lblFrom;
+    private javax.swing.JLabel lblCoordinates;
+    private javax.swing.JLabel lblDateTime;
     private javax.swing.JLabel lblFromLabel;
-    private javax.swing.JLabel lblReplyTo;
-    private javax.swing.JLabel lblReplytoLabel;
-    private javax.swing.JLabel lblSubject;
-    private javax.swing.JLabel lblSubjectLabel;
+    private javax.swing.JLabel lblRmsgViewerCoord;
+    private javax.swing.JLabel lblRmsgViewerFn;
+    private javax.swing.JLabel lblRmsgViewerFrom;
+    private javax.swing.JLabel lblRmsgViewerVia;
     private javax.swing.JLabel lblTo;
-    private javax.swing.JLabel lblToLabel;
     private javax.swing.JMenuItem mnuClose;
     private javax.swing.JMenuItem mnuCopy;
-    private javax.swing.JMenuItem mnuCut;
     private javax.swing.JMenuBar mnuEmailViewer;
     private javax.swing.JMenuItem mnuForward;
     private javax.swing.JMenu mnuMessage;
-    private javax.swing.JMenuItem mnuPaste;
     private javax.swing.JMenuItem mnuPrint;
     private javax.swing.JMenuItem mnuReply;
     private javax.swing.JPanel pnlBottom;
     private javax.swing.JPanel pnlContent;
     private javax.swing.JPanel pnlTop;
     private javax.swing.JPanel pnlTopButtons;
-    private javax.swing.JTextArea txtContent;
+    private javax.swing.JTextField txtRMsgViewerEntry;
+    private javax.swing.JTextArea txtRMsgViewerSms;
     // End of variables declaration//GEN-END:variables
 
 }
