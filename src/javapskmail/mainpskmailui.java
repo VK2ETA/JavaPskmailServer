@@ -3236,6 +3236,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                 bRMsgResend.setForeground(new java.awt.Color(12, 134, 40));
                 bRMsgResend.setText(bundle.getString("mainpskmailui.bRMsgResend.text")); // NOI18N
                 bRMsgResend.setToolTipText(mainpskmailui.getString("mainpskmailui.bRMsgResendDialog.toolTipText")); // NOI18N
+                bRMsgResend.setEnabled(false);
                 bRMsgResend.setMaximumSize(new java.awt.Dimension(110, 25));
                 bRMsgResend.setMinimumSize(new java.awt.Dimension(80, 25));
                 bRMsgResend.setPreferredSize(new java.awt.Dimension(100, 25));
@@ -3250,6 +3251,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                 bRMsgManageMsg.setForeground(new java.awt.Color(0, 102, 51));
                 bRMsgManageMsg.setText(bundle.getString("mainpskmailui.bRMsgManageMsg.text")); // NOI18N
                 bRMsgManageMsg.setToolTipText(bundle.getString("mainpskmailui.bRMsgManageMsg.toolTipText")); // NOI18N
+                bRMsgManageMsg.setEnabled(false);
                 bRMsgManageMsg.setMaximumSize(new java.awt.Dimension(110, 25));
                 bRMsgManageMsg.setMinimumSize(new java.awt.Dimension(80, 25));
                 bRMsgManageMsg.setPreferredSize(new java.awt.Dimension(100, 25));

@@ -13,7 +13,11 @@
  */
 package javapskmail;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.text.DecimalFormat;
+import java.util.Locale;
 import java.util.regex.*;
 import java.util.Random;
 import java.util.logging.Level;
@@ -272,7 +276,7 @@ public class arq {
             String speed = "0";
 
             callsign = Main.configuration.getPreference("CALL");
-            statustxt = Main.configuration.getPreference("STATUS");
+            statustxt = getStatusString();
 
             // Get the GPS position data or the preset data
             if (Main.gpsdata.getFixStatus()) {
@@ -1050,6 +1054,38 @@ public class arq {
         Rval = Rval * p;
         float tmp = Math.round(Rval);
         return tmp / p;
+    }
+ 
+    private String getStatusString() {
+
+        String returnString = Main.configuration.getPreference("STATUS");
+        if (returnString.toLowerCase(Locale.US).startsWith("<statustext>")) {
+            returnString = ""; //Blank it first
+            try {
+                //Check if we have a file named "statustext" in the .pskmail folder
+                String statusFilename = Main.HomePath + Main.Dirprefix + "statustext";
+                File statusFile = new File(statusFilename);
+                // First check most common problems
+                if (statusFile == null) {
+                    throw new IllegalArgumentException("File should not be null.");
+                }
+                if (!statusFile.isFile()) {
+                    throw new IllegalArgumentException("Should not be a directory: " + statusFile);
+                }
+                // We should have a file now, lets fetch stuff                
+                FileReader fin = new FileReader(statusFile);
+                BufferedReader br = new BufferedReader(fin);
+                String lineString;
+                while ((lineString = br.readLine()) != null && returnString.length() < 100) { //Can't find a maximum size, so 100 it is for now
+                    returnString += lineString + " "; //Add spacer for each new line
+                }
+                fin.close();
+            } catch (Exception e) {
+                Main.log.writelog("Could not fetch Beacon Status information.", true);
+                returnString = "Error reading statustext file.";
+            }
+        }
+        return returnString;
     }
 
 }
