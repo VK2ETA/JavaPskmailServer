@@ -152,14 +152,14 @@ public class Modem implements Runnable {
         this.amp = new Amp2();
         amp.init();
         
-//   System.out.println(host);
-//   System.out.println(port);
+        //   System.out.println(host);
+        //   System.out.println(port);
         //MODEM = Pattern.compile("Mode:(.*)>");
         MODEM = Pattern.compile(".*\\<Mode:(.+)\\>.*");
         int launchResult = 0;
         int launchCount = 0;
 
-        while (!opened && launchCount++ < 2) {
+        while (!opened && launchCount++ < 1) {
             try {
                 launchResult = connectToFldigi();
                 //Prevent premature killing of Fldigi. Start timeout at modem launch
@@ -179,7 +179,7 @@ public class Modem implements Runnable {
                 String pskmailon = SOC + "MULTIPSK-OFF" + EOC;
                 // make instance of config
                 //c = new config(Main.HomePath + Main.Dirprefix);
-//         System.out.println("Modem initialized.");       
+                //System.out.println("Modem initialized.");       
             } catch (IOException e) { //exception thrown by connectToFldigi() above
                 opened = false;
                 System.out.println("Error connecting to host.");
@@ -198,36 +198,41 @@ public class Modem implements Runnable {
     private int connectToFldigi() throws IOException {
         int result = 0; //0 = Failed to start when it should have
 
-        if (Main.WantRelayOverRadio | Main.WantRelaySMSs | Main.WantRelayEmails | Main.WantServer) {
-            //Pskmail Mini-Server or RadioMSG relay, we should launch Fldigi automatically
+        //if (Main.WantRelayOverRadio | Main.WantRelaySMSs | Main.WantRelayEmails | Main.WantServer) {
+        if (Main.configuration.getPreference("FLDIGIAPPLICATIONPATH", "").trim().length() > 0) {
+            //Fldigi path not blank, we should launch Fldigi automatically
             if (killAndLaunchFldigi() == -1) {
-                //String outLine;
-/*                      //We should have a listening socket, make the socket objects
-                        Socket sock = new Socket(fldigiHost, fldigiPort);
-                        OutputStream out = sock.getOutputStream();
-                        in = sock.getInputStream();
-                        pout = new PrintWriter(out, true);
-                        opened = true;
-                        result = -1; //Started ok
-                 */
                 //Preset time counter
                 Main.lastModemCharTime = System.currentTimeMillis();
-//                      int exitCode = fldigiProc.waitFor();
+                //int exitCode = fldigiProc.waitFor();
                 //(re-)init Rigctl
                 Rigctl.Rigctl();
             } else if (killAndLaunchFldigi() == +1) {
                 Main.log.writelog("Can't Launch Fldigi, check program path and name in options", true);
             }
-
         } else {
-            result = -2; //Manual start required
+            //Manual start required or done before launching this app, check if we can connect to a running Fldigi
+            result = -2; 
+            try {
+                //We may have a listening socket, make the socket objects
+                Socket sock = new Socket(fldigiHost, fldigiPort);
+                OutputStream out = sock.getOutputStream();
+                in = sock.getInputStream();
+                pout = new PrintWriter(out, true);
+                opened = true;
+                //fldigiRunning = true;
+                //Reset mode as server
+                Sendln("<cmd>server</cmd>");
+            } catch (IOException e) {
+                opened = false;
+            }
         }
         return result;
     }
-    
+
     private int killAndLaunchFldigi() {
         int result = -1;
-        
+      
         //New listening thread looking for error stream data (e.g. we can't launch Fldigi)
         final Thread myOutputStreamThread = new Thread() {
             @Override
@@ -502,10 +507,10 @@ public class Modem implements Runnable {
         modemmodeenum mode = Main.defaultmode;
         String mymodem = Main.Currentmodes[index];
         for (int i = 0; i < Main.Currentmodes.length; i++) {
-//          System.out.println(Main.Currentmodes[i]);
+            //System.out.println(Main.Currentmodes[i]);
         }
-//  System.out.println(index);
-//  System.out.println("modem:" + mymodem);
+        //  System.out.println(index);
+        //  System.out.println("modem:" + mymodem);
 
         if (mymodem.equals("THOR8")) {
             mode = modemmodeenum.THOR8;
@@ -701,7 +706,17 @@ public class Modem implements Runnable {
             //Broken socket?
             if (back == -1 || Main.requestModemRestart) {
                 if (back == -1) {
-                    System.out.println("Error reading from modem (socket closed -1), restarting Fldigi");
+                    if (fldigiRunning) {
+                        //We launched Fldigi automatically
+                        System.out.println("Error reading from modem (socket closed -1), restarting Fldigi");
+                    } else {
+                        //Prevent fast processing of null character
+                        try {
+                            Thread.sleep(100);
+                        } catch (Exception e1) {
+                            //Nothing
+                        }
+                    }
                 } else {
                     System.out.println("Received request to restart Fldigi");
                 }
@@ -741,7 +756,16 @@ public class Modem implements Runnable {
             //Modem was forcibly killed either by operator or the program monitoring
             return '\0';  // should not happen.
         } catch (Exception e) {
-            System.out.println("Error reading from modem (Exception): " + e);
+            if (cantLaunchFldigi) {
+                //Prevent fast processing of null character
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e1) {
+                    //Nothing
+                }
+            } else {
+                System.out.println("Error reading from modem (Exception): " + e);
+            }
             return '\0';  // should not happen.
         }
     }
