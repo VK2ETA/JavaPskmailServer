@@ -390,18 +390,12 @@ public class Modem implements Runnable {
         return result;
     }
    
-
-    //Modem() {
-    //    this.amp = new Amp2();
-    //}
-
     // Send routine
     public void Sendln(String outLine) {
 
         try {
             if (opened & outLine.length() > 0) {
-
-//            System.out.println(outLine);
+                //            System.out.println(outLine);
                 pout.println(outLine);
                 if (outLine.contains("<cmd><mode>")) {
                     try {

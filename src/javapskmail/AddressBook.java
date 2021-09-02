@@ -22,6 +22,7 @@ package javapskmail;
 
 import java.awt.Graphics;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -30,8 +31,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.EventListener;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -117,6 +120,8 @@ public class AddressBook extends javax.swing.JFrame  {
             DefaultListModel myListModel;
             myListModel = (DefaultListModel) this.lstContacts.getModel();
             myListModel.clear();
+            AddressBookRenderer myRenderer = new AddressBookRenderer();
+            lstContacts.setCellRenderer(myRenderer);
 
             for (int i = 0; i < contactlist.size(); i++) {
                 mycontact = contactlist.get(i);
@@ -127,7 +132,7 @@ public class AddressBook extends javax.swing.JFrame  {
             Main.log.writelog("Could not display contact information.", true);
         }
     }
-    
+ 
     /**
      * Try to read all the contacts in the file
      */

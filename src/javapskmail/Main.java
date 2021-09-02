@@ -34,9 +34,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "0.9.4.a27";
+    static String version = "0.9.4.28";
     static String application = "jpskmailserver " + version;// Used to preset an empty status
-    static String versionDate = "20210831";
+    static String versionDate = "20210903";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -2203,7 +2203,7 @@ public class Main {
         }
     }
 
-    static void ChangeMode(modemmodeenum Modem) {
+/*    static void ChangeMode(modemmodeenum Modem) {
         String SendMode = "";
 
         String TXmd = getTXModemString(Modem);
@@ -2229,7 +2229,6 @@ public class Main {
                 if (TxDelayStr.length() > 0) {
                     TxDelay = Integer.parseInt(TxDelayStr);
                 }
-
                 if (TxDelay > 0) {
                     Thread.sleep(TxDelay * 1000);
                 }
@@ -2240,6 +2239,28 @@ public class Main {
         }
         Sendline = "";
 
+    }
+*/
+    
+    //Just change the mode, don't send any data (for the preference screen)
+    static void ChangeMode(modemmodeenum Modem) {
+        if (!TXActive) {
+            String SendMode = "";
+            String TXmd = getTXModemString(Modem);
+            String rxstring = Main.getTXModemString(Main.defaultmode);
+            rxstring += "        ";
+            rxstring = rxstring.substring(0, 7);
+            mainui.RXlabel.setText(rxstring);
+            SendMode = "<cmd><mode>" + TXmd + "</mode></cmd>";
+
+            m.Sendln(SendMode);
+
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
 
     static modemmodeenum convmodem(String mymodem) {

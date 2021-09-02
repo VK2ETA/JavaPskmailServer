@@ -4149,6 +4149,7 @@ private void mnuPreferencesActionPerformed(java.awt.event.ActionEvent evt) {//GE
 // TODO add your handling code here:
 
     try {
+        modemmodeenum lastTxModem = Main.TxModem;
         optionsDialog = new optionsdialog(this, true);
 
         optionsDialog.setCallsign(Main.configuration.getPreference("CALL"));
@@ -4165,7 +4166,10 @@ private void mnuPreferencesActionPerformed(java.awt.event.ActionEvent evt) {//GE
         myarq.setServer(myServer);
         this.cboServer.setSelectedItem(myServer);
         //this.txtServer.setText(myServer);
-
+        //Did we change the default mode in the options?
+        if (lastTxModem != Main.TxModem) {
+            Main.ChangeMode(Main.TxModem);
+        }
         // Update the gui with these settings
         if (!Main.HaveGPSD) {
             if (!Main.gpsport.curstate) {

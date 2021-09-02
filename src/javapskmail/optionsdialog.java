@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.ListIterator;
 import java.text.NumberFormat;      // For masked edit field for position
 import java.util.Locale;            // For format in masked edit
+import javax.swing.DefaultComboBoxModel;
 
 /**
  *
@@ -465,6 +466,7 @@ public class optionsdialog extends javax.swing.JDialog {
                 char[] mdc;
                 mdc = mds.toCharArray();
                 String Md = "";
+                String MdStringList = "";
 
                 for (int index = 0; index < mdc.length; index++) {
                     switch (mdc[index]) {
@@ -538,19 +540,37 @@ public class optionsdialog extends javax.swing.JDialog {
                         default:
                             Md = "default";
                     }
-                    cboModes.addItem(Md);
+                    //Built a comma separated list
+                    if (MdStringList.length() > 0) {
+                        MdStringList += "," + Md;
+                    } else {
+                        MdStringList = Md;
+                    }
+                    //cboModes.addItem(Md);
                 }
-
+                //VK2ETA: speed up display of options
+                String [] values = MdStringList.split(",");
+                //cboModes = new javax.swing.JComboBox(values);
+                //DefaultComboBoxModel<Object> model = new DefaultComboBoxModel<String>(values);
+                //cboModes.setModel(model);
+                cboModes.setModel(new DefaultComboBoxModel(values));
+                
                 defmode = storemodem;
-
+                //Set default mode
                 for (int j = 0; j < Main.m.smodes.length; j++) {
                     if (Main.m.smodes[j].equals(defmode)) {
                         Main.defaultmode = Main.m.pmodes[j];
                         break;
                     }
                 }
-
-                cboModes.setSelectedItem(defmode);
+                //Set combo box
+                //cboModes.setSelectedItem(defmode);
+                for (int j = 0; j < values.length; j++) {
+                    if (values[j].equals(defmode)) {
+                        cboModes.setSelectedIndex(j);
+                        break;
+                    }
+                }               
             }
             
             //Pskmail Server and RadioMsg
@@ -2732,14 +2752,15 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
 
             Main.defaultmode = mmode;
             Main.TxModem = mmode;
-            Main.ChangeMode(Main.TxModem);
+            //Do not change the Fldigi mode at each selection (introduces delays). 
+            //Now done when we exit the option dialog 
+            //Main.ChangeMode(Main.TxModem);
             Main.mainui.setRxmodeTextfield(md);
             Main.mainui.setRXlabel(md);
             Main.RxModem = mmode;
             Main.RxModemString = md;
             Main.mainui.setProfile("Asymmetrical");
             //        myarq.Message("Server Mode:" + md, 5);
-
         }
         Main.configuration.setPreference("DEFAULTMODE", md);
     }//GEN-LAST:event_cboModesActionPerformed
@@ -2990,6 +3011,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
      * A mode is checked/unchecked so the mode list should be refilled
      */
     private void UpdateModeList() {
+        String MdStringList = "";
         try {
             String[] modes = {"PSK1000", "PSK500", "PSK500R", "PSK250R", "DOMINOEX22", "MFSK32", "THOR22", "DOMINOEX11", "MFSK16", "THOR8", "DOMINOEX5", "CTSTIA 8/250",
                 "PSK63RC5", "PSK63RC10", "PSK250RC3", "PSK125RC4", ""};
@@ -3069,13 +3091,21 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
 
 //System.out.println("MODE=" + modestr);
             Main.modes = modestr;
-            cboModes.removeAllItems();
             String mds = Main.modes;
             char[] mdc;
             mdc = mds.toCharArray();
             String Md = "";
 
             Main.DefaultTXmodem = Defmodem;
+            //Remember which was selected before updating
+            // The following is done twice, once here and once in the combobox event. Commenting it all out.
+            // I think we should set a default modem here instead of 
+            // reusing the old that may not exist any more...
+            if (this.cboModes.getItemCount() > 0) {
+                Defmodem = cboModes.getSelectedItem().toString();
+            }
+            //Clear all
+            cboModes.removeAllItems();
 
             for (int index = 0; index < mdc.length; index++) {
                 switch (mdc[index]) {
@@ -3115,7 +3145,6 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
                     case 99:
                         Md = "MFSK64";
                         break;
-
                     case 110:
                         Md = "DOMINOEX5";
                         break;
@@ -3146,26 +3175,34 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
                     default:
                         Md = "default";
                 }
-                cboModes.addItem(Md);
+                //cboModes.addItem(Md); //Way too slooooooowwwww (Swing issue)
+                //Built a comma separated list
+                if (MdStringList.length() > 0) {
+                    MdStringList += "," + Md;
+                } else {
+                    MdStringList = Md;
+                }
             }
+            //Then add the full list once to speed up the update
+            String [] values = MdStringList.split(",");
+            cboModes.setModel(new DefaultComboBoxModel(values));
 
-            // The following is done twice, once here and once in the combobox event. Commenting it all out.
-            // I think we should set a default modem here instead of 
-            // reusing the old that may not exist any more...
-            if (this.cboModes.getItemCount() > 0) {
-                Defmodem = cboModes.getSelectedItem().toString();
-            }
-//  System.out.println("DEFMODE=" + Defmodem);       
+            //  System.out.println("DEFMODE=" + Defmodem);       
             Main.configuration.setPreference("DEFAULTMODE", Defmodem);
             for (int j = 0; j < modes.length; j++) {
                 if (modes[j].equals(Defmodem)) {
                     defaultmodemindex = j;
+                    break;
                 }
             }
-
-            cboModes.setSelectedItem(modemarray[defaultmodemindex]);
+            //cboModes.setSelectedItem(modemarray[defaultmodemindex]);
+            for (int j = 0; j < values.length; j++) {
+                if (values[j].equals(Defmodem)) {
+                    cboModes.setSelectedIndex(j);
+                    break;
+                }
+            }
             Main.mainui.setRXlabel(Defmodem);
-
         } catch (Exception e) {
             Main.log.writelog("Encountered trouble when respooling the mode list drop down.", e, true);
         }
