@@ -39,7 +39,7 @@ public class Connectwindow extends javax.swing.JDialog {
 //        Rigctl.Loadfreqs(myServer);
 
         // Add servers from main
-        for (int i = 0;i<Main.Servers.length;i++){
+        for (int i = 0; i < Main.Servers.length; i++){
             if (!Main.Servers[i].equals("")) cboServerConnect.addItem(Main.Servers[i]);
         }
         this.cboServerConnect.setSelectedItem(Main.mainui.cboServer.getSelectedItem());
@@ -301,17 +301,15 @@ public class Connectwindow extends javax.swing.JDialog {
         Main.RXmodemindex = getrxmodemindex();
         Main.LastRxModem = RXmodemstr;
         Main.defaultmode = Main.convmodem(RXmodemstr);
- //       System.out.println("Setting RX:" + Main.LastRxModem);
+        //System.out.println("Setting RX:" + Main.LastRxModem);
     }                                                
 
-    private void ServerConnectCancelActionPerformed(java.awt.event.ActionEvent evt) {                                                    
-        // TODO add your handling code here:
+    private void ServerConnectCancelActionPerformed(java.awt.event.ActionEvent evt) {
         this.dispose();
     }                                                   
 
-    private void ConnectServerButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                    
-        // TODO add your handling code here:
-//System.out.println("TXmodemstr=" + TXmodemstr);
+    private void ConnectServerButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        //System.out.println("TXmodemstr=" + TXmodemstr);
         TXm = Main.convmodem(TXmodemstr);
         RXm = Main.convmodem(RXmodemstr);
         Main.TxModem = TXm;
@@ -319,8 +317,11 @@ public class Connectwindow extends javax.swing.JDialog {
         Main.RxModemString = RXmodemstr;
         String myServer = cboServerConnect.getSelectedItem().toString();
         Main.mainui.myarq.setServer(myServer);
-        Main.configuration.setServer(myServer);
-        Main.mainui.ConnectButtonAction ();
+        //VK2ETA add main.q
+        Main.q.setServer(myServer);
+        //Not on the fly
+        //Main.configuration.setServer(myServer);
+        Main.mainui.ConnectButtonAction();
         this.dispose();
     }                                                   
        

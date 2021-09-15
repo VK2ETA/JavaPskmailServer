@@ -23,7 +23,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.UIManager;
-import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.JFrame;
 
@@ -36,7 +35,7 @@ public class Main {
     //VK2ETA: Based on "jpskmail 1.7.b";
     static String version = "0.9.4.28";
     static String application = "jpskmailserver " + version;// Used to preset an empty status
-    static String versionDate = "20210903";
+    static String versionDate = "20210915";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -149,6 +148,7 @@ public class Main {
     static String APRSCall = "";
     static String mycall;     // mycall from options
     static String myserver;    // myserver from options
+    static String myserverpassword; //For mini-server requiring password for access
     static String TTYCaller;     // TTY caller
     static String TTYConnected = "";
     static String TTYmodes = "6";
@@ -188,7 +188,9 @@ public class Main {
     static String TX_Text; // output queue
     static int Progress = 0;
     static String DataSize = "";
-    static String Servers[] = {"", "", "", "", "", "", "", "", "", ""};
+    final static int MAXNEWSERVERS = 100; //100 additional servers heard on the air
+    static String Servers[] = {""};
+    static String ServersPasswords[]= {""};
     static double AvgTxMissing = 0;
     static double AvgRxMissing = 0;
     static double hiss2n = 50;
@@ -743,7 +745,7 @@ public class Main {
                                 }
 
                                 // PI4TUE 0.9.33-13:28:52-IM46>
-                                if (Blockline.contains(q.servercall)) {
+                                if (Blockline.contains(q.getServer())) {
                                     //Pattern ppc = Pattern.compile(".*(\\d\\.\\d).*\\-\\d+:\\d+:(\\d+)\\-(.*)M(\\d+)");
                                     Pattern ppc = Pattern.compile(".*\\S+\\s\\S+\\s(\\S{3}).*\\-\\d+:\\d+:(\\d+)\\-(.*)M(\\d+)");
                                     //System.out.println(Blockline);
@@ -774,7 +776,7 @@ public class Main {
                                         }
                                     } else {
                                         //Mini-server connection, "Hi" message
-                                        Pattern pps = Pattern.compile(".*" + q.servercall + " V(\\d{1,2}\\.\\d{1,2}\\.\\d{1,2})(.\\d{1,2}){0,1}, Hi.*");
+                                        Pattern pps = Pattern.compile(".*" + q.getServer() + " V(\\d{1,2}\\.\\d{1,2}\\.\\d{1,2})(.\\d{1,2}){0,1}, Hi.*");
                                         //System.out.println(Blockline);
                                         Matcher mps = pps.matcher(Blockline);
                                         if (mps.lookingAt()) {
@@ -824,7 +826,7 @@ public class Main {
                                     rxb.get_serverstat(scall);
                                     int i = 0;
                                     boolean knownserver = false;
-                                    for (i = 0; i < 10; i++) {
+                                    for (i = 0; i < Servers.length; i++) {
                                         //                              System.out.println(Servers[i] + scall);
                                         if (scall.equals(Servers[i])) {
                                             knownserver = true;
@@ -905,23 +907,19 @@ public class Main {
                                                 Serverbeacon = true;
                                                 int i;
                                                 boolean knownserver = false;
-                                                for (i = 0; i < 10; i++) {
+                                                for (i = 0; i < Servers.length; i++) {
                                                     if (scall.equals(Servers[i])) {
+                                                        //Already in list, exit
                                                         knownserver = true;
                                                         break;
                                                     }
-                                                }
-
-                                                if (!knownserver) {
-                                                    for (i = 0; i < 10; i++) {
-                                                        if (Servers[i].equals("")) {
-                                                            Servers[i] = scall;
-                                                            mainui.addServer(scall);
-                                                            break;
-                                                        }
+                                                    if (!knownserver && Servers[i].length() == 0) {
+                                                        //Not known, add it at first blank spot
+                                                        Servers[i] = scall;
+                                                        mainui.addServer(scall);
+                                                        break;
                                                     }
                                                 }
-
                                             }
                                         } else if (type.equals(":")) {
                                             //System.out.println(type + binfo);
@@ -1173,7 +1171,7 @@ public class Main {
                                     String formatminute = "0" + Integer.toString(Minute);
                                     formatminute = formatminute.substring(formatminute.length() - 2);
                                     String lh = formathour + ":" + formatminute;
-                                    for (i = 0; i < 10; i++) {
+                                    for (i = 0; i < Servers.length; i++) {
 
                                         if (rxb.server.equals(Servers[i])) {
                                             knownserver = true;
@@ -1186,7 +1184,7 @@ public class Main {
                                         }
                                     }
                                     if (!knownserver) {
-                                        for (i = 0; i < 10; i++) {
+                                        for (i = 0; i < Servers.length; i++) {
                                             if (Servers[i].equals("")) {
                                                 Pattern sw = Pattern.compile("[A-Z0-9]+\\-*\\[0-9]*");
                                                 Matcher ssw = sw.matcher(rxb.server);
@@ -1251,7 +1249,8 @@ public class Main {
                                     }
                                 }
                                 // are we  connected?
-                                if (rxb.call.equals(rxb.mycall) & rxb.server.equals(configuration.getPreference("SERVER"))) {
+                                //if (rxb.call.equals(rxb.mycall) & rxb.server.equals(configuration.getPreference("SERVER"))) {
+                                if (rxb.call.equals(rxb.mycall) & rxb.server.equals(q.getServer())) {
                                     //txid on, rxid off. Not yet, we now wait until full connect exchange
                                     //q.send_txrsid_command("OFF");
                                     //q.send_rsid_command("ON"); 
@@ -1413,12 +1412,12 @@ public class Main {
                                                     //blocktime = (charval * 64 / 1000) + 4;
                                                 }
                                                 log("Connect request from " + TTYCaller);
-                                            } else {
-                                                //Send a reject block with a reason
+                                            } else if (rxb.valid && Main.accessPassword.length() > 0 ) {
+                                                //Need password but non provided. Send a reject block with a reason
                                                 q.send_txrsid_command("ON");
                                                 q.send_rsid_command("ON");
-                                                log("Connect attempted with damaged transmission or wrong/missing password");
-                                                q.send_reject(TTYCaller, "Damaged transmission or access password incorrect\n");
+                                                log("Connect attempted with missing password when one is required");
+                                                q.send_reject(TTYCaller, "Server requires a password\n");
                                             }
                                         }
                                     }
@@ -1619,7 +1618,7 @@ public class Main {
         try {
             int i;
             boolean knownserver = false;
-            for (i = 0; i < 10; i++) {
+            for (i = 0; i < Servers.length; i++) {
                 if (myServer.equals(Servers[i])) {
                     knownserver = true;
                     break;
@@ -1906,11 +1905,8 @@ public class Main {
             log.writelog("Problems with config parameter.", e, true);
         }
 
-        // Send Link request
-        //           q.set_txstatus(txstatus.TXlinkreq);
-        //           q.send_link();
-        Servers[0] = configuration.getPreference("SERVER");
-        Main.myserver = Servers[0];
+        //New: now contains a list of servers with optional passwords
+        loadServerList();
         Main.mycall = configuration.getPreference("CALL");
         Freq_offset = Integer.parseInt(Main.configuration.getPreference("RIGOFFSET", "0"));
 
@@ -1923,6 +1919,75 @@ public class Main {
         XmlRpc_URL = "http://" + XMLIP + ":7362/RPC2";
 
     }
+    
+    //Fills array of Servers and passwords from the preferences
+    public static void loadServerList() {
+        
+        //Fill-in spinner for Servers, with passwords now
+        //Format is Eg: vk2eta-1:pass1, vk2eta-2, vk2eta-3:pass3 (Note: vk2eta-2 does not use a password)
+        String[] serverArrayOriginal = configuration.getPreference("SERVER").split(",");
+        String[] serverPasswordArrayOriginal = new String[serverArrayOriginal.length];
+        //int viaValidEntries = 0;
+        Pattern viaPattern = Pattern.compile("^\\s*([0-9a-zA-Z/\\-_.+]+)\\s*(:?)\\s*(\\S*)\\s*$");
+        for (int i = 0; i < serverArrayOriginal.length; i++) {
+            Matcher msc = viaPattern.matcher(serverArrayOriginal[i]);
+            if (msc.find()) {
+                String callSign = "";
+                if (msc.group(1) != null) callSign = msc.group(1);
+                String separator = "";
+                if (msc.group(2) != null) separator = msc.group(2);
+                String accessPassword = "";
+                if (msc.group(3) != null) accessPassword = msc.group(3);
+                if (!callSign.equals("")) {
+                    //viaValidEntries++;
+                    serverArrayOriginal[i] = callSign;
+                    if (!separator.equals("") && !accessPassword.equals("")) {
+                        serverPasswordArrayOriginal[i] = accessPassword;
+                    } else {
+                        serverPasswordArrayOriginal[i] = ""; //As it is copied later on
+                    }
+                } else {
+                    serverArrayOriginal[i] = ""; //Blank it out
+                    serverPasswordArrayOriginal[i] = "";
+                }
+            } else {
+                //Malformed to destination, blank it out too
+                serverArrayOriginal[i] = "";
+                serverPasswordArrayOriginal[i] = "";
+            }
+        }
+        //Copy only non null strings to final array
+        Servers = new String[MAXNEWSERVERS];
+        ServersPasswords = new String[Servers.length];
+        int j = 0;
+        for (int i = 0; i < serverArrayOriginal.length && i < MAXNEWSERVERS; i++) {
+            if (serverArrayOriginal[i].length() > 0) {
+                Servers[j] = serverArrayOriginal[i];
+                ServersPasswords[j++] = serverPasswordArrayOriginal[i];
+            }
+        }
+        //Blank the rest. Index j already contains the first location to blank
+        for (;j < Servers.length; j++) {
+                Servers[j] = "";
+                ServersPasswords[j] = "";
+        }
+        //Set default one
+        Main.myserver = Servers[0];
+        Main.myserverpassword = ServersPasswords[0];
+        //Re-size and blank the other arrays
+        SNR = new double [MAXNEWSERVERS];
+        for (int i=0; i<MAXNEWSERVERS;i++) SNR[i] = 0.0f;
+        Lastheard = new String[MAXNEWSERVERS];
+        for (int i=0; i<MAXNEWSERVERS;i++) Lastheard[i] = "";
+        packets_received = new int[MAXNEWSERVERS];
+        for (int i=0; i<MAXNEWSERVERS;i++) packets_received[i] = 0;
+        modes_received = new String[MAXNEWSERVERS];
+        for (int i=0; i<MAXNEWSERVERS;i++) modes_received[i] = "";
+        strength = new int[MAXNEWSERVERS];
+        for (int i=0; i<MAXNEWSERVERS;i++) strength[i] = 0;
+    }
+
+    
     
     private static void handlegpsd() {
         try {
@@ -2387,7 +2452,7 @@ public class Main {
     static int getserverindex(String server) {
         int i = 0;
         int o = 10;
-        for (i = 0; i < 10; i++) {
+        for (i = 0; i < Servers.length; i++) {
             if (server.equals(Servers[i])) {
                 o = i;
             }
@@ -2397,7 +2462,7 @@ public class Main {
 
     static void setrxdata(String server, int data) {
         int i = getserverindex(server);
-        if (i < 9) {
+        if (i < MAXNEWSERVERS - 1) {
             System.arraycopy(rxdata[i], 0, rxdata[i], 1, 8);
             rxdata[i][0] = data;
         }

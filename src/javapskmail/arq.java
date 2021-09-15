@@ -57,7 +57,9 @@ public class arq {
     public String callsign = cf.getCallsign();
     //Pskmail Server
     public String callsignAsServer = cf.getCallsignAsServer();
-    public String servercall = cf.getServer();
+    //public String servercall = cf.getServer();
+    private String servercall = "NOCAL"; //Set to default no-call
+    private String serverPassword = ""; //Default to blank (= no password)
     public String statustxt = cf.getStatus();
     public String backoff = cf.getBlocklength();
     static private Modem m;
@@ -100,6 +102,16 @@ public class arq {
      */
     public String getServer() {
         return servercall;
+    }
+
+    //Get the current server's password if any
+    public String getServerPassword() {
+        for (int i = 0; i <  Main.MAXNEWSERVERS; i++) {
+            if (Main.Servers[i].equals(this.servercall)) {
+                return Main.ServersPasswords[i];
+            }
+        }
+        return "";
     }
 
     /**
@@ -258,7 +270,7 @@ public class arq {
         String returnframe = "";
         // Fix stream id, this is wrong
         callsign = Main.configuration.getPreference("CALL");
-        servercall = Main.configuration.getPreference("SERVER");
+        //servercall = Main.configuration.getPreference("SERVER");
         returnframe = "00" + Unproto + callsign + "><" + servercall + " ";
         return returnframe;
     }
@@ -416,7 +428,7 @@ public class arq {
         // Fix stream id, this is wrong
         callsign = Main.configuration.getPreference("CALL");
         callsign = callsign.trim();
-        servercall = Main.configuration.getPreference("SERVER");
+        //servercall = Main.configuration.getPreference("SERVER");
         servercall = servercall.trim();
         String defmode = Main.configuration.getPreference("DEFAULTMODE");
 
@@ -460,8 +472,8 @@ public class arq {
         // Fix stream id, this is wrong
         callsign = Main.configuration.getPreference("CALL");
         callsign = callsign.trim();
-        servercall = Main.configuration.getPreference("SERVER");
-        servercall = servercall.trim();
+        //servercall = Main.configuration.getPreference("SERVER");
+        //servercall = servercall.trim();
         backoff = Main.configuration.getPreference("BLOCKLENGTH");
         Main.CurrentModemProfile = backoff;
         if (Rigctl.opened) {
@@ -662,7 +674,9 @@ public class arq {
                 send_txrsid_command("ON");
 //                Thread.sleep(1000);
                 info = connectblock();
-                outstring = make_block(info) + FrameEnd;
+                //VK2ETA Now with Password is connecting to a mini-server
+                //outstring = make_block(info) + FrameEnd;
+                outstring = make_blockWithPassword(info) + FrameEnd;
                 break;
             case TXSummon:
                 int fr = Integer.parseInt(Main.ServerFreq) - Rigctl.OFF;
@@ -990,6 +1004,19 @@ public class arq {
         return StartHeader + info + check;
     }
 
+    /** /
+     * Adds SOH and checksum with possible password
+     * @param info
+     * @return
+     */
+    public String make_blockWithPassword(String info) {
+        String check="";
+        if (info.length()>0) {
+            String password = getServerPassword();
+            check = checksum(info + password);
+        }
+        return StartHeader + info + check;
+    }
 
     /*
     ############################################################

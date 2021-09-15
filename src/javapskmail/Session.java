@@ -1165,13 +1165,11 @@ public class Session {
                     char current;
                     String callsign = Main.configuration.getPreference("CALL");
                     callsign = callsign.trim();
-                    String servercall = Main.configuration.getPreference("SERVER");
-                    servercall = servercall.trim();
+                    //String servercall = Main.configuration.getPreference("SERVER");
+                    String servercall = Main.q.getServer().trim();
                     long flen = 0;
                     flen = penf.length() - start;
-
                     Main.TX_Text += ">FM:" + callsign + ":" + servercall + ":" + partialfile + ":s: :" + Long.toString(flen) + "\n";
-
                     while (fis.available() > 0) {
                         current = (char) fis.read();
                         i++;
@@ -1180,37 +1178,29 @@ public class Session {
                             Main.TX_Text += current;
                         }
                     }
-
                     Session.DataSize = Main.TX_Text.length();
-
                     fis.close();
-
                 } catch (IOException e) {
-//                                                System.out.println("IO error on pending file");
+                    //System.out.println("IO error on pending file");
                 }
             } else if (foutpending.exists()) {
-
                 int i = 0;
                 try {
                     FileInputStream fis = new FileInputStream(foutpending);
                     char current;
                     String callsign = Main.configuration.getPreference("CALL");
                     callsign = callsign.trim();
-                    String servercall = Main.configuration.getPreference("SERVER");
-                    servercall = servercall.trim();
-
+                    //String servercall = Main.configuration.getPreference("SERVER");
+                    String servercall = Main.q.getServer().trim();
                     File ft = new File(Main.Transactions);
                     String[] ss = null;
                     if (ft.exists()) {
 //                                    System.out.println("Transactons exists");
                         FileReader fr = new FileReader(Main.Transactions);
-
                         BufferedReader br = new BufferedReader(fr);
                         String s;
-
                         while ((s = br.readLine()) != null) {
 //                                   System.out.println("s=:" + s);
-
                             ss = s.split(":");
                             //                                  System.out.println(ss[5]);
                             if (s.contains(partialfile)) {
@@ -1220,31 +1210,22 @@ public class Session {
                         }
                         fr.close();
                     }
-
                     long flen = 0;
                     flen = foutpending.length() - start;
-
                     Main.TX_Text += ">FM:" + callsign + ":" + servercall + ":" + partialfile + ":" + Main.filetype + ":" + filename + ":" + Long.toString(flen) + "\n";
-
                     while (fis.available() > 0) {
                         current = (char) fis.read();
                         i++;
-
                         if (i > start) {
                             Main.TX_Text += current;
                         }
                     }
-
                     fis.close();
-
                     Main.TX_Text += "\n-end-\n";
-
                     Session.DataSize = Integer.parseInt(ss[6]);
-
                 } catch (IOException e) {
 //                                                System.out.println("IO error on pending file");
                 }
-
             } else if (Main.TTYConnected.equals("Connected")) {
                 //Look in the Outbox for partial upload to client. Files are in the format VK2ETA_-w-_12345
                 //Since we don't know the file type from the ~FY command (s,w,f etc...),

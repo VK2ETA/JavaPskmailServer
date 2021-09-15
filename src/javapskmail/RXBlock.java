@@ -347,7 +347,7 @@ public class RXBlock{
                                     String lh = formathour  + ":" + formatminute;
                                         int i;
                                         boolean knownserver = false;
-                                        for (i = 0; i <10; i++) {
+                                        for (i = 0; i < Main.Servers.length; i++) {
                                             if (server.equals(Main.Servers[i])) {
                                                 knownserver = true;
                                                 Main.SNR[i] = Main.snr;
@@ -357,7 +357,7 @@ public class RXBlock{
                                             }
                                         }
                                         if (!knownserver) {
-                                            for (i = 0; i <10; i++) {
+                                            for (i = 0; i < Main.Servers.length; i++) {
                                                 if (Main.Servers[i].equals("")) {
                                                     Main.Servers[i] = server;
                                                     Main.SNR[i] = Main.snr;

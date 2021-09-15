@@ -36,7 +36,7 @@ public class optionsdialog extends javax.swing.JDialog {
     private static final ResourceBundle optionsdialog = ResourceBundle.getBundle("javapskmail/optionsdialog");
 
     private String callsign = "N0CAL";
-    private String linktoserver = "N0CAL";
+    private String serverList = "N0CAL";
     private String beaconqrg = "0";
     private String latitude = "0.0";
     private String longitude = "0.0";
@@ -116,7 +116,7 @@ public class optionsdialog extends javax.swing.JDialog {
      * @return
      */
     public String getServer() {
-        return linktoserver;
+        return serverList;
     }
 
     /**
@@ -124,7 +124,7 @@ public class optionsdialog extends javax.swing.JDialog {
      * @param call
      */
     public void setServer(String call) {
-        linktoserver = call;
+        serverList = call;
         this.txtLinkto.setText(call);
     }
 
@@ -667,9 +667,7 @@ public class optionsdialog extends javax.swing.JDialog {
         txtCallsignAsServer = new javax.swing.JTextField();
         jLabel22 = new javax.swing.JLabel();
         jPanel8 = new javax.swing.JPanel();
-        lblPassword = new javax.swing.JLabel();
         lblCallsign = new javax.swing.JLabel();
-        jPasswordField1 = new javax.swing.JPasswordField();
         txtCallsign = new javax.swing.JTextField();
         lblLinkto = new javax.swing.JLabel();
         txtLinkto = new javax.swing.JTextField();
@@ -695,6 +693,8 @@ public class optionsdialog extends javax.swing.JDialog {
         txtLongitude = new javax.swing.JFormattedTextField(nfLonLat);
         bPosConverter = new javax.swing.JButton();
         pnlEmail = new javax.swing.JPanel();
+        jPasswordField1 = new javax.swing.JPasswordField();
+        lblPassword = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
@@ -702,11 +702,11 @@ public class optionsdialog extends javax.swing.JDialog {
         txtPopUser = new javax.swing.JTextField();
         txtReplyto = new javax.swing.JTextField();
         ServerUpdateButton = new javax.swing.JButton();
-        Compressed = new javax.swing.JCheckBox();
         lblEmailHeader = new javax.swing.JLabel();
         jLabel21 = new javax.swing.JLabel();
         jLabel17 = new javax.swing.JLabel();
         txtPopPassword = new javax.swing.JPasswordField();
+        jLabel20 = new javax.swing.JLabel();
         ServerPanel = new javax.swing.JPanel();
         jPanel11 = new javax.swing.JPanel();
         checkboxEnablePskmailServer = new javax.swing.JCheckBox();
@@ -758,6 +758,7 @@ public class optionsdialog extends javax.swing.JDialog {
         spinOffsetSeconds = new javax.swing.JSpinner();
         DCDSpinner = new javax.swing.JSpinner();
         lblDCD = new javax.swing.JLabel();
+        Compressed = new javax.swing.JCheckBox();
         pnlGPS = new javax.swing.JPanel();
         frGPS = new javax.swing.JPanel();
         chkGPSConnection = new javax.swing.JCheckBox();
@@ -876,18 +877,18 @@ public class optionsdialog extends javax.swing.JDialog {
             }
         });
 
-        jLabel22.setText("Server Callsign");
+        jLabel22.setText("Callsign as Server");
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(26, 26, 26)
+                .addGap(11, 11, 11)
                 .addComponent(jLabel22)
-                .addGap(10, 10, 10)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(txtCallsignAsServer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(107, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -901,17 +902,7 @@ public class optionsdialog extends javax.swing.JDialog {
 
         jPanel8.setBorder(javax.swing.BorderFactory.createTitledBorder("Client Configuration"));
 
-        lblPassword.setText("Session password");
-
         lblCallsign.setText(optionsdialog.getString("CALLSIGN")); // NOI18N
-
-        jPasswordField1.setToolTipText("Keep empty if not set at the server or email will not work!!");
-        jPasswordField1.setPreferredSize(new java.awt.Dimension(120, 27));
-        jPasswordField1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jPasswordField1ActionPerformed(evt);
-            }
-        });
 
         txtCallsign.setToolTipText(optionsdialog.getString("PLEASE USE CAPITALS FOR YOUR CALL, AND DON'T USE ADDITIONS LIKE ZL/ OR /M")); // NOI18N
         txtCallsign.setMinimumSize(new java.awt.Dimension(150, 27));
@@ -979,51 +970,32 @@ public class optionsdialog extends javax.swing.JDialog {
         jPanel8Layout.setHorizontalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel8Layout.createSequentialGroup()
-                .addGap(5, 5, 5)
+                .addGap(15, 15, 15)
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel8Layout.createSequentialGroup()
-                        .addGap(25, 25, 25)
-                        .addComponent(lblCallsign)
-                        .addGap(10, 10, 10)
-                        .addComponent(txtCallsign, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel8Layout.createSequentialGroup()
-                        .addGap(75, 75, 75)
-                        .addComponent(lblLinkto)
-                        .addGap(10, 10, 10)
-                        .addComponent(txtLinkto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel8Layout.createSequentialGroup()
-                        .addGap(78, 78, 78)
-                        .addComponent(lblBeaconQRG)
-                        .addGap(7, 7, 7)
-                        .addComponent(spinBeaconMinute, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel8Layout.createSequentialGroup()
-                        .addComponent(lblPassword)
-                        .addGap(10, 10, 10)
-                        .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(lblCallsign, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(lblLinkto, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(lblBeaconQRG, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(lblLatitude, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(lblLongitude, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(spinBeaconMinute, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtCallsign, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel8Layout.createSequentialGroup()
                         .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel8Layout.createSequentialGroup()
-                                .addGap(64, 64, 64)
-                                .addComponent(lblLatitude)
-                                .addGap(10, 10, 10)
-                                .addComponent(txtLatitude, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel8Layout.createSequentialGroup()
-                                .addGap(51, 51, 51)
-                                .addComponent(lblLongitude)
-                                .addGap(10, 10, 10)
-                                .addComponent(txtLongitude, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(12, 12, 12)
-                        .addComponent(bPosConverter)))
-                .addContainerGap(35, Short.MAX_VALUE))
+                            .addComponent(txtLongitude, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtLatitude, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addComponent(bPosConverter))
+                    .addComponent(txtLinkto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(90, Short.MAX_VALUE))
         );
         jPanel8Layout.setVerticalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel8Layout.createSequentialGroup()
-                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel8Layout.createSequentialGroup()
-                        .addGap(7, 7, 7)
-                        .addComponent(lblCallsign))
-                    .addComponent(txtCallsign, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtCallsign, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblCallsign))
                 .addGap(3, 3, 3)
                 .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel8Layout.createSequentialGroup()
@@ -1054,13 +1026,8 @@ public class optionsdialog extends javax.swing.JDialog {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel8Layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(bPosConverter)
-                        .addGap(16, 16, 16)))
-                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel8Layout.createSequentialGroup()
-                        .addGap(7, 7, 7)
-                        .addComponent(lblPassword))
-                    .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 0, 0))
+                        .addGap(18, 18, 18)))
+                .addGap(27, 27, 27))
         );
 
         javax.swing.GroupLayout test3Layout = new javax.swing.GroupLayout(test3);
@@ -1085,6 +1052,16 @@ public class optionsdialog extends javax.swing.JDialog {
         pnlUserData.add(test3, new java.awt.GridBagConstraints());
 
         tabOptions.addTab("User data", pnlUserData);
+
+        jPasswordField1.setToolTipText("Keep empty if not set at the server or email will not work!!");
+        jPasswordField1.setPreferredSize(new java.awt.Dimension(120, 27));
+        jPasswordField1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jPasswordField1ActionPerformed(evt);
+            }
+        });
+
+        lblPassword.setText("Session password");
 
         jLabel7.setText(optionsdialog.getString("HOSTNAME")); // NOI18N
 
@@ -1128,15 +1105,6 @@ public class optionsdialog extends javax.swing.JDialog {
             }
         });
 
-        Compressed.setText(optionsdialog.getString("COMPRESSED OTA")); // NOI18N
-        Compressed.setToolTipText(optionsdialog.getString("COMPRESS EMAIL DURING TRANSFER OVER THE AIR")); // NOI18N
-        Compressed.setMargin(new java.awt.Insets(2, 10, 2, 2));
-        Compressed.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                CompressedActionPerformed(evt);
-            }
-        });
-
         lblEmailHeader.setText(optionsdialog.getString("POP SERVER TO FETCH EMAIL FROM")); // NOI18N
 
         jLabel21.setText("pop Host");
@@ -1147,12 +1115,23 @@ public class optionsdialog extends javax.swing.JDialog {
         java.util.ResourceBundle bundle1 = java.util.ResourceBundle.getBundle("javapskmail/optionsdialog"); // NOI18N
         txtPopPassword.setToolTipText(bundle1.getString("PASSWORD AT THE POP HOST")); // NOI18N
 
+        jLabel20.setText(optionsdialog.getString("ONLY FOR PERL SERVER")); // NOI18N
+
         javax.swing.GroupLayout pnlEmailLayout = new javax.swing.GroupLayout(pnlEmail);
         pnlEmail.setLayout(pnlEmailLayout);
         pnlEmailLayout.setHorizontalGroup(
             pnlEmailLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlEmailLayout.createSequentialGroup()
                 .addGroup(pnlEmailLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlEmailLayout.createSequentialGroup()
+                        .addGap(81, 81, 81)
+                        .addComponent(lblEmailHeader))
+                    .addGroup(pnlEmailLayout.createSequentialGroup()
+                        .addGap(362, 362, 362)
+                        .addComponent(jLabel7))
+                    .addGroup(pnlEmailLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel20))
                     .addGroup(pnlEmailLayout.createSequentialGroup()
                         .addGroup(pnlEmailLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(pnlEmailLayout.createSequentialGroup()
@@ -1171,22 +1150,22 @@ public class optionsdialog extends javax.swing.JDialog {
                             .addComponent(txtPophost, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtReplyto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtPopPassword, javax.swing.GroupLayout.Alignment.LEADING)))
-                    .addComponent(jLabel7)
                     .addGroup(pnlEmailLayout.createSequentialGroup()
-                        .addGap(81, 81, 81)
+                        .addGap(21, 21, 21)
+                        .addComponent(lblPassword)
+                        .addGap(18, 18, 18)
                         .addGroup(pnlEmailLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(pnlEmailLayout.createSequentialGroup()
-                                .addComponent(ServerUpdateButton)
-                                .addGap(17, 17, 17)
-                                .addComponent(Compressed))
-                            .addComponent(lblEmailHeader))))
-                .addContainerGap(58, Short.MAX_VALUE))
+                            .addComponent(ServerUpdateButton)
+                            .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         pnlEmailLayout.setVerticalGroup(
             pnlEmailLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlEmailLayout.createSequentialGroup()
                 .addComponent(jLabel7)
-                .addGap(35, 35, 35)
+                .addGap(31, 31, 31)
+                .addComponent(jLabel20)
+                .addGap(18, 18, 18)
                 .addComponent(lblEmailHeader)
                 .addGap(2, 2, 2)
                 .addGroup(pnlEmailLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1199,17 +1178,20 @@ public class optionsdialog extends javax.swing.JDialog {
                 .addGap(7, 7, 7)
                 .addGroup(pnlEmailLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
-                    .addComponent(txtPopPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtPopPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(4, 4, 4)
                 .addGroup(pnlEmailLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel10)
                     .addComponent(txtReplyto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(6, 6, 6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(pnlEmailLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(pnlEmailLayout.createSequentialGroup()
-                        .addGap(2, 2, 2)
-                        .addComponent(ServerUpdateButton))
-                    .addComponent(Compressed)))
+                        .addGap(7, 7, 7)
+                        .addComponent(lblPassword))
+                    .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(ServerUpdateButton)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         tabOptions.addTab("Email settings", pnlEmail);
@@ -1288,8 +1270,13 @@ public class optionsdialog extends javax.swing.JDialog {
         jLabel18.setText(bundle1.getString("SECURITY PASSWORD")); // NOI18N
 
         txtAccessPassword.setToolTipText(bundle1.getString("ACCESS PASSWORD TIP")); // NOI18N
+        txtAccessPassword.setMinimumSize(new java.awt.Dimension(4, 27));
+        txtAccessPassword.setName(""); // NOI18N
+        txtAccessPassword.setPreferredSize(new java.awt.Dimension(4, 27));
 
         txtServerEmailPassword.setToolTipText(bundle1.getString("SERVER EMAIL PASSWORD")); // NOI18N
+        txtServerEmailPassword.setMinimumSize(new java.awt.Dimension(4, 27));
+        txtServerEmailPassword.setPreferredSize(new java.awt.Dimension(4, 27));
 
         javax.swing.GroupLayout jPanel12Layout = new javax.swing.GroupLayout(jPanel12);
         jPanel12.setLayout(jPanel12Layout);
@@ -1306,7 +1293,7 @@ public class optionsdialog extends javax.swing.JDialog {
                         .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtServerUserName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtServerEmailAddress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtServerEmailPassword)))
+                            .addComponent(txtServerEmailPassword, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(jPanel12Layout.createSequentialGroup()
                         .addComponent(jLabel31)
                         .addGap(3, 3, 3)
@@ -1325,17 +1312,20 @@ public class optionsdialog extends javax.swing.JDialog {
         jPanel12Layout.setVerticalGroup(
             jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel12Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel18)
-                    .addComponent(txtAccessPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel12Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel18))
+                    .addGroup(jPanel12Layout.createSequentialGroup()
+                        .addGap(4, 4, 4)
+                        .addComponent(txtAccessPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtServerImapHost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtServerSmtpHost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel27)
                     .addComponent(jLabel31))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtServerEmailAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel32))
@@ -1479,6 +1469,8 @@ public class optionsdialog extends javax.swing.JDialog {
         jLabel8.setText("ISO Country code");
 
         txtGatewayISOCountryCode.setToolTipText("The two letter ISO country code like US or AU or FR. Leave blank to use computer setting. Used to format phone numbers as international numbers.");
+        txtGatewayISOCountryCode.setPreferredSize(new java.awt.Dimension(4, 27));
+        txtGatewayISOCountryCode.setRequestFocusEnabled(false);
         txtGatewayISOCountryCode.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtGatewayISOCountryCodeActionPerformed(evt);
@@ -1544,6 +1536,8 @@ public class optionsdialog extends javax.swing.JDialog {
 
         spinnerHoursToKeepLink.setModel(new javax.swing.SpinnerNumberModel(24, 0, null, 1));
         spinnerHoursToKeepLink.setToolTipText("When several callsigns use this gateway, how long should we associate a callsign with an E-Mail address or SMS number for proper redirection");
+        spinnerHoursToKeepLink.setMinimumSize(new java.awt.Dimension(32, 25));
+        spinnerHoursToKeepLink.setName(""); // NOI18N
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
@@ -1558,9 +1552,9 @@ public class optionsdialog extends javax.swing.JDialog {
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
-                .addComponent(jLabel23)
-                .addComponent(spinnerHoursToKeepLink, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(spinnerHoursToKeepLink, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
+                .addComponent(jLabel23))
         );
 
         explainRadioMsgButton.setText("Explain");
@@ -1588,17 +1582,17 @@ public class optionsdialog extends javax.swing.JDialog {
         RadioMsgPanelLayout.setVerticalGroup(
             RadioMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(RadioMsgPanelLayout.createSequentialGroup()
-                .addContainerGap(31, Short.MAX_VALUE)
+                .addContainerGap(26, Short.MAX_VALUE)
                 .addGroup(RadioMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(test1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(explainRadioMsgButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
                 .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(5, 5, 5)
                 .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(31, Short.MAX_VALUE))
+                .addContainerGap(27, Short.MAX_VALUE))
         );
 
         tabOptions.addTab("RadioMsg", RadioMsgPanel);
@@ -1750,6 +1744,30 @@ public class optionsdialog extends javax.swing.JDialog {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
         pnlConfiguration.add(lblDCD, gridBagConstraints);
+
+        Compressed.setText(optionsdialog.getString("COMPRESSED OTA")); // NOI18N
+        Compressed.setToolTipText(optionsdialog.getString("COMPRESS EMAIL DURING TRANSFER OVER THE AIR")); // NOI18N
+        Compressed.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
+        Compressed.setBorderPainted(true);
+        Compressed.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        Compressed.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+        Compressed.setMargin(new java.awt.Insets(10, 10, 2, 2));
+        Compressed.setMaximumSize(new java.awt.Dimension(150, 25));
+        Compressed.setMinimumSize(new java.awt.Dimension(150, 25));
+        Compressed.setPreferredSize(new java.awt.Dimension(120, 25));
+        Compressed.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                CompressedActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridwidth = java.awt.GridBagConstraints.RELATIVE;
+        gridBagConstraints.ipadx = 20;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.BASELINE;
+        gridBagConstraints.insets = new java.awt.Insets(30, 0, 0, 0);
+        pnlConfiguration.add(Compressed, gridBagConstraints);
 
         tabOptions.addTab("Configuration", pnlConfiguration);
 
@@ -1915,27 +1933,6 @@ public class optionsdialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(txtFldigipath)
                 .addContainerGap())
-            .addGroup(pnlModemLayout.createSequentialGroup()
-                .addGap(47, 47, 47)
-                .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel19)
-                    .addGroup(pnlModemLayout.createSequentialGroup()
-                        .addComponent(lblModemIPPort)
-                        .addGap(80, 80, 80)
-                        .addComponent(txtModemIPPort, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(pnlModemLayout.createSequentialGroup()
-                        .addComponent(lblModemPreamble)
-                        .addGap(11, 11, 11)
-                        .addComponent(txtModemPreamble, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(pnlModemLayout.createSequentialGroup()
-                        .addComponent(lblModemPostamble)
-                        .addGap(4, 4, 4)
-                        .addComponent(txtModemPostamble, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(pnlModemLayout.createSequentialGroup()
-                        .addComponent(lblModemIPAddress)
-                        .addGap(54, 54, 54)
-                        .addComponent(txtModemIPAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlModemLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(lblFldigiAutorestart)
@@ -1944,6 +1941,23 @@ public class optionsdialog extends javax.swing.JDialog {
                 .addGap(3, 3, 3)
                 .addComponent(lblHours, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(63, 63, 63))
+            .addGroup(pnlModemLayout.createSequentialGroup()
+                .addGap(47, 47, 47)
+                .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlModemLayout.createSequentialGroup()
+                        .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblModemIPPort)
+                            .addComponent(lblModemPreamble)
+                            .addComponent(lblModemPostamble)
+                            .addComponent(lblModemIPAddress))
+                        .addGap(3, 3, 3)
+                        .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtModemIPAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtModemIPPort, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtModemPreamble, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtModemPostamble, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jLabel19))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         pnlModemLayout.setVerticalGroup(
             pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2222,7 +2236,7 @@ public class optionsdialog extends javax.swing.JDialog {
         jLabel15.setText("> 300 Bd");
 
         CB_DOMEX22.setForeground(new java.awt.Color(0, 153, 0));
-        CB_DOMEX22.setText("DOMINOEX22");
+        CB_DOMEX22.setText("DOMEX22");
         CB_DOMEX22.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 CB_DOMEX22ActionPerformed(evt);
@@ -2230,7 +2244,7 @@ public class optionsdialog extends javax.swing.JDialog {
         });
 
         CB_DOMEX11.setForeground(new java.awt.Color(0, 153, 51));
-        CB_DOMEX11.setText("DOMINOEX11");
+        CB_DOMEX11.setText("DOMEX11");
         CB_DOMEX11.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 CB_DOMEX11ActionPerformed(evt);
@@ -2242,42 +2256,39 @@ public class optionsdialog extends javax.swing.JDialog {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(60, 60, 60)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(6, 6, 6)
-                .addComponent(CB_PSK500)
-                .addGap(56, 56, 56)
-                .addComponent(CB_PSK500R)
-                .addGap(45, 45, 45)
-                .addComponent(CB_PSK250)
-                .addGap(12, 12, 12)
-                .addComponent(CB_PSK250R))
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(7, 7, 7)
-                .addComponent(CB_PSK125R)
-                .addGap(45, 45, 45)
-                .addComponent(CB_DOMEX22)
-                .addGap(9, 9, 9)
-                .addComponent(CB_MFSK32)
-                .addGap(7, 7, 7)
-                .addComponent(CB_THOR22))
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(8, 8, 8)
-                .addComponent(CB_DOMEX11)
-                .addGap(7, 7, 7)
-                .addComponent(CB_MFSK16)
-                .addGap(50, 50, 50)
-                .addComponent(CB_THOR8)
-                .addGap(13, 13, 13)
-                .addComponent(CB_DOMEX5))
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(37, 37, 37)
-                .addComponent(jLabel15)
-                .addGap(148, 148, 148)
-                .addComponent(jLabel13)
-                .addGap(0, 0, 0)
-                .addComponent(cboModes, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(CB_PSK500)
+                            .addComponent(CB_PSK125R)
+                            .addComponent(CB_DOMEX11))
+                        .addGap(9, 9, 9)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(CB_PSK500R)
+                            .addComponent(CB_DOMEX22)
+                            .addComponent(CB_MFSK16))
+                        .addGap(13, 13, 13)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(CB_PSK250)
+                            .addComponent(CB_MFSK32)
+                            .addComponent(CB_THOR8))
+                        .addGap(5, 5, 5)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(CB_PSK250R)
+                            .addComponent(CB_THOR22)
+                            .addComponent(CB_DOMEX5)))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(60, 60, 60)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(37, 37, 37)
+                        .addComponent(jLabel15)
+                        .addGap(82, 82, 82)
+                        .addComponent(jLabel13)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cboModes, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(76, 76, 76))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2305,15 +2316,12 @@ public class optionsdialog extends javax.swing.JDialog {
                     .addComponent(CB_MFSK16)
                     .addComponent(CB_THOR8)
                     .addComponent(CB_DOMEX5))
-                .addGap(7, 7, 7)
+                .addGap(13, 13, 13)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addComponent(jLabel15))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(11, 11, 11)
-                        .addComponent(jLabel13))
-                    .addComponent(cboModes, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jLabel15)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(cboModes, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel13))))
         );
 
         tabOptions.addTab("Modes", jPanel2);
@@ -2375,8 +2383,8 @@ public class optionsdialog extends javax.swing.JDialog {
 
             // Save default server
             if (txtLinkto.getText().length() > 0) {
-                linktoserver = txtLinkto.getText();
-                cf.setPreference("SERVER", linktoserver.toUpperCase());
+                serverList = txtLinkto.getText();
+                cf.setPreference("SERVER", serverList.toUpperCase());
             }
 
             // Session password
@@ -2921,7 +2929,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
 
     private void txtLinktoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtLinktoActionPerformed
         // TODO add your handling code here:
-        linktoserver = txtLinkto.getText();
+        serverList = txtLinkto.getText();
     }//GEN-LAST:event_txtLinktoActionPerformed
 
     private void txtCallsignFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtCallsignFocusLost
@@ -3290,6 +3298,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;

@@ -277,18 +277,18 @@ public class mainpskmailui extends javax.swing.JFrame {
         }
 
         // Fetch server to link to
-        String myServer = Main.configuration.getPreference("SERVER", "n0cal");
         this.cboServer.removeAllItems();
-        Rigctl.Loadfreqs(myServer);
-
         // Add servers from main
         for (int i = 0; i < Main.Servers.length; i++) {
             if (!Main.Servers[i].equals("")) {
                 cboServer.addItem(Main.Servers[i]);
             }
         }
-        this.cboServer.setSelectedItem(myServer);
-
+        //String myServer = Main.configuration.getPreference("SERVER", "n0cal");
+        //this.cboServer.setSelectedItem(myServer);
+        this.cboServer.setSelectedItem(Main.Servers[0]);
+        Rigctl.Loadfreqs(Main.Servers[0]);
+        
         if (Main.configuration.getPreference("SCANNER").equals("yes")) {
             ScannerCheckbox.setSelected(true);
             Main.wantScanner = true;
@@ -356,7 +356,8 @@ public class mainpskmailui extends javax.swing.JFrame {
                         rigctlactivelbl.setForeground(new Color(0x0000dd));
                     }
 
-                    labelServerFreq.setText(cboServer.getSelectedItem().toString());
+                    //labelServerFreq.setText(cboServer.getSelectedItem().toString());
+                    labelServerFreq.setText(myarq.getServer());
 
                     freq0.setText(Rigctl.freqs[0]);
                     freq1.setText(Rigctl.freqs[1]);
@@ -938,7 +939,8 @@ public class mainpskmailui extends javax.swing.JFrame {
                             }
 
                             // set scanner frequency ?
-                            if ((mnuMailScanning.isSelected() & !Main.Connected) | (!Main.Connected & !Main.Connecting & !Main.Monitor & !sendbeacon & !Main.Bulletinmode)) {
+                            if ((mnuMailScanning.isSelected() & !Main.Connected) | 
+                                    (!Main.Connected & !Main.Connecting & !Main.Monitor & !sendbeacon & !Main.Bulletinmode)) {
                                 if (Main.configuration.getPreference("SCANNER").equals("yes")) {
                                     if (!Main.wantScanner && (System.currentTimeMillis() > Main.restartScanAtEpoch)) {
                                         Main.wantScanner = true;
@@ -1006,7 +1008,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                             if (!Main.Bulletinmode & !Main.Connected & !Main.IACmode) {
                                 String Period = cboBeaconPeriod.getSelectedItem().toString();
                                 int iPeriod = Integer.parseInt(Period);
-                                if (chkAutoLink.isSelected() & (!myarq.servercall.equals(Main.linkedserver) || !Main.linked) & Minute % 5 == i) {
+                                if (chkAutoLink.isSelected() & (!myarq.getServer().equals(Main.linkedserver) || !Main.linked) & Minute % 5 == i) {
                                     if (!Main.Connected & !Main.Connecting & !Main.Bulletinmode & !Main.IACmode) {
                                         if (Main.sending_link > 0 & !Main.configuration.getPreference("CALL").equals("N0CAL")) {
                                             Main.sending_link--;
@@ -1096,7 +1098,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                                 String Frames = "";
                                 String dbs = "";
                                 String mds = "         ";
-                                for (i = 0; i < 10; i++) {
+                                for (i = 0; i < Main.Servers.length; i++) {
                                     if (Main.Servers[i].equals("")) {
                                         break;
                                     } else {
@@ -1659,28 +1661,28 @@ public class mainpskmailui extends javax.swing.JFrame {
         mnuMailAPRS2 = new javax.swing.JRadioButtonMenuItem();
         mnuMailScanning = new javax.swing.JRadioButtonMenuItem();
         mnuMonitor = new javax.swing.JRadioButtonMenuItem();
+        jSeparator4 = new javax.swing.JSeparator();
+        mnuModeQSY2 = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JSeparator();
         mnuPSK63 = new javax.swing.JRadioButtonMenuItem();
         mnuPSK125 = new javax.swing.JRadioButtonMenuItem();
         mnuPSK250 = new javax.swing.JRadioButtonMenuItem();
         mnuPSK500 = new javax.swing.JRadioButtonMenuItem();
         jSeparator2 = new javax.swing.JSeparator();
-        psk125r_checkbox = new javax.swing.JRadioButtonMenuItem();
-        psk250r_checkbox = new javax.swing.JRadioButtonMenuItem();
-        psk500r_checkbox = new javax.swing.JRadioButtonMenuItem();
+        mnuPSK125R = new javax.swing.JRadioButtonMenuItem();
+        mnuPSK250R = new javax.swing.JRadioButtonMenuItem();
+        mnuPSK500R = new javax.swing.JRadioButtonMenuItem();
         jSeparator3 = new javax.swing.JSeparator();
         mnuTHOR8 = new javax.swing.JRadioButtonMenuItem();
         mnuTHOR22 = new javax.swing.JRadioButtonMenuItem();
         jSeparator7 = new javax.swing.JSeparator();
         mnuMFSK16 = new javax.swing.JRadioButtonMenuItem();
         mnuMFSK32 = new javax.swing.JRadioButtonMenuItem();
-        jSeparator4 = new javax.swing.JSeparator();
-        mnuModeQSY2 = new javax.swing.JMenuItem();
         jSeparator11 = new javax.swing.JPopupMenu.Separator();
-        defaultmnu = new javax.swing.JRadioButtonMenuItem();
         mnuDOMINOEX5 = new javax.swing.JRadioButtonMenuItem();
-        jRadioButtonMenuDOMEX11 = new javax.swing.JRadioButtonMenuItem();
-        jRadioButtonMenuDOMEX22 = new javax.swing.JRadioButtonMenuItem();
+        mnuDOMINOEX11 = new javax.swing.JRadioButtonMenuItem();
+        mnuDOMINOEX22 = new javax.swing.JRadioButtonMenuItem();
+        defaultmnu = new javax.swing.JRadioButtonMenuItem();
         jMenu1 = new javax.swing.JMenu();
         Twitter_send = new javax.swing.JMenuItem();
         GetUpdatesmenuItem = new javax.swing.JMenuItem();
@@ -2651,6 +2653,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                 tabIgate.setBorder(javax.swing.BorderFactory.createTitledBorder(bundle.getString("mainpskmailui.tabIgate.border.title"))); // NOI18N
                 tabIgate.setLayout(new java.awt.GridBagLayout());
 
+                IgateCallField.setEditable(false);
                 IgateCallField.setText(bundle.getString("mainpskmailui.IgateCallField.text")); // NOI18N
                 IgateCallField.setMinimumSize(new java.awt.Dimension(50, 28));
                 IgateCallField.setPreferredSize(new java.awt.Dimension(60, 28));
@@ -2672,7 +2675,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                 gridBagConstraints.gridx = 0;
                 gridBagConstraints.gridy = 1;
                 gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-                gridBagConstraints.insets = new java.awt.Insets(10, 5, 0, 0);
+                gridBagConstraints.insets = new java.awt.Insets(15, 5, 0, 0);
                 tabIgate.add(IgateCall, gridBagConstraints);
 
                 IgateIndicator.setText(bundle.getString("rg.netbeans.beaninfo.editors.Font")); // NOI18N
@@ -3671,8 +3674,18 @@ public class mainpskmailui extends javax.swing.JFrame {
                     }
                 });
                 mnuMode2.add(mnuMonitor);
+                mnuMode2.add(jSeparator4);
+
+                mnuModeQSY2.setText(bundle.getString("mainpskmailui.mnuModeQSY2.text")); // NOI18N
+                mnuModeQSY2.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        mnuModeQSYActionPerformed(evt);
+                    }
+                });
+                mnuMode2.add(mnuModeQSY2);
                 mnuMode2.add(jSeparator1);
 
+                modemnubuttons.add(mnuPSK63);
                 mnuPSK63.setText("PSK63"); // NOI18N
                 mnuPSK63.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -3709,32 +3722,32 @@ public class mainpskmailui extends javax.swing.JFrame {
                 mnuMode2.add(mnuPSK500);
                 mnuMode2.add(jSeparator2);
 
-                modemnubuttons.add(psk125r_checkbox);
-                psk125r_checkbox.setText(bundle.getString("mainpskmailui.psk125r_checkbox.text")); // NOI18N
-                psk125r_checkbox.addActionListener(new java.awt.event.ActionListener() {
+                modemnubuttons.add(mnuPSK125R);
+                mnuPSK125R.setText(bundle.getString("mainpskmailui.mnuPSK125R.text")); // NOI18N
+                mnuPSK125R.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        psk125r_checkboxActionPerformed(evt);
+                        mnuPSK125RActionPerformed(evt);
                     }
                 });
-                mnuMode2.add(psk125r_checkbox);
+                mnuMode2.add(mnuPSK125R);
 
-                modemnubuttons.add(psk250r_checkbox);
-                psk250r_checkbox.setText(bundle.getString("mainpskmailui.psk250r_checkbox.text")); // NOI18N
-                psk250r_checkbox.addActionListener(new java.awt.event.ActionListener() {
+                modemnubuttons.add(mnuPSK250R);
+                mnuPSK250R.setText(bundle.getString("mainpskmailui.mnuPSK250R.text")); // NOI18N
+                mnuPSK250R.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        psk250r_checkboxActionPerformed(evt);
+                        mnuPSK250RActionPerformed(evt);
                     }
                 });
-                mnuMode2.add(psk250r_checkbox);
+                mnuMode2.add(mnuPSK250R);
 
-                modemnubuttons.add(psk500r_checkbox);
-                psk500r_checkbox.setText(bundle.getString("mainpskmailui.psk500r_checkbox.text_1")); // NOI18N
-                psk500r_checkbox.addActionListener(new java.awt.event.ActionListener() {
+                modemnubuttons.add(mnuPSK500R);
+                mnuPSK500R.setText(bundle.getString("mainpskmailui.mnuPSK500R.text_1")); // NOI18N
+                mnuPSK500R.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        psk500r_checkboxActionPerformed(evt);
+                        mnuPSK500RActionPerformed(evt);
                     }
                 });
-                mnuMode2.add(psk500r_checkbox);
+                mnuMode2.add(mnuPSK500R);
                 mnuMode2.add(jSeparator3);
 
                 modemnubuttons.add(mnuTHOR8);
@@ -3773,25 +3786,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                     }
                 });
                 mnuMode2.add(mnuMFSK32);
-                mnuMode2.add(jSeparator4);
-
-                mnuModeQSY2.setText(bundle.getString("mainpskmailui.mnuModeQSY2.text")); // NOI18N
-                mnuModeQSY2.addActionListener(new java.awt.event.ActionListener() {
-                    public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        mnuModeQSYActionPerformed(evt);
-                    }
-                });
-                mnuMode2.add(mnuModeQSY2);
                 mnuMode2.add(jSeparator11);
-
-                defaultmnu.setText(bundle.getString("mainpskmailui.defaultmnu.text")); // NOI18N
-                defaultmnu.setEnabled(false);
-                defaultmnu.addActionListener(new java.awt.event.ActionListener() {
-                    public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        jRadioButtonMenuItemMFSK22ActionPerformed(evt);
-                    }
-                });
-                mnuMode2.add(defaultmnu);
 
                 modemnubuttons.add(mnuDOMINOEX5);
                 mnuDOMINOEX5.setText(bundle.getString("mainpskmailui.mnuDOMINOEX5.text")); // NOI18N
@@ -3802,23 +3797,32 @@ public class mainpskmailui extends javax.swing.JFrame {
                 });
                 mnuMode2.add(mnuDOMINOEX5);
 
-                jRadioButtonMenuDOMEX11.setSelected(true);
-                jRadioButtonMenuDOMEX11.setText(bundle.getString("mainpskmailui.jRadioButtonMenuDOMEX11.text")); // NOI18N
-                jRadioButtonMenuDOMEX11.addActionListener(new java.awt.event.ActionListener() {
+                modemnubuttons.add(mnuDOMINOEX11);
+                mnuDOMINOEX11.setText(bundle.getString("mainpskmailui.mnuDOMINOEX11.text")); // NOI18N
+                mnuDOMINOEX11.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        jRadioButtonMenuDOMEX11ActionPerformed(evt);
+                        mnuDOMINOEX11ActionPerformed(evt);
                     }
                 });
-                mnuMode2.add(jRadioButtonMenuDOMEX11);
+                mnuMode2.add(mnuDOMINOEX11);
 
-                jRadioButtonMenuDOMEX22.setSelected(true);
-                jRadioButtonMenuDOMEX22.setText(bundle.getString("mainpskmailui.jRadioButtonMenuDOMEX22.text")); // NOI18N
-                jRadioButtonMenuDOMEX22.addActionListener(new java.awt.event.ActionListener() {
+                modemnubuttons.add(mnuDOMINOEX22);
+                mnuDOMINOEX22.setText(bundle.getString("mainpskmailui.mnuDOMINOEX22.text")); // NOI18N
+                mnuDOMINOEX22.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        jRadioButtonMenuDOMEX22ActionPerformed(evt);
+                        mnuDOMINOEX22ActionPerformed(evt);
                     }
                 });
-                mnuMode2.add(jRadioButtonMenuDOMEX22);
+                mnuMode2.add(mnuDOMINOEX22);
+
+                defaultmnu.setText(bundle.getString("mainpskmailui.defaultmnu.text")); // NOI18N
+                defaultmnu.setEnabled(false);
+                defaultmnu.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        jRadioButtonMenuItemMFSK22ActionPerformed(evt);
+                    }
+                });
+                mnuMode2.add(defaultmnu);
 
                 jMenuBar3.add(mnuMode2);
 
@@ -4150,6 +4154,7 @@ private void mnuPreferencesActionPerformed(java.awt.event.ActionEvent evt) {//GE
 
     try {
         modemmodeenum lastTxModem = Main.TxModem;
+        String lastServer = myarq.getServer();
         optionsDialog = new optionsdialog(this, true);
 
         optionsDialog.setCallsign(Main.configuration.getPreference("CALL"));
@@ -4162,9 +4167,24 @@ private void mnuPreferencesActionPerformed(java.awt.event.ActionEvent evt) {//GE
         // Options have now closed
         Main.configuration.setCallsign(optionsDialog.getCallsign());
         myarq.setCallsign(optionsDialog.getCallsign());
-        String myServer = optionsDialog.getServer();
-        myarq.setServer(myServer);
-        this.cboServer.setSelectedItem(myServer);
+        //String myServer = optionsDialog.getServer();
+        //VK2ETA: Not here, only use the cboServer drop box on main UI
+        //myarq.setServer(myServer);
+        //Re-load the server list in case it changed
+        Main.loadServerList();
+        this.cboServer.removeAllItems();
+        // Add servers from main
+        boolean foundLastServer = false;
+        for (int i = 0; i < Main.Servers.length; i++) {
+            if (!Main.Servers[i].equals("")) {
+                cboServer.addItem(Main.Servers[i]);
+                if (lastServer.equals(Main.Servers[i])) {
+                    this.cboServer.setSelectedItem(lastServer);
+                    foundLastServer = true;
+                }
+            }
+        }        
+        if (!foundLastServer) this.cboServer.setSelectedItem(Main.Servers[0]); //Try the first one if any
         //this.txtServer.setText(myServer);
         //Did we change the default mode in the options?
         if (lastTxModem != Main.TxModem) {
@@ -4660,259 +4680,86 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
      * @param mymode
      */
     private void updatemodeset(modemmodeenum mymode) {
-
+/*
 //   Main.defaultmode = mymode;
         try {
             switch (mymode) {
                 case PSK63:
                     mnuPSK63.setSelected(true);
-                    mnuPSK125.setSelected(false);
-                    mnuPSK250.setSelected(false);
-                    mnuPSK500.setSelected(false);
-                    psk125r_checkbox.setSelected(false);
-                    psk250r_checkbox.setSelected(false);
-                    psk500r_checkbox.setSelected(false);
-                    mnuMFSK16.setSelected(false);
-                    defaultmnu.setSelected(false);
-                    mnuMFSK32.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR8.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR22.setSelected(false);
                     break;
                 case PSK125:
-                    mnuPSK63.setSelected(false);
                     mnuPSK125.setSelected(true);
-                    mnuPSK250.setSelected(false);
-                    mnuPSK500.setSelected(false);
-                    psk125r_checkbox.setSelected(false);
-                    psk250r_checkbox.setSelected(false);
-                    psk500r_checkbox.setSelected(false);
-                    mnuMFSK16.setSelected(false);
-                    defaultmnu.setSelected(false);
-                    mnuMFSK32.setSelected(false);
-                    mnuTHOR8.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR22.setSelected(false);
                     break;
                 case PSK250:
-                    mnuPSK63.setSelected(false);
-                    mnuPSK125.setSelected(false);
                     mnuPSK250.setSelected(true);
-                    mnuPSK500.setSelected(false);
-                    psk125r_checkbox.setSelected(false);
-                    psk250r_checkbox.setSelected(false);
-                    psk500r_checkbox.setSelected(false);
-                    mnuMFSK16.setSelected(false);
-                    defaultmnu.setSelected(false);
-                    mnuMFSK32.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR8.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR22.setSelected(false);
                     break;
                 case PSK500:
-                    mnuPSK63.setSelected(false);
-                    mnuPSK125.setSelected(false);
-                    mnuPSK250.setSelected(false);
                     mnuPSK500.setSelected(true);
-                    psk125r_checkbox.setSelected(false);
-                    psk250r_checkbox.setSelected(false);
-                    psk500r_checkbox.setSelected(false);
-                    mnuMFSK16.setSelected(false);
-                    defaultmnu.setSelected(false);
-                    mnuMFSK32.setSelected(false);
-                    mnuTHOR8.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR22.setSelected(false);
                     break;
                 case PSK1000:
-                    mnuPSK63.setSelected(false);
-                    mnuPSK125.setSelected(false);
-                    mnuPSK250.setSelected(false);
-                    mnuPSK500.setSelected(false);
-                    psk125r_checkbox.setSelected(false);
-                    psk250r_checkbox.setSelected(false);
-                    psk500r_checkbox.setSelected(false);
-                    mnuMFSK16.setSelected(false);
-                    defaultmnu.setSelected(false);
-                    mnuMFSK32.setSelected(false);
-                    mnuTHOR8.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR22.setSelected(false);
                     break;
                 case PSK125R:
-                    mnuPSK63.setSelected(false);
-                    mnuPSK125.setSelected(false);
-                    mnuPSK250.setSelected(false);
-                    mnuPSK500.setSelected(false);
-                    psk125r_checkbox.setSelected(true);
-                    psk250r_checkbox.setSelected(false);
-                    psk500r_checkbox.setSelected(false);
-                    mnuMFSK16.setSelected(false);
-                    defaultmnu.setSelected(false);
-                    mnuMFSK32.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR8.setSelected(false);
-                    mnuTHOR22.setSelected(false);
+                    mnuPSK125R.setSelected(true);
                     break;
                 case PSK250R:
-                    mnuPSK63.setSelected(false);
-                    mnuPSK125.setSelected(false);
-                    mnuPSK250.setSelected(false);
-                    mnuPSK500.setSelected(false);
-                    psk125r_checkbox.setSelected(false);
-                    psk250r_checkbox.setSelected(true);
-                    psk500r_checkbox.setSelected(false);
-                    mnuMFSK16.setSelected(false);
-                    defaultmnu.setSelected(false);
-                    mnuMFSK32.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR8.setSelected(false);
-                    mnuTHOR22.setSelected(false);
+                    mnuPSK250R.setSelected(true);
                     break;
                 case PSK500R:
-                    mnuPSK63.setSelected(false);
-                    mnuPSK125.setSelected(false);
-                    mnuPSK250.setSelected(false);
-                    mnuPSK500.setSelected(false);
-                    psk125r_checkbox.setSelected(false);
-                    psk250r_checkbox.setSelected(false);
-                    psk500r_checkbox.setSelected(true);
-                    mnuMFSK16.setSelected(false);
-                    defaultmnu.setSelected(false);
-                    mnuMFSK32.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR8.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR22.setSelected(false);
+                    mnuPSK500R.setSelected(true);
                     break;
                 case MFSK16:
-                    mnuPSK63.setSelected(false);
-                    mnuPSK125.setSelected(false);
-                    mnuPSK250.setSelected(false);
-                    mnuPSK500.setSelected(false);
-                    psk125r_checkbox.setSelected(false);
-                    psk250r_checkbox.setSelected(false);
-                    psk500r_checkbox.setSelected(false);
                     mnuMFSK16.setSelected(true);
-                    defaultmnu.setSelected(false);
-                    mnuMFSK32.setSelected(false);
-                    mnuTHOR8.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR22.setSelected(false);
                     break;
                 case MFSK22:
-                    mnuPSK63.setSelected(false);
-                    mnuPSK125.setSelected(false);
-                    mnuPSK250.setSelected(false);
-                    mnuPSK500.setSelected(false);
-                    psk125r_checkbox.setSelected(false);
-                    psk250r_checkbox.setSelected(false);
-                    psk500r_checkbox.setSelected(false);
-                    mnuMFSK16.setSelected(false);
-                    defaultmnu.setSelected(true);
-                    mnuMFSK32.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR8.setSelected(false);
-                    mnuTHOR22.setSelected(false);
                     break;
                 case MFSK32:
-                    mnuPSK63.setSelected(false);
-                    mnuPSK125.setSelected(false);
-                    mnuPSK250.setSelected(false);
-                    mnuPSK500.setSelected(false);
-                    psk125r_checkbox.setSelected(false);
-                    psk250r_checkbox.setSelected(false);
-                    psk500r_checkbox.setSelected(false);
-                    mnuMFSK16.setSelected(false);
-                    defaultmnu.setSelected(false);
                     mnuMFSK32.setSelected(true);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR8.setSelected(false);
-                    mnuTHOR22.setSelected(false);
                     break;
                 case THOR8:
-                    mnuPSK63.setSelected(false);
-                    mnuPSK125.setSelected(false);
-                    mnuPSK250.setSelected(false);
-                    mnuPSK500.setSelected(false);
-                    psk125r_checkbox.setSelected(false);
-                    psk250r_checkbox.setSelected(false);
-                    psk500r_checkbox.setSelected(false);
-                    mnuMFSK16.setSelected(false);
-                    defaultmnu.setSelected(false);
-                    mnuMFSK32.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
                     mnuTHOR8.setSelected(true);
-                    mnuTHOR22.setSelected(false);
                     break;
                 case THOR11:
-                    mnuPSK63.setSelected(false);
-                    mnuPSK125.setSelected(false);
-                    mnuPSK250.setSelected(false);
-                    mnuPSK500.setSelected(false);
-                    psk125r_checkbox.setSelected(false);
-                    psk250r_checkbox.setSelected(false);
-                    psk500r_checkbox.setSelected(false);
-                    mnuMFSK16.setSelected(false);
-                    defaultmnu.setSelected(false);
-                    mnuMFSK32.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR8.setSelected(false);
-                    mnuTHOR22.setSelected(false);
+                    //mnuTHOR11.setSelected(false);
                     break;
                 case THOR22:
-                    mnuPSK63.setSelected(false);
-                    mnuPSK125.setSelected(false);
-                    mnuPSK250.setSelected(false);
-                    mnuPSK500.setSelected(false);
-                    psk125r_checkbox.setSelected(false);
-                    psk250r_checkbox.setSelected(false);
-                    psk500r_checkbox.setSelected(false);
-                    mnuMFSK16.setSelected(false);
-                    defaultmnu.setSelected(false);
-                    mnuMFSK32.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR8.setSelected(false);
                     mnuTHOR22.setSelected(true);
                     break;
                 case DOMINOEX5:
-                    mnuPSK63.setSelected(false);
-                    mnuPSK125.setSelected(false);
-                    mnuPSK250.setSelected(false);
-                    mnuPSK500.setSelected(false);
-                    psk125r_checkbox.setSelected(false);
-                    psk250r_checkbox.setSelected(false);
-                    psk500r_checkbox.setSelected(false);
-                    mnuMFSK16.setSelected(false);
-                    defaultmnu.setSelected(false);
-                    mnuMFSK32.setSelected(false);
                     mnuDOMINOEX5.setSelected(true);
-                    mnuTHOR8.setSelected(false);
-                    mnuTHOR22.setSelected(false);
+                    break;
+                case DOMINOEX11:
+                    mnuDOMINOEX11.setSelected(true);
+                    break;
+                case DOMINOEX22:
+                    mnuDOMINOEX22.setSelected(true);
                     break;
                 case CTSTIA:
-                    mnuPSK63.setSelected(false);
-                    mnuPSK125.setSelected(false);
-                    mnuPSK250.setSelected(false);
-                    mnuPSK500.setSelected(false);
-                    psk125r_checkbox.setSelected(false);
-                    psk250r_checkbox.setSelected(false);
-                    psk500r_checkbox.setSelected(false);
-                    mnuMFSK16.setSelected(false);
-                    defaultmnu.setSelected(false);
-                    mnuMFSK32.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR8.setSelected(false);
-                    mnuDOMINOEX5.setSelected(false);
-                    mnuTHOR22.setSelected(false);
                     break;
             }
         } catch (NoClassDefFoundError ne) {
             myarq.Message("Error setting mode", 5);
         }
-
+*/
+    }
+    
+    private void updatemodereset() {
+        /*
+                    mnuPSK63.setSelected(false);
+                    mnuPSK125.setSelected(false);
+                    mnuPSK250.setSelected(false);
+                    mnuPSK500.setSelected(false);
+                    mnuPSK125R.setSelected(false);
+                    mnuPSK250R.setSelected(false);
+                    mnuPSK500R.setSelected(false);
+                    mnuMFSK16.setSelected(false);
+                    defaultmnu.setSelected(false);
+                    mnuMFSK32.setSelected(false);
+                    mnuTHOR8.setSelected(false);
+                    mnuTHOR22.setSelected(false);
+                    mnuDOMINOEX5.setSelected(false);
+                    mnuDOMINOEX11.setSelected(false);
+                    mnuDOMINOEX22.setSelected(false);
+        */
     }
 
     public void ConnectButtonAction() {
@@ -4937,7 +4784,6 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             lblStatus.setForeground(Color.RED);
             Main.TTYConnected = "";
         } else {
-
             try {
                 if (mnuMailScanning.isSelected()) {
                     Main.Scanning = true;
@@ -4951,7 +4797,6 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                     Main.Connecting = true;
                     Main.connectingPhase = true;
                     Connect_time = 5;
-
                     myarq.send_rsid_command("ON");
                     myarq.set_txstatus(txstatus.TXConnect);
                     myarq.send_frame("");
@@ -5134,7 +4979,8 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 
                                 String callsign = Main.configuration.getPreference("CALL");
                                 callsign = callsign.trim();
-                                String servercall = Main.configuration.getPreference("SERVER");
+                                //String servercall = Main.configuration.getPreference("SERVER");
+                                String servercall = myarq.getServer().trim();
                                 servercall = servercall.trim();
                                 Main.TX_Text += ">FM:" + callsign + ":" + servercall + ":" + filename + ":s: :" + lengthstr + "\n";
                             }
@@ -5346,10 +5192,12 @@ private void cboServerFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:even
         String OldServer = myarq.getServer();
         if (myServer.length() > 1 && !myServer.equals(OldServer)) {
             myarq.setServer(myServer);
-            Main.configuration.setServer(myServer);
-//            serverInput(myServer);
+            //VK2ETA not anymore
+            //Main.configuration.setServer(myServer);
+            //But save in Main too
+            Main.q.setServer(myServer);
+            //serverInput(myServer);
         }
-
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Had_trouble_setting_the_server_to_link_to."), ex, true);
     }
@@ -5362,15 +5210,21 @@ private void cboServerFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:even
      */
 private void cboServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboServerActionPerformed
     try {
-        String myServer = cboServer.getSelectedItem().toString();
-        String OldServer = myarq.getServer();
-        // Is it a a new and not empty thing?
-        if (myServer.length() > 1 && !myServer.equals(OldServer)) {
-            myarq.setServer(myServer);
-            Rigctl.Loadfreqs(myServer);
-            Main.configuration.setServer(myServer);
-            // Update the server array and add item to drop down
-            Main.AddServerToArray(myServer);
+        //Only if we don't have an empty list
+        if (cboServer.getItemCount() > 0) {
+            String myServer = cboServer.getSelectedItem().toString();
+            String OldServer = myarq.getServer();
+            // Is it a a new and not empty thing?
+            if (myServer.length() > 1 && !myServer.equals(OldServer)) {
+                myarq.setServer(myServer);
+                Rigctl.Loadfreqs(myServer);
+                //VK2ETA: Not done here anymore, done in preferences
+                //Main.configuration.setServer(myServer);
+                // Update the server array and add item to drop down
+                //Main.AddServerToArray(myServer);
+                //Also save in Main.q for blocks processing
+                Main.q.setServer(myServer);
+            }
         }
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Had_trouble_setting_the_server_to_link_to."), ex, true);
@@ -5448,7 +5302,7 @@ private void jRadioButtonMenuItemTHOR11ActionPerformed(java.awt.event.ActionEven
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
     }
-    myarq.Message(mainpskmailui.getString("Switching_modem_to_DOMEX5"), 5);
+    myarq.Message(mainpskmailui.getString("Switching_modem_to_DomEx5"), 5);
 }//GEN-LAST:event_jRadioButtonMenuItemTHOR11ActionPerformed
 
 private void jRadioButtonMenuItemMFSK16ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItemMFSK16ActionPerformed
@@ -5540,9 +5394,9 @@ private void mnuPSK500ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
 }//GEN-LAST:event_mnuPSK500ActionPerformed
 
 
-private void psk125r_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_psk125r_checkboxActionPerformed
+private void mnuPSK125RActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuPSK125RActionPerformed
     // TODO add your handling code here:
-       try{//GEN-LAST:event_psk125r_checkboxActionPerformed
+       try{//GEN-LAST:event_mnuPSK125RActionPerformed
             modemmodeenum mymode = modemmodeenum.PSK125R;
             updatemodeset(mymode);
             Main.TxModem = mymode;
@@ -5554,9 +5408,9 @@ private void psk125r_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//
         myarq.Message(mainpskmailui.getString("Switching_modem_to_PSK125R"), 5);
     }
 
-private void psk250r_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_psk250r_checkboxActionPerformed
+private void mnuPSK250RActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuPSK250RActionPerformed
     // TODO add your handling code here:
-       try{//GEN-LAST:event_psk250r_checkboxActionPerformed
+       try{//GEN-LAST:event_mnuPSK250RActionPerformed
             modemmodeenum mymode = modemmodeenum.PSK250R;
             updatemodeset(mymode);
             Main.TxModem = mymode;
@@ -5569,7 +5423,7 @@ private void psk250r_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//
     }
 
 
-private void psk500r_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_psk500r_checkboxActionPerformed
+private void mnuPSK500RActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuPSK500RActionPerformed
     // TODO add your handling code here:
     try {
         modemmodeenum mymode = modemmodeenum.PSK500R;
@@ -5582,7 +5436,7 @@ private void psk500r_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//
         Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
     }
     myarq.Message(mainpskmailui.getString("Switching_modem_to_PSK500R"), 5);
-}//GEN-LAST:event_psk500r_checkboxActionPerformed
+}//GEN-LAST:event_mnuPSK500RActionPerformed
 
 
 private void FilesTxtAreaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_FilesTxtAreaMouseClicked
@@ -6465,7 +6319,8 @@ private void PrefSaveMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
 
                                 String callsign = Main.configuration.getPreference("CALL");
                                 callsign = callsign.trim();
-                                String servercall = Main.configuration.getPreference("SERVER");
+                                //String servercall = Main.configuration.getPreference("SERVER");
+                                String servercall = myarq.getServer().trim();
                                 servercall = servercall.trim();
                                 Main.TX_Text += ">FM:" + callsign + ":" + servercall + ":" + filename + ":s: :" + lengthstr + "\n";
                             }
@@ -6742,7 +6597,8 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
             } else {
                 String callsign = Main.configuration.getPreference("CALL");
                 callsign = callsign.trim();
-                String servercall = Main.configuration.getPreference("SERVER");
+                //String servercall = Main.configuration.getPreference("SERVER");
+                String servercall = myarq.getServer().trim();
                 servercall = servercall.trim();
                 Main.TX_Text += ">FM:" + callsign + ":" + servercall + ":" + filename + ":s: :" + lengthstr + "\n";
             }
@@ -7568,7 +7424,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         myarq.Message(mainpskmailui.getString("Switching_modem_to_MFSK32"), 5);
     }//GEN-LAST:event_mnuMFSK32ActionPerformed
 
-    private void jRadioButtonMenuDOMEX22ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuDOMEX22ActionPerformed
+    private void mnuDOMINOEX22ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuDOMINOEX22ActionPerformed
         // TODO add your handling code here:
         try {
             modemmodeenum mymode = modemmodeenum.DOMINOEX22;
@@ -7580,9 +7436,9 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
         }
         myarq.Message(mainpskmailui.getString("Switching_modem_to_DomEx22"), 5);
-    }//GEN-LAST:event_jRadioButtonMenuDOMEX22ActionPerformed
+    }//GEN-LAST:event_mnuDOMINOEX22ActionPerformed
 
-    private void jRadioButtonMenuDOMEX11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuDOMEX11ActionPerformed
+    private void mnuDOMINOEX11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuDOMINOEX11ActionPerformed
         // TODO add your handling code here:
         try {
             modemmodeenum mymode = modemmodeenum.DOMINOEX11;
@@ -7594,7 +7450,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
         }
         myarq.Message(mainpskmailui.getString("Switching_modem_to_DomEx11"), 5);
-    }//GEN-LAST:event_jRadioButtonMenuDOMEX11ActionPerformed
+    }//GEN-LAST:event_mnuDOMINOEX11ActionPerformed
 
     private void cboAPRS2ndActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboAPRS2ndActionPerformed
         Main.ICONlevel = cboAPRS2nd.getSelectedItem().toString();//GEN-HEADEREND:event_cboAPRS2ndActionPerformed
@@ -8633,8 +8489,6 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JRadioButton jRadBtnAliasOnly;
     public javax.swing.JRadioButtonMenuItem jRadioButtonAccept;
     public javax.swing.JRadioButtonMenuItem jRadioButtonDelete;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuDOMEX11;
-    private javax.swing.JRadioButtonMenuItem jRadioButtonMenuDOMEX22;
     public javax.swing.JRadioButtonMenuItem jRadioButtonReject;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
@@ -8686,6 +8540,8 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JMenuItem mnuClearInbox;
     private javax.swing.JMenuItem mnuClearOutbox;
     private javax.swing.JMenu mnuConnection;
+    private javax.swing.JRadioButtonMenuItem mnuDOMINOEX11;
+    private javax.swing.JRadioButtonMenuItem mnuDOMINOEX22;
     private javax.swing.JRadioButtonMenuItem mnuDOMINOEX5;
     private javax.swing.JMenuItem mnuDownloads;
     private javax.swing.JMenuItem mnuEmailOpenGet;
@@ -8721,8 +8577,11 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JMenuItem mnuOutboxDeleteMsg;
     private javax.swing.JMenuItem mnuOutboxOpenMsg;
     private javax.swing.JRadioButtonMenuItem mnuPSK125;
+    private javax.swing.JRadioButtonMenuItem mnuPSK125R;
     private javax.swing.JRadioButtonMenuItem mnuPSK250;
+    private javax.swing.JRadioButtonMenuItem mnuPSK250R;
     private javax.swing.JRadioButtonMenuItem mnuPSK500;
+    private javax.swing.JRadioButtonMenuItem mnuPSK500R;
     private javax.swing.JRadioButtonMenuItem mnuPSK63;
     private javax.swing.JMenuItem mnuPreferences2;
     private javax.swing.JMenu mnuPrefsMain;
@@ -8746,9 +8605,6 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JPanel pnlStatusIndicator;
     private javax.swing.JPanel pnlSummoning;
     private javax.swing.JPanel pnlTerminalButtons;
-    private javax.swing.JRadioButtonMenuItem psk125r_checkbox;
-    private javax.swing.JRadioButtonMenuItem psk250r_checkbox;
-    private javax.swing.JRadioButtonMenuItem psk500r_checkbox;
     private javax.swing.JLabel rigctlactivelbl;
     private javax.swing.JScrollPane scrEmailLeft;
     private javax.swing.JScrollPane scrEmailRight;

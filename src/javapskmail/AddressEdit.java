@@ -117,6 +117,7 @@ public class AddressEdit extends javax.swing.JDialog {
         showInViaLabel = new javax.swing.JLabel();
         passwordLabel = new javax.swing.JLabel();
         textPassword = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(402, 232));
@@ -366,6 +367,8 @@ public class AddressEdit extends javax.swing.JDialog {
         textPassword.setMinimumSize(new java.awt.Dimension(90, 28));
         textPassword.setPreferredSize(new java.awt.Dimension(90, 28));
 
+        jLabel10.setText(bundle.getString("AddressEdit.jLabel10.text")); // NOI18N
+
         javax.swing.GroupLayout RMsgPanelLayout = new javax.swing.GroupLayout(RMsgPanel);
         RMsgPanel.setLayout(RMsgPanelLayout);
         RMsgPanelLayout.setHorizontalGroup(
@@ -374,25 +377,30 @@ public class AddressEdit extends javax.swing.JDialog {
                 .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(RMsgPanelLayout.createSequentialGroup()
                         .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(checkToMobile, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(checkToEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(textMobileAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                            .addComponent(textEmailAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(RMsgPanelLayout.createSequentialGroup()
-                        .addGap(21, 21, 21)
-                        .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(showInViaLabel)
-                            .addComponent(showInToLabel)))
-                    .addGroup(RMsgPanelLayout.createSequentialGroup()
-                        .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(checkToCallsign)
                             .addComponent(checkVia, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(1, 1, 1)
                         .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(passwordLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(textPassword, javax.swing.GroupLayout.DEFAULT_SIZE, 107, Short.MAX_VALUE))))
+                            .addComponent(textPassword, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addGroup(RMsgPanelLayout.createSequentialGroup()
+                        .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(RMsgPanelLayout.createSequentialGroup()
+                                .addGap(21, 21, 21)
+                                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(showInViaLabel)
+                                    .addComponent(showInToLabel)))
+                            .addGroup(RMsgPanelLayout.createSequentialGroup()
+                                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(checkToMobile, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(checkToEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(textEmailAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(textMobileAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addGap(1, 1, 1))
         );
         RMsgPanelLayout.setVerticalGroup(
@@ -412,7 +420,9 @@ public class AddressEdit extends javax.swing.JDialog {
                         .addComponent(textPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(18, 18, 18)
                 .addComponent(showInToLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 22, Short.MAX_VALUE)
+                .addComponent(jLabel10)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(RMsgPanelLayout.createSequentialGroup()
                         .addComponent(textEmailAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -607,6 +617,7 @@ public class AddressEdit extends javax.swing.JDialog {
     private javax.swing.JCheckBox checkToMobile;
     private javax.swing.JCheckBox checkVia;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
