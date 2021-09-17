@@ -57,7 +57,10 @@ public class Modem implements Runnable {
     private String rxIDstart = "<cmd><rsid>";
     private String rxIDend = "</rsid></cmd>";
     private String txIDstart = "<cmd><txrsid>";
-    private String txIDend = "</txrsid><cmd>";
+    private String txIDend = "</txrsid></cmd>";
+    private String modeIDstart = "<cmd><mode>";
+    private String modeIDend = "</mode></cmd>";
+    private String nextTxRsidCommand = "";
     private long blockstart;
     private long blocktime;
     public int firstCharDelay = 4;
@@ -116,7 +119,7 @@ public class Modem implements Runnable {
     private String fldigiHost;
     private int fldigiPort;
     private BufferedReader reader = null;
-    private Socket sock = null;
+    //private Socket sock = null;
     private boolean fldigiRunning = false;
     private boolean cantLaunchFldigi = false;
     private boolean exitingSoon = false;
@@ -390,27 +393,218 @@ public class Modem implements Runnable {
         return result;
     }
    
-    // Send routine
+    public String getTXModemString(modemmodeenum mode) {
+        try {
+            String Txmodemstring = "";
+            Txmodemstring = getModemString(mode);
+            return Txmodemstring;
+        } catch (Exception e) {
+            return "";
+        }
+    }
+    
+    /**
+     * Send an RX Rsid command to the modem
+     */
+    public void setRxRsid(String s) {
+        String rsidstart = "<cmd><rsid>";
+        String rsidend = "</rsid></cmd>";
+        if (!s.equals("")) {
+            Main.SendCommand += (rsidstart + s + rsidend);
+        }
+    }
+
+   /**
+    * Set the Tx Rsid now
+    */
+   public void setTxRsid(String s) {
+        //System.out.println("arq.send_txrsid_command: " + s + "\n"); 
+        String txrsidstart = "<cmd><txrsid>";
+        String txrsidend = "</txrsid></cmd>";
+        if (!s.equals("")) {
+            Main.SendCommand += (txrsidstart + s + txrsidend);
+        }
+    }
+   
+   /**
+    * Request that the next transmission use TX Rsid or not
+    */
+   public void requestTxRsid(String s) {
+        nextTxRsidCommand = s;
+    }
+
+
+    //Just change the mode, don't send any data (for the preference screen)
+    public void ChangeMode(modemmodeenum Modem) {
+        if (!Main.TXActive) {
+            String SendMode = "";
+            String TXmd = getTXModemString(Modem);
+            String rxstring = getTXModemString(Main.defaultmode);
+            rxstring += "        ";
+            rxstring = rxstring.substring(0, 7);
+            Main.mainui.RXlabel.setText(rxstring);
+            //SendMode = "<cmd><mode>" + TXmd + "</mode></cmd>";
+            //Sendln(SendMode);
+            Sendln("", rxstring, ""); //Just change mode
+        }
+    }
+
+    /**
+     * Send a mode command to the modem
+     */
+    public void setModemModeNow(modemmodeenum mode) throws NullPointerException {
+        //String modestart = "<cmd><mode>";
+        //String modeend = "</mode></cmd>";
+        String modeset = "";
+        try {
+            switch (mode) {
+                case PSK63:
+                    modeset = "PSK63";
+                    break;
+                case PSK125:
+                    modeset = "PSK125";
+                    break;
+                case PSK125R:
+                    modeset = "PSK125R";
+                    break;
+                case PSK250:
+                    modeset = "PSK250";
+                    break;
+                case PSK250R:
+                    modeset = "PSK250R";
+                    break;
+                case PSK500:
+                    modeset = "PSK500";
+                    break;
+                case PSK1000:
+                    modeset = "PSK1000";
+                    break;
+                case PSK500R:
+                    modeset = "PSK500R";
+                    break;
+                case MFSK16:
+                    modeset = "MFSK16";
+                    break;
+                case MFSK32:
+                    modeset = "MFSK32";
+                    break;
+                case THOR8:
+                    modeset = "THOR8";
+                    break;
+                case DOMINOEX5:
+                    modeset = "DOMINOEX5";
+                    break;
+                case THOR22:
+                    modeset = "THOR22";
+                    break;
+                case CTSTIA:
+                    modeset = "CTSTIA";
+                    break;
+                case PSK63RC5:
+                    modeset = "PSK63RC5";
+                    break;
+                case PSK63RC10:
+                    modeset = "PSK63RC10";
+                    break;
+                case PSK250RC3:
+                    modeset = "PSK250RC3";
+                    break;
+                case PSK125RC4:
+                    modeset = "PSK125RC4";
+                    break;
+                case DOMINOEX22:
+                    modeset = "DOMINOEX22";
+                    break;
+                case DOMINOEX11:
+                    modeset = "DOMINOEX11";
+                    break;
+            }
+        } catch (NullPointerException npe) {
+            Main.log.writelog("Error in arq.send_mode_command", npe, true);
+        }
+
+        if (!modeset.equals("")) {
+            if (Main.Status.equals("Connected") && !Main.q.equals(modeset)) {
+                // During connected state
+                //             Main.TX_Text += connstr + "\n";                
+            } else {
+                // Order a mode switch (could be second press too)
+                //Main.SendCommand += modestart + modeset + modeend;
+                //Main.m.Sendln(Main.SendCommand);
+                Main.m.Sendln("", modeset, "");
+            }
+
+            // Save the new mode
+            Main.q.Modem = modeset;
+        }
+    }
+
+    private Object sendMutex = new Object();
+
+    // Send routine with pre-set RSIDs and Mode
     public void Sendln(String outLine) {
 
-        try {
-            if (opened & outLine.length() > 0) {
-                //            System.out.println(outLine);
-                pout.println(outLine);
-                if (outLine.contains("<cmd><mode>")) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(Modem.class.getName()).log(Level.SEVERE, null, ex);
+        synchronized (sendMutex) {
+            try {
+                if (opened & outLine.length() > 0) {
+                    //            System.out.println(outLine);
+                    pout.println(outLine);
+                    if (outLine.contains("<cmd><mode>")) {
+                        try {
+                            //Thread.sleep(1000);
+                            Thread.sleep(500);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(Modem.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    } else if (!outLine.contains("<cmd>")) {
+                        //Must be a data block, reset receive marker of RSID for next RX
+                        //VK2ETA: TO-DO: check if logic (and place of decision) is consistent with RadioMsg
+                        Main.justReceivedRSID = false;
                     }
-                } else if (!outLine.contains("<cmd>")) {
-                    //Must be a data block, reset receive marker of RSID for next RX
-                    //VK2ETA: TO-DO: check if logic (and place of decision) is consistent with RadioMsg
-                    Main.justReceivedRSID = false;
                 }
+            } catch (Exception ex) {
+                Main.log.writelog("Could not send frame, fldigi not running or busy?", ex, true);
             }
-        } catch (Exception ex) {
-            Main.log.writelog("Could not send frame, fldigi not running or busy?", ex, true);
+        }
+    }
+    
+    // Send routine with Mode and TxRsid as parameters
+    public void Sendln(String outLine, String modemString, String TxRsidString) {
+
+        synchronized (sendMutex) {
+            try {
+                //if (opened & outLine.length() > 0) {
+                if (opened) {
+                    //System.out.println(outLine);
+                    if (!modemString.equals("")) {
+                        pout.println(modeIDstart + modemString + modeIDend);
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(Modem.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    if (!TxRsidString.equals("") || !nextTxRsidCommand.equals("")) {
+                        String txRdis = TxRsidString.equals("") ? nextTxRsidCommand : TxRsidString;
+                        pout.println(txIDstart + txRdis + txIDend);
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(Modem.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                    if (!outLine.equals("")) {
+                        pout.println(outLine);
+                        if (!outLine.contains("<cmd>")) {
+                            //Must be a data block, reset receive marker of RSID for next RX
+                            //VK2ETA: TO-DO: check if logic (and place of decision) is consistent with RadioMsg
+                            Main.justReceivedRSID = false;
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                Main.log.writelog("Could not send frame, fldigi not running or busy?", ex, true);
+            }
         }
     }
 
@@ -497,12 +691,12 @@ public class Modem implements Runnable {
         }
     }
 
-    public modemmodeenum getnewmodem(int index) {
+    public modemmodeenum getModeOffList(int index) {
         modemmodeenum mode = Main.defaultmode;
         String mymodem = Main.Currentmodes[index];
-        for (int i = 0; i < Main.Currentmodes.length; i++) {
+        //for (int i = 0; i < Main.Currentmodes.length; i++) {
             //System.out.println(Main.Currentmodes[i]);
-        }
+        //}
         //  System.out.println(index);
         //  System.out.println("modem:" + mymodem);
 
@@ -549,7 +743,6 @@ public class Modem implements Runnable {
         } else if (mymodem.equals("DOMINOEX11")) {
             mode = modemmodeenum.DOMINOEX11;
         }
-
         return mode;
     }
 
@@ -674,6 +867,7 @@ public class Modem implements Runnable {
         return (int) (myblocktime + 0.5);
     }
 
+    /* Not used
     public void Set_rxID() {
         Main.SendCommand += (rxIDstart + "ON" + rxIDend);
     }
@@ -689,6 +883,7 @@ public class Modem implements Runnable {
     public void Unset_txID() {
         Main.SendCommand += (txIDstart + "OFF" + txIDend);
     }
+    */
 
     private char GetByte() {
         char myChar;
@@ -818,7 +1013,7 @@ public class Modem implements Runnable {
 
                 if (Main.RxModem == modemmodeenum.CTSTIA) {
                     inChar = GetByte();
-                    modemmodeenum myrxmode = checkmode(inChar);
+                    modemmodeenum myrxmode = checkMode(inChar);
                     if (inChar > 64 & inChar < 73) {
                         first = inChar - 65;
                         inChar = GetByte();
@@ -838,23 +1033,18 @@ public class Modem implements Runnable {
                     } else {           // no contestia                      
                         inChar = (char) 178;
                     }
-
                 } else {    // not contestia ?
                     inChar = GetByte();
                 }
-
                 //VK2ETA not here
                 //if (!Main.Connected & !Main.Connecting) {
                 //    Main.DCD = Main.MAXDCD;
                 //}
-
                 if (inChar > 127) {
                     // todo: unicode encoding
                     inChar = 0;
                 }
-
                 switch (inChar) {
-
                     case 0:
                         break; // ignore
                     case 1: //SOH
@@ -930,17 +1120,17 @@ public class Modem implements Runnable {
                         Main.m.receivingStatusBlock = false; //Reset now as there may not be an EOT to reset it
                         //VK2ETA not here
                         //Main.DCD = 0;
-                        Main.TXActive = false;
+                        //Moved below modem command so that main loop does not interfere with it
+                        //Main.TXActive = false;
                         if (Main.summoning) {
                             Main.summoning = false;
                             Main.setFreq(Main.freqstore);
                         }
-                        String myrxmodem = Main.RxModemString;
-//VK2ETA review need for config value usage here (legacy?)
-//                        if (!myrxmodem.equals("") & !Main.configuration.getBlocklength().equals("0")) {
-//
-                        Sendln("<cmd><mode>" + myrxmodem + "</mode></cmd>\n");
-//                        }
+                        //String myrxmodem = Main.RxModemString;
+                        //VK2ETA review need for config value usage here (legacy?)
+                        //  if (!myrxmodem.equals("") & !Main.configuration.getBlocklength().equals("0")) {
+                        //Sendln("<cmd><mode>" + myrxmodem + "</mode></cmd>\n");
+                        Sendln("", Main.RxModemString.trim(), "");
                         //Reset Rx timeout counter
                         Main.lastCharacterTime = System.currentTimeMillis();
                         //And restart rxdelay counter if we are in a server session
@@ -950,7 +1140,9 @@ public class Modem implements Runnable {
                             Main.RxDelayCount = 0.0f; //Make sure it is zero in all other cases
                         }
                         //Reset TxRSID as it is OFF by default and needs to be enabled when required
-                        Main.q.send_txrsid_command("OFF");
+                        Main.m.requestTxRsid("OFF");
+                        //Does not solve intermittent TXID issue
+                        Main.TXActive = false;
                         //Save Radio  Message in Sent Box
                         saveSentRadioMSg();
                         break;
@@ -972,7 +1164,6 @@ public class Modem implements Runnable {
                                     //Reset time of RSID since we now know it is a Radio Message.
                                     Main.possibleRadioMsg = 0L;
                                 }
-
                             }
                         } else if (Main.wantbulletins) {
                             //Main.Bul.get("" + inChar); 
@@ -1108,12 +1299,12 @@ public class Modem implements Runnable {
         return modemindex;
     }
 
-    public modemmodeenum getmode(int modemindex) {
+    public modemmodeenum getModeFromIndex(int modemindex) {
         modemmodeenum outmode = modemmodeenum.PSK500R;
         int maxmodems = Main.Currentmodes.length;
 
         if (modemindex >= 0 & modemindex <= maxmodems) {
-            outmode = getnewmodem(modemindex);
+            outmode = getModeOffList(modemindex);
         } else {
             outmode = Main.TxModem;
         }
@@ -1293,7 +1484,7 @@ public class Modem implements Runnable {
         }
     }
   
-    private modemmodeenum checkmode(char c) {
+    private modemmodeenum checkMode(char c) {
         modemmodeenum mymode = modemmodeenum.CTSTIA;
 
         //  "Mode:(.*)>"     
@@ -1311,7 +1502,7 @@ public class Modem implements Runnable {
                 String myaccu = modem.group(1);
                 Main.shown(myaccu);
                 accu = "";
-
+                //VK2ETA: why?
                 if (myaccu.equals("THOR 2")) {
                     myaccu = "THOR 22";
                 } else if (myaccu.equals("Cntestia") | myaccu.equals("Cntestia")) {
@@ -1320,7 +1511,7 @@ public class Modem implements Runnable {
 
                 int m = getmodeindex(myaccu);
 
-                mymode = getmode(m);
+                mymode = getModeFromIndex(m);
                 Main.RxModem = pmodes[m];
                 Main.RxModemString = smodes[m];
             }

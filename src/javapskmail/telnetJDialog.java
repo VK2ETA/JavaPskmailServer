@@ -28,7 +28,7 @@ public class telnetJDialog extends javax.swing.JDialog {
     public telnetJDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        myarq = new arq();
+        //myarq = new arq();
         telnethost.setText(Main.telnethost);
         telnetport.setText(Main.telnetport);
         telnetuserid.setText(Main.userid);

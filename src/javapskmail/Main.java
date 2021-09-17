@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "0.9.4.28";
+    static String version = "0.9.4.29";
     static String application = "jpskmailserver " + version;// Used to preset an empty status
-    static String versionDate = "20210915";
+    static String versionDate = "20210917";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -110,15 +110,15 @@ public class Main {
     @SuppressWarnings("StaticNonFinalUsedInInitialization")
     static String[] Currentmodes = Modes;
     static boolean UseAlttable = false;
-    static String modes = "7654321";
+    static String modes = "8543"; // PSK250, PSK250R, MFSK32, THOR22
     static int Bulletin_time = 0;
     static modemmodeenum TxModem = modemmodeenum.PSK500R;
     static modemmodeenum RxModem = modemmodeenum.PSK500R;
     static modemmodeenum Modemarray[];
-    static String RxModemString = "PSK500R";
-    static String DefaultTXmodem = "PSK500R";
-    static String LastRxModem = "PSK500R";
-    static String LastTxModem = "PSK500R";
+    static String RxModemString = "PSK250R";
+    static String DefaultTXmodem = "PSK250R";
+    static String LastRxModem = "PSK250R";
+    static String LastTxModem = "PSK250R";
     static boolean wantbulletins = true;
 
     // globals to pass info to gui windows
@@ -432,10 +432,10 @@ public class Main {
             Random generator = new Random();
 
             //Always have RXid ON so that TTY connects and igates beacons can be heard on any mode
-            q.send_rsid_command("ON");
+            m.setRxRsid("ON");
 
             // Main  loop
-            q.send_rsid_command("ON");
+            //m.setRxRsid("ON");
             //q.send_txrsid_command("ON");
 
             //Launch separate thread to monitor and relay incoming emails and messages if required
@@ -444,16 +444,15 @@ public class Main {
             //vk2eta debug
             System.out.println("entering receive loop");
             while (true) {
-                // anything to send to the modem?
-                // Send a command to the modem ?
-
+                //Wait for return to Rx if we are transmitting
                 while (TXActive) {
                     Thread.sleep(50);
                 }
 
+                // Send a command to the modem ?
+                //VK2ETA not through SendCommand anymore (Mutex)
                 m.Sendln(SendCommand);
                 Thread.sleep(50);
-
                 SendCommand = "";
 
                 //Handle RadioMsg messages only when fully idle
@@ -464,32 +463,33 @@ public class Main {
                         Main.TXActive = true; //Moved up to prevent change in mode when replying
                         m.txMessage = RMsgTxList.getOldest();
                         //Set Mode
-                        SendCommand += "<cmd><mode>" + m.txMessage.rxMode + "</mode></cmd>";
-                        m.Sendln(SendCommand);
-                        SendCommand = "";
-                        Thread.sleep(250);
+                        //SendCommand += "<cmd><mode>" + m.txMessage.rxMode + "</mode></cmd>";
+                        //m.Sendln(SendCommand);
+                        //SendCommand = "";
+                        //Thread.sleep(250);
                         //Set TX Rsid
-                        q.send_txrsid_command("ON");
-                        m.Sendln(SendCommand);
-                        SendCommand = "";
-                        Thread.sleep(100);
+                        //m.requestTxRsid("ON");
+                        //m.Sendln(SendCommand);
+                        //SendCommand = "";
+                        //Thread.sleep(100);
                         //Send message
-                        Sendline = "\n\n" + m.txMessage.formatForTx(false) + "\n"; //No CCIR modes for now
-                        m.Sendln(Sendline);
+                        //Sendline = "\n\n" + m.txMessage.formatForTx(false) + "\n"; //No CCIR modes for now
+                        String toSend = "\n\n" + m.txMessage.formatForTx(false) + "\n"; //No CCIR modes for now
+                        m.Sendln(toSend, m.txMessage.rxMode, "ON"); //Tx Rsid ON
                         //Log in monitor screen
                         Main.monitor += "\n*TX*  " + "<SOH>"
-                                + Sendline.replace(Character.toString((char) 1), "")
+                                + toSend.replace(Character.toString((char) 1), "")
                                         .replace(Character.toString((char) 4), "") + "<EOT>";
-                        Sendline = "";
+                        //Sendline = "";
                     }
                 }
                 //Always reset the radioMsgWorking flag regardless (allows for change of frequency/mode)
                 radioMsgWorking = false;
 
-// if (Sendline.length() > 0) {System.out.println("MAIN:" + Sendline);   }        
+                // if (Sendline.length() > 0) {System.out.println("MAIN:" + Sendline);   }        
                 // see if tx active and DCD is off and we have exhausted the extra reception delay
                 if (Sendline.length() > 0 & !TXActive & DCD == 0 & RxDelayCount < 0.1f) {
-//                    System.out.println("MAIN2:" + Sendline);
+                    //System.out.println("MAIN2:" + Sendline);
                     //VK2ETA DCDthrow not used 
                     //DCDthrow = generator.nextInt(Persistence);
                     //     System.out.println("DCD:" + DCDthrow);               
@@ -517,6 +517,7 @@ public class Main {
                         if (TxDelay > 0) {
                             Thread.sleep(TxDelay * 1000);
                         }
+                        Main.TXActive = true;
                         // System.out.println("MAIN5" );                        
                         //  Add a 2 seconds delay when mode is MFSK16 (1 sec for MFSK32) to prevent overlaps as
                         //  the trail of MFSK is very long
@@ -527,13 +528,13 @@ public class Main {
                         //}
                         //Try to stop Fldigi locking up by having a delay between the mode change and the data
                         //  block as Fldigi needs to re-initialize the modem at each mode change
-                        String SendMode = "<cmd><mode>" + getTXModemString(TxModem) + "</mode></cmd>";
-                        //System.out.println("TXMODEM for connect:" + getTXModemString(TxModem));
+                        //String SendMode = "<cmd><mode>" + m.getTXModemString(TxModem) + "</mode></cmd>";
+                        String SendMode = m.getTXModemString(TxModem);
+                        //System.out.println("TXMODEM for connect:" + m.getTXModemString(TxModem));
                         //       System.out.println("MAIN6:" + Sendline_cp);
-                        Main.TXActive = true;
-                        m.Sendln(SendMode);
-                        Thread.sleep(250);
-                        m.Sendln(Sendline_cp);
+                        //m.Sendln(SendMode);
+                        //Thread.sleep(250);
+                        m.Sendln(Sendline_cp, SendMode, "");
                         Sendline_cp = "";
                         Sendline = "";
                     } catch (Exception e) {
@@ -574,13 +575,10 @@ public class Main {
                                     mainui.appendMainWindow(mainui.getClock() + " " + Blockline + "\n");
                                 }
                             }
-
                         }
 
                         if (!Bulletinmode & !IACmode) {
-
                             if (Connected) {
-
                                 // status block from server
                                 if (rxb.type.equals("s")
                                         & rxb.valid & rxb.session.equals(session)) {
@@ -612,12 +610,13 @@ public class Main {
                                         //Auto speed/mode adjustment
                                         //I am a TTY server (protocol byte = quality of receive by client)
                                         //Turn RXid and TXid OFF as I am a server and I received a good "s" block
-                                        q.send_rsid_command("OFF");
+                                        m.setRxRsid("OFF");
                                         //Exception is for frequency sensitive modes like MFSK16, MFSK8, DOMINOEX5
+                                        //VK2ETA wrong location as it can get reset with status requests
                                         if (Main.TxModem == modemmodeenum.MFSK16 
                                                 || Main.TxModem == modemmodeenum.MFSK8
                                                 || Main.TxModem == modemmodeenum.DOMINOEX5) {
-                                            q.send_txrsid_command("ON");
+                                            m.requestTxRsid("ON");
                                         //} else {
                                         //    q.send_txrsid_command("OFF");
                                         }
@@ -633,7 +632,7 @@ public class Main {
                                             currentmodeindex = getClientModeIndex(Main.TxModem);
                                             if (currentmodeindex < TTYmodes.length() - 1) { //List in decreasing order of speed
                                                 Main.TxModem = getClientMode(currentmodeindex + 1);
-                                                q.send_txrsid_command("ON");
+                                                m.requestTxRsid("ON");
                                                 sm.SetBlocklength(5); //restart with medium block length
                                                 JustDowngradedRX = false; // Make RX mode downgrade first (if necessary)
                                             }
@@ -646,7 +645,7 @@ public class Main {
                                                 currentmodeindex = getClientModeIndex(Main.TxModem);
                                                 if (currentmodeindex > 0) { //List in decreasing order of speed
                                                     Main.TxModem = getClientMode(currentmodeindex - 1);
-                                                    q.send_txrsid_command("ON");
+                                                    m.requestTxRsid("ON");
                                                     sm.SetBlocklength(4); //restart with small block length
                                                     JustDowngradedRX = true; // Make TX mode downgrade first (if necessary)
                                                 }
@@ -686,10 +685,10 @@ public class Main {
 
                                     } else { //I am a client (protocol byte = my TX mode)
                                         //Turn RXid ON as I am a client
-                                        q.send_rsid_command("ON");
+                                        m.setRxRsid("ON");
                                         pint = (int) pchr - 48;
                                         if (pint < 9 & pint > 0) {
-                                            TxModem = m.getnewmodem(pint);
+                                            TxModem = m.getModeOffList(pint);
                                             if (CurrentModemProfile.equals("0")) {
                                                 TxModem = RxModem;
                                             }
@@ -721,6 +720,7 @@ public class Main {
                                     Status = "Listening";
                                     Connected = false;
                                     mainui.disableMboxMenu();
+                                    mainui.enableMnuPreferences2();
                                     session = "";
                                     Totalbytes = 0;
                                     sm.FileDownload = false;
@@ -1218,6 +1218,7 @@ public class Main {
                                     Status = "Listening";
                                     Connected = false;
                                     mainui.disableMboxMenu();
+                                    mainui.enableMnuPreferences2();
                                     Bulletinmode = false;
                                     Connecting = false;
                                     Main.connectingPhase = false;
@@ -1225,8 +1226,9 @@ public class Main {
                                     Scanning = false;
                                     session = "";
                                     Totalbytes = 0;
-//                                        q.send_rsid_command("OFF");
-                                    q.Message("Rejected:" + rejectreason, 10);
+                                    //q.send_rsid_command("OFF");
+                                    //q.Message("Rejected:" + rejectreason, 10);
+                                    log("Rejected:" + rejectreason);
                                 }
                                 // connect_ack
                             } else if (rxb.type.equals("k") & rxb.valid) {
@@ -1263,6 +1265,7 @@ public class Main {
                                     Main.linked = true;
                                     Main.linkedserver = rxb.server;
                                     mainui.disableMonitor();
+                                    mainui.disableMnuPreferences2();
 
                                     // reset tx queue 
                                     TX_Text = "";
@@ -1294,6 +1297,7 @@ public class Main {
                                 if (Main.TTYConnected.equals("Connecting")) {
                                     Main.TTYConnected = "Connected";
                                     Main.Connected = true;
+                                    mainui.disableMnuPreferences2();
                                     status_received = true;
                                     NumberOfAcks = maxNumberOfAcks;
                                     sm.initSession();
@@ -1314,6 +1318,7 @@ public class Main {
                                 disconnect = false;
                                 Status = "Listening";
                                 Connected = false;
+                                mainui.enableMnuPreferences2();
                                 TTYConnected = "";
                                 session = "";
                                 TX_Text = "";
@@ -1333,8 +1338,8 @@ public class Main {
                                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, e);
                                 }
                                 //Set RXid ON for next connect request
-                                q.send_txrsid_command("ON");
-                                q.send_rsid_command("ON");
+                                m.requestTxRsid("ON");
+                                m.setRxRsid("ON");
                                 // send disconnect packet to caller...
                                 //VK2ETA moved up to be first in sequence
                                 //q.send_disconnect();
@@ -1364,6 +1369,7 @@ public class Main {
                                                 disconnect = false;
                                                 Status = "Listening";
                                                 Connected = false;
+                                                mainui.enableMnuPreferences2();
                                                 TTYConnected = "";
                                                 //Reset RxDelay too
                                                 RxDelay = initialRxDelay;
@@ -1400,8 +1406,8 @@ public class Main {
                                                     Main.TxModem = getmodem(myTxmodem);
                                                 }
                                                 LastSessionExchangeTime = System.currentTimeMillis() / 1000; //Set initial value of session timeout
-                                                q.send_txrsid_command("ON");
-                                                q.send_rsid_command("ON");
+                                                m.requestTxRsid("ON");
+                                                m.setRxRsid("ON");
                                                 q.Message(tmp, 10);
                                                 q.send_ack(TTYCaller);
                                                 status_received = false;
@@ -1413,9 +1419,9 @@ public class Main {
                                                 }
                                                 log("Connect request from " + TTYCaller);
                                             } else if (rxb.valid && Main.accessPassword.length() > 0 ) {
-                                                //Need password but non provided. Send a reject block with a reason
-                                                q.send_txrsid_command("ON");
-                                                q.send_rsid_command("ON");
+                                                //Need password but none provided. Send a reject block with a reason
+                                                m.requestTxRsid("ON");
+                                                m.setRxRsid("ON");
                                                 log("Connect attempted with missing password when one is required");
                                                 q.send_reject(TTYCaller, "Server requires a password\n");
                                             }
@@ -1490,6 +1496,7 @@ public class Main {
                                     disconnect = false;
                                     Status = "Listening";
                                     Connected = false;
+                                    mainui.enableMnuPreferences2();
                                     mainui.disableMboxMenu();
                                     TTYConnected = "";
                                     session = "";
@@ -1502,7 +1509,7 @@ public class Main {
                                     isDisconnected = true;
                                     //Set RXid ON for next connect request
                                     //q.send_txrsid_command("OFF");
-                                    q.send_rsid_command("ON");
+                                    m.setRxRsid("ON");
                                     // send disconnect packet to caller...
                                     q.send_disconnect();
                                 }
@@ -1547,8 +1554,8 @@ public class Main {
                                 if (TTYConnected.equals("Connecting") & !status_received & NumberOfAcks > 0) {
                                     // repeat sending ack...
                                     //Turn RXid and TXid ON as I am repeating a connect ack
-                                    q.send_rsid_command("ON");
-                                    q.send_txrsid_command("ON");
+                                    m.setRxRsid("ON");
+                                    m.requestTxRsid("ON");
                                     q.send_ack(TTYCaller);
                                     status_received = false;
                                     idlesecs = 0;
@@ -1560,6 +1567,7 @@ public class Main {
                                     //Abandon connect trial
                                     Status = "Listening";
                                     Connected = false;
+                                    mainui.enableMnuPreferences2();
                                     mainui.disableMboxMenu();
                                     TTYConnected = "";
                                     session = "";
@@ -1573,12 +1581,12 @@ public class Main {
                                     Main.RxDelay = Main.initialRxDelay;
                                     //Set RXid ON for next connect request
                                     //q.send_txrsid_command("OFF");
-                                    q.send_rsid_command("ON");
+                                    m.setRxRsid("ON");
                                 } else if (TTYConnected.equals("Connected")) {
                                     // We are in a session, send a poll
                                     //Turn RXid and TXid ON as I am repeating a status request
-                                    q.send_rsid_command("ON");
-                                    q.send_txrsid_command("ON");
+                                    m.setRxRsid("ON");
+                                    m.requestTxRsid("ON");
                                     myrxstatus = sm.getTXStatus();
                                     q.send_status(myrxstatus);  // send our status
                                     idlesecs = 0;
@@ -1842,7 +1850,7 @@ public class Main {
             if (!strunt.isEmpty()) {
                 modes = configuration.getPreference("MODES");
             } else {
-                modes = "85b3"; // PSK250R, PSK250, PSK125R, THOR22
+                modes = "8543"; // PSK250, PSK250R, MFSK32, THOR22
                 configuration.setPreference("MODES", Main.modes);
             }
 
@@ -2158,22 +2166,6 @@ public class Main {
         }
     }
 
-    static String getTXModemString(modemmodeenum mode) {
-        try {
-            String Txmodemstring = "";
-            Txmodemstring = m.getModemString(mode);
-            return Txmodemstring;
-        } catch (Exception e) {
-            return "";
-        }
-    }
-
-    static String getAltTXModemString(modemmodeenum mode) {
-        String Txmodemstring = "";
-        Txmodemstring = m.getAltModemString(mode);
-        return Txmodemstring;
-    }
-
     static void setFreq(String freq) {
         if (Rigctl.opened) {
             int fr = Integer.parseInt(Main.CurrentFreq) + Rigctl.OFF;
@@ -2237,15 +2229,16 @@ public class Main {
             if (currentmodeindex < TTYmodes.length() - 1) { //List in decreasing order of speed
                 Main.TxModem = getClientMode(currentmodeindex + 1);
                 sm.SetBlocklength(5); //restart with medium block length
-                q.send_txrsid_command("ON");
-                String TXmd = getTXModemString(Main.TxModem);
-                String SendMode = "<cmd><mode>" + TXmd + "</mode></cmd>";
-                m.Sendln(SendMode);
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                m.requestTxRsid("ON");
+                String TxMode = m.getTXModemString(Main.TxModem);
+                //String SendMode = "<cmd><mode>" + TxMode + "</mode></cmd>";
+                //m.Sendln(SendMode);
+                m.Sendln("", TxMode, "");
+                //try {
+                //    Thread.sleep(1000);
+                //} catch (InterruptedException ex) {
+                //    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                //}
             }
 
         } else {
@@ -2256,78 +2249,19 @@ public class Main {
                 Main.RxModem = getClientMode(currentmodeindex + 1);
                 Main.RxModemString = m.getModemString(Main.RxModem);
                 blocktime = m.getBlockTime(Main.RxModem);
-                String TXmd = getTXModemString(Main.TxModem);
-                String SendMode = "<cmd><mode>" + TXmd + "</mode></cmd>";
-                m.Sendln(SendMode);
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                String TxMode = m.getTXModemString(Main.TxModem);
+                //String SendMode = "<cmd><mode>" + TXmd + "</mode></cmd>";
+                //m.Sendln(SendMode);
+                m.Sendln("", TxMode, ""); //Just change mode
+                //try {
+                //    Thread.sleep(1000);
+                //} catch (InterruptedException ex) {
+                //    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                //}
             }
         }
     }
-
-/*    static void ChangeMode(modemmodeenum Modem) {
-        String SendMode = "";
-
-        String TXmd = getTXModemString(Modem);
-        String rxstring = Main.getTXModemString(Main.defaultmode);
-        rxstring += "        ";
-        rxstring = rxstring.substring(0, 7);
-        mainui.RXlabel.setText(rxstring);
-        SendMode = "<cmd><mode>" + TXmd + "</mode></cmd>";
-
-        m.Sendln(SendMode);
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        if (Sendline.length() > 0) {
-            try {
-                //VK2ETA add TX delay here from config popup (allows on-the-fly changes)
-                int TxDelay = 0;
-                String TxDelayStr = configuration.getPreference("TXDELAY", "0");
-                //System.out.println("TXDELAY:" + TxDelayStr);  
-                if (TxDelayStr.length() > 0) {
-                    TxDelay = Integer.parseInt(TxDelayStr);
-                }
-                if (TxDelay > 0) {
-                    Thread.sleep(TxDelay * 1000);
-                }
-            } catch (InterruptedException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            m.Sendln(Sendline);
-        }
-        Sendline = "";
-
-    }
-*/
-    
-    //Just change the mode, don't send any data (for the preference screen)
-    static void ChangeMode(modemmodeenum Modem) {
-        if (!TXActive) {
-            String SendMode = "";
-            String TXmd = getTXModemString(Modem);
-            String rxstring = Main.getTXModemString(Main.defaultmode);
-            rxstring += "        ";
-            rxstring = rxstring.substring(0, 7);
-            mainui.RXlabel.setText(rxstring);
-            SendMode = "<cmd><mode>" + TXmd + "</mode></cmd>";
-
-            m.Sendln(SendMode);
-
-            try {
-                Thread.sleep(1);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-
+  
     static modemmodeenum convmodem(String mymodem) {
         modemmodeenum mode = modemmodeenum.THOR8;
 

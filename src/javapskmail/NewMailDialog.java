@@ -531,8 +531,7 @@ private void addattachment(){
             File sizer = new File(myattachment);
             this.txtAttachment.setText(myattachment.toString()+", size: "+Long.toString(sizer.length())+" bytes");
         }
-        arq aa = new arq();
-        aa.Message("Including attachment ", 10);
+        Main.q.Message("Including attachment ", 10);
     } catch (Exception ex) {
        Main.log.writelog("Could not add attachment.", ex,true);
     }

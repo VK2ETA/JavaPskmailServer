@@ -14,11 +14,6 @@
  */
 package javapskmail;
 
-//import java.io.File;
-//import java.io.FileInputStream;
-//import java.io.FileOutputStream;
-//import java.io.InputStream;
-//import java.io.OutputStream;
 import java.util.ResourceBundle;
 import javax.swing.SpinnerNumberModel;
 import java.util.ArrayList;
@@ -459,6 +454,8 @@ public class optionsdialog extends javax.swing.JDialog {
                     CB_DOMEX5.setSelected(true);
                     modemarray[i] = "DOMINOEX5";
                 }
+                //VK2ETA: Bug? when opening options when connected to server, messes up the modelist or 
+                //   the Main.mode string of character coded modes? 
                 Main.Currentmodes = modemarray;
 
                 cboModes.removeAllItems();
@@ -2762,7 +2759,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
             Main.TxModem = mmode;
             //Do not change the Fldigi mode at each selection (introduces delays). 
             //Now done when we exit the option dialog 
-            //Main.ChangeMode(Main.TxModem);
+            //Main.m.ChangeMode(Main.TxModem);
             Main.mainui.setRxmodeTextfield(md);
             Main.mainui.setRXlabel(md);
             Main.RxModem = mmode;

@@ -2,6 +2,7 @@
  * arq.java
  *
  * Copyright (C) 2008 Pär Crusefalk (SM0RWO)
+ * Copyright (C) 2018-2021 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,11 +23,6 @@ import java.util.regex.*;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static javapskmail.Main.SendCommand;
-import static javapskmail.modemmodeenum.CTSTIA;
-import static javapskmail.modemmodeenum.PSK125RC4;
-import static javapskmail.modemmodeenum.PSK500;
-import static javapskmail.modemmodeenum.THOR22;
 
 /**
  *
@@ -91,8 +87,18 @@ public class arq {
      *
      * @param server
      */
-    public void setServer(String server) {
-        servercall = server;
+    public void setServerAndPassword(String server) {
+        this.servercall = server;
+        boolean foundCall = false;
+        for (int i = 0; i <  Main.MAXNEWSERVERS; i++) {
+            if (Main.Servers[i].toLowerCase().equals(this.servercall.toLowerCase())) {
+                foundCall = true;
+                serverPassword = Main.ServersPasswords[i];
+            }
+        }
+        if (!foundCall) {
+            serverPassword = "";
+        }
     }
 
     /**
@@ -105,13 +111,13 @@ public class arq {
     }
 
     //Get the current server's password if any
-    public String getServerPassword() {
-        for (int i = 0; i <  Main.MAXNEWSERVERS; i++) {
-            if (Main.Servers[i].equals(this.servercall)) {
-                return Main.ServersPasswords[i];
-            }
-        }
-        return "";
+    public String getPassword() {
+        return serverPassword;
+    }
+
+    //Set the current server's password
+    public void setPassword(String password) {
+        this.serverPassword = password;
     }
 
     /**
@@ -176,8 +182,6 @@ public class arq {
     public void sendit(String outmessage) {
         String sendtext = "";
         String montext = outmessage.substring(1, outmessage.length() - 6);
-        char[] charArray;
-        int i;
 
         sendtext += outmessage;
         Main.Sendline = Main.ModemPreamble + sendtext + Main.ModemPostamble;
@@ -542,7 +546,7 @@ public class arq {
         String info = "";
         String outstring = "";
 
-        send_txrsid_command("ON");
+        Main.m.requestTxRsid("ON");
 //            Thread.sleep(1000);
         info = "0" + Streamid + "d";
         outstring += make_block(info) + FrameEnd;
@@ -604,60 +608,60 @@ public class arq {
 
             case TXUImessage:
                 // Only UI messages at this point
-                send_txrsid_command("ON");
+                Main.m.requestTxRsid("ON");
                 //              Thread.sleep(500);
                 info = ui_messageblock(payload);
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXPing:
-                send_txrsid_command("ON");
+                Main.m.requestTxRsid("ON");
                 info = pingblock();
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXPingReply:
-                send_txrsid_command("ON");
+                Main.m.requestTxRsid("ON");
                 info = replyPingblock();
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXInq:
-                send_txrsid_command("ON");
+                Main.m.requestTxRsid("ON");
                 //    System.out.println("INQ");
                 info = inquireblock();
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXInqReply:
-                send_txrsid_command("ON");
+                Main.m.requestTxRsid("ON");
                 //    System.out.println("INQ Reply");
                 info = replyInquireblock();
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXQSLReply:
-                send_txrsid_command("ON");
+                Main.m.requestTxRsid("ON");
                 //    System.out.println("QSL Reply");
                 info = replyQSLblock();
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXCQ:
-                send_txrsid_command("ON");
+                Main.m.requestTxRsid("ON");
                 info = cqblock();
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXaprsmessage:
-                send_txrsid_command("ON");
+                Main.m.requestTxRsid("ON");
                 //               Thread.sleep(1000);
                 info = ui_aprsblock(payload);
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXlinkreq:
-                send_txrsid_command("ON");
+                Main.m.requestTxRsid("ON");
                 //               Thread.sleep(500);
                 //               send_mode_command(Main.linkmode);
                 //               Thread.sleep(500);
@@ -665,13 +669,13 @@ public class arq {
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXBeacon:
-                send_txrsid_command("ON");
+                Main.m.requestTxRsid("ON");
                 Thread.sleep(500);
                 info = ui_beaconblock();
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXConnect:
-                send_txrsid_command("ON");
+                Main.m.requestTxRsid("ON");
 //                Thread.sleep(1000);
                 info = connectblock();
                 //VK2ETA Now with Password is connecting to a mini-server
@@ -681,15 +685,15 @@ public class arq {
             case TXSummon:
                 int fr = Integer.parseInt(Main.ServerFreq) - Rigctl.OFF;
                 Main.setFreq(Integer.toString(fr));
-                send_txrsid_command("ON");
+                Main.m.requestTxRsid("ON");
 //                Thread.sleep(1000);
                 info = summonblock();
                 outstring = make_block(info) + FrameEnd;
                 break;
             case TXAbort:
                 Main.Aborting = true;
-                send_txrsid_command("ON");
-                send_rsid_command("ON");
+                Main.m.requestTxRsid("ON");
+                Main.m.setRxRsid("ON");
                 info = abortblock();
                 //  System.out.println("INFO:" + info);           
                 if (!info.equals("")) {
@@ -706,20 +710,20 @@ public class arq {
                         || Main.TxModem == modemmodeenum.MFSK64
                         || Main.TxModem == modemmodeenum.PSK125
                         || Main.TxModem == modemmodeenum.PSK125R)) {
-                    send_txrsid_command("ON");
+                    Main.m.requestTxRsid("ON");
                     rxRsidCounter = 0;
                 } else if (rxRsidCounter > 0 && (Main.TxModem == modemmodeenum.MFSK8
                         || Main.TxModem == modemmodeenum.MFSK16
                         || Main.TxModem == modemmodeenum.PSK63
                         || Main.TxModem == modemmodeenum.DOMINOEX5
                         || Main.TxModem == modemmodeenum.PSK31)) {
-                    send_txrsid_command("ON");
+                    Main.m.requestTxRsid("ON");
                     rxRsidCounter = 0;
                 }
                 ;
                 //In any case send RSID until we have full connect exchange so that the server can gauge it's tx delay
                 if (Main.connectingPhase) {
-                    send_txrsid_command("ON");
+                    Main.m.requestTxRsid("ON");
                 }
                 info = statusblock(Main.myrxstatus);
                 outstring = make_block(info) + FrameEnd;
@@ -728,7 +732,6 @@ public class arq {
                 outstring = "";
                 info = payload;
                 outstring = StartHeader + info;
-
                 info = statusblock(Main.myrxstatus);
                 outstring += make_block(info) + FrameEnd;
                 break;
@@ -789,130 +792,6 @@ public class arq {
     public void send_QSL_reply() throws InterruptedException {
         this.txserverstatus = txstatus.TXQSLReply;
         send_frame("");
-    }
-
-    /**
-     * Send a mode command to the modem
-     */
-    public void send_rsid_command(String s) {
-        String rsidstart = "<cmd><rsid>";
-        String rsidend = "</rsid></cmd>";
-        if (!s.equals("")) {
-            Main.SendCommand += (rsidstart + s + rsidend);
-        }
-    }
-
-    public void send_txrsid_command(String s) {
-        //System.out.println("arq.send_txrsid_command: " + s + "\n"); 
-        String txrsidstart = "<cmd><txrsid>";
-        String txrsidend = "</txrsid></cmd>";
-        if (!s.equals("")) {
-            Main.SendCommand += (txrsidstart + s + txrsidend);
-        }
-    }
-
-    public void send_txrxonoff_command() {
-        Main.SendCommand += "<cmd><txrxrsid>ON</txrsid><rsid>ON</rsid></cmd>";
-    }
-
-    /**
-     * Send a mode command to the modem
-     */
-    public void send_mode_command(modemmodeenum mode) throws NullPointerException {
-        String modestart = "<cmd><mode>";
-        String modeend = "</mode></cmd>";
-        String modeset = "";
-        String connstr = "";
-        try {
-            switch (mode) {
-                case PSK63:
-                    modeset = "PSK63";
-                    connstr = "~SPEED63!";
-                    break;
-                case PSK125:
-                    modeset = "PSK125";
-                    connstr = "~SPEED125!";
-                    break;
-                case PSK125R:
-                    modeset = "PSK125R";
-                    break;
-                case PSK250:
-                    modeset = "PSK250";
-                    connstr = "~SPEED250!";
-                    break;
-                case PSK250R:
-                    modeset = "PSK250R";
-                    break;
-                case PSK500:
-                    modeset = "PSK500";
-                    connstr = "~SPEED500!";
-                    break;
-                case PSK1000:
-                    modeset = "PSK1000";
-                    connstr = "~SPEED1000!";
-                    break;
-                case PSK500R:
-                    modeset = "PSK500R";
-                    break;
-                case MFSK16:
-                    modeset = "MFSK16";
-                    connstr = "~SPEEDMFSK16!";
-                    break;
-                case MFSK32:
-                    modeset = "MFSK32";
-                    connstr = "~SPEEDMFSK32!";
-                    break;
-                case THOR8:
-                    modeset = "THOR8";
-                    connstr = "~SPEEDTHOR8!";
-                    break;
-                case DOMINOEX5:
-                    modeset = "DOMINOEX5";
-                    connstr = "~SPEEDDOMINOEX5";
-                    break;
-                case THOR22:
-                    modeset = "THOR22";
-                    connstr = "~SPEEDTHOR22!";
-                    break;
-                case CTSTIA:
-                    modeset = "CTSTIA";
-                    break;
-                case PSK63RC5:
-                    modeset = "PSK63RC5";
-                    break;
-                case PSK63RC10:
-                    modeset = "PSK63RC10";
-                    break;
-                case PSK250RC3:
-                    modeset = "PSK250RC3";
-                    break;
-                case PSK125RC4:
-                    modeset = "PSK125RC4";
-                    break;
-                case DOMINOEX22:
-                    modeset = "DOMINOEX22";
-                    break;
-                case DOMINOEX11:
-                    modeset = "DOMINOEX11";
-                    break;
-            }
-        } catch (NullPointerException npe) {
-            Main.log.writelog("Error in arq.send_mode_command", npe, true);
-        }
-
-        if (!modeset.equals("")) {
-            if (Main.Status.equals("Connected") && !Modem.equals(modeset)) {
-                // During connected state
-                //             Main.TX_Text += connstr + "\n";                
-            } else {
-                // Order a mode switch (could be second press too)
-                Main.SendCommand += modestart + modeset + modeend;
-                Main.m.Sendln(SendCommand);
-            }
-
-            // Save the new mode
-            Modem = modeset;
-        }
     }
 
     /**
@@ -1012,8 +891,7 @@ public class arq {
     public String make_blockWithPassword(String info) {
         String check="";
         if (info.length()>0) {
-            String password = getServerPassword();
-            check = checksum(info + password);
+            check = checksum(info + serverPassword);
         }
         return StartHeader + info + check;
     }

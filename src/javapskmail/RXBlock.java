@@ -110,7 +110,7 @@ public class RXBlock{
             direct_message = false;
             radioMsgBlock = false;
 
-             myarq = new arq();
+            //myarq = new arq();
             String path = Main.HomePath + Main.Dirprefix;
             myconfig = new config(path);
             mycall = myconfig.getCallsign();
@@ -277,8 +277,8 @@ public class RXBlock{
                             Main.linked = true;
                             Main.linkedserver = linkserver;
                             Main.sending_link = 0;
-                            myarq.send_mode_command(Main.defaultmode); 
-                            myarq.Message("Linked to " + linkserver, 10);
+                            Main.m.setModemModeNow(Main.defaultmode); 
+                            Main.q.Message("Linked to " + linkserver, 10);
                             // switch off rsid
 //                           myarq.send_rsid_command("OFF");  
 //                           Thread.sleep(500);
@@ -308,8 +308,8 @@ public class RXBlock{
                             msgtext = mb.group(1);
                             ack = mb.group(2);
                             String Ackmessage = from + " ack" + ack;
-                            myarq.set_txstatus(txstatus.TXaprsmessage);
-                            myarq.send_aprsmessage(Ackmessage);
+                            Main.q.set_txstatus(txstatus.TXaprsmessage);
+                            Main.q.send_aprsmessage(Ackmessage);
                         }
                   }
              } else {
@@ -328,7 +328,7 @@ public class RXBlock{
              }
            }
            catch (Exception e){
-               myarq.Message ("Problem in arq...", 10);
+               Main.q.Message ("Problem in arq...", 10);
            }
       }
 

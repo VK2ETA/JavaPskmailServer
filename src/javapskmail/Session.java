@@ -91,7 +91,6 @@ public class Session {
     public FileWriter pFile = null;
     private FileWriter tmpmessage = null;
     private FileWriter inbox = null;
-    private arq a;
     private BufferedWriter iacout;
     private fastfec f;
     //Server files
@@ -101,7 +100,6 @@ public class Session {
     public Session() {
         String path = Main.HomePath + Main.Dirprefix;
         config cf = new config(path);
-        a = new arq();
         f = new fastfec();
         myserver = cf.getServer();
         blocklength = "6";
@@ -683,14 +681,14 @@ public class Session {
                 String TrString = "";
                 File mycodedFile = new File(codedFile);
                 if (mycodedFile.isFile()) {
-                    TrString = ">FM:" + a.callsign + ":" + Destination + ":"
+                    TrString = ">FM:" + Main.q.callsign + ":" + Destination + ":"
                             + token + ":u:" + myfile
                             + ":" + Long.toString(mycodedFile.length()) + "\n";
                 }
 
                 if (Main.Connected) {
                     if (mycodedFile.isFile()) {
-                        Main.TX_Text += "~FO5:" + a.callsign + ":" + Destination + ":"
+                        Main.TX_Text += "~FO5:" + Main.q.callsign + ":" + Destination + ":"
                                 + token + ":u:" + myfile
                                 + ":" + Long.toString(mycodedFile.length()) + "\n";
                     }
@@ -785,11 +783,11 @@ public class Session {
                                                     Firstline = true;
                                                     try {                                            
                                                         iacout = new BufferedWriter(new FileWriter(Main.HomePath + Main.Dirprefix + "iactemp", true));
-                                                        a.Message("Receiving IAC fleetcode file", 15);
+                                                        Main.q.Message("Receiving IAC fleetcode file", 15);
                                                     } 
                                                     catch (Exception e){
                                                         Main.log.writelog("Error when trying to open the iac file.", e, true);
-                                                        a.Message("Error opening file...", 15);
+                                                        Main.q.Message("Error opening file...", 15);
                                                     }
                                                 }
                                              }
@@ -1407,7 +1405,7 @@ public class Session {
                     Session.DataSize = 0;
                     Session.DataReceived = 0;
                     Main.Progress = 0;
-                    a.Message("Upload complete...", 10);
+                    Main.q.Message("Upload complete...", 10);
                     str = "";
                     //                                           System.out.println("Deleting temp file " + deletefl);
                 } catch (IOException i) {
@@ -1632,7 +1630,7 @@ public class Session {
                     } catch (Exception exc) {
                         Main.log.writelog("Error when trying to decode the downoad file.", exc, true);
                     } catch (NoClassDefFoundError exp) {
-                        a.Message("problem decoding B64 file", 10);
+                        Main.q.Message("problem decoding B64 file", 10);
                     }
                     File tmp = new File(Main.HomePath + Main.Dirprefix + "TempFile");
                     boolean success = tmp.delete();
@@ -1760,7 +1758,7 @@ public class Session {
                         fl.delete();
                     }
 
-                    a.Message("Added to mbox queue", 10);
+                    Main.q.Message("Added to mbox queue", 10);
                 }
                 
                 
@@ -1777,7 +1775,7 @@ public class Session {
                         Base64.decodeFileToFile(cin, cout);
                         cmid = Unzip.Unzip(Main.HomePath + Main.Dirprefix + "tmpmessage.gz");
                     } catch (Exception e) {
-                        a.Message("Decoding error!", 10);
+                        Main.q.Message("Decoding error!", 10);
                     }
                     //Analyse and Send email
                     String to = "";
@@ -1815,7 +1813,7 @@ public class Session {
                             } else {
                                 Main.TX_Text += resultStr;
                             }
-                            a.Message("Email Sent...", 10);
+                            Main.q.Message("Email Sent...", 10);
                         }
                     }
                     Main.Progress = 0;
@@ -1834,7 +1832,7 @@ public class Session {
                         Base64.decodeFileToFile(cin, cout);
                         cmid = Unzip.Unzip(Main.HomePath + Main.Dirprefix + "tmpmessage.gz");
                     } catch (Exception e) {
-                        a.Message("Decoding error!", 10);
+                        Main.q.Message("Decoding error!", 10);
                     }
 
                     // append to Inbox file
@@ -1978,7 +1976,7 @@ public class Session {
 
                                                         }
                                                     } catch (Exception e) {
-                                                        a.Message("IO problem", 10);
+                                                        Main.q.Message("IO problem", 10);
                                                     }
 
                                                 } else {
@@ -1992,7 +1990,7 @@ public class Session {
                                                         attachmentFilename = Main.HomePath + Main.Dirprefix + attachmentFilename;
 
                                                     } catch (Exception e) {
-                                                        a.Message("IO problem", 10);
+                                                        Main.q.Message("IO problem", 10);
                                                     }
                                                 }
                                             } else {
@@ -2039,15 +2037,15 @@ public class Session {
 
                                                 boolean success = Base64.decodeToFile(attachment, attachmentFilename);
                                                 if (success) {
-                                                    a.Message("File stored in " + attachmentFilename, 10);
+                                                    Main.q.Message("File stored in " + attachmentFilename, 10);
                                                     Main.mainwindow += "File stored in " + attachmentFilename + "\n";
                                                 } else {
-                                                    a.Message("File not stored in " + attachmentFilename, 10);
+                                                    Main.q.Message("File not stored in " + attachmentFilename, 10);
                                                     Main.mainwindow += "File not stored in " + attachmentFilename + "?\n";
                                                 }
 
                                             } catch (Exception e) {
-                                                a.Message("Problem with decoding, " + e, 10);
+                                                Main.q.Message("Problem with decoding, " + e, 10);
                                             }
 
                                         }
@@ -2091,7 +2089,7 @@ public class Session {
                     }
                     Main.Progress = 0;
 
-                    a.Message("Added to mbox queue", 10);
+                    Main.q.Message("Added to mbox queue", 10);
                 }
                 // compressed web pages download
                 if (CwwwDownload) {
@@ -2124,7 +2122,7 @@ public class Session {
                             }
                             in.close();
                         } catch (IOException e) {
-                            a.Message("problem decoding B64 file", 10);
+                            Main.q.Message("problem decoding B64 file", 10);
                         }
                         File tmp1 = new File(Main.HomePath + Main.Dirprefix + "TMP");
 
@@ -2145,7 +2143,7 @@ public class Session {
                     } catch (Exception exc) {
                         Main.log.writelog("Error handling the download file.", exc, true);
                     } catch (NoClassDefFoundError exp) {
-                        a.Message("problem decoding B64 file", 10);
+                        Main.q.Message("problem decoding B64 file", 10);
                     }
                     File tmp = new File(Main.HomePath + Main.Dirprefix + "TempFile");
                     boolean success = tmp.delete();
@@ -2166,7 +2164,7 @@ public class Session {
                 if (WWWDownload) {
                     WWWDownload = false;
                 }
-                a.Message("done...", 10);
+                Main.q.Message("done...", 10);
                 Main.Progress = 0;
                 Transaction = "";
 
@@ -2217,7 +2215,7 @@ public class Session {
                     } catch (Exception exc) {
                         Main.log.writelog("Error when trying to decode the downoad file.", exc, true);
                     } catch (NoClassDefFoundError exp) {
-                        a.Message("problem decoding B64 file", 10);
+                        Main.q.Message("problem decoding B64 file", 10);
                     }
                     File tmp = new File(Main.HomePath + Main.Dirprefix + "TempFile");
                     boolean success = tmp.delete();
@@ -2293,7 +2291,7 @@ public class Session {
                 if (WWWDownload) {
                     WWWDownload = false;
                 }
-                a.Message("done...", 10);
+                Main.q.Message("done...", 10);
                 Main.Progress = 0;
                 Transaction = "";
             }
@@ -2306,7 +2304,7 @@ public class Session {
             if (mn.lookingAt()) {
                 if (mn.group(1).equals("NNNN")) {
                     Main.IACmode = false;
-                    a.Message("End of code...", 10);
+                    Main.q.Message("End of code...", 10);
                     Main.Status = "Listening";
                     try {
                         iacout.close();
@@ -2325,7 +2323,7 @@ public class Session {
             if (mn.lookingAt()) {
                 if (mn.group(1).equals("NNNN")) {
                     Main.Bulletinmode = false;
-                    a.Message("End of bulletin...", 2);
+                    Main.q.Message("End of bulletin...", 2);
                 }
             }
         }
@@ -2398,7 +2396,7 @@ public class Session {
                 }
             } catch (IOException ex) {
                 //                                             Main.log.writelog("Error when trying to write to pending file.", ex, true);
-                a.Message("Error writing pending file.", 1);
+                Main.q.Message("Error writing pending file.", 1);
             }
             try {
                 tmpmessage.write(str + "\n");
@@ -2535,12 +2533,9 @@ public class Session {
         Blocklength = Integer.parseInt(Main.TXblocklength);
         int Maxblocklength = 6;
         int Minblocklength = 3;
-
         int Nrblocks = 8;
-
-        String TXmd = Main.getTXModemString(Main.TxModem);
-
-// System.out.println(TXmd)  ;
+        String TXmd = Main.m.getTXModemString(Main.TxModem);
+        // System.out.println(TXmd)  ;
         if (TXmd.equals("PSK500")) {
             Nrblocks = 16;
             Maxblocklength = 6;
@@ -2553,18 +2548,11 @@ public class Session {
             Nrblocks = 8;
             Maxblocklength = 5;
             Minblocklength = 4;
-            //VK2ETA should not be controlled here
-            //a.send_txrsid_command("ON");
-//        System.out.println("TXID ON");      
         } else {
             Nrblocks = 4;
             Maxblocklength = 5;
             Minblocklength = 3;
-            //VK2ETA should not be controlled here
-            //a.send_txrsid_command("ON");
-            //System.out.println("TXID ON");      
         }
-
         while (i < (Nrblocks - nr_missing) & Main.TX_Text.length() > 0) {
             String newstring = "";
             if (Blocklength < Minblocklength) {
@@ -2751,21 +2739,21 @@ public class Session {
                 out.write(attachment);
                 //Close the output stream
                 out.close();
-                a.Message("File stored in " + Filename, 10);
+                Main.q.Message("File stored in " + Filename, 10);
                 Main.mainwindow += "File stored in " + Filename + "\n";
             } else {
                 boolean success = Base64.decodeToFile(attachment, Filename);
                 if (success) {
-                    a.Message("File stored in " + Filename, 10);
+                    Main.q.Message("File stored in " + Filename, 10);
                     Main.mainwindow += "File stored in " + Filename + "\n";
                 } else {
-                    a.Message("File not stored in " + Filename, 10);
+                    Main.q.Message("File not stored in " + Filename, 10);
                     Main.mainwindow += "File not stored in " + Filename + "?\n";
                 }
             }
         } catch (Exception e) {
             Main.log.writelog("Had trouble saving the attachment. " + e.getMessage().toString(), e, true);
-            a.Message("Problem with decoding, " + e, 10);
+            Main.q.Message("Problem with decoding, " + e, 10);
         }
     }
 

@@ -17,7 +17,7 @@ public class GetWebPageDialog extends javax.swing.JDialog {
     public GetWebPageDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        myarq = new arq();
+        //myarq = new arq();
 
         
         this.WebPage1.setText(Main.configuration.getPreference("URL1"));

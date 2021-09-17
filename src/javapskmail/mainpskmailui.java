@@ -46,7 +46,7 @@ public class mainpskmailui extends javax.swing.JFrame {
 
     static int timercnt = 0;
 
-    public arq myarq;
+    //public arq myarq;
     /**
      *
      */
@@ -166,9 +166,9 @@ public class mainpskmailui extends javax.swing.JFrame {
 
         initComponents();
         ButtonGroup RB = new ButtonGroup();
-        myarq = new arq();
-        String path = Main.HomePath + Main.Dirprefix;
-//        myconfig = new config(path);
+        //myarq = new arq();
+        //String path = Main.HomePath + Main.Dirprefix;
+        //myconfig = new config(path);
 
         mysession = new Session();
         mysession.mycall = Main.mycall;
@@ -357,7 +357,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                     }
 
                     //labelServerFreq.setText(cboServer.getSelectedItem().toString());
-                    labelServerFreq.setText(myarq.getServer());
+                    labelServerFreq.setText(Main.q.getServer());
 
                     freq0.setText(Rigctl.freqs[0]);
                     freq1.setText(Rigctl.freqs[1]);
@@ -451,9 +451,9 @@ public class mainpskmailui extends javax.swing.JFrame {
                     timercnt++;
                 } else { //Second loop
                     //Check last character receipt from Fldigi
-                    //More than 3 minutes ago, set test mode = Squelch fully open
+                    //More than timeout, set test mode = Squelch fully open
                     //If more than 30 seconds in test mode, then kill fldigi and let the 
-                    //  modem getbyte() restart it and re-int Rigctl
+                    //  modem getbyte() restart it and re-init Rigctl
                     if (!Main.TXActive 
                             && (System.currentTimeMillis() - Main.lastModemCharTime > 55000)) { // = 55 seconds
                         if (!Main.modemTestMode) {
@@ -477,8 +477,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                         }
                     } else {
                         if (Main.modemTestMode) {
-                            System.out.println("Exiting Modem test mode, all OK");
-                            
+                            System.out.println("Exiting Modem test mode, all OK");    
                         }
                         //Reset test flag
                         Main.modemTestMode = false;
@@ -507,7 +506,6 @@ public class mainpskmailui extends javax.swing.JFrame {
                         String minuteformat = "0" + Integer.toString(Minute);
                         minuteformat = minuteformat.substring(minuteformat.length() - 2);
                         String newmessage = hourformat + ":" + minuteformat + " " + Main.MSGwindow;
-
                         appendMSGWindow(newmessage);
                         Main.MSGwindow = "";
                     }
@@ -515,7 +513,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                     if (Systemsecond >= Main.Second & sendbeacon) {
                         sendbeacon = false;
                         try {
-                            myarq.send_beacon();
+                            Main.q.send_beacon();
                         } catch (InterruptedException ex) {
                             Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -537,14 +535,9 @@ public class mainpskmailui extends javax.swing.JFrame {
                         Main.Statusline = "Receiving radio Message";
                         Main.StatusLineTimer = 2;
                     } else if (Main.possibleRadioMsg > 0L && !Main.Connected) {
-                        Main.Statusline = "Radio Message?";
+                        Main.Statusline = "Receiving Frame?";
                         Main.StatusLineTimer = 2;
-                    } else if (RMsgTxList.getAvailableLength() > 0 | Main.radioMsgWorking) {
-                        Main.Statusline = "Replying to Radio Message";
-                        Main.StatusLineTimer = 2;
-                    }
-                    //Radio Message timeout on lack of characters received
-                    if (Main.receivingRadioMsg
+                    } else if (!Main.Connected && !Main.Connecting
                             && (System.currentTimeMillis() - Main.lastCharacterTime > 10000)) {
                         Main.receivingRadioMsg = false;
                     }
@@ -587,7 +580,7 @@ public class mainpskmailui extends javax.swing.JFrame {
 
                     // set mode indicators
                     RxmodeTextfield.setText(Main.RxModemString);
-                    TxmodeTextfield.setText(Main.getTXModemString(Main.TxModem));
+                    TxmodeTextfield.setText(Main.m.getTXModemString(Main.TxModem));
                     int snrval = (int) Main.snr;
                     RxmodeQuality.setValue(snrval);
 
@@ -755,7 +748,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                     }
 
                     if (Main.TXActive) {
-                        String txstring = Main.getTXModemString(Main.TxModem);
+                        String txstring = Main.m.getTXModemString(Main.TxModem);
                         txstring += "        ";
                         if (txstring.length() > 6) {
                             txstring = txstring.substring(0, 9);
@@ -791,8 +784,8 @@ public class mainpskmailui extends javax.swing.JFrame {
                         if (Second == 10 | Second == 30) {
 
                             try {
-                                myarq.set_txstatus(txstatus.TXConnect);
-                                myarq.send_frame("");
+                                Main.q.set_txstatus(txstatus.TXConnect);
+                                Main.q.send_frame("");
                             } catch (InterruptedException ex) {
                                 Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
                             }
@@ -859,7 +852,8 @@ public class mainpskmailui extends javax.swing.JFrame {
                                 && Main.modemAutoRestartDelay > everyXHours * 60) {
                             Main.requestModemRestart = true;
                             System.out.println("Periodic restart of Fldigi requested");
-                        } else { //Process the rest, we have an active modem connection
+                        } else { 
+                            //Process the rest, we have an active modem connection
                             oldminute = Minute;
                             Main.modemAutoRestartDelay++;
                             if (Main.Connecting_time > 0) {
@@ -870,7 +864,6 @@ public class mainpskmailui extends javax.swing.JFrame {
                                 Throughput.setText(Integer.toString(minutebytes));
                             }
                             minutebytes = 0;
-
                             // reset mode  ??, 
                             //But not if we are in modem test mode to check if Fldigi is still alive. 
                             // Changing the mode will results in a couple of erratic characters being 
@@ -879,10 +872,10 @@ public class mainpskmailui extends javax.swing.JFrame {
                                     | (!Main.Connected & !Main.Connecting & !Main.Monitor
                                     & !Main.Bulletinmode & !radioMsgActive & !serverActive
                                     & !Main.TXActive & !Main.modemTestMode)) {
-                                myarq.send_mode_command(Main.defaultmode);
+                                Main.m.setModemModeNow(Main.defaultmode);
                                 Main.TxModem = Main.defaultmode;
                                 Main.RxModem = Main.defaultmode;
-                                String rxstring = Main.getTXModemString(Main.defaultmode);
+                                String rxstring = Main.m.getTXModemString(Main.defaultmode);
                                 rxstring += "        ";
                                 rxstring = rxstring.substring(0, 7);
                                 Main.RxModemString = rxstring;
@@ -1008,16 +1001,16 @@ public class mainpskmailui extends javax.swing.JFrame {
                             if (!Main.Bulletinmode & !Main.Connected & !Main.IACmode) {
                                 String Period = cboBeaconPeriod.getSelectedItem().toString();
                                 int iPeriod = Integer.parseInt(Period);
-                                if (chkAutoLink.isSelected() & (!myarq.getServer().equals(Main.linkedserver) || !Main.linked) & Minute % 5 == i) {
+                                if (chkAutoLink.isSelected() & (!Main.q.getServer().equals(Main.linkedserver) || !Main.linked) & Minute % 5 == i) {
                                     if (!Main.Connected & !Main.Connecting & !Main.Bulletinmode & !Main.IACmode) {
                                         if (Main.sending_link > 0 & !Main.configuration.getPreference("CALL").equals("N0CAL")) {
                                             Main.sending_link--;
                                             Main.linkmode = Main.defaultmode;
                                             if (!Main.TXActive) {
                                                 try {
-                                                    myarq.Message(mainpskmailui.getString("Link_to_server"), 5);
-                                                    myarq.set_txstatus(txstatus.TXlinkreq);
-                                                    myarq.send_link();
+                                                    Main.q.Message(mainpskmailui.getString("Link_to_server"), 5);
+                                                    Main.q.set_txstatus(txstatus.TXlinkreq);
+                                                    Main.q.send_link();
                                                 } catch (InterruptedException ex) {
                                                     Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
                                                 }
@@ -1031,7 +1024,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                                     if (iPeriod == 10) {
                                         if (Minute == (j + 10) | Minute == (j + 20) | Minute == (j + 30) | Minute == (j + 40) | Minute == (j + 50)) {
 
-//                                                myarq.send_beacon();
+//                                                Main.q.send_beacon();
                                             sendbeacon = true;
                                             Main.configuration.setPreference("LATITUDE", Latitudestr);
                                             Main.configuration.setPreference("LONGITUDE", Longitudestr);
@@ -1040,7 +1033,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                                     } else if (iPeriod == 30) {
                                         if (Minute == (j + 15) | Minute == (j + 45)) {
 
-//                                                myarq.send_beacon();
+//                                                Main.q.send_beacon();
                                             sendbeacon = true;
                                             Main.configuration.setPreference("LATITUDE", Latitudestr);
                                             Main.configuration.setPreference("LONGITUDE", Longitudestr);
@@ -1049,7 +1042,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                                     } else {
                                         // 1 hour
                                         if (Minute == (j + 55)) {
-                                            //                                               myarq.send_beacon();
+                                            //                                               Main.q.send_beacon();
                                             sendbeacon = true;
                                             Main.configuration.setPreference("LATITUDE", Latitudestr);
                                             Main.configuration.setPreference("LONGITUDE", Longitudestr);
@@ -1448,6 +1441,20 @@ public class mainpskmailui extends javax.swing.JFrame {
 
     public void enableMboxMenu() {
         mnuMbox2.setVisible(true);
+    }
+
+    public void disableMnuPreferences2() {
+        //mnuPreferences2.setVisible(false);
+        //PrefSaveMenu.setVisible(false);
+        mnuPreferences2.setEnabled(false);
+        PrefSaveMenu.setEnabled(false);
+    }
+
+    public void enableMnuPreferences2() {
+        //mnuPreferences2.setVisible(true);
+        //PrefSaveMenu.setVisible(true);
+        mnuPreferences2.setEnabled(true);
+        PrefSaveMenu.setEnabled(true);
     }
 
     public void disableMonitor() {
@@ -4118,12 +4125,12 @@ private void mnuQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
   //              Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
             }
  
-            myarq.Message(mainpskmailui.getString("Config_File_stored."), 10);
+            Main.q.Message(mainpskmailui.getString("Config_File_stored."), 10);
          }
         }
 
         catch (Exception e) {
-                 myarq.Message(mainpskmailui.getString("problem_writing_the_config_file"), 10);
+                 Main.q.Message(mainpskmailui.getString("problem_writing_the_config_file"), 10);
          }
      */
     Main.m.Sendln("<cmd>normal</cmd>\n");
@@ -4154,7 +4161,7 @@ private void mnuPreferencesActionPerformed(java.awt.event.ActionEvent evt) {//GE
 
     try {
         modemmodeenum lastTxModem = Main.TxModem;
-        String lastServer = myarq.getServer();
+        String lastServer = Main.q.getServer();
         optionsDialog = new optionsdialog(this, true);
 
         optionsDialog.setCallsign(Main.configuration.getPreference("CALL"));
@@ -4166,10 +4173,10 @@ private void mnuPreferencesActionPerformed(java.awt.event.ActionEvent evt) {//GE
         optionsDialog.setVisible(true);
         // Options have now closed
         Main.configuration.setCallsign(optionsDialog.getCallsign());
-        myarq.setCallsign(optionsDialog.getCallsign());
+        Main.q.setCallsign(optionsDialog.getCallsign());
         //String myServer = optionsDialog.getServer();
         //VK2ETA: Not here, only use the cboServer drop box on main UI
-        //myarq.setServer(myServer);
+        //Main.q.setServer(myServer);
         //Re-load the server list in case it changed
         Main.loadServerList();
         this.cboServer.removeAllItems();
@@ -4181,14 +4188,15 @@ private void mnuPreferencesActionPerformed(java.awt.event.ActionEvent evt) {//GE
                 if (lastServer.equals(Main.Servers[i])) {
                     this.cboServer.setSelectedItem(lastServer);
                     foundLastServer = true;
+                    break;
                 }
             }
         }        
         if (!foundLastServer) this.cboServer.setSelectedItem(Main.Servers[0]); //Try the first one if any
         //this.txtServer.setText(myServer);
         //Did we change the default mode in the options?
-        if (lastTxModem != Main.TxModem) {
-            Main.ChangeMode(Main.TxModem);
+        if (lastTxModem != Main.TxModem && !Main.Connected) {
+            Main.m.ChangeMode(Main.TxModem);
         }
         // Update the gui with these settings
         if (!Main.HaveGPSD) {
@@ -4267,13 +4275,13 @@ private void txtMainEntryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
                 }
             } else if (intext.contains("@")) {
                 //Unproto email (Pskmail version)
-                myarq.set_txstatus(txstatus.TXUImessage);
-                myarq.send_uimessage(intext);
+                Main.q.set_txstatus(txstatus.TXUImessage);
+                Main.q.send_uimessage(intext);
             } else {
                 try {
                     //Unproto APRS message to another station
-                    myarq.set_txstatus(txstatus.TXaprsmessage);
-                    myarq.send_aprsmessage(intext + myarq.getAPRSMessageNumber());
+                    Main.q.set_txstatus(txstatus.TXaprsmessage);
+                    Main.q.send_aprsmessage(intext + Main.q.getAPRSMessageNumber());
                     Main.mainwindow += " =>>" + intext + "\n";
                     appendMSGWindow(" =>>" + intext + "\n");
                 } catch (InterruptedException ex) {
@@ -4293,9 +4301,9 @@ private void txtMainEntryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
     public void SendAprsMsgDeSocket(String intext) {
         try {
             if (!Main.Connected) {
-                myarq.set_txstatus(txstatus.TXaprsmessage);
-//            myarq.send_aprsmessage(intext + myarq.getAPRSMessageNumber());
-                myarq.send_aprsmessage(intext);
+                Main.q.set_txstatus(txstatus.TXaprsmessage);
+//            Main.q.send_aprsmessage(intext + Main.q.getAPRSMessageNumber());
+                Main.q.send_aprsmessage(intext);
                 Main.mainwindow += " =>>" + intext + "\n";
                 appendMSGWindow(" =>>" + intext + "\n");
                 // send an ack to the map client
@@ -4316,9 +4324,9 @@ private void txtMainEntryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
 
     private void PositButtonActionPerformed(java.awt.event.ActionEvent evt) {
         try {
-            myarq.Message(mainpskmailui.getString("Send_Beacon"), 5);
-            myarq.set_txstatus(txstatus.TXBeacon);
-            myarq.send_beacon();
+            Main.q.Message(mainpskmailui.getString("Send_Beacon"), 5);
+            Main.q.set_txstatus(txstatus.TXBeacon);
+            Main.q.send_beacon();
             Main.configuration.setPreference("LATITUDE", Latitudestr);
             Main.configuration.setPreference("LONGITUDE", Longitudestr);
         } catch (InterruptedException ex) {
@@ -4332,12 +4340,12 @@ private void txtStatusKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:even
     mystring = txtStatus.getText();
     Main.statustxt = mystring;
     Main.configuration.setPreference("STATUS", mystring);
-    myarq.setTxtStatus(mystring);
+    Main.q.setTxtStatus(mystring);
 }//GEN-LAST:event_txtStatusKeyReleased
 
 private void cboAPRSIconActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboAPRSIconActionPerformed
     // TODO add your handling code here:
-    myarq.Message(mainpskmailui.getString("Icon_set..."), 5);
+    Main.q.Message(mainpskmailui.getString("Icon_set..."), 5);
     Main.configuration.setPreference("ICON", cboAPRSIcon.getSelectedItem().toString());
     Main.Icon = cboAPRSIcon.getSelectedItem().toString();
     if (cboAPRSIcon.getSelectedIndex() < 9 & Main.ICONlevel.equals("/")) {
@@ -4352,17 +4360,17 @@ private void chkBeaconStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIR
     // TODO add your handling code here:
 
     if (this.chkBeacon.isSelected()){//GEN-LAST:event_chkBeaconStateChanged
-            myarq.Message(mainpskmailui.getString("Beacon_on"), 5);
+            Main.q.Message(mainpskmailui.getString("Beacon_on"), 5);
             Main.configuration.SetBeacon("1");
         } else {
-            myarq.Message(mainpskmailui.getString("Beacon_off"), 5);
+            Main.q.Message(mainpskmailui.getString("Beacon_off"), 5);
             Main.configuration.SetBeacon("0");
         }
     }
 
 private void FileReadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FileReadButtonActionPerformed
 // TODO add your handling code here:
-    myarq.Message(mainpskmailui.getString("Choose_File_to_read..."), 5);
+    Main.q.Message(mainpskmailui.getString("Choose_File_to_read..."), 5);
     String myfile = "";
     if (evt.getSource() == FileReadButton) {
         File downloads = new File(Main.HomePath + Main.Dirprefix + "Downloads" + Main.Separator);
@@ -4382,13 +4390,13 @@ private void FileReadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GE
             // dbd
         }
     }
-    myarq.Message(mainpskmailui.getString("Reading_") + myfile, 5);
+    Main.q.Message(mainpskmailui.getString("Reading_") + myfile, 5);
 }//GEN-LAST:event_FileReadButtonActionPerformed
 
 private void mnuBulletinsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuBulletinsActionPerformed
     try {
         // TODO add your handling code here:
-        myarq.Message(mainpskmailui.getString("Deleting_bulletin_file..."), 5);
+        Main.q.Message(mainpskmailui.getString("Deleting_bulletin_file..."), 5);
         String bulletinpath = null;
         if (File.separator.equals("/")) {
             bulletinpath = System.getProperty("user.home") + "/.pskmail/Downloads/bulletins";
@@ -4427,9 +4435,9 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                 // TODO add your handling code here:
                 if (Main.Connected) {
                     Main.TX_Text += "~GETTIDESTN\n";
-                    myarq.Message(mainpskmailui.getString("Requesting_list_of_tidal_reference_stations..."), 5);
+                    Main.q.Message(mainpskmailui.getString("Requesting_list_of_tidal_reference_stations..."), 5);
                 } else {
-                    myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+                    Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
                 }
             }//GEN-LAST:event_mnuGetTidestationsActionPerformed
 
@@ -4439,13 +4447,13 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                     String tidestationnumber = "";
                     tidestationnumber = txtMainEntry.getText();
                     if (tidestationnumber.equals("")) {
-                        myarq.Message(mainpskmailui.getString("Need__number_of_the_station..."), 5);
+                        Main.q.Message(mainpskmailui.getString("Need__number_of_the_station..."), 5);
                     } else {
                         Main.TX_Text += "~GETTIDE " + tidestationnumber + "\n";
-                        myarq.Message(mainpskmailui.getString("Requesting_tidal_information_for_atation_") + tidestationnumber, 5);
+                        Main.q.Message(mainpskmailui.getString("Requesting_tidal_information_for_atation_") + tidestationnumber, 5);
                     }
                 } else {
-                    myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+                    Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
                 }
             }//GEN-LAST:event_mnuGetTideActionPerformed
 
@@ -4454,9 +4462,9 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 
                 if (Main.Connected) {
                     Main.TX_Text += "~GETNEAR\n";
-                    myarq.Message(mainpskmailui.getString("Getting_APRS_stations_near_you..."), 5);
+                    Main.q.Message(mainpskmailui.getString("Getting_APRS_stations_near_you..."), 5);
                 } else {
-                    myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+                    Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
                 }
             }//GEN-LAST:event_mnuGetAPRSActionPerformed
 
@@ -4464,9 +4472,9 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                 // TODO add your handling code here:
                 if (Main.Connected) {
                     Main.TX_Text += "~GETSERVERS\n";
-                    myarq.Message(mainpskmailui.getString("Getting_list_of_servers_from_the_web..."), 5);
+                    Main.q.Message(mainpskmailui.getString("Getting_list_of_servers_from_the_web..."), 5);
                 } else {
-                    myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+                    Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
                 }
             }//GEN-LAST:event_mnuGetServerfqActionPerformed
 
@@ -4474,9 +4482,9 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                 // TODO add your handling code here:
                 if (Main.Connected) {
                     Main.TX_Text += "~GETNEWS\n";
-                    myarq.Message(mainpskmailui.getString("Trying_to_get_the_news_from_the_web..."), 5);
+                    Main.q.Message(mainpskmailui.getString("Trying_to_get_the_news_from_the_web..."), 5);
                 } else {
-                    myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+                    Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
                 }
             }//GEN-LAST:event_mnuGetPskmailNewsActionPerformed
 
@@ -4484,7 +4492,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                 // TODO add your handling code here:
                 mysession.deleteFile("headers");
                 mysession.makeFile("headers");
-                myarq.Message(mainpskmailui.getString("Delete_list_of_mail_headers..."), 5);
+                Main.q.Message(mainpskmailui.getString("Delete_list_of_mail_headers..."), 5);
                 // Refresh the view
                 refreshEmailGrids();
             }//GEN-LAST:event_mnuHeadersActionPerformed
@@ -4493,7 +4501,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                 if (Main.Connected) {
                     SendEmailWhileConnected();
                 } else {
-                    myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+                    Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
                 }
 }//GEN-LAST:event_SendButtonActionPerformed
 
@@ -4501,9 +4509,9 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                 // TODO add your handling code here:
                 if (Main.Connected | Main.TTYConnected.equals("Connected")) {
                     Main.TX_Text += "~LISTFILES\n";
-                    myarq.Message(mainpskmailui.getString("Requesting_files_list..."), 5);
+                    Main.q.Message(mainpskmailui.getString("Requesting_files_list..."), 5);
                 } else {
-                    myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+                    Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
                 }
             }//GEN-LAST:event_ListFilesButtonActionPerformed
 
@@ -4513,12 +4521,12 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                     String file = txtMainEntry.getText();
                     if (file.length() > 0) {
                         Main.TX_Text += "~GETBIN " + file + "\n";
-                        myarq.Message(mainpskmailui.getString("Requsting_file_") + file, 5);
+                        Main.q.Message(mainpskmailui.getString("Requsting_file_") + file, 5);
                     } else {
-                        myarq.Message(mainpskmailui.getString("Which_file_shall_I_get?"), 5);
+                        Main.q.Message(mainpskmailui.getString("Which_file_shall_I_get?"), 5);
                     }
                 } else {
-                    myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+                    Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
                 }
             }//GEN-LAST:event_DownloadButtonActionPerformed
 
@@ -4528,18 +4536,18 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                     Main.TX_Text += ("~QUIT" + "\n");
                     lblStatus.setText(mainpskmailui.getString("Discon"));
                     lblStatus.setForeground(Color.RED);
-                    myarq.Message(mainpskmailui.getString("trying_to_disconnect..."), 5);
+                    Main.q.Message(mainpskmailui.getString("trying_to_disconnect..."), 5);
                     mysession.FileDownload = false;
 
                 } else {
                     try {
-                        myarq.send_rsid_command("ON");
-                        myarq.set_txstatus(txstatus.TXConnect);
+                        Main.m.setRxRsid("ON");
+                        Main.q.set_txstatus(txstatus.TXConnect);
                         Main.Connecting = true;
                         Main.connectingPhase = true;
                         Connect_time = 5;
-                        myarq.send_frame("");
-                        myarq.Message(mainpskmailui.getString("Choose_File_to_read..."), 5);
+                        Main.q.send_frame("");
+                        Main.q.Message(mainpskmailui.getString("Choose_File_to_read..."), 5);
                     } catch (InterruptedException ex) {
                         Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -4555,6 +4563,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                     Main.Status = mainpskmailui.getString("Listening");
                     Main.Connected = false;
                     disableMboxMenu();
+                    enableMnuPreferences2();
                     Main.TTYConnected = "";
                     mysession.FileDownload = false;
                     try {
@@ -4562,25 +4571,25 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                             mysession.pFile.close();
                         }
                     } catch (IOException e) {
-                        myarq.Message("Cannot close pending file", 10);
+                        Main.q.Message("Cannot close pending file", 10);
                     }
 
                     bConnect.setText(java.util.ResourceBundle.getBundle("javapskmail/mainpskmailui").getString("Connect"));
                     Conn_connect.setText(java.util.ResourceBundle.getBundle("javapskmail/mainpskmailui").getString("Connect"));
                     FileConnect.setText(java.util.ResourceBundle.getBundle("javapskmail/mainpskmailui").getString("Connect"));
-                    myarq.send_abort();
-            myarq.Message(mainpskmailui.getString("Aborting..."), 5);//GEN-LAST:event_FileAbortButtonActionPerformed
+                    Main.q.send_abort();
+            	    Main.q.Message(mainpskmailui.getString("Aborting..."), 5);
         } catch (InterruptedException ex) {
             Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
+    }//GEN-LAST:event_FileAbortButtonActionPerformed
 
             private void UpdateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UpdateButtonActionPerformed
                 // TODO add your handling code here:
                 if (!Main.Connected) {
-                    myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+                    Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
                 } else {
-                    myarq.Message(mainpskmailui.getString("Choose_File_to_update..."), 5);
+                    Main.q.Message(mainpskmailui.getString("Choose_File_to_update..."), 5);
                     if (evt.getSource() == UpdateButton) {
                         File downloads = new File(Main.HomePath + Main.Dirprefix + "Downloads" + Main.Separator);
                         String myfile = "";
@@ -4592,7 +4601,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                         File dfile = new File(Main.HomePath + Main.Dirprefix + "Downloads" + Main.Separator + myfile);
                         if (dfile.isFile()) {
                             Main.TX_Text += "~GETBIN " + myfile + "\n";
-                            myarq.Message(mainpskmailui.getString("Updating_") + myfile, 5);
+                            Main.q.Message(mainpskmailui.getString("Updating_") + myfile, 5);
                         }
 
                     }
@@ -4603,9 +4612,9 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                 // TODO add your handling code here:
                 if (Main.Connected) {
                     Main.TX_Text += "~LISTLOCAL\n";
-                    myarq.Message(mainpskmailui.getString("Requesting_list_of_local_mails_on_the_server"), 5);
+                    Main.q.Message(mainpskmailui.getString("Requesting_list_of_local_mails_on_the_server"), 5);
                 } else {
-                    myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+                    Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
                 }
             }//GEN-LAST:event_mnuMboxListActionPerformed
 
@@ -4615,12 +4624,12 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                     String number = txtMainEntry.getText();
                     if (number.length() > 0) {
                         Main.TX_Text += "~READLOCAL " + number + "\n";
-                        myarq.Message(mainpskmailui.getString("Reading_local_mail_") + number + mainpskmailui.getString("_on_the_server"), 5);
+                        Main.q.Message(mainpskmailui.getString("Reading_local_mail_") + number + mainpskmailui.getString("_on_the_server"), 5);
                     } else {
-                        myarq.Message(mainpskmailui.getString("Which_email?_(need_number...)"), 5);
+                        Main.q.Message(mainpskmailui.getString("Which_email?_(need_number...)"), 5);
                     }
                 } else {
-                    myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+                    Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
                 }
             }//GEN-LAST:event_mnuMboxReadActionPerformed
 
@@ -4630,10 +4639,10 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                     String number = txtMainEntry.getText();
                     if (number.length() > 0) {
                         Main.TX_Text += "~DELETELOCAL " + number + "\n";
-                        myarq.Message(mainpskmailui.getString("Deleting_mail_nr._") + number + mainpskmailui.getString("on_the_server"), 5);
+                        Main.q.Message(mainpskmailui.getString("Deleting_mail_nr._") + number + mainpskmailui.getString("on_the_server"), 5);
                     }
                 } else {
-                    myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+                    Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
                 }
             }//GEN-LAST:event_mnuMboxDeleteActionPerformed
 
@@ -4737,7 +4746,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                     break;
             }
         } catch (NoClassDefFoundError ne) {
-            myarq.Message("Error setting mode", 5);
+            Main.q.Message("Error setting mode", 5);
         }
 */
     }
@@ -4775,7 +4784,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                     mysession.pFile.close();
                 }
             } catch (IOException e) {
-                myarq.Message("Cannot close pending file", 10);
+                Main.q.Message("Cannot close pending file", 10);
             }
 
         } else if (Main.TTYConnected.equals("Connected")) {
@@ -4792,15 +4801,15 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                     Connect_time = 5;
                     lblStatus.setText(mainpskmailui.getString("Connecting"));
                     lblStatus.setForeground(Color.RED);
-                    myarq.Message(mainpskmailui.getString("Connecting,_waiting_for_channel..."), 5);
+                    Main.q.Message(mainpskmailui.getString("Connecting,_waiting_for_channel..."), 5);
                 } else {
                     Main.Connecting = true;
                     Main.connectingPhase = true;
                     Connect_time = 5;
-                    myarq.send_rsid_command("ON");
-                    myarq.set_txstatus(txstatus.TXConnect);
-                    myarq.send_frame("");
-                    myarq.Message(mainpskmailui.getString("Sending_Connect_request..."), 5);
+                    Main.m.setRxRsid("ON");
+                    Main.q.set_txstatus(txstatus.TXConnect);
+                    Main.q.send_frame("");
+                    Main.q.Message(mainpskmailui.getString("Sending_Connect_request..."), 5);
                 }
             } catch (InterruptedException ex) {
                 Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
@@ -4823,7 +4832,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
         if (Main.Connected) {
             try {
 
-                myarq.send_abort();
+                Main.q.send_abort();
             } catch (InterruptedException ex) {
                 Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -4832,49 +4841,47 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                     Main.sm.pFile.close();
                 }
             } catch (IOException e) {
-                myarq.Message("Cannot close pending file", 10);
+                Main.q.Message("Cannot close pending file", 10);
             }
             try {
                 if (Main.sm.dlFile != null) {
                     Main.sm.dlFile.close();
                 }
             } catch (IOException e) {
-                myarq.Message("Cannot close pending file", 10);
+                Main.q.Message("Cannot close pending file", 10);
             }
 
         } else if (Main.TTYConnected.equals("Connected")) {
             try {
-                myarq.send_abort();
+                Main.q.send_abort();
             } catch (InterruptedException ex) {
                 Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             try {
 //                        Main.Connected = true;
+                enableMnuPreferences2();
                 disableMboxMenu();
-                myarq.send_abort();
+                Main.q.send_abort();
             } catch (InterruptedException ex) {
                 Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         }
-
         bConnect.setText(java.util.ResourceBundle.getBundle("javapskmail/mainpskmailui").getString("Connect"));
         Conn_connect.setText(java.util.ResourceBundle.getBundle("javapskmail/mainpskmailui").getString("Connect"));
         FileConnect.setText(java.util.ResourceBundle.getBundle("javapskmail/mainpskmailui").getString("Connect"));
-
         Main.Connected = false;
         Main.TTYConnected = "";
         mysession.FileDownload = false;
-
-        myarq.send_mode_command(Main.defaultmode);
-
+        Main.m.setModemModeNow(Main.defaultmode);
     }
 
+    /* Not used
     private void SendButtonAction() {
         if (Main.Connected) {
 //            FileReader out = null;
-            myarq.Message(mainpskmailui.getString("Trying_to_send_your_email..."), 5);
+            Main.q.Message(mainpskmailui.getString("Trying_to_send_your_email..."), 5);
             if (Main.compressedmail) {
                 try {
 
@@ -4980,7 +4987,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                                 String callsign = Main.configuration.getPreference("CALL");
                                 callsign = callsign.trim();
                                 //String servercall = Main.configuration.getPreference("SERVER");
-                                String servercall = myarq.getServer().trim();
+                                String servercall = Main.q.getServer().trim();
                                 servercall = servercall.trim();
                                 Main.TX_Text += ">FM:" + callsign + ":" + servercall + ":" + filename + ":s: :" + lengthstr + "\n";
                             }
@@ -5028,20 +5035,21 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                 }
             }
         } else {
-            myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+            Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
         }
     }
+    */
 
 private void mnuPSK63ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuPSK63ActionPerformed
     try {
         modemmodeenum mymode = modemmodeenum.PSK63;
         updatemodeset(mymode);
         Main.RxModemString = "PSK63";
-        myarq.send_mode_command(mymode);
+        Main.m.setModemModeNow(mymode);
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
     }
-    myarq.Message(mainpskmailui.getString("Switching_modem_to_PSK63"), 5);
+    Main.q.Message(mainpskmailui.getString("Switching_modem_to_PSK63"), 5);
 }//GEN-LAST:event_mnuPSK63ActionPerformed
 
 private void mnuPSK125ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuPSK125ActionPerformed
@@ -5049,11 +5057,11 @@ private void mnuPSK125ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
         modemmodeenum mymode = modemmodeenum.PSK125;
         updatemodeset(mymode);
         Main.RxModemString = "PSK125";
-        myarq.send_mode_command(mymode);
+        Main.m.setModemModeNow(mymode);
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
     }
-    myarq.Message(mainpskmailui.getString("Switching_modem_to_PSK125"), 5);
+    Main.q.Message(mainpskmailui.getString("Switching_modem_to_PSK125"), 5);
 }//GEN-LAST:event_mnuPSK125ActionPerformed
 
 private void mnuPSK250ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuPSK250ActionPerformed
@@ -5061,11 +5069,11 @@ private void mnuPSK250ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
         modemmodeenum mymode = modemmodeenum.PSK250;
         updatemodeset(mymode);
         Main.RxModemString = "PSK250";
-        myarq.send_mode_command(mymode);
+        Main.m.setModemModeNow(mymode);
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
     }
-    myarq.Message(mainpskmailui.getString("Switching_modem_to_PSK250"), 5);
+    Main.q.Message(mainpskmailui.getString("Switching_modem_to_PSK250"), 5);
 }//GEN-LAST:event_mnuPSK250ActionPerformed
 
 private void mnuTHOR22ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuTHOR22ActionPerformed
@@ -5075,20 +5083,20 @@ private void mnuTHOR22ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
         Main.RxModemString = "THOR22";
         Main.TxModem = mymode;
         Main.RxModem = mymode;
-        myarq.send_mode_command(mymode);
+        Main.m.setModemModeNow(mymode);
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
     }
-    myarq.Message(mainpskmailui.getString("Switching_modem_to_THOR22"), 5);
+    Main.q.Message(mainpskmailui.getString("Switching_modem_to_THOR22"), 5);
 }//GEN-LAST:event_mnuTHOR22ActionPerformed
 
 private void mnuModeQSYActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuModeQSYActionPerformed
     // TODO add your handling code here:
     if (Main.Connected) {
         Main.TX_Text += "~QSY!\n";
-        myarq.Message(mainpskmailui.getString("Asking_the_server_to_QSY"), 5);
+        Main.q.Message(mainpskmailui.getString("Asking_the_server_to_QSY"), 5);
     } else {
-        myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+        Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
     }
 }//GEN-LAST:event_mnuModeQSYActionPerformed
 
@@ -5100,9 +5108,9 @@ private void menuMessagesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
     // TODO add your handling code here:
     if (Main.Connected) {
         Main.TX_Text += "~/~GETMSG\n";
-        myarq.Message(mainpskmailui.getString("Getting_list_of_messages_from_the_web..."), 5);
+        Main.q.Message(mainpskmailui.getString("Getting_list_of_messages_from_the_web..."), 5);
     } else {
-        myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+        Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
     }
 }//GEN-LAST:event_menuMessagesActionPerformed
 
@@ -5163,13 +5171,13 @@ private void GetGribActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
     Pattern pgs = Pattern.compile(".*(\\d+\\w,\\d+\\w,\\d+\\w,\\d+\\w).*");
     Matcher mgs = pgs.matcher(gribsquare);
     if (!mgs.find()) {
-        myarq.Message(mainpskmailui.getString("Format_error:") + gribsquare, 10);
+        Main.q.Message(mainpskmailui.getString("Format_error:") + gribsquare, 10);
     } else {
         if (Main.Connected) {
             Main.TX_Text += "~SEND\nTo: query@saildocs.com\nSubject: none\n\n" + gribsquare + "\n.\n.\n";
         } else {
 
-            myarq.Message(mainpskmailui.getString("Connect_first..."), 10);
+            Main.q.Message(mainpskmailui.getString("Connect_first..."), 10);
         }
     }
 }//GEN-LAST:event_GetGribActionPerformed
@@ -5189,13 +5197,13 @@ private void spnMinuteStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIR
 private void cboServerFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_cboServerFocusLost
     try {
         String myServer = cboServer.getSelectedItem().toString();
-        String OldServer = myarq.getServer();
+        String OldServer = Main.q.getServer();
         if (myServer.length() > 1 && !myServer.equals(OldServer)) {
-            myarq.setServer(myServer);
+            Main.q.setServerAndPassword(myServer);
             //VK2ETA not anymore
             //Main.configuration.setServer(myServer);
             //But save in Main too
-            Main.q.setServer(myServer);
+            Main.q.setServerAndPassword(myServer);
             //serverInput(myServer);
         }
     } catch (Exception ex) {
@@ -5213,17 +5221,17 @@ private void cboServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
         //Only if we don't have an empty list
         if (cboServer.getItemCount() > 0) {
             String myServer = cboServer.getSelectedItem().toString();
-            String OldServer = myarq.getServer();
+            String OldServer = Main.q.getServer();
             // Is it a a new and not empty thing?
             if (myServer.length() > 1 && !myServer.equals(OldServer)) {
-                myarq.setServer(myServer);
+                Main.q.setServerAndPassword(myServer);
                 Rigctl.Loadfreqs(myServer);
                 //VK2ETA: Not done here anymore, done in preferences
                 //Main.configuration.setServer(myServer);
                 // Update the server array and add item to drop down
                 //Main.AddServerToArray(myServer);
                 //Also save in Main.q for blocks processing
-                Main.q.setServer(myServer);
+                Main.q.setServerAndPassword(myServer);
             }
         }
     } catch (Exception ex) {
@@ -5236,9 +5244,9 @@ private void Ping_menu_itemActionPerformed(java.awt.event.ActionEvent evt) {//GE
     // TODO add your handling code here:
     if (!Main.Connected & !Main.Connecting & !Main.Bulletinmode & !Main.IACmode) {
         try {
-            myarq.Message(mainpskmailui.getString("send_ping"), 5);
-            myarq.set_txstatus(txstatus.TXPing);
-            myarq.send_ping();
+            Main.q.Message(mainpskmailui.getString("send_ping"), 5);
+            Main.q.set_txstatus(txstatus.TXPing);
+            Main.q.send_ping();
         } catch (InterruptedException ex) {
             Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -5249,9 +5257,9 @@ private void Link_menu_itemActionPerformed(java.awt.event.ActionEvent evt) {//GE
     // TODO add your handling code here:
     if (!Main.Connected & !Main.Connecting & !Main.Bulletinmode & !Main.IACmode) {
         try {
-            myarq.Message(mainpskmailui.getString("Link_to_server"), 5);
-            myarq.set_txstatus(txstatus.TXlinkreq);
-            myarq.send_link();
+            Main.q.Message(mainpskmailui.getString("Link_to_server"), 5);
+            Main.q.set_txstatus(txstatus.TXlinkreq);
+            Main.q.send_link();
             Main.sending_link = 5;
         } catch (InterruptedException ex) {
             Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
@@ -5263,21 +5271,21 @@ private void Link_menu_itemActionPerformed(java.awt.event.ActionEvent evt) {//GE
 private void Beacon_menu_itemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Beacon_menu_itemActionPerformed
     try {
         // TODO add your handling code here:
-        myarq.Message(mainpskmailui.getString("Send_Beacon"), 5);
-        myarq.set_txstatus(txstatus.TXBeacon);
-            myarq.send_beacon();//GEN-LAST:event_Beacon_menu_itemActionPerformed
+        Main.q.Message(mainpskmailui.getString("Send_Beacon"), 5);
+        Main.q.set_txstatus(txstatus.TXBeacon);
+        Main.q.send_beacon();
         } catch (InterruptedException ex) {
             Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
+    }//GEN-LAST:event_Beacon_menu_itemActionPerformed
 
 private void WWV_menu_itemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WWV_menu_itemActionPerformed
     // TODO add your handling code here:
     if (Main.Connected) {
         Main.TX_Text += "~GETWWV\n";
-        myarq.Message(mainpskmailui.getString("Getting_WWV_Info_from_the_web..."), 5);
+        Main.q.Message(mainpskmailui.getString("Getting_WWV_Info_from_the_web..."), 5);
     } else {
-        myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+        Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
     }
 
 }//GEN-LAST:event_WWV_menu_itemActionPerformed
@@ -5298,11 +5306,11 @@ private void jRadioButtonMenuItemTHOR11ActionPerformed(java.awt.event.ActionEven
         Main.TxModem = mymode;
         Main.RxModem = mymode;
         Main.RxModemString = "DOMINOEX5";
-        myarq.send_mode_command(mymode);
+        Main.m.setModemModeNow(mymode);
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
     }
-    myarq.Message(mainpskmailui.getString("Switching_modem_to_DomEx5"), 5);
+    Main.q.Message(mainpskmailui.getString("Switching_modem_to_DomEx5"), 5);
 }//GEN-LAST:event_jRadioButtonMenuItemTHOR11ActionPerformed
 
 private void jRadioButtonMenuItemMFSK16ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItemMFSK16ActionPerformed
@@ -5311,11 +5319,11 @@ private void jRadioButtonMenuItemMFSK16ActionPerformed(java.awt.event.ActionEven
         updatemodeset(mymode);
         Main.TxModem = mymode;
         Main.RxModemString = "MFSK16";
-        myarq.send_mode_command(mymode);
+        Main.m.setModemModeNow(mymode);
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
     }
-    myarq.Message(mainpskmailui.getString("Switching_modem_to_MFSK16"), 5);
+    Main.q.Message(mainpskmailui.getString("Switching_modem_to_MFSK16"), 5);
 }//GEN-LAST:event_jRadioButtonMenuItemMFSK16ActionPerformed
 
 private void jRadioButtonMenuItemMFSK22ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItemMFSK22ActionPerformed
@@ -5324,11 +5332,11 @@ private void jRadioButtonMenuItemMFSK22ActionPerformed(java.awt.event.ActionEven
         updatemodeset(mymode);
         Main.TxModem = mymode;
         Main.RxModemString = "MFSK16";
-        myarq.send_mode_command(mymode);
+        Main.m.setModemModeNow(mymode);
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
     }
-    myarq.Message(mainpskmailui.getString("Switching_modem_to_MFSK16"), 5);
+    Main.q.Message(mainpskmailui.getString("Switching_modem_to_MFSK16"), 5);
 }//GEN-LAST:event_jRadioButtonMenuItemMFSK22ActionPerformed
 
 private void jRadioButtonMenuItemMFSK32ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItemMFSK32ActionPerformed
@@ -5338,11 +5346,11 @@ private void jRadioButtonMenuItemMFSK32ActionPerformed(java.awt.event.ActionEven
         updatemodeset(mymode);
         Main.TxModem = mymode;
         Main.RxModemString = "MFSK32";
-        myarq.send_mode_command(mymode);
+        Main.m.setModemModeNow(mymode);
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
     }
-    myarq.Message(mainpskmailui.getString("Switching_modem_to_MFSK32"), 5);
+    Main.q.Message(mainpskmailui.getString("Switching_modem_to_MFSK32"), 5);
 }//GEN-LAST:event_jRadioButtonMenuItemMFSK32ActionPerformed
 
 private void jRadioButtonMenuItemTHOR8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonMenuItemTHOR8ActionPerformed
@@ -5351,19 +5359,19 @@ private void jRadioButtonMenuItemTHOR8ActionPerformed(java.awt.event.ActionEvent
         updatemodeset(mymode);
         Main.TxModem = mymode;
         Main.RxModemString = "THOR8";
-        myarq.send_mode_command(mymode);
+        Main.m.setModemModeNow(mymode);
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
     }
-    myarq.Message(mainpskmailui.getString("Switching_modem_to_THOR8"), 5);
+    Main.q.Message(mainpskmailui.getString("Switching_modem_to_THOR8"), 5);
 }//GEN-LAST:event_jRadioButtonMenuItemTHOR8ActionPerformed
 
 private void chkAutoLinkStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_chkAutoLinkStateChanged
     if (this.chkAutoLink.isSelected()) {
-        myarq.Message(mainpskmailui.getString("Autolink_on"), 5);
+        Main.q.Message(mainpskmailui.getString("Autolink_on"), 5);
         Main.configuration.setAutolink("1");
     } else {
-        myarq.Message(mainpskmailui.getString("Autolink_off"), 5);
+        Main.q.Message(mainpskmailui.getString("Autolink_off"), 5);
         Main.configuration.setAutolink("0");
     }
 
@@ -5373,9 +5381,9 @@ private void Update_serverActionPerformed(java.awt.event.ActionEvent evt) {//GEN
     // TODO add your handling code here:
     //if (Main.Connected) {
     mysession.sendUpdate();
-    myarq.Message("Sending record to server", 5);
+    Main.q.Message("Sending record to server", 5);
     //   } else {
-    //       myarq.Message("You need to connect first...", 5);
+    //       Main.q.Message("You need to connect first...", 5);
     //   }
 }//GEN-LAST:event_Update_serverActionPerformed
 
@@ -5386,11 +5394,11 @@ private void mnuPSK500ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
         updatemodeset(mymode);
         Main.TxModem = mymode;
         Main.RxModemString = "PSK500";
-        myarq.send_mode_command(mymode);
+        Main.m.setModemModeNow(mymode);
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
     }
-    myarq.Message(mainpskmailui.getString("Switching_modem_to_PSK500"), 5);
+    Main.q.Message(mainpskmailui.getString("Switching_modem_to_PSK500"), 5);
 }//GEN-LAST:event_mnuPSK500ActionPerformed
 
 
@@ -5401,11 +5409,11 @@ private void mnuPSK125RActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
             updatemodeset(mymode);
             Main.TxModem = mymode;
             Main.RxModemString = "PSK125R";
-            myarq.send_mode_command(mymode);
+            Main.m.setModemModeNow(mymode);
         } catch (Exception ex) {
             Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
         }
-        myarq.Message(mainpskmailui.getString("Switching_modem_to_PSK125R"), 5);
+        Main.q.Message(mainpskmailui.getString("Switching_modem_to_PSK125R"), 5);
     }
 
 private void mnuPSK250RActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuPSK250RActionPerformed
@@ -5415,11 +5423,11 @@ private void mnuPSK250RActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
             updatemodeset(mymode);
             Main.TxModem = mymode;
             Main.RxModemString = "PSK250R";
-            myarq.send_mode_command(mymode);
+            Main.m.setModemModeNow(mymode);
         } catch (Exception ex) {
             Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
         }
-        myarq.Message(mainpskmailui.getString("Switching_modem_to_PSK250R"), 5);
+        Main.q.Message(mainpskmailui.getString("Switching_modem_to_PSK250R"), 5);
     }
 
 
@@ -5429,13 +5437,12 @@ private void mnuPSK500RActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
         modemmodeenum mymode = modemmodeenum.PSK500R;
         updatemodeset(mymode);
         Main.TxModem = mymode;
-        Main.RxModem = mymode;
         Main.RxModemString = "PSK500R";
-        myarq.send_mode_command(mymode);
+        Main.m.setModemModeNow(mymode);
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
     }
-    myarq.Message(mainpskmailui.getString("Switching_modem_to_PSK500R"), 5);
+    Main.q.Message(mainpskmailui.getString("Switching_modem_to_PSK500R"), 5);
 }//GEN-LAST:event_mnuPSK500RActionPerformed
 
 
@@ -5473,9 +5480,9 @@ private void FilesTxtAreaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRS
             if (Main.Connected & !filestr.equals("0")) {
                 txtMainEntry.setText("");
                 Main.TX_Text += "~GETBIN " + filestr + "\n";
-                myarq.Message(mainpskmailui.getString("Downloading_file_") + filestr, 15);
+                Main.q.Message(mainpskmailui.getString("Downloading_file_") + filestr, 15);
             } else {
-                myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 10);
+                Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 10);
             }
         }
     }
@@ -5652,10 +5659,10 @@ private void bSummonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
                                Main.Connecting = true;
                                Main.connectingPhase = true;
                                Main.Connecting_time = 5;
-                               myarq.send_rsid_command("ON");
-                               myarq.set_txstatus(txstatus.TXSummon);
-                               myarq.send_frame("");
-                               myarq.Message(mainpskmailui.getString("Sending_Summon_request..."), 5);
+                               Main.q.send_rsid_command("ON");
+                               Main.q.set_txstatus(txstatus.TXSummon);
+                               Main.q.send_frame("");
+                               Main.q.Message(mainpskmailui.getString("Sending_Summon_request..."), 5);
 
                         }
                        catch (InterruptedException ex) {
@@ -5741,9 +5748,9 @@ private void jGetIACActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
     // TODO add your handling code here:
     if (Main.Connected) {
         Main.TX_Text += "~GETIAC\n";
-        myarq.Message(mainpskmailui.getString("Getting_IAC_Fleetcodes..."), 5);
+        Main.q.Message(mainpskmailui.getString("Getting_IAC_Fleetcodes..."), 5);
     } else {
-        myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+        Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
     }
 
 }//GEN-LAST:event_jGetIACActionPerformed
@@ -5885,7 +5892,7 @@ private void FileSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GE
                         Main.TX_Text += "~FO5:" + mysession.mycall + ":" + Destination + ":"
                                 + token + ":u:" + myfile
                                 + ":" + Long.toString(mycodedFile.length()) + "\n";
-                        myarq.Message(mainpskmailui.getString("Uploading_") + myfile, 5);
+                        Main.q.Message(mainpskmailui.getString("Uploading_") + myfile, 5);
                         Main.filetype = "u";
                     }
                 }
@@ -5946,7 +5953,7 @@ private void mnuUploadsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
         }
     }
 
-    myarq.Message("Deleting pending files", 10);
+    Main.q.Message("Deleting pending files", 10);
 }//GEN-LAST:event_mnuUploadsActionPerformed
 
 private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
@@ -6208,13 +6215,12 @@ private void PrefSaveMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
 
     /**
      * Archive of the old method. Only sends one email per event. I want to
-     * change that
-     */
+     * Not used
     private void ArchivedEmailSendButtonActionPerformed() {
         // TODO add your handling code here:
         if (Main.Connected) {
 //            FileReader out = null;
-            myarq.Message(mainpskmailui.getString("Trying_to_send_your_email..."), 5);
+            Main.q.Message(mainpskmailui.getString("Trying_to_send_your_email..."), 5);
             if (Main.compressedmail) {
                 try {
 
@@ -6320,7 +6326,7 @@ private void PrefSaveMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
                                 String callsign = Main.configuration.getPreference("CALL");
                                 callsign = callsign.trim();
                                 //String servercall = Main.configuration.getPreference("SERVER");
-                                String servercall = myarq.getServer().trim();
+                                String servercall = Main.q.getServer().trim();
                                 servercall = servercall.trim();
                                 Main.TX_Text += ">FM:" + callsign + ":" + servercall + ":" + filename + ":s: :" + lengthstr + "\n";
                             }
@@ -6368,9 +6374,10 @@ private void PrefSaveMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
                 }
             }
         } else {
-            myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+            Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
         }
     }
+     */
 
     /**
      * Send Email button pushed, should initiate a transfer of all messages if
@@ -6382,7 +6389,7 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
     if (Main.Connected) {
         SendEmailWhileConnected();
     } else {
-        myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+        Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
     }
 }//GEN-LAST:event_EmailSendButtonActionPerformed
 
@@ -6391,7 +6398,7 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
      */
     private void SendEmailWhileConnected() {
         // Lets update the status so the user knows something is happening
-        myarq.Message(mainpskmailui.getString("Trying_to_send_your_email..."), 5);
+        Main.q.Message(mainpskmailui.getString("Trying_to_send_your_email..."), 5);
 
         try {
             if (Main.compressedmail) {
@@ -6533,7 +6540,7 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
             File dir = new File(Main.HomePath + Main.Dirprefix + "Outbox");
             File[] files = dir.listFiles();
 
-            if (files.length > 0 & files[0].length() > 0) {
+            if (files.length > 0 && files[0].length() > 0) {
                 // Check for a selected row in the outbox here
                 email myemail = this.GetSelectedOutboxRow();
                 if (myemail != null && myemail.getFileName().length() > 0) {
@@ -6598,7 +6605,7 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
                 String callsign = Main.configuration.getPreference("CALL");
                 callsign = callsign.trim();
                 //String servercall = Main.configuration.getPreference("SERVER");
-                String servercall = myarq.getServer().trim();
+                String servercall = Main.q.getServer().trim();
                 servercall = servercall.trim();
                 Main.TX_Text += ">FM:" + callsign + ":" + servercall + ":" + filename + ":s: :" + lengthstr + "\n";
             }
@@ -6653,8 +6660,8 @@ private void CQButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     // TODO add your handling code here:
     if (!Main.Connected) {
         try {
-            myarq.set_txstatus(txstatus.TXCQ);
-            myarq.send_frame("");
+            Main.q.set_txstatus(txstatus.TXCQ);
+            Main.q.send_frame("");
         } catch (InterruptedException ex) {
             Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -6822,7 +6829,7 @@ private void mnuMonitorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
     } else {
         Main.Monitor = true;
         mnuMonitor.setSelected(true);
-        myarq.send_rsid_command("ON");
+        Main.m.setRxRsid("ON");
     }
 }//GEN-LAST:event_mnuMonitorActionPerformed
 
@@ -6830,7 +6837,7 @@ private void mnuClearInboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN
     // TODO add your handling code here:
     mysession.deleteFile("Inbox");
     mysession.makeFile("Inbox");
-    myarq.Message("Clear Inbox", 5);
+    Main.q.Message("Clear Inbox", 5);
     // Refresh the view
     refreshEmailGrids();
 
@@ -6850,9 +6857,9 @@ private void mnuClearOutboxActionPerformed(java.awt.event.ActionEvent evt) {//GE
             }
 
             if (!n.delete()) {
-                myarq.Message("Couldn't remove " + n.getPath(), 5);
+                Main.q.Message("Couldn't remove " + n.getPath(), 5);
             } else {
-                myarq.Message("Clear Outbox", 5);
+                Main.q.Message("Clear Outbox", 5);
                 // Refresh the view
                 refreshEmailGrids();
             }
@@ -6866,9 +6873,9 @@ private void GetforecastActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
     // TODO add your handling code here:
     if (Main.Connected) {
         Main.TX_Text += "~GET2IAC\n";
-        myarq.Message(mainpskmailui.getString("Getting_IAC_Forecast..."), 5);
+        Main.q.Message(mainpskmailui.getString("Getting_IAC_Forecast..."), 5);
     } else {
-        myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+        Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
     }
 
 }//GEN-LAST:event_GetforecastActionPerformed
@@ -6877,17 +6884,17 @@ private void lblStatusMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
     // TODO add your handling code here:
     if (Main.Monitor) {
         Main.Monitor = false;
-        myarq.Message("Monitor OFF", 5);
+        Main.q.Message("Monitor OFF", 5);
         mnuMonitor.setSelected(false);
     } else if (Main.Bulletinmode) {
         Main.Bulletinmode = false;
         Main.Status = "Listening";
-        myarq.Message("Bulletin OFF", 5);
+        Main.q.Message("Bulletin OFF", 5);
     } else {
         Main.Monitor = true;
-        myarq.Message("Monitor ON", 5);
+        Main.q.Message("Monitor ON", 5);
         mnuMonitor.setSelected(true);
-        myarq.send_rsid_command("ON");
+        Main.m.setRxRsid("ON");
     }
 }//GEN-LAST:event_lblStatusMouseClicked
 
@@ -6943,9 +6950,9 @@ private void menuInquireActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
     // TODO add your handling code here:
     if (!Main.Connected & !Main.Connecting & !Main.Bulletinmode & !Main.IACmode) {
         try {
-            myarq.Message(mainpskmailui.getString("send_ping"), 5);
-            myarq.set_txstatus(txstatus.TXInq);
-            myarq.send_frame("");
+            Main.q.Message(mainpskmailui.getString("send_inquire"), 5);
+            Main.q.set_txstatus(txstatus.TXInq);
+            Main.q.send_frame("");
         } catch (InterruptedException ex) {
             Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -7087,7 +7094,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
      * @param evt
      */
     private void cboBeaconPeriodActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboBeaconPeriodActionPerformed
-        myarq.Message(mainpskmailui.getString("Updated_beacon_time"), 5);
+        Main.q.Message(mainpskmailui.getString("Updated_beacon_time"), 5);
         Main.configuration.setPreference("BEACONTIME", cboBeaconPeriod.getSelectedItem().toString());
     }//GEN-LAST:event_cboBeaconPeriodActionPerformed
 
@@ -7104,13 +7111,13 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             if (message.length() > 0) {
                 if (!Main.Connected) {
                     message = "TWEET " + message + "{01";
-                    myarq.set_txstatus(txstatus.TXUImessage);
-                    myarq.send_aprsmessage(message);
+                    Main.q.set_txstatus(txstatus.TXUImessage);
+                    Main.q.send_aprsmessage(message);
                 } else {
                     Main.TX_Text += "~TWEET " + message + "\n";
                 }
             } else {
-                myarq.Message(mainpskmailui.getString("What?"), 10);
+                Main.q.Message(mainpskmailui.getString("What?"), 10);
             }
         } catch (Exception e) {
             Main.log.writelog(mainpskmailui.getString("Problem_sending_tweet."), e, true);
@@ -7121,7 +7128,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         if (Main.Connected) {
             Main.TX_Text += "~GETUPDATE\n";
         } else {
-            myarq.Message(mainpskmailui.getString("Connect_first..."), 10);
+            Main.q.Message(mainpskmailui.getString("Connect_first..."), 10);
         }
     }//GEN-LAST:event_GetUpdatesmenuItemActionPerformed
 
@@ -7417,11 +7424,11 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             updatemodeset(mymode);
             Main.TxModem = mymode;
             Main.RxModemString = "MFSK32";
-            myarq.send_mode_command(mymode);
+            Main.m.setModemModeNow(mymode);
         } catch (Exception ex) {
             Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
         }
-        myarq.Message(mainpskmailui.getString("Switching_modem_to_MFSK32"), 5);
+        Main.q.Message(mainpskmailui.getString("Switching_modem_to_MFSK32"), 5);
     }//GEN-LAST:event_mnuMFSK32ActionPerformed
 
     private void mnuDOMINOEX22ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuDOMINOEX22ActionPerformed
@@ -7431,11 +7438,11 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             updatemodeset(mymode);
             Main.TxModem = mymode;
             Main.RxModemString = "DOMINOEX22";
-            myarq.send_mode_command(mymode);
+            Main.m.setModemModeNow(mymode);
         } catch (Exception ex) {
             Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
         }
-        myarq.Message(mainpskmailui.getString("Switching_modem_to_DomEx22"), 5);
+        Main.q.Message(mainpskmailui.getString("Switching_modem_to_DomEx22"), 5);
     }//GEN-LAST:event_mnuDOMINOEX22ActionPerformed
 
     private void mnuDOMINOEX11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuDOMINOEX11ActionPerformed
@@ -7445,11 +7452,11 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             updatemodeset(mymode);
             Main.TxModem = mymode;
             Main.RxModemString = "DOMINOEX11";
-            myarq.send_mode_command(mymode);
+            Main.m.setModemModeNow(mymode);
         } catch (Exception ex) {
             Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
         }
-        myarq.Message(mainpskmailui.getString("Switching_modem_to_DomEx11"), 5);
+        Main.q.Message(mainpskmailui.getString("Switching_modem_to_DomEx11"), 5);
     }//GEN-LAST:event_mnuDOMINOEX11ActionPerformed
 
     private void cboAPRS2ndActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboAPRS2ndActionPerformed
@@ -7517,7 +7524,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private void bRMsgReqPosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgReqPosActionPerformed
         if (selectedTo == "*") {
             //middleToastText("CAN'T Request Positions from \"ALL\"\n\nSelect a single TO destination above");
-            myarq.Message(mainpskmailui.getString("you_must_select_to"), 5);
+            Main.q.Message(mainpskmailui.getString("you_must_select_to"), 5);
         } else if (RMsgProcessor.matchMyCallWith(selectedTo, false)) {
             //middleToastText("CAN'T Request Positions from \"YOURSELF\"\n\nSelect another TO destination above");
         } else {
@@ -7529,7 +7536,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
 
     private void bRMsgResendLastActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgResendLastActionPerformed
         if (selectedTo.equals("*") && selectedVia.equals("")) {
-            myarq.Message(mainpskmailui.getString("you_must_select_to"), 5);
+            Main.q.Message(mainpskmailui.getString("you_must_select_to"), 5);
             //middleToastText("CAN'T Request Positions from \"ALL\"\n\nSelect a single TO destination above");
         //} else if (RMsgProcessor.matchMyCallWith(selectedTo, false)) {
             //middleToastText("CAN'T Request Positions from \"YOURSELF\"\n\nSelect another TO destination above");
@@ -7676,9 +7683,9 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             if (Main.Connected) {
                 txtMainEntry.setText("");
                 mysession.sendRead(mailstr);
-                myarq.Message(mainpskmailui.getString("Requesting_email_nr._") + mailstr, 15);
+                Main.q.Message(mainpskmailui.getString("Requesting_email_nr._") + mailstr, 15);
             } else {
-                myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 10);
+                Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 10);
             }
         } catch (Exception e) {
             Main.log.writelog("Issue after doubleclick on mail in header.", e, true);
@@ -7817,7 +7824,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
      */
     private void NewMail() {
         NewMailDialog NewDialog;
-        myarq.Message(mainpskmailui.getString("Write_new_email_message"), 5);
+        Main.q.Message(mainpskmailui.getString("Write_new_email_message"), 5);
 
         try {
             NewDialog = new NewMailDialog();
@@ -7836,7 +7843,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
      */
     public void ReplyMail(String to, String subject) {
         NewMailDialog NewDialog;
-        myarq.Message(mainpskmailui.getString("Write_reply_email_message"), 5);
+        Main.q.Message(mainpskmailui.getString("Write_reply_email_message"), 5);
         String re = mainpskmailui.getString("Reply_short");
 
         try {
@@ -7861,7 +7868,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
 
     public void ForwardMail(String subject, String content) {
         NewMailDialog NewDialog;
-        myarq.Message(mainpskmailui.getString("Write_forward_email_message"), 5);
+        Main.q.Message(mainpskmailui.getString("Write_forward_email_message"), 5);
         String fwd = mainpskmailui.getString("Forward_short");
 
         try {
@@ -7885,9 +7892,9 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             String mailnr = "";
             mailnr = mysession.getHeaderCount(Main.HomePath + Main.Dirprefix + "headers");
             mysession.sendQTC(mailnr);
-            myarq.Message(mainpskmailui.getString("Requesting_mail_headers_from_nr._") + mailnr, 5);
+            Main.q.Message(mainpskmailui.getString("Requesting_mail_headers_from_nr._") + mailnr, 5);
         } else {
-            myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+            Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
         }
     }
 
@@ -7896,12 +7903,12 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             String numbers = txtMainEntry.getText();
             if (numbers.length() > 0) {
                 mysession.sendDelete(numbers);
-                myarq.Message(mainpskmailui.getString("Trying_to_delete_mail_nr._") + numbers, 5);
+                Main.q.Message(mainpskmailui.getString("Trying_to_delete_mail_nr._") + numbers, 5);
             } else {
-                myarq.Message(mainpskmailui.getString("Which_mail_numbers?"), 5);
+                Main.q.Message(mainpskmailui.getString("Which_mail_numbers?"), 5);
             }
         } else {
-            myarq.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
+            Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
         }
     }
 
