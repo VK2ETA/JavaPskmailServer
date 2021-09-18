@@ -433,29 +433,12 @@ public class Modem implements Runnable {
         nextTxRsidCommand = s;
     }
 
-
-    //Just change the mode, don't send any data (for the preference screen)
-    public void ChangeMode(modemmodeenum Modem) {
-        if (!Main.TXActive) {
-            String SendMode = "";
-            String TXmd = getTXModemString(Modem);
-            String rxstring = getTXModemString(Main.defaultmode);
-            rxstring += "        ";
-            rxstring = rxstring.substring(0, 7);
-            Main.mainui.RXlabel.setText(rxstring);
-            //SendMode = "<cmd><mode>" + TXmd + "</mode></cmd>";
-            //Sendln(SendMode);
-            Sendln("", rxstring, ""); //Just change mode
-        }
-    }
-
     /**
      * Send a mode command to the modem
      */
     public void setModemModeNow(modemmodeenum mode) throws NullPointerException {
-        //String modestart = "<cmd><mode>";
-        //String modeend = "</mode></cmd>";
         String modeset = "";
+
         try {
             switch (mode) {
                 case PSK63:

@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "0.9.4.29";
+    static String version = "0.9.4.30";
     static String application = "jpskmailserver " + version;// Used to preset an empty status
-    static String versionDate = "20210917";
+    static String versionDate = "20210918";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -603,7 +603,6 @@ public class Main {
                                     // set the modem type for TX if client. For TTY server, adjust TX mode based on received s2n from TTY client.
                                     //Common data needed for later
                                     String pbyte = rxb.protocol;
-
                                     char pchr = pbyte.charAt(0);
                                     int pint = (int) pchr;
                                     if (TTYConnected.equals("Connected")) {
@@ -682,7 +681,6 @@ public class Main {
                                                 Main.mys2n = 50; //Reset to mid-range
                                             }
                                         }
-
                                     } else { //I am a client (protocol byte = my TX mode)
                                         //Turn RXid ON as I am a client
                                         m.setRxRsid("ON");
@@ -696,18 +694,15 @@ public class Main {
                                             TxModem = RxModem;
                                         }
                                     }
-
                                     //Moved processing of block before decision on mode upgrade
                                     if (Session.tx_missing.length() > 0 | Main.TX_Text.length() > 0) {
                                         String outstr = sm.doTXbuffer();
                                         q.send_data(outstr);
                                     } else {
                                         myrxstatus = sm.getTXStatus();
-
                                         q.send_status(myrxstatus);  // send our status
                                     }
                                     Main.validblock = true;
-
                                 } else if (Connected & (rxb.type.equals("p"))
                                         & rxb.valid & rxb.session.equals(session)) {
                                     sm.RXStatus(rxb.payload);   // parse incoming status packet
@@ -715,7 +710,7 @@ public class Main {
                                     myrxstatus = sm.getTXStatus();
                                     q.send_status(myrxstatus);  // send our status
                                     Main.txbusy = true;
-                                    // disconnect request
+                                    //Disconnect request
                                 } else if (Connected & rxb.type.equals("d") & (rxb.session.equals(session) | rxb.session.equals("0"))) {
                                     Status = "Listening";
                                     Connected = false;
@@ -739,9 +734,7 @@ public class Main {
                                 } else if (rxb.valid & rxb.session.equals(session)) {
                                     myrxstatus = sm.doRXBuffer(rxb.payload, rxb.type);
                                 } else if (rxb.session.equals(session)) {
-
                                     myrxstatus = sm.doRXBuffer("", rxb.type);
-
                                 }
 
                                 // PI4TUE 0.9.33-13:28:52-IM46>
@@ -1837,7 +1830,8 @@ public class Main {
             String strunt = configuration.getPreference("DEFAULTMODE");
             if (!strunt.isEmpty()) {
                 DefaultTXmodem = configuration.getPreference("DEFAULTMODE");
-                Main.defaultmode = convmodem(DefaultTXmodem);
+                defaultmode = convmodem(DefaultTXmodem);
+                LastTxModem = LastRxModem = DefaultTXmodem;
             } else {
                 DefaultTXmodem = "PSK250R";
                 Main.defaultmode = convmodem(DefaultTXmodem);

@@ -1489,6 +1489,7 @@ public class mainpskmailui extends javax.swing.JFrame {
         mnuHeadersFetch = new javax.swing.JMenuItem();
         modemnubuttons = new javax.swing.ButtonGroup();
         buttonGroupAlias = new javax.swing.ButtonGroup();
+        buttonGroupPartialDownloads = new javax.swing.ButtonGroup();
         tabMain = new javax.swing.JTabbedPane();
         tabTerminal = new javax.swing.JPanel();
         pnlTerminalButtons = new javax.swing.JPanel();
@@ -3315,14 +3316,14 @@ public class mainpskmailui extends javax.swing.JFrame {
                 cboServer.setFont(new java.awt.Font("DejaVu Sans Mono", 0, 12)); // NOI18N
                 cboServer.setMinimumSize(new java.awt.Dimension(150, 27));
                 cboServer.setPreferredSize(new java.awt.Dimension(150, 27));
-                cboServer.addActionListener(new java.awt.event.ActionListener() {
-                    public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        cboServerActionPerformed(evt);
-                    }
-                });
                 cboServer.addFocusListener(new java.awt.event.FocusAdapter() {
                     public void focusLost(java.awt.event.FocusEvent evt) {
                         cboServerFocusLost(evt);
+                    }
+                });
+                cboServer.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        cboServerActionPerformed(evt);
                     }
                 });
                 gridBagConstraints = new java.awt.GridBagConstraints();
@@ -3603,13 +3604,21 @@ public class mainpskmailui extends javax.swing.JFrame {
                 jSeparator8.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
                 mnuFile2.add(jSeparator8);
 
+                buttonGroupPartialDownloads.add(jRadioButtonAccept);
                 jRadioButtonAccept.setSelected(true);
                 jRadioButtonAccept.setText(bundle.getString("mainpskmailui.jRadioButtonAccept.text")); // NOI18N
+                jRadioButtonAccept.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        jRadioButtonAcceptActionPerformed(evt);
+                    }
+                });
                 mnuFile2.add(jRadioButtonAccept);
 
+                buttonGroupPartialDownloads.add(jRadioButtonReject);
                 jRadioButtonReject.setText(bundle.getString("mainpskmailui.jRadioButtonReject.text")); // NOI18N
                 mnuFile2.add(jRadioButtonReject);
 
+                buttonGroupPartialDownloads.add(jRadioButtonDelete);
                 jRadioButtonDelete.setText(bundle.getString("mainpskmailui.jRadioButtonDelete.text")); // NOI18N
                 mnuFile2.add(jRadioButtonDelete);
                 mnuFile2.add(jSeparator5);
@@ -4191,12 +4200,18 @@ private void mnuPreferencesActionPerformed(java.awt.event.ActionEvent evt) {//GE
                     break;
                 }
             }
-        }        
-        if (!foundLastServer) this.cboServer.setSelectedItem(Main.Servers[0]); //Try the first one if any
-        //this.txtServer.setText(myServer);
+        }
+        if (!foundLastServer) {
+            this.cboServer.setSelectedItem(Main.Servers[0]); //Try the first one if any
+        }        //this.txtServer.setText(myServer);
         //Did we change the default mode in the options?
         if (lastTxModem != Main.TxModem && !Main.Connected) {
-            Main.m.ChangeMode(Main.TxModem);
+            try {
+                Main.m.setModemModeNow(Main.TxModem);
+                Main.LastRxModem = Main.LastTxModem = Main.m.getModemString(Main.TxModem);
+            } catch (Exception ex) {
+                Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
+            }
         }
         // Update the gui with these settings
         if (!Main.HaveGPSD) {
@@ -5360,10 +5375,10 @@ private void jRadioButtonMenuItemTHOR8ActionPerformed(java.awt.event.ActionEvent
         Main.TxModem = mymode;
         Main.RxModemString = "THOR8";
         Main.m.setModemModeNow(mymode);
+        Main.q.Message(mainpskmailui.getString("Switching_modem_to_THOR8"), 5);
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Encountered_problem_when_setting_mode."), ex, true);
     }
-    Main.q.Message(mainpskmailui.getString("Switching_modem_to_THOR8"), 5);
 }//GEN-LAST:event_jRadioButtonMenuItemTHOR8ActionPerformed
 
 private void chkAutoLinkStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_chkAutoLinkStateChanged
@@ -5374,7 +5389,6 @@ private void chkAutoLinkStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-F
         Main.q.Message(mainpskmailui.getString("Autolink_off"), 5);
         Main.configuration.setAutolink("0");
     }
-
 }//GEN-LAST:event_chkAutoLinkStateChanged
 
 private void Update_serverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Update_serverActionPerformed
@@ -7633,6 +7647,10 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         }
     }//GEN-LAST:event_bContacts1ActionPerformed
 
+    private void jRadioButtonAcceptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonAcceptActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jRadioButtonAcceptActionPerformed
+
     /**
      * Simple message dialog with yes and no button
      *
@@ -8466,6 +8484,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JButton bRMsgSendSMS;
     private javax.swing.JButton bSummon;
     private javax.swing.ButtonGroup buttonGroupAlias;
+    private javax.swing.ButtonGroup buttonGroupPartialDownloads;
     private javax.swing.JCheckBox cbComp;
     private javax.swing.JComboBox cboAPRS2nd;
     private javax.swing.JComboBox cboAPRSIcon;

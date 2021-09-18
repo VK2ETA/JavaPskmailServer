@@ -21,17 +21,17 @@ package javapskmail;
  */
 public class Connectwindow extends javax.swing.JDialog {
 
-        String TXmodemstr = Main.LastTxModem;
+    String TXmodemstr = Main.LastTxModem;
     String RXmodemstr = Main.LastRxModem;
     String[] Modemstrings = {"default","THOR8","MFSK16","THOR22",
-                                            "MFSK32",  "PSK250R", 
-                                            "PSK500R", "PSK500", 
-                                            "PSK250","PSK125R","THOR11","DOMINOEX5","CTSTIA", "PSK1000",
-                                            "PSK63RC5", "PSK63RC10", "PSK250RC3", "PSK125RC4", "DOMINOEX22", "DOMINOEX11"};
-    String[] modemindicators = {"0","1","2","3","4","5","6","7","8","b","d","n","f", "g",  "h",  "i",  "j",  "k", "l", "m"};
+        "MFSK32",  "PSK250R", "PSK500R", "PSK500",
+        "PSK250", "PSK125R", "THOR11", "DOMINOEX5", "CTSTIA", "PSK1000",
+        "PSK63RC5", "PSK63RC10", "PSK250RC3", "PSK125RC4", "DOMINOEX22", "DOMINOEX11"};
+    String[] modemindicators = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "b", "d", "n", "f", "g", "h", "i", "j", "k", "l", "m"};
     modemmodeenum TXm;
     modemmodeenum RXm;
-    private java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("javapskmail/Bundle"); 
+    private boolean addingItems = false;
+    private java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("javapskmail/Bundle");
 
     /**
      * Creates new form Connectwindow
@@ -44,117 +44,161 @@ public class Connectwindow extends javax.swing.JDialog {
 //        Rigctl.Loadfreqs(myServer);
 
         // Add servers from main
-        for (int i = 0; i < Main.Servers.length; i++){
-            if (!Main.Servers[i].equals("")) cboServerConnect.addItem(Main.Servers[i]);
+        for (int i = 0; i < Main.Servers.length; i++) {
+            if (!Main.Servers[i].equals("")) {
+                cboServerConnect.addItem(Main.Servers[i]);
+            }
         }
         this.cboServerConnect.setSelectedItem(Main.mainui.cboServer.getSelectedItem());
-        
+
         //set modems
-            this.jComboBoxTXModem.removeAllItems();
-            this.jComboBoxRXModem.removeAllItems();       
+        this.jComboBoxTXModem.removeAllItems();
+        this.jComboBoxRXModem.removeAllItems();
 
-            int i = 0;
-            int k = 0;
-            int l = 0;
-            for (i = 0; i < Main.modes.length(); i++) {
-                    if (Main.modes.substring(i, i+1).equals("g")){
-                        jComboBoxTXModem.addItem("PSK1000");
-                        jComboBoxRXModem.addItem("PSK1000"); 
-                        if (Main.LastRxModem.equals("PSK1000")){
-                            l = k;
-                        }
-                        k++;
-                    } else if (Main.modes.substring(i, i+1).equals("7")) {
-                        jComboBoxTXModem.addItem("PSK500");
-                        jComboBoxRXModem.addItem("PSK500");
-                        if (Main.LastRxModem.equals("PSK500")){
-                            l = k;
-                        }
-                        k++;                        
-                     } else if (Main.modes.substring(i, i+1).equals("6")){
-                        jComboBoxTXModem.addItem("PSK500R");
-                        jComboBoxRXModem.addItem("PSK500R");
-                        if (Main.LastRxModem.equals("PSK500R")){
-                            l = k;
-                        }
-                        k++;
-                     } else if (Main.modes.substring(i, i+1).equals("5")){
-                        jComboBoxTXModem.addItem("PSK250R");
-                        jComboBoxRXModem.addItem("PSK250R");
-                        if (Main.LastRxModem.equals("PSK250R")){
-                            l = k;
-                        }
-                        k++;
-                     }else if (Main.modes.substring(i, i+1).equals("l")){
-                        jComboBoxTXModem.addItem("DOMINOEX22");
-                        jComboBoxRXModem.addItem("DOMINOEX22");
-                        if (Main.LastRxModem.equals("DOMINOEX22")){
-                            l = k;
-                        }
-                        k++;
-                     }else if (Main.modes.substring(i, i+1).equals("m")){
-                        jComboBoxTXModem.addItem("DOMINOEX11");
-                        jComboBoxRXModem.addItem("DOMINOEX11");
-                        if (Main.LastRxModem.equals("DOMINOEX11")){
-                            l = k;
-                        }
-                        k++;
-                     }else if (Main.modes.substring(i, i+1).equals("4")){
-                        jComboBoxTXModem.addItem("MFSK32");
-                        jComboBoxRXModem.addItem("MFSK32");
-                        if (Main.LastRxModem.equals("MFSK32")){
-                            l = k;
-                        }
-                        k++;
-                     }else if (Main.modes.substring(i, i+1).equals("3")){
-                        jComboBoxTXModem.addItem("THOR22");
-                        jComboBoxRXModem.addItem("THOR22");
-                        if (Main.LastRxModem.equals("THOR22")){
-                            l = k;
-                        }
-                        k++;
-                     }else if (Main.modes.substring(i, i+1).equals("2")){
-                        jComboBoxTXModem.addItem("MFSK16");
-                        jComboBoxRXModem.addItem("MFSK16");
-                        if (Main.LastRxModem.equals("PSK1000")){
-                            l = k;
-                        }
-                        k++;
-                     }else if (Main.modes.substring(i, i+1).equals("1")){
-                        jComboBoxTXModem.addItem("THOR8");
-                        jComboBoxRXModem.addItem("THOR8");
-                        if (Main.LastRxModem.equals("THOR8")){
-                            l = k;
-                        }
-                        k++;
-                     }else if (Main.modes.substring(i, i+1).equals("8")){
-                        jComboBoxTXModem.addItem("PSK250");
-                        jComboBoxRXModem.addItem("PSK250");
-                         if (Main.LastRxModem.equals("PSK250")){
-                            l = k;
-                        }
-                        k++;                   }else if (Main.modes.substring(i, i+1).equals("b")){
-                        jComboBoxTXModem.addItem("PSK125R");
-                        jComboBoxRXModem.addItem("PSK125R");
-                        if (Main.LastRxModem.equals("PSK125R")){
-                            l = k;
-                        }
-                        k++;
-                    }else if (Main.modes.substring(i, i+1).equals("n")){
-                        jComboBoxTXModem.addItem("DOMINOEX5");
-                        jComboBoxRXModem.addItem("DOMINOEX5");
-                        if (Main.LastRxModem.equals("DOMINOEX5")){
-                            l = k;
-                        }
-                        k++;                       
-                    }
+        int i = 0;
+        int k = 0;
+        int l = 0;
+        int m = 0;
+        addingItems = true;
+        for (i = 0; i < Main.modes.length(); i++) {
+            if (Main.modes.substring(i, i + 1).equals("g")) {
+                jComboBoxTXModem.addItem("PSK1000");
+                jComboBoxRXModem.addItem("PSK1000");
+                if (Main.LastRxModem.equals("PSK1000")) {
+                    l = k;
                 }
-//            System.out.println("lastRXmodem=" + Main.LastRxModem);
-
-                        jComboBoxTXModem.setSelectedIndex(l);
-                        jComboBoxRXModem.setSelectedIndex(l);     
+                if (Main.LastTxModem.equals("PSK1000")) {
+                    m = k;
+                }
+                k++;
+            } else if (Main.modes.substring(i, i + 1).equals("7")) {
+                jComboBoxTXModem.addItem("PSK500");
+                jComboBoxRXModem.addItem("PSK500");
+                if (Main.LastRxModem.equals("PSK500")) {
+                    l = k;
+                }
+                if (Main.LastTxModem.equals("PSK500")) {
+                    m = k;
+                }
+                k++;
+            } else if (Main.modes.substring(i, i + 1).equals("6")) {
+                jComboBoxTXModem.addItem("PSK500R");
+                jComboBoxRXModem.addItem("PSK500R");
+                if (Main.LastRxModem.equals("PSK500R")) {
+                    l = k;
+                }
+                if (Main.LastTxModem.equals("PSK500R")) {
+                    m = k;
+                }
+                k++;
+            } else if (Main.modes.substring(i, i + 1).equals("5")) {
+                jComboBoxTXModem.addItem("PSK250R");
+                jComboBoxRXModem.addItem("PSK250R");
+                if (Main.LastRxModem.equals("PSK250R")) {
+                    l = k;
+                }
+                if (Main.LastTxModem.equals("PSK250R")) {
+                    m = k;
+                }
+                k++;
+            } else if (Main.modes.substring(i, i + 1).equals("l")) {
+                jComboBoxTXModem.addItem("DOMINOEX22");
+                jComboBoxRXModem.addItem("DOMINOEX22");
+                if (Main.LastRxModem.equals("DOMINOEX22")) {
+                    l = k;
+                }
+                if (Main.LastTxModem.equals("DOMINOEX22")) {
+                    m = k;
+                }
+                k++;
+            } else if (Main.modes.substring(i, i + 1).equals("m")) {
+                jComboBoxTXModem.addItem("DOMINOEX11");
+                jComboBoxRXModem.addItem("DOMINOEX11");
+                if (Main.LastRxModem.equals("DOMINOEX11")) {
+                    l = k;
+                }
+                if (Main.LastTxModem.equals("DOMINOEX11")) {
+                    m = k;
+                }
+                k++;
+            } else if (Main.modes.substring(i, i + 1).equals("4")) {
+                jComboBoxTXModem.addItem("MFSK32");
+                jComboBoxRXModem.addItem("MFSK32");
+                if (Main.LastRxModem.equals("MFSK32")) {
+                    l = k;
+                }
+                if (Main.LastTxModem.equals("MFSK32")) {
+                    m = k;
+                }
+                k++;
+            } else if (Main.modes.substring(i, i + 1).equals("3")) {
+                jComboBoxTXModem.addItem("THOR22");
+                jComboBoxRXModem.addItem("THOR22");
+                if (Main.LastRxModem.equals("THOR22")) {
+                    l = k;
+                }
+                if (Main.LastTxModem.equals("THOR22")) {
+                    m = k;
+                }
+                k++;
+            } else if (Main.modes.substring(i, i + 1).equals("2")) {
+                jComboBoxTXModem.addItem("MFSK16");
+                jComboBoxRXModem.addItem("MFSK16");
+                if (Main.LastRxModem.equals("MFSK16")) {
+                    l = k;
+                }
+                if (Main.LastTxModem.equals("MFSK16")) {
+                    m = k;
+                }
+                k++;
+            } else if (Main.modes.substring(i, i + 1).equals("1")) {
+                jComboBoxTXModem.addItem("THOR8");
+                jComboBoxRXModem.addItem("THOR8");
+                if (Main.LastRxModem.equals("THOR8")) {
+                    l = k;
+                }
+                if (Main.LastTxModem.equals("THOR8")) {
+                    m = k;
+                }
+                k++;
+            } else if (Main.modes.substring(i, i + 1).equals("8")) {
+                jComboBoxTXModem.addItem("PSK250");
+                jComboBoxRXModem.addItem("PSK250");
+                if (Main.LastRxModem.equals("PSK250")) {
+                    l = k;
+                }
+                if (Main.LastTxModem.equals("PSK250")) {
+                    m = k;
+                }
+                k++;
+            } else if (Main.modes.substring(i, i + 1).equals("b")) {
+                jComboBoxTXModem.addItem("PSK125R");
+                jComboBoxRXModem.addItem("PSK125R");
+                if (Main.LastRxModem.equals("PSK125R")) {
+                    l = k;
+                }
+                if (Main.LastTxModem.equals("PSK125R")) {
+                    m = k;
+                }
+                k++;
+            } else if (Main.modes.substring(i, i + 1).equals("n")) {
+                jComboBoxTXModem.addItem("DOMINOEX5");
+                jComboBoxRXModem.addItem("DOMINOEX5");
+                if (Main.LastRxModem.equals("DOMINOEX5")) {
+                    l = k;
+                }
+                if (Main.LastTxModem.equals("DOMINOEX5")) {
+                    m = k;
+                }
+                k++;
+            }
+        }
+        //            System.out.println("lastRXmodem=" + Main.LastRxModem);
+        addingItems = false;
+        jComboBoxRXModem.setSelectedIndex(l);
+        jComboBoxTXModem.setSelectedIndex(m);
     }
-    
+ 
     private String getrxmodemindex(){
         String index = "8";
         for (int i = 0; i < Modemstrings.length; i++){
@@ -316,20 +360,22 @@ public class Connectwindow extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jComboBoxTXModemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxTXModemActionPerformed
-        // TODO add your handling code here:
-                TXmodemstr = this.jComboBoxTXModem.getSelectedItem().toString();
-        Main.LastTxModem = TXmodemstr;
-//        System.out.println("Setting TX:" + Main.LastTxModem);
+        if (!addingItems) { //Do not process when adding items, only on selection
+            TXmodemstr = this.jComboBoxTXModem.getSelectedItem().toString();
+            Main.LastTxModem = TXmodemstr;
+            //        System.out.println("Setting TX:" + Main.LastTxModem);
+        }
     }//GEN-LAST:event_jComboBoxTXModemActionPerformed
 
     private void jComboBoxRXModemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxRXModemActionPerformed
-        // TODO add your handling code here:
-                RXmodemstr = this.jComboBoxRXModem.getSelectedItem().toString();
-//        System.out.println("rxm:" + RXmodemstr);
-        Main.RXmodemindex = getrxmodemindex();
-        Main.LastRxModem = RXmodemstr;
-        Main.defaultmode = Main.convmodem(RXmodemstr);
-        //System.out.println("Setting RX:" + Main.LastRxModem);
+        if (!addingItems) {
+            RXmodemstr = this.jComboBoxRXModem.getSelectedItem().toString();
+            //        System.out.println("rxm:" + RXmodemstr);
+            Main.RXmodemindex = getrxmodemindex();
+            Main.LastRxModem = RXmodemstr;
+            Main.defaultmode = Main.convmodem(RXmodemstr);
+            //System.out.println("Setting RX:" + Main.LastRxModem);
+        }
     }//GEN-LAST:event_jComboBoxRXModemActionPerformed
 
     private void ConnectServerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ConnectServerButtonActionPerformed

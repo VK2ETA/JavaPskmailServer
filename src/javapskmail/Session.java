@@ -344,13 +344,9 @@ public class Session {
                     if (Linebreak >= 0) {
                         String fullLine = Lineoutstring.substring(0, Linebreak);
                         Lineoutstring = Lineoutstring.substring(Linebreak + 1);
-
                         parseInput(fullLine);
-
                     }
-
                 }
-
             }
 
             // make room for more data
@@ -886,7 +882,6 @@ public class Session {
                         // close pending file
                         in.close();
                     }
-
                 } catch (Exception e) {
                     Main.log.writelog("Error when trying to open the download file.", e, true);
                 }
@@ -928,7 +923,6 @@ public class Session {
                         // close pending file
                         in.close();
                     }
-
                 } catch (Exception e) {
                     Main.log.writelog("Error when trying to open the download file.", e, true);
                 }
@@ -972,7 +966,6 @@ public class Session {
                         in.close();
 //                                                    pending.delete();
                     }
-
                 } catch (Exception e) {
                     Main.log.writelog("Error when trying to open the download file.", e, true);
                 }
@@ -1008,9 +1001,7 @@ public class Session {
                 DataSize = Integer.parseInt(ThisFileLength);
                 DataReceived = 0;
                 Main.DataSize = Integer.toString(DataSize);
-
                 File pending = new File(Main.HomePath + Main.Dirprefix + "Pending" + Main.Separator + Transaction);
-
                 if (pending.exists()) {
                     DataReceived = (int) pending.length();
                     FileReader in = new FileReader(pending);
@@ -1054,9 +1045,7 @@ public class Session {
                 DataSize = Integer.parseInt(ThisFileLength);
                 DataReceived = 0;
                 Main.DataSize = Integer.toString(DataSize);
-
                 File pending = new File(Main.HomePath + Main.Dirprefix + "Pending" + Main.Separator + Transaction);
-
                 if (pending.exists()) {
                     DataReceived = (int) pending.length();
                     FileReader in = new FileReader(pending);
@@ -1068,7 +1057,6 @@ public class Session {
                     // close pending file
                     in.close();
                 }
-
                 try {
                     Trfile = new File(Main.pendingstr + Transaction);
                     pFile = new FileWriter(Trfile, true);
@@ -1118,7 +1106,6 @@ public class Session {
                 if (pending.exists()) {
                     x = pending.length();
                 }
-
                 if (Main.mainui.jRadioButtonAccept.isSelected()) {
                     Main.TX_Text += "~FY:" + ofrm2.group(4) + ":" + Long.toString(x) + "\n";
                 } else if (Main.mainui.jRadioButtonReject.isSelected()) {
@@ -1128,7 +1115,6 @@ public class Session {
                     if (pending.exists()) {
                         pending.delete();
                     }
-
                 }
             } else if (ofrm2.group(5).equals("s")) { //E-Mail upload to this TTYserver for sending
                 // get the file ?
@@ -1154,9 +1140,7 @@ public class Session {
             File penf = new File(Main.Pendingdir + partialfile);
             File foutpending = new File(Main.Outpendingdir + Main.Separator + partialfile);
             String filename = "";
-
             if (penf.exists()) {
-
                 int i = 0;
                 try {
                     FileInputStream fis = new FileInputStream(penf);
@@ -1254,7 +1238,6 @@ public class Session {
                             pendingType = pendingFn.substring(firstSep + 2, secondSep);
                             pendingToken = pendingFn.substring(secondSep + 2);
                         }
-
                         if (pendingCaller.equals(caller) && partialfile.equals(pendingToken)) {
                             //Found a match, queue for TX at specified offset
                             int j = 0;
@@ -1279,14 +1262,10 @@ public class Session {
                             } catch (IOException e) {
 //                                                System.out.println("IO error on pending file");
                             }
-
                         }
-
                     }
                 }
-
             }
-
             Main.log("Sending file: " + filename);
         }
 
@@ -1361,11 +1340,9 @@ public class Session {
 //                                                Main.mainwindow += "Mail sent on server...\n";
 //                                                Main.FilesTextArea += "Mail sent on server...\n";
                     }
-
                     if (TransactionsExists()) {
                         FileReader trf = new FileReader(Main.Transactions);
                         BufferedReader tr = new BufferedReader(trf);
-
                         String sta[] = new String[20];
                         String st;
                         int st1 = 0;
@@ -1377,7 +1354,6 @@ public class Session {
 
                         }
                         tr.close();
-
                         File trw = new File(Main.Transactions);
                         if (trw.exists()) {
                             trw.delete();
@@ -1398,9 +1374,7 @@ public class Session {
                         } catch (NullPointerException npe) {
                             //                                 System.out.println("nullpointerproblem:" + npe);
                         }
-
                     }
-
                     // reset progress bar
                     Session.DataSize = 0;
                     Session.DataReceived = 0;
@@ -1412,7 +1386,6 @@ public class Session {
 //                                            System.out.println("IO problem:" + i);
                 }
             }
-
         }
         
         // message receive
@@ -1478,7 +1451,7 @@ public class Session {
             }
         }
 
-        //compressed  website receive
+        //compressed  website Send
         Pattern tgmsg = Pattern.compile("^\\s*(~TGET64)\\s(\\d+)");
         Matcher tgmmsg = tgmsg.matcher(str);
         if (tgmmsg.lookingAt()) {
@@ -1588,7 +1561,6 @@ public class Session {
                     Headers = false;
                     DataReceived = 0;
                     Main.DataSize = Integer.toString(0);
-
                     try {
                         this.headers.close();
                         Main.mainui.refreshEmailGrid();
@@ -1596,11 +1568,9 @@ public class Session {
                         Main.log.writelog("Error when trying to close the headers file.", ex, true);
                     }
                 }
-
                 if (FileList) {
                     FileList = false;
                 }
-
                 if (FileDownload) {
                     FileDownload = false;
                     Main.comp = false;
@@ -1761,7 +1731,6 @@ public class Session {
                     Main.q.Message("Added to mbox queue", 10);
                 }
                 
-                
                 // compressed E-mail upload while I am a TTYServer
                 if (CompressedEmailUpload) {
                     CompressedEmailUpload = false;
@@ -1834,7 +1803,6 @@ public class Session {
                     } catch (Exception e) {
                         Main.q.Message("Decoding error!", 10);
                     }
-
                     // append to Inbox file
                     FileReader fr = new FileReader(Main.HomePath + Main.Dirprefix + "tmpmessage");
                     BufferedReader br = new BufferedReader(fr);
@@ -1846,25 +1814,11 @@ public class Session {
                     String outstr = "";
                     String attachment = "";
                     base64attachment = false;
-
                     // make some room on the screen...
                     Main.mainwindow += "\n\n";
                     // read tmpmessage line by line
                     while ((s = br.readLine()) != null) {
                         // show what we've got...
-                        int maxwait = 0;
-//                                                    while (Main.mainmutex) {
-//                                                        try {
-//                                                            Thread.sleep(5);
-//                                                            maxwait++;
-//                                                            if (maxwait > 100) {
-//                                                                break;
-//                                                            }
-//                                                        } catch (InterruptedException ex) {
-//                                                             Logger.getLogger(Modem.class.getName()).log(Level.SEVERE, null, ex);
-//                                                        }
-//                                                    }
-
                         Main.mainwindow += s;
                         Main.mainwindow += "\n";
                         // compile some patterns and set up the matchers
@@ -1886,7 +1840,6 @@ public class Session {
                         Matcher mxui = xui.matcher(s);
                         Pattern nmx = Pattern.compile("name=");
                         Matcher mnmx = nmx.matcher(s);
-
                         if (mfrm.lookingAt()) {
                             if (mfrm.group(1).equals("From:")) {
                                 From = mfrm.group(2);
@@ -1897,32 +1850,26 @@ public class Session {
                                         + mdate.group(4) + " " + mdate.group(5) + " "
                                         + mdate.group(6);
                             }
-
                         } else if (mdate2.lookingAt()) {
                             if (mdate2.group(1).equals("Date:")) {
                                 Date = mdate2.group(2) + " " + mdate2.group(3) + " "
                                         + mdate2.group(4);
                             }
-
                         } else if (msub.lookingAt()) {
                             if (msub.group(1).equals("Subject:")) {
                                 Sub = msub.group(2);
                             }
-
                         } else if (m64.lookingAt()) {
                             if (m64.group(1).equals("content-transfer-encoding: base64")) {
                                 // there is an attachment...
                                 base64attachment = true;
 //                                                                debug ("Attachment");
                                 outstr += s + "\n";  // write to Inbox
-
                             }
                         } else if (cc64.lookingAt()) {
                             outstr += s + "\n";  // write to Inbox
-
                         } else if (mxui.lookingAt()) {
                             outstr += s + "\n";  // write to Inbox
-
                         } else if (mnm.lookingAt()) {
                             if (mnm.group(1).equals("filename=")) {
                                 // get the file name
@@ -1932,20 +1879,15 @@ public class Session {
                                     // remove the "
                                 } else {
                                     attachmentFilename = mnm.group(2);
-
                                 }
 //                                                             debug (attachmentFilename);
-
                                 outstr += s + "\n";  // write to Inbox
-
                             }
                         } else if (mnmx.lookingAt()) {
                             outstr += s + "\n";  // write to Inbox
                         } else {
-
                             if (base64attachment) {
                                 outstr += s + "\n";  // write to Inbox
-
                                 if (!s.equals("")) {
                                     if (!s.startsWith("--")) {
                                         if (!s.contains("-")) {
@@ -1970,15 +1912,12 @@ public class Session {
                                                             if (!myfiles.isDirectory()) {
                                                                 myfiles.mkdir();
                                                             }
-
                                                             attachmentFilename = "Files/" + attachmentFilename;
                                                             attachmentFilename = Main.HomePath + Main.Dirprefix + attachmentFilename;
-
                                                         }
                                                     } catch (Exception e) {
                                                         Main.q.Message("IO problem", 10);
                                                     }
-
                                                 } else {
                                                     try {
                                                         // put it in the Files directory
@@ -1988,7 +1927,6 @@ public class Session {
                                                         }
                                                         attachmentFilename = "Files\\" + attachmentFilename;
                                                         attachmentFilename = Main.HomePath + Main.Dirprefix + attachmentFilename;
-
                                                     } catch (Exception e) {
                                                         Main.q.Message("IO problem", 10);
                                                     }
@@ -1999,11 +1937,9 @@ public class Session {
                                                 if (!myfiles.isDirectory()) {
                                                     myfiles.mkdir();
                                                 }
-
                                                 attachmentFilename = "Files" + Main.Separator + attachmentFilename;
                                                 attachmentFilename = Main.HomePath + Main.Dirprefix + attachmentFilename;
                                             }
-
                                             try {
                                                 File myfiles = new File(Main.HomePath + Main.Dirprefix + "Files");
                                                 if (!myfiles.isDirectory()) {
@@ -2026,15 +1962,11 @@ public class Session {
                                                             attachment += attlines[i] + "\n";
                                                             //                                                                                           Main.mainwindow += ";;" +attlines[i] + "\n"; // debug
                                                         }
-
                                                     }
-
                                                 }
-
                                                 if (Main.Separator.equals("\\")) {
                                                     attachmentFilename = attachmentFilename.substring(0, attachmentFilename.length() - 1);
                                                 }
-
                                                 boolean success = Base64.decodeToFile(attachment, attachmentFilename);
                                                 if (success) {
                                                     Main.q.Message("File stored in " + attachmentFilename, 10);
@@ -2043,11 +1975,9 @@ public class Session {
                                                     Main.q.Message("File not stored in " + attachmentFilename, 10);
                                                     Main.mainwindow += "File not stored in " + attachmentFilename + "?\n";
                                                 }
-
                                             } catch (Exception e) {
                                                 Main.q.Message("Problem with decoding, " + e, 10);
                                             }
-
                                         }
                                     }
                                 }
@@ -2057,7 +1987,6 @@ public class Session {
                         }
 
                     } // end while
-
                     fr.close();
                     this.inbox = new FileWriter(Main.HomePath + Main.Dirprefix + "Inbox", true);
                     inbox.write("From " + From + " " + Date + "\n");
@@ -2078,30 +2007,25 @@ public class Session {
                     if (fl.exists()) {
                         fl.delete();
                     }
-
                     File pending = new File(Main.HomePath + Main.Dirprefix + "Pending" + Main.Separator + Transaction);
                     if (pending.exists()) {
                         pending.delete();
                     }
-
                     if (Main.protocol > 0) {
                         Main.TX_Text += "~FA:" + Transaction + "\n";
                     }
                     Main.Progress = 0;
-
                     Main.q.Message("Added to mbox queue", 10);
                 }
                 // compressed web pages download
                 if (CwwwDownload) {
                     CwwwDownload = false;
                     Main.comp = false;
-
                     try {
                         this.dlFile.close();
                     } catch (IOException ex) {
                         Main.log.writelog("Error when trying to close the download file.", ex, true);
                     }
-
                     try {
                         try {
                             Base64.decodeFileToFile(Main.HomePath + Main.Dirprefix + "TempFile", Main.HomePath + Main.Dirprefix + "TMP.gz");
@@ -2113,7 +2037,6 @@ public class Session {
                         } catch (Exception exz) {
                             Main.log.writelog("Error when trying to unzip the download file.", exz, true);
                         }
-
                         try {
                             BufferedReader in = new BufferedReader(new FileReader(Main.HomePath + Main.Dirprefix + "TMP"));
                             String str2;
@@ -2125,21 +2048,17 @@ public class Session {
                             Main.q.Message("problem decoding B64 file", 10);
                         }
                         File tmp1 = new File(Main.HomePath + Main.Dirprefix + "TMP");
-
                         if (tmp1.exists()) {
                             tmp1.delete();
                         }
-
                         File tmp = new File(Main.HomePath + Main.Dirprefix + "Pending" + Main.Separator + Transaction);
                         if (tmp.exists()) {
                             tmp.delete();
                         }
                         if (Main.protocol > 0) {
                             Main.TX_Text += "~FA:" + Transaction + "\n";
-
                         }
                         Main.Progress = 0;
-
                     } catch (Exception exc) {
                         Main.log.writelog("Error handling the download file.", exc, true);
                     } catch (NoClassDefFoundError exp) {
@@ -2147,7 +2066,6 @@ public class Session {
                     }
                     File tmp = new File(Main.HomePath + Main.Dirprefix + "TempFile");
                     boolean success = tmp.delete();
-
                     try {
                         if (pFile != null) {
                             Main.sm.pFile.close();
@@ -2157,9 +2075,7 @@ public class Session {
                         Main.log.writelog("Error when trying to close the pending file.", ex, true);
                     }
                     Main.Progress = 0;
-
                 }
-
                 // web pages   download                                      
                 if (WWWDownload) {
                     WWWDownload = false;
@@ -2174,7 +2090,6 @@ public class Session {
                     Headers = false;
                     DataReceived = 0;
                     Main.DataSize = Integer.toString(0);
-
                     try {
                         this.headers.close();
                         Main.mainui.refreshEmailGrid();
@@ -2182,36 +2097,28 @@ public class Session {
                         Main.log.writelog("Error when trying to close the headers file.", ex, true);
                     }
                 }
-
                 if (FileList) {
                     FileList = false;
                 }
-
                 if (FileDownload) {
                     FileDownload = false;
                     Main.comp = false;
-
                     try {
                         this.dlFile.close();
                         File df = new File(Main.HomePath + Main.Dirprefix + "TempFile");
                         if (df.exists()) {
                             boolean scs = df.delete();
                         }
-
                     } catch (IOException ex) {
                         Main.log.writelog("Error when trying to close the download file.", ex, true);
                     }
-
                     try {
                         File tmp = new File(Main.HomePath + Main.Dirprefix + "Pending" + Main.Separator + Transaction);
                         if (tmp.exists()) {
                             tmp.delete();
                         }
-
                         Main.TX_Text += "~FA:" + Transaction + "\n";
-
                         Main.Progress = 0;
-
                     } catch (Exception exc) {
                         Main.log.writelog("Error when trying to decode the downoad file.", exc, true);
                     } catch (NoClassDefFoundError exp) {
@@ -2219,7 +2126,6 @@ public class Session {
                     }
                     File tmp = new File(Main.HomePath + Main.Dirprefix + "TempFile");
                     boolean success = tmp.delete();
-
                     try {
                         if (pFile != null) {
                             Main.sm.pFile.close();
@@ -2229,7 +2135,6 @@ public class Session {
                         Main.log.writelog("Error when trying to close the pending file.", ex, true);
                     }
                     Main.Progress = 0;
-
                     //                                                    Main.log(ThisFile + " received");
                 }
                 // messages  download      - append tmpmessage to Inbox in mbox format
@@ -2238,12 +2143,10 @@ public class Session {
                     this.tmpmessage.close();
                     // append to Inbox file
                     FileReader fr = new FileReader(Main.HomePath + Main.Dirprefix + "tmpmessage");
-
                     File fl = new File(Main.HomePath + Main.Dirprefix + "tmpmessage");
                     if (fl.exists()) {
                         fl.delete();
                     }
-
                 }
                 // compressed messages  download or compressed Email upload
                 if (CMsgDownload | CompressedEmailUpload) {
@@ -2256,7 +2159,6 @@ public class Session {
                     if (fl.exists()) {
                         fl.delete();
                     }
-
                     File pending = new File(Main.HomePath + Main.Dirprefix + "Pending" + Main.Separator + Transaction);
                     if (pending.exists()) {
                         pending.delete();
@@ -2266,16 +2168,13 @@ public class Session {
                 if (CwwwDownload) {
                     CwwwDownload = false;
                     Main.comp = false;
-
                     try {
                         this.dlFile.close();
                     } catch (IOException ex) {
                         Main.log.writelog("Error when trying to close the download file.", ex, true);
                     }
-
                     File tmp = new File(Main.HomePath + Main.Dirprefix + "TempFile");
                     boolean success = tmp.delete();
-
                     try {
                         if (pFile != null) {
                             Main.sm.pFile.close();
@@ -2286,7 +2185,6 @@ public class Session {
                     }
                     Main.Progress = 0;
                 }
-
                 // web pages   download
                 if (WWWDownload) {
                     WWWDownload = false;
@@ -2356,11 +2254,9 @@ public class Session {
         if (FileDownload & !Firstline) {
             Main.FilesTextArea += str + "\n";
             DataReceived += str.length();
-
             if (DataSize > 0) {
                 Main.Progress = 100 * DataReceived / DataSize;
             }
-
             try {
                 if (pFile != null) {
                     pFile.write(str + "\n");
@@ -2395,7 +2291,7 @@ public class Session {
                     pFile.flush();
                 }
             } catch (IOException ex) {
-                //                                             Main.log.writelog("Error when trying to write to pending file.", ex, true);
+                //Main.log.writelog("Error when trying to write to pending file.", ex, true);
                 Main.q.Message("Error writing pending file.", 1);
             }
             try {
@@ -2416,7 +2312,8 @@ public class Session {
                     pFile.flush();
                 }
             } catch (IOException ex) {
-                //                                               Main.log.writelog("Error when trying to write to pending file.", ex, true);
+                //Do nothing as it happens normally when a compressed download is aborted and restarted without closing the app (init issue?)
+                //Main.log.writelog("Error when trying to write to pending file.", ex, true);
             }
             try {
                 if (str.length() > 0) {
@@ -2424,7 +2321,8 @@ public class Session {
                     dlFile.flush();
                 }
             } catch (IOException ex) {
-                Main.log.writelog("Error when trying to write to tmpmessage file.", ex, true);
+                //Do nothing as it happens normally when a compressed download is aborted and restarted without closing the app (init issue?)
+                //Main.log.writelog("Error when trying to write to tmpmessage file.", ex, true);
             }
         }
 
