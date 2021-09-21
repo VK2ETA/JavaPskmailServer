@@ -130,7 +130,7 @@ public class Session {
         if (Main.sversion > 1.5) {
 
             String rec64 = base_64.base64Encode(recinfo);
-            output = Main.cr.encrypt(Main.sm.hispubkey, rec64);
+            output = Main.cr.encrypt(hispubkey, rec64);
             record = "~RECx" + output + "\n";
             while (record.length() > 30) {
                 Main.TX_Text += record.substring(0, 30) + "\n";
@@ -367,7 +367,7 @@ public class Session {
         boolean foundMatchingCommand = false;
 
         // ~STOP: <transaction> for TTY session...
-        //"~STOP:" + Main.sm.Transaction + "\n"
+        //"~STOP:" + Transaction + "\n"
         Pattern STOPm = Pattern.compile("^\\s*~STOP:([A-Za-z0-9]+)?");
         Matcher stopm = STOPm.matcher(str);
         if (Main.TTYConnected.equals("Connected") & stopm.lookingAt()) {
@@ -548,10 +548,10 @@ public class Session {
         Pattern SPC = Pattern.compile("^Updated data");
         Matcher spc = SPC.matcher(str);
         if (spc.lookingAt()) {
-            if (Main.sm.hispubkey.length() > 0) {
+            if (hispubkey.length() > 0) {
                 String mailpass = Main.configuration.getPreference("POPPASS");
                 if (mailpass.length() > 0 & Main.Passwrd.length() > 0) {
-                    String intext = Main.cr.encrypt(Main.sm.hispubkey, mailpass + "," + Main.Passwrd);
+                    String intext = Main.cr.encrypt(hispubkey, mailpass + "," + Main.Passwrd);
                     Main.TX_Text += ("~Msp" + intext + "\n");
                     Main.mainwindow += "\n=>>" + intext + "\n";
                 } else {
@@ -563,6 +563,67 @@ public class Session {
 
         }
 
+        //~GETWWV space weather indexes and forecast...
+        Pattern WWVp = Pattern.compile("^(\\s*~GETWWV.*)");
+        Matcher WWVm = WWVp.matcher(str);
+        if (Main.TTYConnected.equals("Connected") & WWVm.lookingAt()) {
+            foundMatchingCommand = true;
+            if (Main.WantServer) {
+                Main.TX_Text += serverMail.readWebPage("https://services.swpc.noaa.gov/text/wwv.txt", "", false);
+            } else {
+                Main.TX_Text += "Sorry, Not enabled\n";
+            }
+        }
+        
+        //~GETMSG Get APRS messages
+        Pattern AMp = Pattern.compile("^(\\s*~GETMSG.*)");
+        Matcher AMm = AMp.matcher(str);
+        if (Main.TTYConnected.equals("Connected") & AMm.lookingAt()) {
+            foundMatchingCommand = true;
+            if (Main.WantServer) {
+                Main.TX_Text += serverMail.readWebPage("http://www.findu.com/cgi-bin/msg.cgi?call=" + Main.TTYCaller, "", false);
+            } else {
+                Main.TX_Text += "Sorry, Not enabled\n";
+            }
+        }
+        
+        //~GETNEAR Get (15) APRS stations near me (using last reported position to APRS)
+        Pattern GNp = Pattern.compile("^(\\s*~GETNEAR.*)");
+        Matcher GNm = GNp.matcher(str);
+        if (Main.TTYConnected.equals("Connected") & GNm.lookingAt()) {
+            foundMatchingCommand = true;
+            if (Main.WantServer) {
+                Main.TX_Text += serverMail.readWebPage("http://www.findu.com/cgi-bin/near.cgi?last=24&n=15&call=" + Main.TTYCaller, "", false);
+            } else {
+                Main.TX_Text += "Sorry, Not enabled\n";
+            }
+        }
+        
+        //~GETTIDESTN Get Tide stations near me (using last reported position to APRS)
+        Pattern TSp = Pattern.compile("^(\\s*~GETTIDESTN.*)");
+        Matcher TSm = TSp.matcher(str);
+        if (Main.TTYConnected.equals("Connected") & TSm.lookingAt()) {
+            foundMatchingCommand = true;
+            if (Main.WantServer) {
+                Main.TX_Text += serverMail.readWebPage("http://www.findu.com/cgi-bin/tidestation.cgi?call=" + Main.TTYCaller, "", false);
+            } else {
+                Main.TX_Text += "Sorry, Not enabled\n";
+            }
+        }
+       
+        //~GETTIDE Get Tide for a given station
+        Pattern TDp = Pattern.compile("\\s*~GETTIDE\\s*(\\d+)");
+        Matcher TDm = TDp.matcher(str);
+        if (Main.TTYConnected.equals("Connected") & TDm.lookingAt()) {
+            foundMatchingCommand = true;
+            String station = TDm.group(1);
+            if (Main.WantServer) {
+                Main.TX_Text += serverMail.readWebPage("http://www.findu.com/cgi-bin/tide.cgi?tide=" + station, "", false);
+            } else {
+                Main.TX_Text += "Sorry, Not enabled\n";
+            }
+        }
+        
         // ~GETBIN for TTY session...
         Pattern GBm = Pattern.compile("^\\s*~GETBIN\\s(\\S+)");
         Matcher gb = GBm.matcher(str);
@@ -1607,8 +1668,8 @@ public class Session {
 
                     try {
                         if (pFile != null) {
-                            Main.sm.pFile.close();
-                            Main.sm.Trfile.delete();
+                            pFile.close();
+                            Trfile.delete();
                         }
                     } catch (IOException ex) {
                         Main.log.writelog("Error when trying to close the pending file.", ex, true);
@@ -2068,8 +2129,8 @@ public class Session {
                     boolean success = tmp.delete();
                     try {
                         if (pFile != null) {
-                            Main.sm.pFile.close();
-                            Main.sm.Trfile.delete();
+                            pFile.close();
+                            Trfile.delete();
                         }
                     } catch (IOException ex) {
                         Main.log.writelog("Error when trying to close the pending file.", ex, true);
@@ -2128,8 +2189,8 @@ public class Session {
                     boolean success = tmp.delete();
                     try {
                         if (pFile != null) {
-                            Main.sm.pFile.close();
-                            Main.sm.Trfile.delete();
+                            pFile.close();
+                            Trfile.delete();
                         }
                     } catch (IOException ex) {
                         Main.log.writelog("Error when trying to close the pending file.", ex, true);
@@ -2177,8 +2238,8 @@ public class Session {
                     boolean success = tmp.delete();
                     try {
                         if (pFile != null) {
-                            Main.sm.pFile.close();
-                            Main.sm.Trfile.delete();
+                            pFile.close();
+                            Trfile.delete();
                         }
                     } catch (IOException ex) {
                         Main.log.writelog("Error when trying to close the pending file.", ex, true);

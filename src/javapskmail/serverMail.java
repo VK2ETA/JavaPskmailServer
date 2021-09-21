@@ -730,6 +730,87 @@ public class serverMail {
         return webPage;
     }
     
+
+    //Read a web page as supplied and optionally trim with the begin: and end: strings
+    public static String readRawWebPage(String webURL, String startStopStr, boolean compressedPage) {
+        String webPage = "";
+        String begin = "";
+        String end = "";
+        try {
+            Pattern STm;
+            Matcher st;
+            //Make sure the url is properly formed. Assume www.abc is http://www.abc
+            if (webURL.startsWith("www")) {
+                webURL = "http://" + webURL;
+            }
+            Document doc = Jsoup.connect(webURL).get();
+            String raw = doc.html();
+            return raw;
+/*            if (doc != null) {
+                //Preserve or convert line breaks
+                doc.outputSettings(new Document.OutputSettings().prettyPrint(false));//makes html() preserve linebreaks and spacing
+                doc.select("br").append("\\n");
+                doc.select("p").prepend("\\n");
+                String s = doc.html().replaceAll("\\\\n", "\n");
+                webPage = doc.text();
+                //webPage = Jsoup.clean(s, "", Whitelist.none(), new Document.OutputSettings().prettyPrint(false));
+                //webPage = Jsoup.clean(s, Whitelist.none()); //, "", Whitelist.none(), new Document.OutputSettings().prettyPrint(false));
+            }
+            //Extract begin and end limits if any
+            if (startStopStr.contains("end:")) {
+                STm = Pattern.compile("\\s*(begin:.*)?(end:.*)");
+                st = STm.matcher(startStopStr);
+                if (st.lookingAt()) {
+                    if (st.group(1) != null) {
+                        begin = st.group(1).replaceFirst("begin:", "").trim();
+                    }
+                    if (st.group(2) != null) {
+                        end = st.group(2).replaceFirst("end:", "").trim();
+                    }
+                }
+            } else {
+                //No end: statement, maybe just a begin:
+                STm = Pattern.compile("\\s*(begin:.*)?");
+                st = STm.matcher(startStopStr);
+                if (st.lookingAt()) {
+                    if (st.group(1) != null) {
+                        begin = st.group(1).replaceFirst("begin:", "").trim();
+                    }
+                }
+            }
+            //Trim required? begin: abc
+            if (!begin.equals("")) {
+                if (webPage.toLowerCase(Locale.US).contains(begin.toLowerCase(Locale.US))) {
+                    int beginIndex = webPage.toLowerCase(Locale.US).indexOf(begin.toLowerCase(Locale.US));
+                    //Found, trim then
+                    webPage = webPage.substring(beginIndex);
+                }
+            }
+            //Trim required? end: xyz
+            if (!end.equals("")) {
+                if (webPage.toLowerCase(Locale.US).contains(end.toLowerCase(Locale.US))) {
+                    int endIndex = webPage.toLowerCase(Locale.US).lastIndexOf(end.toLowerCase(Locale.US));
+                    //Found, trim then
+                    webPage = webPage.substring(0, endIndex);
+                }
+            }
+            if (compressedPage) {
+                webPage = tgetZip(webPage);
+            } else {
+                //Pskmail does not handle unicode (the CRC gets corrupted), replace or strip any non ASCII character
+                webPage = webPage.replaceAll("\u2013", "-");
+                webPage = webPage.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
+                webPage = "Your wwwpage: " + webPage.length() + "\n"
+                        + webPage + "\n-end-\n";
+            }
+*/
+        } catch (Exception e) {
+            webPage = "Error getting web page: " + e.getMessage() + "\n";
+        }
+        return webPage;
+
+    }
+    
     //Compresses an email message and provides the exchange initiation string (">FM:") to send to the client
     public static String tgetZip(String webPage) {
         String returnString = "";
@@ -741,9 +822,7 @@ public class serverMail {
         FileInputStream in = null;
 
         if (webPage.length() != 0) {
-
             String Destination = Main.TTYCaller;
-
             String mysourcefile = Main.HomePath + Main.Dirprefix + "tmpfile";
             try {
                 RMsgUtil.saveDataStringAsFile("", mysourcefile, webPage); //no path as it is included in filename
@@ -754,11 +833,8 @@ public class serverMail {
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
             }
-
             GZIPOutputStream myzippedfile = null;
-
             String tmpfile = Main.HomePath + Main.Dirprefix + "tmpfile.gz";
-
             try {
                 myzippedfile = new GZIPOutputStream(new FileOutputStream(tmpfile));
             } catch (FileNotFoundException ex) {
@@ -766,7 +842,6 @@ public class serverMail {
             } catch (IOException ioe) {
                 Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ioe);
             }
-
             byte[] buffer = new byte[4096];
             int bytesRead;
 
@@ -777,29 +852,23 @@ public class serverMail {
             } catch (IOException ex) {
                 Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
             }
-
             try {
                 in.close();
                 myzippedfile.close();
             } catch (IOException ex) {
                 Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
             }
-
             Random r = new Random();
             //token = Long.toString(Math.abs(r.nextLong()), 12);
             token = Long.toString(Math.abs(r.nextLong()), 12);
             token = token.substring(token.length()-6);
             //token = "tmp" + token;
-
             codedFile = Main.HomePath + Main.Dirprefix + "Outbox" + Main.Separator + Destination + "_-w-_" + token;
-
             Base64.encodeFileToFile(tmpfile, codedFile);
-
             File dlfile = new File(tmpfile);
             if (dlfile.exists()) {
                 dlfile.delete();
             }
-
             File mycodedFile = new File(codedFile);
             if (mycodedFile.isFile()) {
                 // >FM:PI4TUE:PA0R:Jynhgf:w: :496
@@ -810,7 +879,6 @@ public class serverMail {
                         + token + ":w:" + " "
                         + ":" + Long.toString(mycodedFile.length()) + "\n";
             }
-
             File Transactions = new File(Main.Transactions);
             FileWriter tr;
             try {
@@ -823,7 +891,6 @@ public class serverMail {
             String dataString = RMsgUtil.readFile(codedFile);
             returnString += dataString + "\n-end-\n";
         }
-
         return returnString;
     }
 
@@ -855,17 +922,13 @@ public class serverMail {
                     pendingType = pendingFn.substring(firstSep + 2, secondSep);
                     pendingToken = pendingFn.substring(secondSep + 2);
                 }
-                        
                 if (pendingCaller.equals(caller)) {
                     //Add this file to the list of pending downloads
                     //>FO5:PI4TUE:PA0R:JhyJkk:f:test.txt:496
                     returnList += ">FO5:" + server + ":" + caller + ":" + pendingToken + ":" + pendingType + ": :" + filesOutbox[i].length() + "\n";
                 } 
-                
             }
         }
-
-   
         return returnList;
     }
     

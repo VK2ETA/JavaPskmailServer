@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "0.9.4.30";
+    static String version = "0.9.4.31";
     static String application = "jpskmailserver " + version;// Used to preset an empty status
-    static String versionDate = "20210918";
+    static String versionDate = "20210921";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -915,6 +915,7 @@ public class Main {
                                                 }
                                             }
                                         } else if (type.equals(":")) {
+                                            //APRS message
                                             //System.out.println(type + binfo);
                                             Pattern gc = Pattern.compile("(\\S+)>PSKAPR.::(\\S+)\\s*:(.*)(\\{\\d+)");
                                             Matcher gmc = gc.matcher(type + binfo);
@@ -942,23 +943,25 @@ public class Main {
                                             Pattern gm = Pattern.compile(".*00u(\\S+):26\\s(\\S+)\\s(.*)([0123456789ABCDEF]{4}).*");
                                             Matcher gmm = gm.matcher(Blockline);
                                             if (gmm.lookingAt()) {
-                                                //                                   System.out.println("FOUND:" +  Blockline);
+                                                //System.out.println("FOUND:" +  Blockline);
                                                 String fromcall = gmm.group(1);// + "         ";
                                                 //fromcall = fromcall.substring(0, 9);
                                                 String outcall = gmm.group(2) + "         ";
                                                 outcall = outcall.substring(0, 9);
                                                 binfo = gmm.group(3);
-                      
-                                                String toxastir = gmm.group(2) + ">PSKAPR,TCPIP*,qAC," + gmm.group(1) + "::" + fromcall + "  " + ":" + gmm.group(3) + "\n";
-                                                mapsock.sendmessage(toxastir);
-                                                //test: VK2ETA>PSKAPR,TCPIP*::vk2eta-1 :test aprs 1
-                                               //VK2ZZZ>APWW11,TCPIP*,qAC,T2LUBLIN::VK2XXX-8 :Hello Jack Long time no see!{21}
-                                                String aprsmessage = fromcall + ">PSKAPR,TCPIP*::" + outcall + ":" + binfo;
-                                                boolean igateSendOk = igate.write(aprsmessage);
-                                                //System.out.println(aprsmessage);
-                                                //If I run as server, send QSL
-                                                if (Main.WantServer && igateSendOk) {
-                                                    q.send_QSL_reply();
+                                                if (!mycall.equals(fromcall)) {
+                                                    //Not for my Client's callsign (can be different to myserver's callsign)
+                                                    String toxastir = gmm.group(2) + ">PSKAPR,TCPIP*,qAC," + gmm.group(1) + "::" + fromcall + "  " + ":" + gmm.group(3) + "\n";
+                                                    mapsock.sendmessage(toxastir);
+                                                    //test: VK2ETA>PSKAPR,TCPIP*::vk2eta-1 :test aprs 1
+                                                    //VK2ZZZ>APWW11,TCPIP*,qAC,T2LUBLIN::VK2XXX-8 :Hello Jack Long time no see!{21}
+                                                    String aprsmessage = fromcall + ">PSKAPR,TCPIP*::" + outcall + ":" + binfo;
+                                                    boolean igateSendOk = igate.write(aprsmessage);
+                                                    //System.out.println(aprsmessage);
+                                                    //If I run as server, send QSL
+                                                    if (Main.WantServer && igateSendOk) {
+                                                        q.send_QSL_reply();
+                                                    }
                                                 }
                                             }
                                         }
@@ -1133,7 +1136,7 @@ public class Main {
                                     }
                                 }
                             }
-
+                            
                             //System.out.println(Blockline);
                             // unproto packets
                             if (rxb.type.equals("u")) {
@@ -1194,7 +1197,29 @@ public class Main {
                                         }
 
                                     }
-
+                                //Link request?
+                                //<SOH>00uVK2ETA><VK2ETA-5 064A<EOT>
+                                } else {
+                                    Pattern pl = Pattern.compile("^(\\S+)><(\\S+)");
+                                    Matcher ml = pl.matcher(rxb.payload);
+                                    if (ml.lookingAt()) {
+                                        String linkCall = ml.group(1);
+                                        String linkServer = ml.group(2);
+                                        String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
+                                        if (serverCall.equals(linkServer)) {
+                                            //$MSG = "$ServerCall>PSKAPR,TCPIP*::PSKAPR   :GATING $1";
+                                            String linkString = serverCall + ">PSKAPR,TCPIP*::PSKAPR   :GATING " + linkCall;
+                                            try {
+                                                igate.write(linkString);
+                                                //Add station to list
+                                                igate.addStationToList(linkCall);
+                                                //Acknowledge
+                                                q.send_link_ack(linkCall);
+                                            } catch (IOException e) {
+                                                //Noting for now: check if recovery required
+                                            }
+                                        }
+                                    }
                                 }
                                 // reject
                             } else if (rxb.type.equals("r") & rxb.valid) {  // reject

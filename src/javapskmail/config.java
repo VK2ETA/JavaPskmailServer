@@ -11,7 +11,6 @@
  * You should have received a copy of the GNU General Public License  
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.  
  */
-
 package javapskmail;
 
 import java.io.File;
@@ -28,6 +27,7 @@ import java.util.Properties;
 public class config {
 // Private variables 
     // options dialogue
+
     private String callsign;
     private String callsignAsServer;
     private String linktoserver;
@@ -54,7 +54,7 @@ public class config {
     private int txdelay;
     private int offsetminute;
     private int offsetsecond;
-    
+
     private String Webpage1 = "none";
     private String Webpage1b = "";
     private String Webpage1e = "";
@@ -73,7 +73,7 @@ public class config {
     private String Webpage6 = "none";
     private String Webpage6b = "";
     private String Webpage6e = "";
-    
+
     public String qrg0 = "";
     public String qrg1 = "";
     public String qrg2 = "";
@@ -86,29 +86,55 @@ public class config {
 
     // various values
     private String statustxt;
-    
+
     private String filepath;
 
     // Common properties file object
     Properties configFile;
 
     //enums for the config file, use these instead of hardcoded strings, less confusion for all then!
-    public enum user {CALL, SERVER, BLOCKLENGTH, LATITUDE, LONGITUDE, BEACON, BEACONTIME, BEACONQRG, BEACONCOMP,AUTOLINK, ICON, ICON2, STATUS, CALLSIGNASSERVER}
-    public enum email {POPHOST, POPUSER, POPPASS, RETURNADDRESS, COMPRESSED}
-    public enum configuration {LOGFILE, DCD, RETRIES, IDLETIME, TXDELAY, OFFSETMINUTE, OFFSETSECONDS}
-    public enum devices {GPSD, GPSPORT, GPSSPEED, GPSENABLED, APRSSERVER, APRSSERVERPORT}
-    public enum aprs {APRSCALL}
-    public enum rigctrl {RIGCTL, SCANNER, RIGOFFSET, QRG0, QRG1, QRG2, QRG3, QRG4}
-    public enum state {yes, no}
-    public enum web {URL1, URL1B, URL1E, URL2, URL2B, URL2E, URL3, URL3B, URL3E, URL4, URL4B, URL4E, URL5, URL5B, URL5E, URL6, URL6B, URL6E}
-    public enum modem {MODEMIP, MODEMIPPORT, MODEMPOSTAMBLE, MODEMPREAMBLE, MULTI}
+    public enum user {
+        CALL, SERVER, BLOCKLENGTH, LATITUDE, LONGITUDE, BEACON, BEACONTIME, BEACONQRG, BEACONCOMP, AUTOLINK, ICON, ICON2, STATUS, CALLSIGNASSERVER
+    }
+
+    public enum email {
+        POPHOST, POPUSER, POPPASS, RETURNADDRESS, COMPRESSED
+    }
+
+    public enum configuration {
+        LOGFILE, DCD, RETRIES, IDLETIME, TXDELAY, OFFSETMINUTE, OFFSETSECONDS
+    }
+
+    public enum devices {
+        GPSD, GPSPORT, GPSSPEED, GPSENABLED, APRSSERVER, APRSSERVERPORT
+    }
+
+    public enum aprs {
+        APRSCALL
+    }
+
+    public enum rigctrl {
+        RIGCTL, SCANNER, RIGOFFSET, QRG0, QRG1, QRG2, QRG3, QRG4
+    }
+
+    public enum state {
+        yes, no
+    }
+
+    public enum web {
+        URL1, URL1B, URL1E, URL2, URL2B, URL2E, URL3, URL3B, URL3E, URL4, URL4B, URL4E, URL5, URL5B, URL5E, URL6, URL6B, URL6E
+    }
+
+    public enum modem {
+        MODEMIP, MODEMIPPORT, MODEMPOSTAMBLE, MODEMPREAMBLE, MULTI
+    }
 
     // constructor
     /**
-     * 
+     *
      */
-    public config(String path){
-        
+    public config(String path) {
+
         filepath = path;
         configFile = new Properties();
         // Check the config file, create and fill if necessary
@@ -117,16 +143,16 @@ public class config {
             statustxt = getPreference(user.STATUS.toString());
             callsign = getPreference(user.CALL.toString());
             callsignAsServer = getPreference(user.CALLSIGNASSERVER.toString());
-            linktoserver =getPreference(user.SERVER.toString());
+            linktoserver = getPreference(user.SERVER.toString());
             latitude = getPreference(user.LATITUDE.toString());
             longitude = getPreference(user.LONGITUDE.toString());
             blocklength = getPreference(user.BLOCKLENGTH.toString());
             Main.CurrentModemProfile = blocklength;
-            beaconqrg = getPreference(user.BEACONQRG.toString(),"0");
-            beaconcomp = getPreference(user.BEACONCOMP.toString(),"1");
-            beacon = getPreference(user.BEACON.toString(),"1");
-            beacontime = getPreference(user.BEACONTIME.toString(),"30");
-            autolink = getPreference(user.AUTOLINK.toString(),"1");
+            beaconqrg = getPreference(user.BEACONQRG.toString(), "0");
+            beaconcomp = getPreference(user.BEACONCOMP.toString(), "1");
+            beacon = getPreference(user.BEACON.toString(), "1");
+            beacontime = getPreference(user.BEACONTIME.toString(), "30");
+            autolink = getPreference(user.AUTOLINK.toString(), "1");
             Webpage1 = getPreference(web.URL1.toString());
             Webpage1b = getPreference(web.URL1B.toString());
             Webpage1e = getPreference(web.URL1E.toString());
@@ -145,17 +171,16 @@ public class config {
             Webpage6 = getPreference(web.URL6.toString());
             Webpage6b = getPreference(web.URL6B.toString());
             Webpage6e = getPreference(web.URL6E.toString());
-            qrg0 = getPreference(rigctrl.QRG0.toString(),"1048000");
-            qrg1 = getPreference(rigctrl.QRG1.toString(),"1048000");
-            qrg2 = getPreference(rigctrl.QRG2.toString(),"1048000");
-            qrg3 = getPreference(rigctrl.QRG3.toString(),"1048000");
-            qrg4 = getPreference(rigctrl.QRG4.toString(),"1048000");
-            RigOffset = getPreference(rigctrl.RIGOFFSET.toString(),"1000");
-            APRSServer = getPreference(devices.APRSSERVER.toString(),state.yes.toString());
-            APRSServerPort = getPreference(devices.APRSSERVERPORT.toString(),"8063");
-            Main.APRSCall = getPreference(aprs.APRSCALL.toString(),"N0CAL");
-        }
-        catch (Exception e) {
+            qrg0 = getPreference(rigctrl.QRG0.toString(), "1048000");
+            qrg1 = getPreference(rigctrl.QRG1.toString(), "1048000");
+            qrg2 = getPreference(rigctrl.QRG2.toString(), "1048000");
+            qrg3 = getPreference(rigctrl.QRG3.toString(), "1048000");
+            qrg4 = getPreference(rigctrl.QRG4.toString(), "1048000");
+            RigOffset = getPreference(rigctrl.RIGOFFSET.toString(), "1000");
+            APRSServer = getPreference(devices.APRSSERVER.toString(), state.yes.toString());
+            APRSServerPort = getPreference(devices.APRSSERVERPORT.toString(), "8063");
+            Main.APRSCall = getPreference(aprs.APRSCALL.toString(), "N0CAL");
+        } catch (Exception e) {
             callsign = "N0CALL";
             linktoserver = "N0CALL";
             blocklength = "6";
@@ -179,11 +204,11 @@ public class config {
     }
 
     /**
-     * If there is no config file then one should be created,
-     * it should have good defaults.
+     * If there is no config file then one should be created, it should have
+     * good defaults.
      */
-    private void initialcheckconfigfile(){
-        
+    private void initialcheckconfigfile() {
+
         try {
             // Check if there is a configuration file
             boolean exists = (new File(filepath + "configuration.xml")).exists();
@@ -191,17 +216,17 @@ public class config {
             // There is no file, we must create one
             if (!exists) {
                 OutputStream fo = new FileOutputStream(filepath + "configuration.xml");
-                configFile.setProperty(user.CALL.toString(),"N0CAL");
-                configFile.setProperty(user.SERVER.toString() , "N0CAL");
-                configFile.setProperty(user.BLOCKLENGTH.toString() , "7");
-                configFile.setProperty(user.LATITUDE.toString() , "0.0");
-                configFile.setProperty(user.LONGITUDE.toString() , "0.0");
-                configFile.setProperty(user.BEACONQRG.toString() , "0");
-                configFile.setProperty(user.BEACONCOMP.toString() , "1");
-                configFile.setProperty(user.BEACON.toString() , "1");
-                configFile.setProperty(user.BEACONTIME.toString() , "30");
-                configFile.setProperty(user.AUTOLINK.toString() , "1");
-                configFile.setProperty(user.STATUS.toString() , Main.application);
+                configFile.setProperty(user.CALL.toString(), "N0CAL");
+                configFile.setProperty(user.SERVER.toString(), "N0CAL");
+                configFile.setProperty(user.BLOCKLENGTH.toString(), "7");
+                configFile.setProperty(user.LATITUDE.toString(), "0.0");
+                configFile.setProperty(user.LONGITUDE.toString(), "0.0");
+                configFile.setProperty(user.BEACONQRG.toString(), "0");
+                configFile.setProperty(user.BEACONCOMP.toString(), "1");
+                configFile.setProperty(user.BEACON.toString(), "1");
+                configFile.setProperty(user.BEACONTIME.toString(), "30");
+                configFile.setProperty(user.AUTOLINK.toString(), "1");
+                configFile.setProperty(user.STATUS.toString(), Main.application);
                 // Gps defaults
                 configFile.setProperty(devices.GPSPORT.toString(), "/dev/ttyS0");
                 configFile.setProperty(devices.GPSSPEED.toString(), "4800");
@@ -215,11 +240,11 @@ public class config {
                 configFile.setProperty(email.POPUSER.toString(), "none");
                 configFile.setProperty(email.POPPASS.toString(), "none");
                 configFile.setProperty(email.RETURNADDRESS.toString(), "myself@myemail.com");
-                
+
                 configFile.setProperty(web.URL1.toString(), "none");
                 configFile.setProperty(web.URL1B.toString(), "");
                 configFile.setProperty(web.URL1E.toString(), "");
-                 configFile.setProperty(web.URL2.toString(), "none");
+                configFile.setProperty(web.URL2.toString(), "none");
                 configFile.setProperty(web.URL2B.toString(), "");
                 configFile.setProperty(web.URL2E.toString(), "");
                 configFile.setProperty(web.URL3.toString(), "none");
@@ -231,10 +256,10 @@ public class config {
                 configFile.setProperty(web.URL5.toString(), "none");
                 configFile.setProperty(web.URL5B.toString(), "");
                 configFile.setProperty(web.URL5E.toString(), "");
-                 configFile.setProperty(web.URL6.toString(), "none");
+                configFile.setProperty(web.URL6.toString(), "none");
                 configFile.setProperty(web.URL6B.toString(), "");
                 configFile.setProperty(web.URL6E.toString(), "");
-                
+
                 configFile.setProperty(modem.MODEMIP.toString(), "localhost");
                 configFile.setProperty(modem.MODEMIPPORT.toString(), "7322");
                 configFile.setProperty(modem.MODEMPOSTAMBLE.toString(), "");
@@ -244,146 +269,149 @@ public class config {
                 configFile.setProperty(devices.APRSSERVER.toString(), "yes");
                 configFile.setProperty(devices.APRSSERVERPORT.toString(), "8063");
                 configFile.setProperty(aprs.APRSCALL.toString(), "N0CAL");
-                configFile.storeToXML(fo,"Configuration file for JPSKmail client");
+                configFile.storeToXML(fo, "Configuration file for JPSKmail client");
                 fo.close();
             }
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             Main.log.writelog("Could not create settings file, directory permission trouble?", true);
-        }        
-    }
-    
-    /**
-     * 
-     * @return
-     */
-    public String getCallsign( )    {
-            return callsign;
-    }
-
-   
-    /**
-     * 
-     * @return
-     */
-    public String getCallsignAsServer( )    {
-            return callsignAsServer;
+        }
     }
 
     /**
-     * 
+     *
+     * @return
+     */
+    public String getCallsign() {
+        return callsign;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public String getCallsignAsServer() {
+        return callsignAsServer;
+    }
+
+    /**
+     *
      * @param newcall
      */
-    public void setCallsign(String newcall)    {
-            callsign = newcall;           
-    }
-    
-    /**
-     * 
-     * @return
-     */
-    public String getServer( )    {
-            return linktoserver;
+    public void setCallsign(String newcall) {
+        callsign = newcall;
     }
 
     /**
-     * 
+     *
+     * @return
+     */
+    public String getServer() {
+        return linktoserver;
+    }
+
+    /**
+     *
      * @param newcall
      */
-    public void setServer(String newcall)    {
-            linktoserver = newcall; 
-            setPreference(user.SERVER.toString() , newcall);
+    public void setServer(String newcall) {
+        linktoserver = newcall;
+        setPreference(user.SERVER.toString(), newcall);
     }
-    
+
     /**
-     * 
+     *
      * @param newlat
      */
-    public void setLatitude(String newlat)    {
-            latitude = newlat;           
-    }
-        
-    /**
-     * 
-     * @return
-     */
-    public String getLatitude( )    {
-            return latitude;
+    public void setLatitude(String newlat) {
+        latitude = newlat;
     }
 
-         /**
-          * 
-          * @param newlon
-          */
-    public void setLongitude(String newlon)    {
-            longitude = newlon;           
+    /**
+     *
+     * @return
+     */
+    public String getLatitude() {
+        return latitude;
     }
-         /**
-          * 
-          * @return
-          */
-    public String getLongitude( )    {
-            return longitude;
+
+    /**
+     *
+     * @param newlon
+     */
+    public void setLongitude(String newlon) {
+        longitude = newlon;
     }
-    
-    public void setSpeed(String newspeed){
+
+    /**
+     *
+     * @return
+     */
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setSpeed(String newspeed) {
         speed = newspeed;
     }
-    
-    public String getSpeed(){
+
+    public String getSpeed() {
         return speed;
     }
-    
-    public void setCourse(String newcourse){
+
+    public void setCourse(String newcourse) {
         course = newcourse;
     }
-    
-    public String getCourse(){
+
+    public String getCourse() {
         return course;
     }
-         /**
-          * 
-          * @param newlength
-          */
-    public void setBlocklength(String newlength)    {
-             blocklength = newlength;
+
+    /**
+     *
+     * @param newlength
+     */
+    public void setBlocklength(String newlength) {
+        blocklength = newlength;
     }
-         /**
-          * 
-          * @return
-          */
-    public String getBlocklength( )    {
-            return blocklength;
+
+    /**
+     *
+     * @return
+     */
+    public String getBlocklength() {
+        return blocklength;
     }
-      
-      /**
-       * 
-       * @param newqrg
-       */
-      public void setBeaconqrg(String newqrg)    {
-            beaconqrg = newqrg;
-            setPreference(user.BEACONQRG.toString(), newqrg);
+
+    /**
+     *
+     * @param newqrg
+     */
+    public void setBeaconqrg(String newqrg) {
+        beaconqrg = newqrg;
+        setPreference(user.BEACONQRG.toString(), newqrg);
     }
-        /**
-         * 
-         * @return
-         */
-        public String getBeaconqrg( )    {
-            return beaconqrg;
-    }  
-    
-    public void SetBeacon(String newbeacon){
+
+    /**
+     *
+     * @return
+     */
+    public String getBeaconqrg() {
+        return beaconqrg;
+    }
+
+    public void SetBeacon(String newbeacon) {
         beacon = newbeacon;
         setPreference(user.BEACON.toString(), beacon);
     }
-    
-    public String getBeacon(){
+
+    public String getBeacon() {
         return beacon;
     }
 
     /**
      * Compressed beacon setting
-     * @return 
+     *
+     * @return
      */
     public String getBeaconcomp() {
         return beaconcomp;
@@ -391,39 +419,41 @@ public class config {
 
     /**
      * Compressed beacon setting
-     * @param beaconcomp 
+     *
+     * @param beaconcomp
      */
     public void setBeaconcomp(String beaconcomp) {
         this.beaconcomp = beaconcomp;
         setPreference(user.BEACONCOMP.toString(), beaconcomp);
     }
 
-    public void setAutolink(String newautolink){
+    public void setAutolink(String newautolink) {
         autolink = newautolink;
         setPreference(user.AUTOLINK.toString(), autolink);
     }
 
-    public String getAutolink(){
+    public String getAutolink() {
         return autolink;
     }
 
     /**
-         * 
-         * @return
-         */
-        public String getStatus()    {
-            return statustxt;           
-    }    
+     *
+     * @return
+     */
+    public String getStatus() {
+        return statustxt;
+    }
 
-    public void SetWebPages(String url1,String url2,String url3,String url4,String url5,String url6){
+    public void SetWebPages(String url1, String url2, String url3, String url4, String url5, String url6) {
         Webpage1 = url1;
         Webpage2 = url2;
         Webpage3 = url3;
         Webpage4 = url4;
         Webpage5 = url5;
-        Webpage6 = url6;        
+        Webpage6 = url6;
     }
-     public void SetWebPagesB(String url1,String url2,String url3,String url4,String url5,String url6){
+
+    public void SetWebPagesB(String url1, String url2, String url3, String url4, String url5, String url6) {
         Webpage1b = url1;
         Webpage2b = url2;
         Webpage3b = url3;
@@ -432,7 +462,7 @@ public class config {
         Webpage6b = url6;
     }
 
-      public void SetWebPagesE(String url1,String url2,String url3,String url4,String url5,String url6){
+    public void SetWebPagesE(String url1, String url2, String url3, String url4, String url5, String url6) {
         Webpage1e = url1;
         Webpage2e = url2;
         Webpage3e = url3;
@@ -441,81 +471,80 @@ public class config {
         Webpage6e = url6;
     }
 
+    /**
+     *
+     * @param newstatus
+     */
+    public void setStatus(String newstatus) {
+        statustxt = newstatus;
+    }
 
-        
-         /**
-          * 
-          * @param newstatus
-          */
-         public void setStatus(String newstatus) {
-            statustxt = newstatus;
-         }
-         
-         public void saveURLs() {
-            if (Webpage1.length() > 0) {
-                setPreference("URL1", Webpage1); 
-            }
-             if (Webpage2.length() > 0) {
-                setPreference("URL2", Webpage2); 
-            }
-            if (Webpage3.length() > 0) {
-                setPreference("URL3", Webpage3); 
-            }
-            if (Webpage4.length() > 0) {
-                setPreference("URL4", Webpage4); 
-            }
-            if (Webpage5.length() > 0) {
-                setPreference("URL5", Webpage5); 
-            }
-            if (Webpage6.length() > 0) {
-                setPreference("URL6", Webpage6); 
-            }
-              if (Webpage1b.length() > 0) {
-                setPreference("URL1B", Webpage1b);
-            }
-             if (Webpage2b.length() > 0) {
-                setPreference("URL2B", Webpage2b);
-            }
-            if (Webpage3b.length() > 0) {
-                setPreference("URL3B", Webpage3b);
-            }
-            if (Webpage4b.length() > 0) {
-                setPreference("URL4B", Webpage4b);
-            }
-            if (Webpage5b.length() > 0) {
-                setPreference("URL5B", Webpage5b);
-            }
-            if (Webpage6b.length() > 0) {
-                setPreference("URL6B", Webpage6b);
-            }
-                if (Webpage1e.length() > 0) {
-                setPreference("URL1E", Webpage1e); 
-            }
-             if (Webpage2e.length() > 0) {
-                setPreference("URL2E", Webpage2e); 
-            }
-            if (Webpage3e.length() > 0) {
-                setPreference("URL3E", Webpage3e); 
-            }
-            if (Webpage4e.length() > 0) {
-                setPreference("URL4E", Webpage4e); 
-            }
-            if (Webpage5e.length() > 0) {
-                setPreference("URL5E", Webpage5e); 
-            }
-            if (Webpage6e.length() > 0) {
-                setPreference("URL6E", Webpage6e); 
-            }
-         }
+    public void saveURLs() {
+        //VK2ETA: always save the strings otherwise we can't blank the fields out
+        //if (Webpage1.length() > 0) {
+            setPreference("URL1", Webpage1);
+        //}
+        //if (Webpage2.length() > 0) {
+            setPreference("URL2", Webpage2);
+        //}
+        //if (Webpage3.length() > 0) {
+            setPreference("URL3", Webpage3);
+        //}
+        //if (Webpage4.length() > 0) {
+            setPreference("URL4", Webpage4);
+        //}
+        //if (Webpage5.length() > 0) {
+            setPreference("URL5", Webpage5);
+        //}
+        //if (Webpage6.length() > 0) {
+            setPreference("URL6", Webpage6);
+        //}
+        //if (Webpage1b.length() > 0) {
+            setPreference("URL1B", Webpage1b);
+        //}
+        //if (Webpage2b.length() > 0) {
+            setPreference("URL2B", Webpage2b);
+        //}
+        //if (Webpage3b.length() > 0) {
+            setPreference("URL3B", Webpage3b);
+        //}
+        //if (Webpage4b.length() > 0) {
+            setPreference("URL4B", Webpage4b);
+        //}
+        //if (Webpage5b.length() > 0) {
+            setPreference("URL5B", Webpage5b);
+        //}
+        //if (Webpage6b.length() > 0) {
+            setPreference("URL6B", Webpage6b);
+        //}
+        //if (Webpage1e.length() > 0) {
+            setPreference("URL1E", Webpage1e);
+        //}
+        //if (Webpage2e.length() > 0) {
+            setPreference("URL2E", Webpage2e);
+        //}
+        //if (Webpage3e.length() > 0) {
+            setPreference("URL3E", Webpage3e);
+        //}
+        //if (Webpage4e.length() > 0) {
+            setPreference("URL4E", Webpage4e);
+        //}
+        //if (Webpage5e.length() > 0) {
+            setPreference("URL5E", Webpage5e);
+        //}
+        //if (Webpage6e.length() > 0) {
+            setPreference("URL6E", Webpage6e);
+        //}
+    }
 
-    /** /
+    /**
+     * /
      * Load properties and set config object
-     * @param Key 
+     *
+     * @param Key
      * @param Value
      * @return
      */
-
-
     public String getAPRSServer() {
         return APRSServer;
     }
@@ -531,76 +560,75 @@ public class config {
     public void setAPRSServerPort(String APRSServerPort) {
         this.APRSServerPort = APRSServerPort;
     }
-    
-    public String[] getQRGs(){
+
+    public String[] getQRGs() {
         String[] qrgs = {qrg0, qrg1, qrg2, qrg3, qrg4};
         return qrgs;
     }
 
-
-public void setPreference(String Key, String Value) {
-    try {
+    public void setPreference(String Key, String Value) {
+        try {
             InputStream f = new FileInputStream(Main.HomePath + Main.Dirprefix + "configuration.xml");
             configFile.loadFromXML(f);
             f.close();
 //   System.out.println(Key + "," + Value);
             configFile.setProperty(Key, Value);
             OutputStream fo = new FileOutputStream(Main.HomePath + Main.Dirprefix + "configuration.xml");
-            configFile.storeToXML(fo,"Configuration file for JPSKmail client");
+            configFile.storeToXML(fo, "Configuration file for JPSKmail client");
 //  System.out.println(">>Key=" + Key + " value=" + configFile.getProperty(Key) + "\n");  // debug
+        } catch (Exception e) {
+            Main.log.writelog("Could not store setting: " + Key, true);
         }
-    catch(Exception e) {
-        Main.log.writelog("Could not store setting: "+Key, true);
     }
-}    
 
-/**
- * 
- * @param Key
- * @return
- */
-
-public String getPreference(String Key) {
-    String myReturn="";
-    try {
-        InputStream f = new FileInputStream(Main.HomePath + Main.Dirprefix + "configuration.xml");
-        configFile.loadFromXML(f);
-        f.close();
-        myReturn = configFile.getProperty(Key);
-        if (myReturn.equals(""))
-            myReturn="";
-    }
-    catch(Exception ex) {
-       return "";
-    }
+    /**
+     *
+     * @param Key
+     * @return
+     */
+    public String getPreference(String Key) {
+        String myReturn = "";
+        try {
+            InputStream f = new FileInputStream(Main.HomePath + Main.Dirprefix + "configuration.xml");
+            configFile.loadFromXML(f);
+            f.close();
+            myReturn = configFile.getProperty(Key);
+            if (myReturn.equals("")) {
+                myReturn = "";
+            }
+        } catch (Exception ex) {
+            return "";
+        }
 //    System.out.println("Key=" + Key + " value=" + configFile.getProperty(Key) + "\n");  // debug
-    if (!myReturn.equals(""))
-        return (myReturn);
-    else
-        return "";
- }
+        if (!myReturn.equals("")) {
+            return (myReturn);
+        } else {
+            return "";
+        }
+    }
 
- /**
-  * Get the saved value, if its not there then use the default value
-  * @param Key
-  * @param Default
-  * @return
-  */
- public String getPreference(String Key, String Default) {
-    Properties configFile = new Properties();
-    String myReturn="";
-    try {
-        InputStream f = new FileInputStream(Main.HomePath + Main.Dirprefix + "configuration.xml");
-        configFile.loadFromXML(f);
-        f.close();
-        myReturn = configFile.getProperty(Key);
-        if (myReturn.equals(""))
-            myReturn=Default;
-        return myReturn;
+    /**
+     * Get the saved value, if its not there then use the default value
+     *
+     * @param Key
+     * @param Default
+     * @return
+     */
+    public String getPreference(String Key, String Default) {
+        Properties configFile = new Properties();
+        String myReturn = "";
+        try {
+            InputStream f = new FileInputStream(Main.HomePath + Main.Dirprefix + "configuration.xml");
+            configFile.loadFromXML(f);
+            f.close();
+            myReturn = configFile.getProperty(Key);
+            if (myReturn.equals("")) {
+                myReturn = Default;
+            }
+            return myReturn;
+        } catch (Exception ex) {
+            return Default;
+        }
     }
-    catch(Exception ex) {
-       return Default;
-    }
- }
-    
+
 }

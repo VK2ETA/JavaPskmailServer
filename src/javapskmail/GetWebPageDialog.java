@@ -81,6 +81,7 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         pnlButtons = new javax.swing.JPanel();
+        WebTestURL1Button = new javax.swing.JButton();
         WebOKButton = new javax.swing.JButton();
         GetWebCancelButton = new javax.swing.JButton();
 
@@ -242,6 +243,10 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         gridBagConstraints.gridy = 0;
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 0, 0);
         jPanel1.add(Weblabel, gridBagConstraints);
+
+        URL1b.setMinimumSize(new java.awt.Dimension(4, 25));
+        URL1b.setName(""); // NOI18N
+        URL1b.setPreferredSize(new java.awt.Dimension(4, 25));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
@@ -251,6 +256,10 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(6, 7, 0, 3);
         jPanel1.add(URL1b, gridBagConstraints);
+
+        URL1e.setMinimumSize(new java.awt.Dimension(4, 25));
+        URL1e.setName(""); // NOI18N
+        URL1e.setPreferredSize(new java.awt.Dimension(4, 25));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 1;
@@ -260,6 +269,10 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 7);
         jPanel1.add(URL1e, gridBagConstraints);
+
+        URL2b.setMinimumSize(new java.awt.Dimension(4, 25));
+        URL2b.setName(""); // NOI18N
+        URL2b.setPreferredSize(new java.awt.Dimension(4, 25));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
@@ -269,6 +282,10 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(6, 7, 0, 3);
         jPanel1.add(URL2b, gridBagConstraints);
+
+        URL3b.setMinimumSize(new java.awt.Dimension(4, 25));
+        URL3b.setName(""); // NOI18N
+        URL3b.setPreferredSize(new java.awt.Dimension(4, 25));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 3;
@@ -278,6 +295,10 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(6, 7, 0, 3);
         jPanel1.add(URL3b, gridBagConstraints);
+
+        URL4b.setMinimumSize(new java.awt.Dimension(4, 25));
+        URL4b.setName(""); // NOI18N
+        URL4b.setPreferredSize(new java.awt.Dimension(4, 25));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 4;
@@ -287,6 +308,10 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(6, 7, 0, 3);
         jPanel1.add(URL4b, gridBagConstraints);
+
+        URL5b.setMinimumSize(new java.awt.Dimension(4, 25));
+        URL5b.setName(""); // NOI18N
+        URL5b.setPreferredSize(new java.awt.Dimension(4, 25));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 5;
@@ -296,6 +321,10 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(6, 7, 0, 3);
         jPanel1.add(URL5b, gridBagConstraints);
+
+        URL6b.setMinimumSize(new java.awt.Dimension(4, 25));
+        URL6b.setName(""); // NOI18N
+        URL6b.setPreferredSize(new java.awt.Dimension(4, 25));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 6;
@@ -305,6 +334,10 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(7, 7, 5, 3);
         jPanel1.add(URL6b, gridBagConstraints);
+
+        URL2e.setMinimumSize(new java.awt.Dimension(4, 25));
+        URL2e.setName(""); // NOI18N
+        URL2e.setPreferredSize(new java.awt.Dimension(4, 25));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 2;
@@ -314,6 +347,10 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 7);
         jPanel1.add(URL2e, gridBagConstraints);
+
+        URL3e.setMinimumSize(new java.awt.Dimension(4, 25));
+        URL3e.setName(""); // NOI18N
+        URL3e.setPreferredSize(new java.awt.Dimension(4, 25));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 3;
@@ -323,6 +360,10 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 7);
         jPanel1.add(URL3e, gridBagConstraints);
+
+        URL4e.setMinimumSize(new java.awt.Dimension(4, 25));
+        URL4e.setName(""); // NOI18N
+        URL4e.setPreferredSize(new java.awt.Dimension(4, 25));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 4;
@@ -332,6 +373,10 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 7);
         jPanel1.add(URL4e, gridBagConstraints);
+
+        URL5e.setMinimumSize(new java.awt.Dimension(4, 25));
+        URL5e.setName(""); // NOI18N
+        URL5e.setPreferredSize(new java.awt.Dimension(4, 25));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 5;
@@ -341,6 +386,10 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         gridBagConstraints.weightx = 0.1;
         gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 7);
         jPanel1.add(URL5e, gridBagConstraints);
+
+        URL6e.setMinimumSize(new java.awt.Dimension(4, 25));
+        URL6e.setName(""); // NOI18N
+        URL6e.setPreferredSize(new java.awt.Dimension(4, 25));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 6;
@@ -372,6 +421,18 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         jPanel1.add(jLabel3, gridBagConstraints);
 
         pnlButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+
+        WebTestURL1Button.setText(bundle.getString("GetWebPageDialog.text")); // NOI18N
+        WebTestURL1Button.setMaximumSize(new java.awt.Dimension(97, 30));
+        WebTestURL1Button.setMinimumSize(new java.awt.Dimension(97, 30));
+        WebTestURL1Button.setName(""); // NOI18N
+        WebTestURL1Button.setPreferredSize(new java.awt.Dimension(97, 30));
+        WebTestURL1Button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                WebTestURL1ButtonActionPerformed(evt);
+            }
+        });
+        pnlButtons.add(WebTestURL1Button);
 
         WebOKButton.setText(bundle.getString("GetWebPageDialog.WebOKButton.text")); // NOI18N
         WebOKButton.setMinimumSize(new java.awt.Dimension(80, 30));
@@ -572,7 +633,24 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         }
          this.setVisible(false);
     }//GEN-LAST:event_WebButton6ActionPerformed
-    
+
+    private void WebTestURL1ButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WebTestURL1ButtonActionPerformed
+        //e.g.: "~TGET www.bom.gov.au/nsw/forecasts/centralwestslopes.shtml begin:Forecast issued at end:The next routine forecast"
+        String url1 = this.WebPage1.getText();
+        if (url1.length() > 0) {
+            String webText = "";
+            if (URL1b.getText().equals("") | URL1e.getText().equals("")) {
+                webText = serverMail.readWebPage(url1, "", false);
+            } else {
+                webText = serverMail.readWebPage(url1, " begin:" + URL1b.getText() + " end:" + URL1e.getText(), false);
+                //test: webText = serverMail.readRawWebPage(url1, " begin:" + URL1b.getText() + " end:" + URL1e.getText(), false);
+            }
+            if (webText.length() > 0) {
+                Main.mainui.appendMainWindow("\n-----------------------------\n" + webText + "\n-----------------------------\n");
+            }
+        }
+    }//GEN-LAST:event_WebTestURL1ButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -619,6 +697,7 @@ public class GetWebPageDialog extends javax.swing.JDialog {
     private javax.swing.JTextField WebPage4;
     private javax.swing.JTextField WebPage5;
     private javax.swing.JTextField WebPage6;
+    private javax.swing.JButton WebTestURL1Button;
     private javax.swing.JLabel Weblabel;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

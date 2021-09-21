@@ -52,7 +52,8 @@ public class mainpskmailui extends javax.swing.JFrame {
      */
 //    public config myconfig;
 //    public Rigctl myrig;
-    private Session mysession;
+    //VK2ETA: use Main.sm as single object for all "mysession" access
+    //private Session mysession;
     private optionsdialog optionsDialog;
     private FrequencyHelper fqhelper;
     private static int oldminute = 0;
@@ -170,8 +171,8 @@ public class mainpskmailui extends javax.swing.JFrame {
         //String path = Main.HomePath + Main.Dirprefix;
         //myconfig = new config(path);
 
-        mysession = new Session();
-        mysession.mycall = Main.mycall;
+        //mysession = new Session();
+        Main.sm.mycall = Main.mycall;
         fc = new JFileChooser();
 
 //        if (Main.configuration.getPreference("RIGCTL").equals("yes")) {
@@ -2751,6 +2752,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                 gridBagConstraints.insets = new java.awt.Insets(10, 5, 0, 0);
                 tabIgate.add(APRSServerSelect, gridBagConstraints);
 
+                APRS_IS.setSelected(true);
                 APRS_IS.setText(bundle.getString("mainpskmailui.APRS_IS.text")); // NOI18N
                 APRS_IS.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -4505,8 +4507,8 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 
             private void mnuHeadersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuHeadersActionPerformed
                 // TODO add your handling code here:
-                mysession.deleteFile("headers");
-                mysession.makeFile("headers");
+                Main.sm.deleteFile("headers");
+                Main.sm.makeFile("headers");
                 Main.q.Message(mainpskmailui.getString("Delete_list_of_mail_headers..."), 5);
                 // Refresh the view
                 refreshEmailGrids();
@@ -4552,7 +4554,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                     lblStatus.setText(mainpskmailui.getString("Discon"));
                     lblStatus.setForeground(Color.RED);
                     Main.q.Message(mainpskmailui.getString("trying_to_disconnect..."), 5);
-                    mysession.FileDownload = false;
+                    Main.sm.FileDownload = false;
 
                 } else {
                     try {
@@ -4580,10 +4582,10 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                     disableMboxMenu();
                     enableMnuPreferences2();
                     Main.TTYConnected = "";
-                    mysession.FileDownload = false;
+                    Main.sm.FileDownload = false;
                     try {
-                        if (mysession.pFile != null) {
-                            mysession.pFile.close();
+                        if (Main.sm.pFile != null) {
+                            Main.sm.pFile.close();
                         }
                     } catch (IOException e) {
                         Main.q.Message("Cannot close pending file", 10);
@@ -4793,10 +4795,10 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             lblStatus.setForeground(Color.RED);
             Main.Connecting_time = 0;
             Main.Scanning = false;
-            mysession.FileDownload = false;
+            Main.sm.FileDownload = false;
             try {
-                if (mysession.pFile != null) {
-                    mysession.pFile.close();
+                if (Main.sm.pFile != null) {
+                    Main.sm.pFile.close();
                 }
             } catch (IOException e) {
                 Main.q.Message("Cannot close pending file", 10);
@@ -4839,7 +4841,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
         Main.connectingPhase = false;
         Main.Connecting_time = 0;
         Main.Scanning = false;
-        mysession.FileDownload = false;
+        Main.sm.FileDownload = false;
         lblStatus.setText(mainpskmailui.getString("Listening"));
         lblStatus.setForeground(Color.lightGray);
         Main.Status = mainpskmailui.getString("Listening");
@@ -4888,7 +4890,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
         FileConnect.setText(java.util.ResourceBundle.getBundle("javapskmail/mainpskmailui").getString("Connect"));
         Main.Connected = false;
         Main.TTYConnected = "";
-        mysession.FileDownload = false;
+        Main.sm.FileDownload = false;
         Main.m.setModemModeNow(Main.defaultmode);
     }
 
@@ -4941,7 +4943,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                                     String outfile = penfile0;
                                     i = outfile.lastIndexOf(File.separator);
                                     ffilename = (i > -1) ? outfile.substring(i + 1) : outfile;
-                                    Main.TX_Text += "~FO5:" + mysession.mycall + ":" + mysession.myserver + ":"
+                                    Main.TX_Text += "~FO5:" + Main.sm.mycall + ":" + Main.sm.myserver + ":"
                                             + ffilename + ":u:" + fname + ":" + Long.toString(fpendingfiles[0].length()) + "\n";
                                 }
                             }
@@ -4962,7 +4964,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                                 String outfile = penfile0;
                                 j = outfile.lastIndexOf(File.separator);
                                 filename = (j > -1) ? outfile.substring(j + 1) : outfile;
-                                Main.TX_Text += "~FO5:" + mysession.mycall + ":" + mysession.myserver + ":"
+                                Main.TX_Text += "~FO5:" + Main.sm.mycall + ":" + Main.sm.myserver + ":"
                                         + filename + ":s: :" + Long.toString(pendingfiles[0].length()) + "\n";
                             }
                         } else {
@@ -5122,7 +5124,9 @@ private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 private void menuMessagesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMessagesActionPerformed
     // TODO add your handling code here:
     if (Main.Connected) {
-        Main.TX_Text += "~/~GETMSG\n";
+        //VK2ETA: syntax error?
+        //Main.TX_Text += "~/~GETMSG\n";
+        Main.TX_Text += "~GETMSG\n";
         Main.q.Message(mainpskmailui.getString("Getting_list_of_messages_from_the_web..."), 5);
     } else {
         Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
@@ -5394,7 +5398,7 @@ private void chkAutoLinkStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-F
 private void Update_serverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Update_serverActionPerformed
     // TODO add your handling code here:
     //if (Main.Connected) {
-    mysession.sendUpdate();
+    Main.sm.sendUpdate();
     Main.q.Message("Sending record to server", 5);
     //   } else {
     //       Main.q.Message("You need to connect first...", 5);
@@ -5791,7 +5795,7 @@ private void FileSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GE
 
             if (mypath.length() > 0) {
 
-                String Destination = mysession.myserver;
+                String Destination = Main.sm.myserver;
                 Destination = (String) JOptionPane.showInputDialog(
                         new JFrame(),
                         "File destination (CALL)",
@@ -5896,14 +5900,14 @@ private void FileSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GE
                 String TrString = "";
                 File mycodedFile = new File(codedFile);
                 if (mycodedFile.isFile()) {
-                    TrString = ">FM:" + mysession.mycall + ":" + Destination + ":"
+                    TrString = ">FM:" + Main.sm.mycall + ":" + Destination + ":"
                             + token + ":u:" + myfile
                             + ":" + Long.toString(mycodedFile.length()) + "\n";
                 }
 
                 if (Main.Connected) {
                     if (mycodedFile.isFile()) {
-                        Main.TX_Text += "~FO5:" + mysession.mycall + ":" + Destination + ":"
+                        Main.TX_Text += "~FO5:" + Main.sm.mycall + ":" + Destination + ":"
                                 + token + ":u:" + myfile
                                 + ":" + Long.toString(mycodedFile.length()) + "\n";
                         Main.q.Message(mainpskmailui.getString("Uploading_") + myfile, 5);
@@ -6279,7 +6283,7 @@ private void PrefSaveMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
                                     String outfile = penfile0;
                                     i = outfile.lastIndexOf(File.separator);
                                     ffilename = (i > -1) ? outfile.substring(i + 1) : outfile;
-                                    Main.TX_Text += "~FO5:" + mysession.mycall + ":" + mysession.myserver + ":"
+                                    Main.TX_Text += "~FO5:" + Main.sm.mycall + ":" + Main.sm.myserver + ":"
                                             + ffilename + ":u:" + fname + ":" + Long.toString(fpendingfiles[0].length()) + "\n";
                                 }
                             }
@@ -6300,7 +6304,7 @@ private void PrefSaveMenuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
                                 String outfile = penfile0;
                                 j = outfile.lastIndexOf(File.separator);
                                 filename = (j > -1) ? outfile.substring(j + 1) : outfile;
-                                Main.TX_Text += "~FO5:" + mysession.mycall + ":" + mysession.myserver + ":"
+                                Main.TX_Text += "~FO5:" + Main.sm.mycall + ":" + Main.sm.myserver + ":"
                                         + filename + ":s: :" + Long.toString(pendingfiles[0].length()) + "\n";
                             }
                         } else {
@@ -6507,7 +6511,7 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
                             String outfile = penfile0;
                             i = outfile.lastIndexOf(File.separator);
                             ffilename = (i > -1) ? outfile.substring(i + 1) : outfile;
-                            Main.TX_Text += "~FO5:" + mysession.mycall + ":" + mysession.myserver + ":"
+                            Main.TX_Text += "~FO5:" + Main.sm.mycall + ":" + Main.sm.myserver + ":"
                                     + ffilename + ":u:" + fname + ":" + Long.toString(fpendingfiles[0].length()) + "\n";
                         }
                     }
@@ -6657,7 +6661,7 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
                 String outfile = penfile0;
                 int j = outfile.lastIndexOf(File.separator);
                 String filename = (j > -1) ? outfile.substring(j + 1) : outfile;
-                Main.TX_Text += "~FO5:" + mysession.mycall + ":" + mysession.myserver + ":"
+                Main.TX_Text += "~FO5:" + Main.sm.mycall + ":" + Main.sm.myserver + ":"
                         + filename + ":s: :" + Long.toString(pendingfiles[0].length()) + "\n";
             }
         }
@@ -6849,8 +6853,8 @@ private void mnuMonitorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
 
 private void mnuClearInboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuClearInboxActionPerformed
     // TODO add your handling code here:
-    mysession.deleteFile("Inbox");
-    mysession.makeFile("Inbox");
+    Main.sm.deleteFile("Inbox");
+    Main.sm.makeFile("Inbox");
     Main.q.Message("Clear Inbox", 5);
     // Refresh the view
     refreshEmailGrids();
@@ -7166,7 +7170,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             //       Destination Dst = new Destination(this,true);
             if (myfile.length() > 0) {
                 Main.myfile = myfile;
-                String Destination = mysession.myserver;
+                String Destination = Main.sm.myserver;
                 Destination = (String) JOptionPane.showInputDialog(
                         new JFrame(),
                         "File destination (CALL)",
@@ -7259,14 +7263,14 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
                 String TrString = "";
                 File mycodedFile = new File(codedFile);
                 if (mycodedFile.isFile()) {
-                    TrString = "~FO5:" + mysession.mycall + ":" + Main.fileDestination + ":"
+                    TrString = "~FO5:" + Main.sm.mycall + ":" + Main.fileDestination + ":"
                             + token + ":b:" + myfile
                             + ":" + Long.toString(mycodedFile.length()) + "\n";
                 }
 
                 if (Main.Connected) {
                     if (mycodedFile.isFile()) {
-                        Main.TX_Text += "~FO5:" + mysession.mycall + ":" + Main.fileDestination + ":"
+                        Main.TX_Text += "~FO5:" + Main.sm.mycall + ":" + Main.fileDestination + ":"
                                 + token + ":b:" + myfile
                                 + ":" + Long.toString(mycodedFile.length()) + "\n";
                         Main.fileDestination = Destination;
@@ -7308,7 +7312,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             //       Destination Dst = new Destination(this,true);
             if (myfile.length() > 0) {
                 Main.myfile = myfile;
-                String Destination = mysession.myserver;
+                String Destination = Main.sm.myserver;
                 Destination = (String) JOptionPane.showInputDialog(
                         new JFrame(),
                         "File destination (CALL)",
@@ -7401,14 +7405,14 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
                 String TrString = "";
                 File mycodedFile = new File(codedFile);
                 if (mycodedFile.isFile()) {
-                    TrString = "~FO5:" + mysession.mycall + ":" + Main.fileDestination + ":"
+                    TrString = "~FO5:" + Main.sm.mycall + ":" + Main.fileDestination + ":"
                             + token + ":b:" + myfile
                             + ":" + Long.toString(mycodedFile.length()) + "\n";
                 }
 
                 if (Main.Connected) {
                     if (mycodedFile.isFile()) {
-                        Main.TX_Text += "~FO5:" + mysession.mycall + ":" + Main.fileDestination + ":"
+                        Main.TX_Text += "~FO5:" + Main.sm.mycall + ":" + Main.fileDestination + ":"
                                 + token + ":b:" + myfile
                                 + ":" + Long.toString(mycodedFile.length()) + "\n";
                         Main.fileDestination = Destination;
@@ -7700,7 +7704,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         try {
             if (Main.Connected) {
                 txtMainEntry.setText("");
-                mysession.sendRead(mailstr);
+                Main.sm.sendRead(mailstr);
                 Main.q.Message(mainpskmailui.getString("Requesting_email_nr._") + mailstr, 15);
             } else {
                 Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 10);
@@ -7908,8 +7912,8 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private void QTC() {
         if (Main.Connected) {
             String mailnr = "";
-            mailnr = mysession.getHeaderCount(Main.HomePath + Main.Dirprefix + "headers");
-            mysession.sendQTC(mailnr);
+            mailnr = Main.sm.getHeaderCount(Main.HomePath + Main.Dirprefix + "headers");
+            Main.sm.sendQTC(mailnr);
             Main.q.Message(mainpskmailui.getString("Requesting_mail_headers_from_nr._") + mailnr, 5);
         } else {
             Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
@@ -7920,7 +7924,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         if (Main.Connected) {
             String numbers = txtMainEntry.getText();
             if (numbers.length() > 0) {
-                mysession.sendDelete(numbers);
+                Main.sm.sendDelete(numbers);
                 Main.q.Message(mainpskmailui.getString("Trying_to_delete_mail_nr._") + numbers, 5);
             } else {
                 Main.q.Message(mainpskmailui.getString("Which_mail_numbers?"), 5);

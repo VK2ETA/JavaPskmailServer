@@ -655,7 +655,6 @@ public class arq {
                 break;
             case TXaprsmessage:
                 Main.m.requestTxRsid("ON");
-                //               Thread.sleep(1000);
                 info = ui_aprsblock(payload);
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
@@ -668,6 +667,14 @@ public class arq {
                 info = ui_linkblock();
                 outstring = make_block(info) + FrameEnd;
                 break;
+            case TXlinkack:
+                //Reply with same info as Inquire block (contains latest email count)
+                // This allows for a regular link to be issued and the number of emails reported
+                Main.m.requestTxRsid("ON");
+                info = replyInquireblock();
+                Lastblockinframe = 1;
+                outstring = make_block(info) + FrameEnd;
+                break;
             case TXBeacon:
                 Main.m.requestTxRsid("ON");
                 Thread.sleep(500);
@@ -676,7 +683,6 @@ public class arq {
                 break;
             case TXConnect:
                 Main.m.requestTxRsid("ON");
-//                Thread.sleep(1000);
                 info = connectblock();
                 //VK2ETA Now with Password is connecting to a mini-server
                 //outstring = make_block(info) + FrameEnd;
@@ -803,8 +809,7 @@ public class arq {
     }
 
     /**
-     * /
-     * Send a simple ping, using port 7
+     *
      */
     public void send_link_ack(String reqCallSign) throws InterruptedException {
         this.reqCallSign = reqCallSign;
