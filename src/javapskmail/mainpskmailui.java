@@ -1437,27 +1437,51 @@ public class mainpskmailui extends javax.swing.JFrame {
     }
 
     public void disableMboxMenu() {
-        mnuMbox2.setVisible(false);
+        //mnuMbox2.setVisible(false);
+        mnuMbox2.setEnabled(false);
     }
 
     public void enableMboxMenu() {
-        mnuMbox2.setVisible(true);
+        //mnuMbox2.setVisible(true);
+        mnuMbox2.setEnabled(true);
     }
 
     public void disableMnuPreferences2() {
-        //mnuPreferences2.setVisible(false);
-        //PrefSaveMenu.setVisible(false);
         mnuPreferences2.setEnabled(false);
         PrefSaveMenu.setEnabled(false);
     }
 
     public void enableMnuPreferences2() {
-        //mnuPreferences2.setVisible(true);
-        //PrefSaveMenu.setVisible(true);
         mnuPreferences2.setEnabled(true);
         PrefSaveMenu.setEnabled(true);
+        //Automatically re-enable all menu options
+        resetAllMenus();
     }
 
+    public void setMenuForJavaServer() {
+        jGetIAC.setEnabled(false);
+        Getforecast.setEnabled(false);
+        mnuGetServerfq2.setEnabled(false);
+        mnuGetPskmailNews2.setEnabled(false);
+        jMenu1.setEnabled(false);
+        Resetrecord_mnu.setEnabled(false);
+        Update_server.setEnabled(false);
+        MnuTelnet.setEnabled(false);
+        disableMboxMenu();
+    }
+  
+    public void resetAllMenus() {
+        jGetIAC.setEnabled(true);
+        Getforecast.setEnabled(true);
+        mnuGetServerfq2.setEnabled(true);
+        mnuGetPskmailNews2.setEnabled(true);
+        jMenu1.setEnabled(true);
+        jMenu1.setEnabled(true);
+        Resetrecord_mnu.setEnabled(true);
+        Update_server.setEnabled(true);
+        MnuTelnet.setEnabled(true);
+    }
+        
     public void disableMonitor() {
         if (Main.Monitor) {
             Main.Monitor = false;

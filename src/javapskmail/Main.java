@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "0.9.4.31";
-    static String application = "jpskmailserver " + version;// Used to preset an empty status
-    static String versionDate = "20210921";
+    static String version = "0.9.5.00";
+    static String application = "jpskmailserver " + "B" + version;// Used to preset an empty status
+    static String versionDate = "20210922";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -257,7 +257,7 @@ public class Main {
     static String Passwrd = "password";
     static String hispubkey = "";
     static crypt cr = null;
-    static String serverversion = "1.1";
+    static String serverVersion = "1.1";
     static double sversion = 1.1;
 
     static Session sm = null;
@@ -746,9 +746,9 @@ public class Main {
                                     connectsecond = "";
                                     String localmail = "";
                                     if (mpc.lookingAt()) {
-                                        serverversion = mpc.group(1);
+                                        serverVersion = mpc.group(1);
                                         sm.serverversion = mpc.group(1);
-                                        sversion = Double.parseDouble(serverversion);
+                                        sversion = Double.parseDouble(serverVersion);
 //     System.out.println(sversion);
                                         connectsecond = mpc.group(2);
                                         localmail = mpc.group(3);
@@ -774,6 +774,7 @@ public class Main {
                                         Matcher mps = pps.matcher(Blockline);
                                         if (mps.lookingAt()) {
                                             Main.connectingPhase = false;
+                                            mainui.setMenuForJavaServer();
                                         }
                                     }
                                 }
