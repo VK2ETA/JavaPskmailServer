@@ -268,8 +268,8 @@ public class mainpskmailui extends javax.swing.JFrame {
                 IgateSwitch.setSelected(true);
                 IgateSwitch.setText("ON");
                 Main.wantigate = true;
-                //String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
-                IgateCallField.setText(Main.configuration.getPreference("CALLSIGNASSERVER", Main.APRSCall));
+                //iGate cIgateCallFieldallsign must be uppercase and free of prefixes and Non-Aprs IDs
+                IgateCallField.setText(Main.cleanCallForAprs(Main.configuration.getPreference("CALLSIGNASSERVER")));
             } else {
                 IgateSwitch.setSelected(false);
                 IgateSwitch.setText("OFF");
@@ -304,7 +304,7 @@ public class mainpskmailui extends javax.swing.JFrame {
 
         
         //IgateCallField.setText(Main.configuration.getPreference("APRSCALL"));
-        IgateCallField.setText(Main.configuration.getPreference("CALLSIGNASSERVER"));
+        IgateCallField.setText(Main.cleanCallForAprs(Main.configuration.getPreference("CALLSIGNASSERVER")));
         String nr = Main.configuration.getPreference("APRSINTERNETSERVER");
         if (nr.equals("")) {
             APRSServerSelect.setSelectedIndex(10);
@@ -4209,6 +4209,7 @@ private void mnuPreferencesActionPerformed(java.awt.event.ActionEvent evt) {//GE
         // Options have now closed
         Main.configuration.setCallsign(optionsDialog.getCallsign());
         Main.q.setCallsign(optionsDialog.getCallsign());
+        IgateCallField.setText(Main.cleanCallForAprs(Main.configuration.getPreference("CALLSIGNASSERVER")));
         //String myServer = optionsDialog.getServer();
         //VK2ETA: Not here, only use the cboServer drop box on main UI
         //Main.q.setServer(myServer);
@@ -5148,9 +5149,15 @@ private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 private void menuMessagesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMessagesActionPerformed
     // TODO add your handling code here:
     if (Main.Connected) {
+        //Added option to nominate the number of messages
+        String maxMessages = txtMainEntry.getText();
         //VK2ETA: syntax error?
         //Main.TX_Text += "~/~GETMSG\n";
-        Main.TX_Text += "~GETMSG\n";
+        if (maxMessages.trim().length() > 0) {
+            Main.TX_Text += "~GETMSG " + maxMessages + "\n";
+        } else {
+            Main.TX_Text += "~GETMSG\n";
+        }
         Main.q.Message(mainpskmailui.getString("Getting_list_of_messages_from_the_web..."), 5);
     } else {
         Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
@@ -5775,9 +5782,12 @@ private void IgateSwitchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 
 private void IgateCallFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_IgateCallFieldActionPerformed
     // TODO add your handling code here:
-    igate.aprscall = IgateCallField.getText();
-    Main.APRSCall = igate.aprscall;
-    Main.configuration.setPreference("APRSCALL", igate.aprscall);
+    String igateCall = Main.cleanCallForAprs(IgateCallField.getText());
+    if (igateCall.length() > 0) {
+        igate.aprscall = igateCall;
+        Main.APRSCall = igate.aprscall;
+        //Main.configuration.setPreference("APRSCALL", igate.aprscall);
+    }
 }//GEN-LAST:event_IgateCallFieldActionPerformed
 
 private void IgateSwitchMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_IgateSwitchMouseClicked

@@ -556,4 +556,12 @@ public class RMsgUtil {
         };
         myThread.start();
     }
+
+    //Right-pad string with spaces, up to 50 characters
+    public static String padString (String myString, int length) {
+        if (length > 50) length = 50;
+        return (myString + "                                                   ").substring(0,length);
+    }
+    
+    
 }

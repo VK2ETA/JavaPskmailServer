@@ -54,7 +54,7 @@ public class arq {
     //Pskmail Server
     public String callsignAsServer = cf.getCallsignAsServer();
     //public String servercall = cf.getServer();
-    private String servercall = "NOCAL"; //Set to default no-call
+    private String servercall = "NOCALL"; //Set to default no-call
     private String serverPassword = ""; //Default to blank (= no password)
     public String statustxt = cf.getStatus();
     public String backoff = cf.getBlocklength();

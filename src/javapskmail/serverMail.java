@@ -746,64 +746,6 @@ public class serverMail {
             Document doc = Jsoup.connect(webURL).get();
             String raw = doc.html();
             return raw;
-/*            if (doc != null) {
-                //Preserve or convert line breaks
-                doc.outputSettings(new Document.OutputSettings().prettyPrint(false));//makes html() preserve linebreaks and spacing
-                doc.select("br").append("\\n");
-                doc.select("p").prepend("\\n");
-                String s = doc.html().replaceAll("\\\\n", "\n");
-                webPage = doc.text();
-                //webPage = Jsoup.clean(s, "", Whitelist.none(), new Document.OutputSettings().prettyPrint(false));
-                //webPage = Jsoup.clean(s, Whitelist.none()); //, "", Whitelist.none(), new Document.OutputSettings().prettyPrint(false));
-            }
-            //Extract begin and end limits if any
-            if (startStopStr.contains("end:")) {
-                STm = Pattern.compile("\\s*(begin:.*)?(end:.*)");
-                st = STm.matcher(startStopStr);
-                if (st.lookingAt()) {
-                    if (st.group(1) != null) {
-                        begin = st.group(1).replaceFirst("begin:", "").trim();
-                    }
-                    if (st.group(2) != null) {
-                        end = st.group(2).replaceFirst("end:", "").trim();
-                    }
-                }
-            } else {
-                //No end: statement, maybe just a begin:
-                STm = Pattern.compile("\\s*(begin:.*)?");
-                st = STm.matcher(startStopStr);
-                if (st.lookingAt()) {
-                    if (st.group(1) != null) {
-                        begin = st.group(1).replaceFirst("begin:", "").trim();
-                    }
-                }
-            }
-            //Trim required? begin: abc
-            if (!begin.equals("")) {
-                if (webPage.toLowerCase(Locale.US).contains(begin.toLowerCase(Locale.US))) {
-                    int beginIndex = webPage.toLowerCase(Locale.US).indexOf(begin.toLowerCase(Locale.US));
-                    //Found, trim then
-                    webPage = webPage.substring(beginIndex);
-                }
-            }
-            //Trim required? end: xyz
-            if (!end.equals("")) {
-                if (webPage.toLowerCase(Locale.US).contains(end.toLowerCase(Locale.US))) {
-                    int endIndex = webPage.toLowerCase(Locale.US).lastIndexOf(end.toLowerCase(Locale.US));
-                    //Found, trim then
-                    webPage = webPage.substring(0, endIndex);
-                }
-            }
-            if (compressedPage) {
-                webPage = tgetZip(webPage);
-            } else {
-                //Pskmail does not handle unicode (the CRC gets corrupted), replace or strip any non ASCII character
-                webPage = webPage.replaceAll("\u2013", "-");
-                webPage = webPage.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
-                webPage = "Your wwwpage: " + webPage.length() + "\n"
-                        + webPage + "\n-end-\n";
-            }
-*/
         } catch (Exception e) {
             webPage = "Error getting web page: " + e.getMessage() + "\n";
         }

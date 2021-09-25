@@ -16,6 +16,7 @@ package javapskmail;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -53,7 +54,7 @@ public class igate {
         while (!connected) {
 
             //aprscall = Main.configuration.getPreference("CALL");
-            aprscall = Main.configuration.getPreference("CALLSIGNASSERVER");
+            aprscall = Main.cleanCallForAprs(Main.configuration.getPreference("CALLSIGNASSERVER"));
             aprspass = getHash(aprscall);
 
             connected = true;
@@ -256,8 +257,9 @@ public class igate {
     }
 
     //Check that station is in the list and was last linked less than 30 minutes ago
-    public static boolean isStationLinked(String station) {
+    public static boolean isStationLinked(String stationRaw) {
         boolean inList = false;
+        String station = stationRaw.toUpperCase(Locale.US);
 
         //Look in list if already registered
         if (station.length() > 0) {
@@ -295,11 +297,11 @@ public class igate {
         Pattern pl = Pattern.compile("^(\\w*\\-*\\d*)>(\\w*),*(.*?):(.)(\\w*\\-*\\d*)\\s*:(.*)(\\{*.*)");
         Matcher ml = pl.matcher(line);
         if (ml.lookingAt()) {
-            String fromcall = ml.group(1);
+            String fromcall = ml.group(1).toUpperCase(Locale.US);
             String groupcall = ml.group(2);
             String path = ml.group(3);
             String type = ml.group(4);
-            String tocall = ml.group(5);
+            String tocall = ml.group(5).toUpperCase(Locale.US);
             String message = ml.group(6);
             if (isStationLinked(tocall)) {
                 //Send over RF (we do not check for duplicates here (YET?)
@@ -318,7 +320,8 @@ public class igate {
 
    
     //Remove a Station to the linked stations list
-    public static void removeStationFromList(String station) {
+    public static void removeStationFromList(String stationRaw) {
+        String station = stationRaw.toUpperCase(Locale.US);
 
         if (station.length() > 0) {
             for (int i = 0; i < linkedStationsList.size(); i++) {
@@ -331,9 +334,9 @@ public class igate {
     }    
 
     //Add a Station to the linked stations list
-    public static void addStationToList(String newStation) {
+    public static void addStationToList(String newStationRaw) {
         boolean inList = false;
-
+        String newStation = newStationRaw.toUpperCase(Locale.US);
         //Look in list if already registered
         if (newStation.length() > 0) {
             for (int i = 0; i < linkedStationsList.size(); i++) {

@@ -59,6 +59,8 @@ public class Session {
     //rx is my machine, tx is the other machine
     public static String tx_lastsent;    //Last block sent to me
     public static String tx_missing; //List of repeats  I need to resend.
+    public static String lastTx_missing = ""; //last list of repeats (to see if we keep repeating the same blocks over)
+    public static int sameRepeat = 0; //Identical repeats count
     public static String tx_ok;  //last block received conseq ok at other end.
     public static String tx_lastreceived;  // at other end
 
@@ -438,7 +440,6 @@ public class Session {
             foundMatchingCommand = true;
             Main.disconnect = true;
             Main.log("Disconnect request from " + Main.TTYCaller);
-
         } else if (tm.lookingAt()) {
             Main.TX_Text = "~QUIT\n";
         }
@@ -574,14 +575,57 @@ public class Session {
                 Main.TX_Text += "Sorry, Not enabled\n";
             }
         }
-        
+
         //~GETMSG Get APRS messages
-        Pattern AMp = Pattern.compile("^(\\s*~GETMSG.*)");
+        Pattern AMp = Pattern.compile("^(\\s*~GETMSG\\s*(\\d*))");
         Matcher AMm = AMp.matcher(str);
         if (Main.TTYConnected.equals("Connected") & AMm.lookingAt()) {
             foundMatchingCommand = true;
+            int maxLines = 10; //Default 10 lines
             if (Main.WantServer) {
-                Main.TX_Text += serverMail.readWebPage("http://www.findu.com/cgi-bin/msg.cgi?call=" + Main.TTYCaller, "", false);
+                if (AMm.group(2) != null) {
+                    try {
+                    maxLines = Integer.parseInt(AMm.group(2).trim());
+                    if (maxLines < 1) maxLines = 1;
+                    } catch (Exception e) {
+                        maxLines = 10;
+                    }
+                }
+                String msgText = serverMail.readWebPage("http://www.findu.com/cgi-bin/msg.cgi?call=" + Main.TTYCaller, "", false);
+                String msgCleanText = "Your messages:\nFrom       Date    Time         Message\n";
+                //"fromtotime&nbsp;message\n" +
+                //"VK2ETA-90  VK2ETA     09/21   07:21:52z Reply to message number 5"
+                Pattern psc = Pattern.compile("(^[a-zA-Z0-9\\-\\/]+)\\s+([a-zA-Z0-9\\-\\/]+)\\s+(\\S+)\\s+(\\S+)\\s+(Reply)\\s+(.*)$", Pattern.MULTILINE);
+                Matcher msc = psc.matcher(msgText);
+                boolean keepLooking = true;
+                String from;
+                String to;
+                String date;
+                String time;
+                String msg;
+                int lines = 0;
+                for (int start = 0; keepLooking;) {
+                    keepLooking = msc.find(start);
+                    if (keepLooking) {
+                        if (lines < maxLines && Main.matchClientCallWith(msc.group(2)) &&
+                                msc.group(6).trim().length() > 0) {
+                            //For me, NOT From me, and with a non blank message, max 10 entries
+                            to = RMsgUtil.padString(msc.group(2), 9);
+                            from = RMsgUtil.padString(msc.group(1), 9);
+                            date = msc.group(3);
+                            time = RMsgUtil.padString(msc.group(4), 10);
+                            msg = msc.group(6);
+                            msgCleanText += from + "  " + date + "  " + time + "  " + msg + "\n";
+                            lines++;
+                        }
+                        start = msc.end();
+                    }
+                }
+                if (lines > 0) {
+                    Main.TX_Text += msgCleanText;
+                } else {
+                    Main.TX_Text += "No APRS Messages\n";
+                } 
             } else {
                 Main.TX_Text += "Sorry, Not enabled\n";
             }
@@ -593,7 +637,57 @@ public class Session {
         if (Main.TTYConnected.equals("Connected") & GNm.lookingAt()) {
             foundMatchingCommand = true;
             if (Main.WantServer) {
-                Main.TX_Text += serverMail.readWebPage("http://www.findu.com/cgi-bin/near.cgi?last=24&n=15&call=" + Main.TTYCaller, "", false);
+                int maxLines = 15;
+                String msgText = serverMail.readRawWebPage("http://www.findu.com/cgi-bin/near.cgi?last=24&n=15&call=" + Main.TTYCaller, "", false);
+                String msgCleanText = "Station     Latitude   Longitude  KMs   Bearing  Age\n";
+                /* Example of useful data lines:
+                <td> <a href="find.cgi?call=VK2XYZ B"><img src="../icon/S66.GIF" border="0"> VK2XYZ B</a> </td>
+                <td> -34.04417</td>
+                <td> 151.12567</td>
+                <td>8.0 </td>
+                <td>SE</td>
+                <td> 00:00:06:04 </td>
+                */
+                Pattern psc = Pattern.compile("^\\s+<td>.*>\\s*(\\S+)\\s*<\\/a>\\s*<\\/td>$|^\\s+<td>\\s*(\\S+)\\s*<\\/td>$", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+                Matcher msc = psc.matcher(msgText);
+                boolean keepLooking = true;
+                String station = "";
+                String[] data = new String[5];
+                int lines = 0;
+                int index = -1;
+                for (int start = 0; keepLooking;) {
+                    keepLooking = msc.find(start);
+                    if (keepLooking) {
+                        if (lines < maxLines && msc.group(1) != null) {
+                            //We have a new station, prepare data gathering
+                            station = RMsgUtil.padString(msc.group(1), 9);
+                            index = 0;
+                        } else if (lines < maxLines && msc.group(2) != null) {
+                            //Store data in the array
+                            if (index >= 0 && index <= 4) {
+                                String thisData = msc.group(2); //Debug
+                                data[index++] = thisData;
+                                if (index >= 5) {
+                                    //We have a full datas set, add to reply
+                                    msgCleanText += station + "  "
+                                            + RMsgUtil.padString(data[0], 11)
+                                            + RMsgUtil.padString(data[1], 11)
+                                            + RMsgUtil.padString(data[2], 7)
+                                            + RMsgUtil.padString(data[3], 8)
+                                            + RMsgUtil.padString(data[4], 12) + "\n";
+                                    index = -1; //Disable further data collection until a new station found
+                                    lines++; //Entries counter
+                                }
+                            }
+                        }
+                        start = msc.end();
+                    }
+                }
+                if (lines > 0) {
+                    Main.TX_Text += msgCleanText;
+                } else {
+                    Main.TX_Text += "No stations nearby\n";
+                }
             } else {
                 Main.TX_Text += "Sorry, Not enabled\n";
             }
@@ -605,7 +699,56 @@ public class Session {
         if (Main.TTYConnected.equals("Connected") & TSm.lookingAt()) {
             foundMatchingCommand = true;
             if (Main.WantServer) {
-                Main.TX_Text += serverMail.readWebPage("http://www.findu.com/cgi-bin/tidestation.cgi?call=" + Main.TTYCaller, "", false);
+                int maxLines = 50;
+                String msgText = serverMail.readRawWebPage("http://www.findu.com/cgi-bin/tidestation.cgi?call=" + Main.TTYCaller, "", false);
+                String msgCleanText = "Distance  Number  Latitude Longitude  Name\n";
+                /* Example of useful data lines group:
+                <td>2365.7</td>
+                <td>2684 </td>
+                <td><a href="tide.cgi?tide=2684">Satawan Anchorage, Nomoi Islands, F.S.M. </a></td>
+                <td> 5.3333 </td>
+                <td> 153.733</td>
+                */
+                Pattern psc = Pattern.compile("^\\s+<td><.*>\\s*(.+)\\s*<\\/a>\\s*<\\/td>$|^\\s+<td>\\s*(\\S+\\s*)<\\/td>$", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+                Matcher msc = psc.matcher(msgText);
+                boolean keepLooking = true;
+                String station = "";
+                String[] data = new String[5];
+                int lines = 0;
+                int index = 0;
+                int matchCount = 0;
+                for (int start = 0; keepLooking;) {
+                    keepLooking = msc.find(start);
+                    if (keepLooking) {
+                        if (lines < maxLines && msc.group(1) != null) {
+                            //We have a new station
+                            station = msc.group(1);
+                            index = 2; //Reset index just in case 
+                        } else if (lines < maxLines && msc.group(2) != null) {
+                            //Store data in the array, skipping the first 4 entries (unused headers)
+                            if (matchCount++ > 3 && index >= 0 && index <= 3) {
+                                String thisData = msc.group(2); //Debug
+                                data[index++] = thisData;
+                                if (index >= 4) {
+                                    //We have a full datas set, add to reply
+                                    msgCleanText += RMsgUtil.padString(data[0], 10)
+                                            + RMsgUtil.padString(data[1], 8)
+                                            + RMsgUtil.padString(data[2], 9)
+                                            + RMsgUtil.padString(data[3], 9)
+                                            + station + "\n";
+                                    index = 0; //Reset to first data element
+                                    lines++; //Entries counter
+                                }
+                            }
+                        }
+                        start = msc.end();
+                    }
+                }
+                if (lines > 0) {
+                    Main.TX_Text += msgCleanText;
+                } else {
+                    Main.TX_Text += "No Tide stations nearby\n";
+                }
             } else {
                 Main.TX_Text += "Sorry, Not enabled\n";
             }
@@ -618,7 +761,7 @@ public class Session {
             foundMatchingCommand = true;
             String station = TDm.group(1);
             if (Main.WantServer) {
-                Main.TX_Text += serverMail.readWebPage("http://www.findu.com/cgi-bin/tide.cgi?tide=" + station, "", false);
+                Main.TX_Text += serverMail.readWebPage("http://www.findu.com/cgi-bin/tide.cgi?tide=" + station, "begin:20 end:&nbsp", false);
             } else {
                 Main.TX_Text += "Sorry, Not enabled\n";
             }
@@ -2467,8 +2610,8 @@ public class Session {
             b[i] = (int) tx_missing.substring(i, i + 1).charAt(0) - 32;
         }
         if (tx_missing.length() > 2) {
-//With adaptive modes, blocksize of 8 is not effective. Minimum of 16 (2 ** 4)
-//  if (Blocklength > 3) {
+        //With adaptive modes, blocksize of 8 is not effective. Minimum of 16 (2 ** 4)
+        //  if (Blocklength > 3) {
             if (Blocklength > 4) {
                 Blocklength--;
             }
@@ -2480,18 +2623,21 @@ public class Session {
             Blocklength = 5;
         }
 
-// add missing blocks
+        // add missing blocks
+        int howFarBack = 0; //number of blocks between oldest to re-transmit and next block to send
         if (nr_missing > 0) {
             for (i = 0; i < nr_missing; i++) {
                 String block = TX_addblock(b[i]);
                 Outbuffer += block;
             }
+            howFarBack = lastqueued - b[0];
+            if (howFarBack < 0) howFarBack += 64;
         }
 
         i = 0;
         Blocklength = Integer.parseInt(Main.TXblocklength);
         int Maxblocklength = 6;
-        int Minblocklength = 3;
+        int Minblocklength = 4;
         int Nrblocks = 8;
         String TXmd = Main.m.getTXModemString(Main.TxModem);
         // System.out.println(TXmd)  ;
@@ -2499,8 +2645,8 @@ public class Session {
             Nrblocks = 16;
             Maxblocklength = 6;
             Minblocklength = 4;
-        } else if (TXmd.equals("PSK500R")) {
-            Nrblocks = 8;
+        } else if (TXmd.equals("PSK500R") || TXmd.equals("PSK250")) {
+            Nrblocks = 10;
             Maxblocklength = 6;
             Minblocklength = 4;
         } else if (TXmd.equals("PSK250R")) {
@@ -2508,11 +2654,14 @@ public class Session {
             Maxblocklength = 5;
             Minblocklength = 4;
         } else {
-            Nrblocks = 4;
+            Nrblocks = 6;
             Maxblocklength = 5;
-            Minblocklength = 3;
+            Minblocklength = 4;
         }
-        while (i < (Nrblocks - nr_missing) & Main.TX_Text.length() > 0) {
+        //VK2ETA debug: Need a limit as to how much forward we can enqueue blocks, otherwise 
+        //   we overwrite to-be-retransmitted block with new ones
+        while (i < (Nrblocks - nr_missing) && Main.TX_Text.length() > 0 &&
+                howFarBack < 32 ) {
             String newstring = "";
             if (Blocklength < Minblocklength) {
                 Blocklength = Minblocklength;
@@ -2536,7 +2685,7 @@ public class Session {
 //                lastqueued = 0;
 //            }
                 txbuffer[lastqueued] = newstring;
-
+                //??? Blank out past 16 ahead for 8 blocks 
                 for (int j = lastqueued + 17; j < lastqueued + 25; j++) {
                     txbuffer[j % 64] = "";
                 }
@@ -2550,6 +2699,7 @@ public class Session {
             Outbuffer += block;
             i++;
             lastqueued += 1;
+            howFarBack += 1;
             if (lastqueued > 63) {
                 lastqueued = 0;
             }

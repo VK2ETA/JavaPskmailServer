@@ -394,6 +394,7 @@ public class Connectwindow extends javax.swing.JDialog {
         //Main.mainui.myarq.setPassword(myServerPassword);
         //VK2ETA add main.q
         Main.q.setServerAndPassword(myServer);
+        //Override the default password with the one here in case we typed a new one
         Main.q.setPassword(myServerPassword);
         //Not on the fly
         //Main.configuration.setServer(myServer);

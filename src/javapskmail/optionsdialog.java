@@ -2373,15 +2373,21 @@ public class optionsdialog extends javax.swing.JDialog {
 
             // Save users callsign
             if (txtCallsign.getText().length() > 0) {
-                callsign = txtCallsign.getText();
-                cf.setPreference("CALL", callsign.toUpperCase());
-                Main.mycall = callsign;
+                String cleanCall = txtCallsign.getText();
+                //remove un-allowed characters
+                cleanCall = cleanCall.replaceAll("[^a-zA-Z0-9\\/\\-]", "");
+                if (cleanCall.length() > 0) {
+                    callsign = cleanCall;
+                    Main.mycall = callsign;
+                }
             }
 
             // Save default server
             if (txtLinkto.getText().length() > 0) {
                 serverList = txtLinkto.getText();
-                cf.setPreference("SERVER", serverList.toUpperCase());
+                //VK2ETA, allow lower cases here for stations and passwords
+                //cf.setPreference("SERVER", serverList.toUpperCase());
+                cf.setPreference("SERVER", serverList);
             }
 
             // Session password
@@ -2568,9 +2574,15 @@ public class optionsdialog extends javax.swing.JDialog {
             }
 
             //Pskmail Server preferences
-            if (txtCallsignAsServer.getText().length() > 0) {
-                cf.setPreference("CALLSIGNASSERVER", txtCallsignAsServer.getText());
-                Main.callsignAsServer = txtCallsignAsServer.getText();
+            String callAsServer = txtCallsignAsServer.getText();
+            if (callAsServer.length() > 0) {
+                callAsServer = callAsServer.replaceAll("[^a-zA-Z0-9\\/\\-]", "");
+                if (callAsServer.length() > 0) {
+                    cf.setPreference("CALLSIGNASSERVER", callAsServer);
+                    Main.callsignAsServer = callAsServer;
+                    igate.aprscall = Main.cleanCallForAprs(callAsServer);
+                    Main.APRSCall = igate.aprscall;
+                }
             }
             //cf.setPreference("ACCESSPASSWORD", txtAccessPassword.getPassword().toString().trim());
             //Main.accessPassword = txtAccessPassword.getPassword().toString().trim();

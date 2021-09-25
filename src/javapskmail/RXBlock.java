@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.Calendar;
+import java.util.Locale;
 
 
 /**
@@ -113,7 +114,7 @@ public class RXBlock{
             //myarq = new arq();
             String path = Main.HomePath + Main.Dirprefix;
             myconfig = new config(path);
-            mycall = myconfig.getCallsign();
+            mycall = myconfig.getCallsign().toUpperCase(Locale.US);
             myserver = myconfig.getServer();
             try {
                 test = analyze(inBlock);
@@ -247,7 +248,7 @@ public class RXBlock{
  //     System.out.println(inString) ;
                Matcher bcm = b72.matcher(inString);
                if (bcm.lookingAt()) {
-                   server = bcm.group(1);
+                   server = bcm.group(1).toUpperCase(Locale.US);
                     get_serverstat(server);
                     port = "72";
                 }
@@ -260,7 +261,7 @@ public class RXBlock{
                 Matcher bcm3 = b26.matcher(inString);
                if(bcm3.lookingAt()){
 //      System.out.println(inString) ;
-                   server = bcm3.group(1);
+                   server = bcm3.group(1).toUpperCase(Locale.US);
                     get_serverstat(server);
                     port  = "72";
                }
@@ -296,13 +297,15 @@ public class RXBlock{
            try {             
                 Matcher ma = p.matcher(payload);
               if (ma.lookingAt()) {
-                  server = ma.group(1);
+                  server = ma.group(1).toUpperCase(Locale.US);
                   port = ma.group(2);
-                  from = ma.group(3);
+                  from = ma.group(3).toUpperCase(Locale.US);
                   call = ma.group(4);
                   msgtext = ma.group(5);
 //00uPI4TUE:26 PA0R>PSKAPR*::PA0R     :ack06
-                  if (!from.equals(mycall) & port.equals("26") & msgtext.indexOf("ack") != 0 & call.equals(mycall)){
+                  if (!from.toUpperCase(Locale.US).equals(mycall.toUpperCase(Locale.US)) 
+                          & port.equals("26") & msgtext.indexOf("ack") != 0 
+                          & call.toUpperCase(Locale.US).equals(mycall.toUpperCase(Locale.US))){
                     Matcher mb = pa.matcher(msgtext);
                     if (mb.lookingAt()) {
                             msgtext = mb.group(1);
@@ -320,7 +323,7 @@ public class RXBlock{
                 call = md.group(3);
                 msgtext = md.group(4);
 
-                if (call.equals(mycall) & valid == true & port.equals("26")) {
+                if (call.toUpperCase(Locale.US).equals(mycall.toUpperCase(Locale.US)) & valid == true & port.equals("26")) {
 //                    direct_message = true;
  //                   System.out.println(from + ":" + call + ":" + msgtext);
                 }

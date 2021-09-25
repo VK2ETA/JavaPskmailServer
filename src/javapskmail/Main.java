@@ -12,12 +12,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package javapskmail;
 
 import java.io.*;
 import java.net.*;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "0.9.5.00";
+    static String version = "0.9.6.00";
     static String application = "jpskmailserver " + "B" + version;// Used to preset an empty status
-    static String versionDate = "20210922";
+    static String versionDate = "20210925";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -158,7 +158,7 @@ public class Main {
     static int DCDthrow;
     //RxDelay is the measured delay between the return to Rx of the server and the end of the RSID tx by the client
     static final double initialRxDelay = 2.0f;//Initial 2 seconds delay of RX just in case
-    static double RxDelay = initialRxDelay; 
+    static double RxDelay = initialRxDelay;
     static double RxDelayCount = initialRxDelay;
     static String connectsecond;
     static long oldtime = 0L;
@@ -190,7 +190,7 @@ public class Main {
     static String DataSize = "";
     final static int MAXNEWSERVERS = 100; //100 additional servers heard on the air
     static String Servers[] = {""};
-    static String ServersPasswords[]= {""};
+    static String ServersPasswords[] = {""};
     static double AvgTxMissing = 0;
     static double AvgRxMissing = 0;
     static double hiss2n = 50;
@@ -275,7 +275,7 @@ public class Main {
 
     // Our main window
     static mainpskmailui mainui;
-    
+
     // Modem handle
     static public Modem m;
     static String RXmodemindex = "";
@@ -363,54 +363,42 @@ public class Main {
             if (!HaveGPSD) {
                 handlegps();
             }
-            /*
-            if (want_igate) {
-               try {
-                    igate.start();
-               } catch (IOException ex) {
- //                  Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-              }
-            }
-             */
             // Make session object
             //System.out.println("About to create new Session.");            
             sm = new Session();  // session, class
 
             // Show the main window (center screen)
-            //System.out.println("about to sleep 20sec");
-            //Thread.sleep(20000);
-            System.out.println("about to new mainpskmailui");
+            //System.out.println("about to new mainpskmailui");
             mainui = new mainpskmailui();
-            System.out.println("about to pack");
-//vk2eta debug            
+            //System.out.println("about to pack");
             mainui.pack();
-            System.out.println("about to setLocationRelativeTo");
+            //System.out.println("about to setLocationRelativeTo");
             mainui.setLocationRelativeTo(null); // position in the center of the screen
-            System.out.println("about to setDefaultCloseOperation");
+            //System.out.println("about to setDefaultCloseOperation");
             mainui.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-            System.out.println("about to setVisible");
+            //System.out.println("about to setVisible");
             mainui.setVisible(true);
-//            mainui.disableMboxMenu();
+            //mainui.disableMboxMenu();
 
             // start the modem thread
-            System.out.println("About to create new Modem.");
+            //System.out.println("About to create new Modem.");
             m = new Modem(host, port);
             Thread myThread = new Thread(m);
             // Start the modem thread
             myThread.setDaemon(true);
-            System.out.println("Launching modem thread.");
+            //System.out.println("Launching modem thread.");
             myThread.start();
 
             //vk2eta debug
-            System.out.println("Starting UI timers");
+            //System.out.println("Starting UI timers");
             //VK2ETA locking up at startup when heavy CPU load. Solution: Delayed timer's
             //  start until after main gui init to avoid firing gui actions before it is initilised.
             //Ok to start UI timers here as the events run on the EDT thread and coalesces the 
             //  events if the load is too high
             mainui.u.start();
             mainui.timer200ms.start();
-            System.out.println("Timers started");
+            //System.out.println("Timers started");
 
             // Start the aprs server socket
             mapsock = new aprsmapsocket();
@@ -437,12 +425,11 @@ public class Main {
             // Main  loop
             //m.setRxRsid("ON");
             //q.send_txrsid_command("ON");
-
             //Launch separate thread to monitor and relay incoming emails and messages if required
             RMsgProcessor.startEmailsAndSMSsMonitor();
 
             //vk2eta debug
-            System.out.println("entering receive loop");
+            //System.out.println("entering receive loop");
             while (true) {
                 //Wait for return to Rx if we are transmitting
                 while (TXActive) {
@@ -612,12 +599,12 @@ public class Main {
                                         m.setRxRsid("OFF");
                                         //Exception is for frequency sensitive modes like MFSK16, MFSK8, DOMINOEX5
                                         //VK2ETA wrong location as it can get reset with status requests
-                                        if (Main.TxModem == modemmodeenum.MFSK16 
+                                        if (Main.TxModem == modemmodeenum.MFSK16
                                                 || Main.TxModem == modemmodeenum.MFSK8
                                                 || Main.TxModem == modemmodeenum.DOMINOEX5) {
                                             m.requestTxRsid("ON");
-                                        //} else {
-                                        //    q.send_txrsid_command("OFF");
+                                            //} else {
+                                            //    q.send_txrsid_command("OFF");
                                         }
                                         //Adjust my TX mode (as a server) AND the Client's TX modes
                                         pint = (pint - 32) * 100 / 90;
@@ -625,8 +612,16 @@ public class Main {
                                         //Get current RX modem position in table
                                         int currentmodeindex = 0;
                                         //Should I upgrade/downgrade my TX mode?
+                                        //Am I repeating the same blocks over and over again (and I am not idle)
+                                        if (Session.tx_missing.length() > 0
+                                                && Session.lastTx_missing.equals(Session.tx_missing)) {
+                                            Session.sameRepeat++;
+                                        } else {
+                                            Session.sameRepeat = 0;
+                                            Session.lastTx_missing = Session.tx_missing;
+                                        }
                                         AvgTxMissing = decayaverage(AvgTxMissing, Session.tx_missing.length(), 2);
-                                        if (AvgTxMissing > 3) {
+                                        if (AvgTxMissing > 3 || Session.sameRepeat > 2) {
                                             //Downgrade Tx mode
                                             currentmodeindex = getClientModeIndex(Main.TxModem);
                                             if (currentmodeindex < TTYmodes.length() - 1) { //List in decreasing order of speed
@@ -648,7 +643,6 @@ public class Main {
                                                     sm.SetBlocklength(4); //restart with small block length
                                                     JustDowngradedRX = true; // Make TX mode downgrade first (if necessary)
                                                 }
-
                                                 Main.hiss2n = 50; //Reset to mid-range
                                             }
                                         }
@@ -694,7 +688,7 @@ public class Main {
                                             TxModem = RxModem;
                                         }
                                     }
-                                    //Moved processing of block before decision on mode upgrade
+                                    //Still data to send or mising block to resend?
                                     if (Session.tx_missing.length() > 0 | Main.TX_Text.length() > 0) {
                                         String outstr = sm.doTXbuffer();
                                         q.send_data(outstr);
@@ -703,7 +697,7 @@ public class Main {
                                         q.send_status(myrxstatus);  // send our status
                                     }
                                     Main.validblock = true;
-                                } else if (Connected & (rxb.type.equals("p"))
+                                } else if (rxb.type.equals("p")
                                         & rxb.valid & rxb.session.equals(session)) {
                                     sm.RXStatus(rxb.payload);   // parse incoming status packet
 
@@ -711,7 +705,7 @@ public class Main {
                                     q.send_status(myrxstatus);  // send our status
                                     Main.txbusy = true;
                                     //Disconnect request
-                                } else if (Connected & rxb.type.equals("d") & (rxb.session.equals(session) | rxb.session.equals("0"))) {
+                                } else if (rxb.type.equals("d") & (rxb.session.equals(session) | rxb.session.equals("0"))) {
                                     Status = "Listening";
                                     Connected = false;
                                     mainui.disableMboxMenu();
@@ -738,7 +732,7 @@ public class Main {
                                 }
 
                                 // PI4TUE 0.9.33-13:28:52-IM46>
-                                if (Blockline.contains(q.getServer())) {
+                                if (Blockline.toUpperCase(Locale.US).contains(q.getServer().toUpperCase(Locale.US))) {
                                     //Pattern ppc = Pattern.compile(".*(\\d\\.\\d).*\\-\\d+:\\d+:(\\d+)\\-(.*)M(\\d+)");
                                     Pattern ppc = Pattern.compile(".*\\S+\\s\\S+\\s(\\S{3}).*\\-\\d+:\\d+:(\\d+)\\-(.*)M(\\d+)");
                                     //System.out.println(Blockline);
@@ -769,7 +763,7 @@ public class Main {
                                         }
                                     } else {
                                         //Mini-server connection, "Hi" message
-                                        Pattern pps = Pattern.compile(".*" + q.getServer() + " V(\\d{1,2}\\.\\d{1,2}\\.\\d{1,2})(.\\d{1,2}){0,1}, Hi.*");
+                                        Pattern pps = Pattern.compile(".*" + q.getServer() + " V(\\d{1,2}\\.\\d{1,2}\\.\\d{1,2})(.\\d{1,2}){0,1}, Hi.*", Pattern.CASE_INSENSITIVE);
                                         //System.out.println(Blockline);
                                         Matcher mps = pps.matcher(Blockline);
                                         if (mps.lookingAt()) {
@@ -778,613 +772,597 @@ public class Main {
                                         }
                                     }
                                 }
-                            } //End if (connected)
-
-                            if (!Connected & Blockline.contains("QSL") & Blockline.contains(q.callsign)) {
-                                String pCheck = "";
-                                //Pattern psc = Pattern.compile(".*de ([A-Z0-9\\-]+)\\s(?:(\\d*)|((\\d+)\\s+(\\d+))\\s)([0123456789ABCDEF]{4}).*");
-                                Pattern psc = Pattern.compile(".*de ([A-Z0-9\\-]+)\\s*(?:(?:(\\d+\\s)(\\d+\\s))|(\\d*\\s))([0123456789ABCDEF]{4}).*");
-                                Matcher msc = psc.matcher(Blockline);
-                                String scall = "";
-                                rx_snr = "";
-                                String numberOfMails = "";
-                                if (msc.lookingAt()) {
-                                    scall = msc.group(1);
-                                    if (msc.group(4) != null) {
-                                        rx_snr = msc.group(4).trim();
-                                    } else {
-                                        rx_snr = msc.group(2).trim();
-                                        numberOfMails = msc.group(3).trim();
+                                //End if (connected)
+                            } else {
+                                //NOT connected
+                                if (Blockline.contains("QSL") & Blockline.toUpperCase(Locale.US).contains(q.callsign.toUpperCase(Locale.US))) {
+                                    String pCheck = "";
+                                    //Pattern psc = Pattern.compile(".*de ([A-Z0-9\\-]+)\\s(?:(\\d*)|((\\d+)\\s+(\\d+))\\s)([0123456789ABCDEF]{4}).*");
+                                    Pattern psc = Pattern.compile(".*de ([A-Z0-9\\-]+)\\s*(?:(?:(\\d+\\s)(\\d+\\s))|(\\d*\\s))([0123456789ABCDEF]{4}).*");
+                                    Matcher msc = psc.matcher(Blockline);
+                                    String scall = "";
+                                    rx_snr = "";
+                                    String numberOfMails = "";
+                                    if (msc.lookingAt()) {
+                                        scall = msc.group(1).toUpperCase(Locale.US);
+                                        if (msc.group(4) != null) {
+                                            rx_snr = msc.group(4).trim();
+                                        } else {
+                                            rx_snr = msc.group(2).trim();
+                                            numberOfMails = msc.group(3).trim();
+                                        }
+                                        pCheck = msc.group(5);
                                     }
-                                    pCheck = msc.group(5);
-                                }
-                                // fill the servers drop down list
-                                char soh = 1;
-                                String sohstr = Character.toString(soh);
-                                String checkstring = "";
-                                if (rx_snr.equals("")) {
-                                    checkstring = sohstr + "00uQSL " + q.callsign + " de " + scall + " ";
-                                } else if (!rx_snr.equals("") && !numberOfMails.equals("")) {
-                                    checkstring = sohstr + "00uQSL " + q.callsign + " de " + scall + " " + rx_snr + " " + numberOfMails + " ";
-                                    //System.out.println("RX_SNR:" + rx_snr);
-                                    mainui.appendMainWindow("From " + scall + ": " + rx_snr + "%, " + numberOfMails + " mails\n");
-                                    setrxdata(scall, Integer.parseInt(rx_snr));
-                                } else if (!rx_snr.equals("") && numberOfMails.equals("")){
-                                    checkstring = sohstr + "00uQSL " + q.callsign + " de " + scall + " " + rx_snr + " ";
-                                    //System.out.println("RX_SNR:" + rx_snr);
-                                    mainui.appendMainWindow("From " + scall + ": " + rx_snr + "%\n");
-                                    setrxdata(scall, Integer.parseInt(rx_snr));
-                                }
-                                String check = q.checksum(checkstring);
-                                if (check.equals(pCheck)) {
-                                    rxb.get_serverstat(scall);
-                                    int i = 0;
-                                    boolean knownserver = false;
-                                    for (i = 0; i < Servers.length; i++) {
-                                        //                              System.out.println(Servers[i] + scall);
-                                        if (scall.equals(Servers[i])) {
-                                            knownserver = true;
-                                            break;
+                                    // fill the servers drop down list
+                                    char soh = 1;
+                                    String sohstr = Character.toString(soh);
+                                    String checkstring = "";
+                                    if (rx_snr.equals("")) {
+                                        checkstring = sohstr + "00uQSL " + q.callsign + " de " + scall + " ";
+                                    } else if (!rx_snr.equals("") && !numberOfMails.equals("")) {
+                                        checkstring = sohstr + "00uQSL " + q.callsign + " de " + scall + " " + rx_snr + " " + numberOfMails + " ";
+                                        //System.out.println("RX_SNR:" + rx_snr);
+                                        mainui.appendMainWindow("From " + scall + ": " + rx_snr + "%, " + numberOfMails + " mails\n");
+                                        setrxdata(scall, Integer.parseInt(rx_snr));
+                                    } else if (!rx_snr.equals("") && numberOfMails.equals("")) {
+                                        checkstring = sohstr + "00uQSL " + q.callsign + " de " + scall + " " + rx_snr + " ";
+                                        //System.out.println("RX_SNR:" + rx_snr);
+                                        mainui.appendMainWindow("From " + scall + ": " + rx_snr + "%\n");
+                                        setrxdata(scall, Integer.parseInt(rx_snr));
+                                    }
+                                    String check = q.checksum(checkstring);
+                                    if (check.equals(pCheck)) {
+                                        rxb.get_serverstat(scall);
+                                        int i = 0;
+                                        boolean knownserver = false;
+                                        for (i = 0; i < Servers.length; i++) {
+                                            //                              System.out.println(Servers[i] + scall);
+                                            if (scall.equals(Servers[i])) {
+                                                knownserver = true;
+                                                break;
+                                            }
+                                        }
+                                        if (!knownserver) {
+                                            mainui.addServer(scall); // add to servers drop down list
                                         }
                                     }
-                                    if (!knownserver) {
-                                        mainui.addServer(scall); // add to servers drop down list
+                                } else if (Blockline.contains(":71 ")) {
+                                    Pattern psc = Pattern.compile(".*00u(\\S+):71\\s(\\d*)\\s([0123456789ABCDEF]{4}).*");
+                                    Matcher msc = psc.matcher(Blockline);
+                                    String scall = "";
+                                    String pCheck = "";
+                                    rx_snr = "";
+                                    if (msc.lookingAt()) {
+                                        scall = msc.group(1).toUpperCase(Locale.US);
+                                        rx_snr = msc.group(2);
+                                        pCheck = msc.group(3);
                                     }
-                                }
-                            } else if (!Connected & Blockline.contains(":71 ")) {
-                                Pattern psc = Pattern.compile(".*00u(\\S+):71\\s(\\d*)\\s([0123456789ABCDEF]{4}).*");
-                                Matcher msc = psc.matcher(Blockline);
-                                String scall = "";
-                                String pCheck = "";
-                                rx_snr = "";
-                                if (msc.lookingAt()) {
-                                    scall = msc.group(1);
-                                    rx_snr = msc.group(2);
-                                    pCheck = msc.group(3);
-                                }
-                                // fill the servers drop down list
-                                String checkstring = "";
-                                if (!rx_snr.equals("")) {
-                                    checkstring = "00u" + scall + ":71 " + rx_snr + " ";
-                                    //                                       System.out.println("RX_SNR:" + rx_snr);
-                                    mainui.appendMainWindow("From " + scall + ": " + rx_snr + "%\n");
-                                    setrxdata(scall, Integer.parseInt(rx_snr));
-                                } else {
-                                    checkstring = "00u" + scall + ":71 ";
-                                }
+                                    // fill the servers drop down list
+                                    String checkstring = "";
+                                    if (!rx_snr.equals("")) {
+                                        checkstring = "00u" + scall + ":71 " + rx_snr + " ";
+                                        //                                       System.out.println("RX_SNR:" + rx_snr);
+                                        mainui.appendMainWindow("From " + scall + ": " + rx_snr + "%\n");
+                                        setrxdata(scall, Integer.parseInt(rx_snr));
+                                    } else {
+                                        checkstring = "00u" + scall + ":71 ";
+                                    }
 
-                                String check = q.checksum(checkstring);
-                                if (check.equals(pCheck)) {
-                                    rxb.get_serverstat(scall);
-
-                                    // switch off txrsid
-                                    //                                      q.send_txrsid_command("OFF");
-                                } else {
-//                                        System.out.println("check not ok.\n");
-                                }
-                            } else if (!Connected & Blockline.contains(":26 ")) {
-                                // System.out.println(Blockline);
-                                //Uncompressed APRS Beacon or APRS message
-                                Pattern bsc = Pattern.compile(".*00u(\\S+):26\\s(.)(.*)(.)([0123456789ABCDEF]{4}).*");
-                                Matcher bmsc = bsc.matcher(Blockline);
-                                String scall = "";
-                                String binfo = "";
-                                if (bmsc.lookingAt()) {
-                                    scall = bmsc.group(1);
-                                    String type = bmsc.group(2);
-                                    binfo = bmsc.group(3);
-                                    String nodetype = bmsc.group(4);
-                                    String pCheck = bmsc.group(5);
-
-                                    binfo += nodetype;
-                                    String checkstring = "00u" + scall + ":26 " + type + binfo;
                                     String check = q.checksum(checkstring);
-                                    String outstring = "";
                                     if (check.equals(pCheck)) {
-//                             System.out.println("CHECKED, type=" + type);
-                                        if (type.equals("!")) {
-                                            //Uncompressed APRS Beacon
-                                            //E.g. <SOH>00uVK2ETA:26 !2700.00S/13300.00E.Test 1FDF9<EOT>
-                                            //VK2ETA>PSKAPR,TCPIP*,qAC,T2SYDNEY:!2712.85S/15303.72E.test aprs 2
-                                            outstring = scall + ">PSKAPR,TCPIP*:" + type + binfo;
-//                                                System.out.println(outstring);
-                                            boolean igateSendOk = igate.write(outstring);
-                                            // Push this to aprs map too
-                                            mapsock.sendmessage(outstring);
-                                            //If I run as server, send QSL
-                                            if (Main.WantServer && igateSendOk) {
-                                                q.send_QSL_reply();
-                                            }
-                                            //record heard server stations?????
-                                            if (nodetype.equals("&")) {
-                                                // is serverbeacon
-                                                Serverbeacon = true;
-                                                int i;
-                                                boolean knownserver = false;
-                                                for (i = 0; i < Servers.length; i++) {
-                                                    if (scall.equals(Servers[i])) {
-                                                        //Already in list, exit
-                                                        knownserver = true;
-                                                        break;
-                                                    }
-                                                    if (!knownserver && Servers[i].length() == 0) {
-                                                        //Not known, add it at first blank spot
-                                                        Servers[i] = scall;
-                                                        mainui.addServer(scall);
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                        } else if (type.equals(":")) {
-                                            //APRS message
-                                            //System.out.println(type + binfo);
-                                            Pattern gc = Pattern.compile("(\\S+)>PSKAPR.::(\\S+)\\s*:(.*)(\\{\\d+)");
-                                            Matcher gmc = gc.matcher(type + binfo);
-                                            if (gmc.lookingAt()) {
-                                                String outcall = gmc.group(2);
-                                                binfo = gmc.group(3);
-                                                String mnumber = gmc.group(4);
-                                                outstring = scall + ">PSKAPR,TCPIP*::" + outcall;
-                                                //     System.out.println("MSG:" + outstring);
+                                        rxb.get_serverstat(scall);
 
-                                                String padder = "        ";
-                                                outstring += padder.substring(0, 8 - outcall.length());
-                                                outstring += ":";
-                                                outstring += binfo;
-                                                outstring += mnumber;
+                                        // switch off txrsid
+                                        //                                      q.send_txrsid_command("OFF");
+                                    } else {
+//                                        System.out.println("check not ok.\n");
+                                    }
+                                } else if (Blockline.contains(":26 ")) {
+                                    // System.out.println(Blockline);
+                                    //Uncompressed APRS Beacon or APRS message
+                                    Pattern bsc = Pattern.compile(".*00u(\\S+):26\\s(.)(.*)(.)([0123456789ABCDEF]{4}).*");
+                                    Matcher bmsc = bsc.matcher(Blockline);
+                                    String scall = "";
+                                    String binfo = "";
+                                    if (bmsc.lookingAt()) {
+                                        scall = bmsc.group(1);
+                                        String type = bmsc.group(2);
+                                        binfo = bmsc.group(3);
+                                        String nodetype = bmsc.group(4);
+                                        String pCheck = bmsc.group(5);
+
+                                        binfo += nodetype;
+                                        String checkstring = "00u" + scall + ":26 " + type + binfo;
+                                        String check = q.checksum(checkstring);
+                                        String outstring = "";
+                                        if (check.equals(pCheck)) {
+                                            //System.out.println("CHECKED, type=" + type);
+                                            //Make callsigns upper case to meet APRS requirements
+                                            //Returns a blank call if not a standard call
+                                            scall = cleanCallForAprs(scall);
+                                            if (scall.length() > 0 && type.equals("!")) {
+                                                //Uncompressed APRS Beacon
+                                                //E.g. <SOH>00uVK2ETA:26 !2700.00S/13300.00E.Test 1FDF9<EOT>
+                                                //VK2ETA>PSKAPR,TCPIP*,qAC,T2SYDNEY:!2712.85S/15303.72E.test aprs 2
+                                                outstring = scall + ">PSKAPR,TCPIP*:" + type + binfo;
+//                                                System.out.println(outstring);
                                                 boolean igateSendOk = igate.write(outstring);
                                                 // Push this to aprs map too
                                                 mapsock.sendmessage(outstring);
-                                                mainui.appendMainWindow(outstring);
-                                            }
-                                        } else {
-                                            //APRS message to another callsign
-                                            // message PA0R-2:26 PA0R test
-                                            //System.out.println("IS :" + Blockline);
-                                            Pattern gm = Pattern.compile(".*00u(\\S+):26\\s(\\S+)\\s(.*)([0123456789ABCDEF]{4}).*");
-                                            Matcher gmm = gm.matcher(Blockline);
-                                            if (gmm.lookingAt()) {
-                                                //System.out.println("FOUND:" +  Blockline);
-                                                String fromcall = gmm.group(1);// + "         ";
-                                                //fromcall = fromcall.substring(0, 9);
-                                                String outcall = gmm.group(2) + "         ";
-                                                outcall = outcall.substring(0, 9);
-                                                binfo = gmm.group(3);
-                                                if (!mycall.equals(fromcall)) {
-                                                    //Not for my Client's callsign (can be different to myserver's callsign)
-                                                    String toxastir = gmm.group(2) + ">PSKAPR,TCPIP*,qAC," + gmm.group(1) + "::" + fromcall + "  " + ":" + gmm.group(3) + "\n";
-                                                    mapsock.sendmessage(toxastir);
-                                                    //test: VK2ETA>PSKAPR,TCPIP*::vk2eta-1 :test aprs 1
-                                                    //VK2ZZZ>APWW11,TCPIP*,qAC,T2LUBLIN::VK2XXX-8 :Hello Jack Long time no see!{21}
-                                                    String aprsmessage = fromcall + ">PSKAPR,TCPIP*::" + outcall + ":" + binfo;
-                                                    boolean igateSendOk = igate.write(aprsmessage);
-                                                    //System.out.println(aprsmessage);
-                                                    //If I run as server, send QSL
-                                                    if (Main.WantServer && igateSendOk) {
-                                                        q.send_QSL_reply();
+                                                //If I run as server, send QSL
+                                                if (Main.WantServer && igateSendOk) {
+                                                    q.send_QSL_reply();
+                                                }
+                                                //record heard server stations?????
+                                                if (nodetype.equals("&")) {
+                                                    // is serverbeacon
+                                                    Serverbeacon = true;
+                                                    int i;
+                                                    boolean knownserver = false;
+                                                    for (i = 0; i < Servers.length; i++) {
+                                                        if (scall.equals(Servers[i])) {
+                                                            //Already in list, exit
+                                                            knownserver = true;
+                                                            break;
+                                                        }
+                                                        if (!knownserver && Servers[i].length() == 0) {
+                                                            //Not known, add it at first blank spot
+                                                            Servers[i] = scall;
+                                                            mainui.addServer(scall);
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            } else if (scall.length() > 0 && type.equals(":")) {
+                                                //APRS message
+                                                //System.out.println(type + binfo);
+                                                Pattern gc = Pattern.compile("(\\S+)>PSKAPR.::(\\S+)\\s*:(.*)(\\{\\d+)");
+                                                Matcher gmc = gc.matcher(type + binfo);
+                                                if (gmc.lookingAt()) {
+                                                    String outcall = gmc.group(2);
+                                                    binfo = gmc.group(3);
+                                                    String mnumber = gmc.group(4);
+                                                    outstring = scall + ">PSKAPR,TCPIP*::" + outcall;
+                                                    //     System.out.println("MSG:" + outstring);
+
+                                                    String padder = "        ";
+                                                    outstring += padder.substring(0, 8 - outcall.length());
+                                                    outstring += ":";
+                                                    outstring += binfo;
+                                                    outstring += mnumber;
+                                                    boolean igateSendOk = igate.write(outstring);
+                                                    // Push this to aprs map too
+                                                    mapsock.sendmessage(outstring);
+                                                    mainui.appendMainWindow(outstring);
+                                                }
+                                            } else if (scall.length() > 0) {
+                                                //APRS message to another callsign
+                                                // message PA0R-2:26 PA0R test
+                                                //System.out.println("IS :" + Blockline);
+                                                Pattern gm = Pattern.compile(".*00u(\\S+):26\\s(\\S+)\\s(.*)([0123456789ABCDEF]{4}).*");
+                                                Matcher gmm = gm.matcher(Blockline);
+                                                if (gmm.lookingAt()) {
+                                                    //System.out.println("FOUND:" +  Blockline);
+                                                    String fromcall = gmm.group(1).toUpperCase(Locale.US);// + "         ";
+                                                    //fromcall = fromcall.substring(0, 9);
+                                                    String outcall = gmm.group(2).toUpperCase(Locale.US) + "         ";
+                                                    outcall = outcall.substring(0, 9);
+                                                    binfo = gmm.group(3);
+                                                    if (!mycall.equals(fromcall)) {
+                                                        //Not for my Client's callsign (can be different to myserver's callsign)
+                                                        String toxastir = gmm.group(2) + ">PSKAPR,TCPIP*,qAC," + gmm.group(1) + "::" + fromcall + "  " + ":" + gmm.group(3) + "\n";
+                                                        mapsock.sendmessage(toxastir);
+                                                        //test: VK2ETA>PSKAPR,TCPIP*::vk2eta-1 :test aprs 1
+                                                        //VK2ZZZ>APWW11,TCPIP*,qAC,T2LUBLIN::VK2XXX-8 :Hello Jack Long time no see!{21}
+                                                        String aprsmessage = fromcall + ">PSKAPR,TCPIP*::" + outcall + ":" + binfo;
+                                                        boolean igateSendOk = igate.write(aprsmessage);
+                                                        //System.out.println(aprsmessage);
+                                                        //If I run as server, send QSL
+                                                        if (Main.WantServer && igateSendOk) {
+                                                            q.send_QSL_reply();
+                                                        }
                                                     }
                                                 }
                                             }
+                                            outstring = "";
                                         }
-                                        outstring = "";
+
                                     }
-
-                                }
-                            } else if (!Connected & Blockline.contains(":25 ")) {
-                                // System.out.println(Blockline);
-                                //Unproto email message
-                                Pattern bsc = Pattern.compile(".*00u(\\S+):25(\\s+)([\\w.-]+@\\w+\\.[\\w.-]+)(\\s+)(.+)\\n([0123456789ABCDEF]{4}).*");
-                                Matcher bmsc = bsc.matcher(Blockline); //
-                                String scall = "";
-                                String spaces1 = "";
-                                String email = "";
-                                String spaces2 = "";
-                                String body = "";
-                                if (bmsc.lookingAt()) {
-                                    scall = bmsc.group(1);
-                                    spaces1 = bmsc.group(2);
-                                    email = bmsc.group(3);
-                                    spaces2 = bmsc.group(4);
-                                    body = bmsc.group(5);
-                                    String pCheck = bmsc.group(6);
-                                    String checkstring = "00u" + scall + ":25" + spaces1 + email + spaces2 + body + "\n";
-                                    String check = q.checksum(checkstring);
-                                    //Only authorized if the server is left open (without a password)
-                                    // Otherwise use the RadioMsg app to send short messages
-                                    if (Main.WantServer && Main.accessPassword.length() == 0 && check.equals(pCheck)) {
-                                        String subject = "Short email from " + scall;
-                                        String resultStr = serverMail.sendMail(scall, email, subject, body, ""); //last param is attachementFileName
-                                        //If I run as server, send QSL
-                                        if (resultStr.contains("Message sent")) {
-                                            q.send_QSL_reply();
-                                        }
-                                    }
-                                }
-                            } else if (!Connected & Blockline.contains(":6 ")) {
-                                //Compressed beacon
-                                Pattern cbsc = Pattern.compile(".*00u(\\S+):6\\s(.*)([0123456789ABCDEF]{4}).*");
-                                Matcher cbmsc = cbsc.matcher(Blockline);
-                                String scall = "";
-                                String binfo = "";
-                                if (cbmsc.lookingAt()) {
-                                    scall = cbmsc.group(1);
-                                    binfo = cbmsc.group(2);
-                                    String pCheck = cbmsc.group(3);
-                                    String checkstring = "00u" + scall + ":6 " + binfo;
-                                    String check = q.checksum(checkstring);
-
-                                    if (check.equals(pCheck)) {
-                                        byte[] cmps = binfo.substring(0, 11).getBytes();
-                                        int flg = cmps[0] - 32;
-                                        int latdegrees = cmps[1] - 32;
-                                        String s_latdegrees = String.format("%02d", latdegrees);
-                                        int latminutes = cmps[2] - 32;
-                                        String s_latminutes = String.format("%02d", latminutes);
-                                        int latrest = cmps[3] - 32;
-                                        String s_latrest = String.format("%02d", latrest);
-                                        int londegrees = cmps[4] - 32;
-                                        String s_londegrees = String.format("%03d", londegrees);
-                                        int lonminutes = cmps[5] - 32;
-                                        String s_lonminutes = String.format("%02d", lonminutes);
-                                        int lonrest = cmps[6] - 32;
-                                        String s_lonrest = String.format("%02d", lonrest);
-                                        int course = cmps[7] - 32;
-                                        String s_course = String.format("%03d", course);
-                                        int speed = cmps[8] - 32;
-                                        String s_speed = String.format("%03d", speed);
-                                        char c = (char) cmps[9];
-                                        String symbol = Character.toString(c);
-                                        int statusinx = cmps[10] - 32;
-                                        String statusmessage = binfo.substring(11);
-                                        if (statusinx <= igate.maxstatus) {
-                                            statusmessage = igate.status[statusinx] + statusmessage;
-                                        }
-                                        String latstr = "S";
-                                        String lonstr = "W";
-
-                                        int x = flg & 32;
-                                        if (x == 32) {
-                                            course += 180;
-                                        }
-                                        x = flg & 16;
-                                        if (x == 16) {
-                                            speed += 90;
-                                        }
-                                        x = flg & 8;
-                                        if (x == 8) {
-                                            latstr = "N";
-                                        }
-                                        x = flg & 4;
-                                        if (x == 4) {
-                                            lonstr = "E";
-                                        }
-                                        x = flg & 2;
-                                        if (x == 2) {
-                                            londegrees += 90;
-                                            s_londegrees = String.format("%03d", londegrees);
-                                        }
-                                        String linfo = "!";
-                                        linfo += s_latdegrees;
-                                        linfo += s_latminutes;
-                                        linfo += ".";
-                                        linfo += s_latrest;
-                                        linfo += latstr;
-                                        linfo += "/";
-                                        linfo += s_londegrees;
-                                        linfo += s_lonminutes;
-                                        linfo += ".";
-                                        linfo += s_lonrest;
-                                        linfo += lonstr;
-                                        linfo += symbol;
-                                        linfo += s_course;
-                                        linfo += "/";
-                                        linfo += s_speed;
-                                        linfo += "/";
-                                        linfo += statusmessage;
-
-                                        String outstring = scall + ">PSKAPR,TCPIP*:" + linfo;
-
-//                                            System.out.println(outstring);
-                                        boolean igateSendOk = igate.write(outstring);
-                                        // Push this to aprs map too
-                                        mapsock.sendmessage(outstring);
-                                        outstring = "";
-                                        //If I run as server, send QSL
-                                        if (Main.WantServer && igateSendOk) {
-                                            q.send_QSL_reply();
-                                        }
-                                    }
-                                }
-                            } else if (!Connected & WantServer & Blockline.contains(":7 ")) {
-                                //Ping request
-                                //<SOH>00uVK2ETA:7 1830<EOT>
-                                Pattern cbsc = Pattern.compile(".*00u(\\S+):7\\s([0123456789ABCDEF]{4}).*");
-                                Matcher cbmsc = cbsc.matcher(Blockline);
-                                String scall = "";
-                                if (cbmsc.lookingAt()) {
-                                    scall = cbmsc.group(1);
-                                    if (scall.length() > 1) {
-                                        //Some callsign present, reply with s/n
-                                        String uiMsg = "Ping request from " + scall;
-                                        q.Message(uiMsg, 10);
-                                        try {
-                                            Thread.sleep(10);
-                                        } catch (Exception e) {
-                                            //Nothing
-                                        }
-                                        q.set_txstatus(txstatus.TXPingReply);
-                                        q.send_ping_reply();
-                                    }
-                                }
-                            } else if (!Connected & WantServer & Blockline.contains(":8 ")) {
-                                //Inquire request
-                                //<SOH>00uVK2ETA:8 VK2ETA-5 B848<EOT>
-                                Pattern cbsc = Pattern.compile(".*00u(\\S+):8\\s(\\S+)\\s([0123456789ABCDEF]{4}).*");
-                                Matcher cbmsc = cbsc.matcher(Blockline);
-                                String scall;
-                                String reqcall;
-                                if (cbmsc.lookingAt()) {
-                                    reqcall = cbmsc.group(1);
-                                    scall = cbmsc.group(2);
-                                    String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
-                                    if (scall.length() > 1 && reqcall.length() > 1 && scall.equals(serverCall)) {
-                                        //Some callsigns present and match my call as sever, reply with s/n
-                                        String uiMsg = "Inquire request from " + reqcall;
-                                        q.Message(uiMsg, 5);
-                                        q.set_txstatus(txstatus.TXInqReply);
-                                        q.setReqCallsign(reqcall);
-                                        q.send_inquire_reply();
-                                    }
-                                }
-                            }
-                            
-                            //System.out.println(Blockline);
-                            // unproto packets
-                            if (rxb.type.equals("u")) {
-                                //Display received APRS message???? - Check the callsigns used
-                                if (rxb.port.equals("26") & !Serverbeacon) {
-                                    if (rxb.call.equals(configuration.getPreference("CALL")) || rxb.call.equals(configuration.getPreference("PSKAPRS"))) {
-                                        //                                       q.send_txrsid_command("OFF");
-                                        //                                       Thread.sleep(500);                          
-
-                                        if (rxb.msgtext.indexOf("ack") != 0 & rxb.msgtext.indexOf(":") != 0) {
-                                            MSGwindow += rxb.from + ": " + rxb.msgtext + "\n";
-                                            if (!Connected) {
-                                                mainwindow += rxb.from + ": " + rxb.msgtext + "\n";
-                                            } else {
-                                                q.Message("You received a message", 10);
+                                } else if (Blockline.contains(":25 ")) {
+                                    // System.out.println(Blockline);
+                                    //Unproto email message
+                                    Pattern bsc = Pattern.compile(".*00u(\\S+):25(\\s+)([\\w.-]+@\\w+\\.[\\w.-]+)(\\s+)(.+)\\n([0123456789ABCDEF]{4}).*");
+                                    Matcher bmsc = bsc.matcher(Blockline); //
+                                    String scall = "";
+                                    String spaces1 = "";
+                                    String email = "";
+                                    String spaces2 = "";
+                                    String body = "";
+                                    if (bmsc.lookingAt()) {
+                                        scall = bmsc.group(1);
+                                        spaces1 = bmsc.group(2);
+                                        email = bmsc.group(3);
+                                        spaces2 = bmsc.group(4);
+                                        body = bmsc.group(5);
+                                        String pCheck = bmsc.group(6);
+                                        String checkstring = "00u" + scall + ":25" + spaces1 + email + spaces2 + body + "\n";
+                                        String check = q.checksum(checkstring);
+                                        String checkWithPass = q.checksum(checkstring + accessPassword);
+                                        //Only authorized if the server is left open (without a password)
+                                        // Otherwise use the RadioMsg app to send short messages
+                                        //if (Main.WantServer && (Main.accessPassword.length() == 0 && check.equals(pCheck) 
+                                        //        || Main.accessPassword.length() > 0 && checkWithPass.equals(pCheck))) {
+                                        //Changed back to always open
+                                        if (check.equals(pCheck)) {
+                                            String subject = "Short email from " + scall;
+                                            String resultStr = serverMail.sendMail(scall, email, subject, body, ""); //last param is attachementFileName
+                                            //If I run as server, send QSL
+                                            if (resultStr.contains("Message sent")) {
+                                                q.send_QSL_reply();
                                             }
                                         }
                                     }
-                                } else if (rxb.port.equals("71") | rxb.port.equals("72")) {
-                                    //Ping reply from server
-                                    int i;
-                                    boolean knownserver = false;
-                                    Calendar cal = Calendar.getInstance();
-                                    int Hour = cal.get(Calendar.HOUR_OF_DAY);
-                                    int Minute = cal.get(Calendar.MINUTE);
-                                    String formathour = "0" + Integer.toString(Hour);
-                                    formathour = formathour.substring(formathour.length() - 2);
-                                    String formatminute = "0" + Integer.toString(Minute);
-                                    formatminute = formatminute.substring(formatminute.length() - 2);
-                                    String lh = formathour + ":" + formatminute;
-                                    for (i = 0; i < Servers.length; i++) {
+                                } else if (Blockline.contains(":6 ")) {
+                                    //Compressed beacon
+                                    Pattern cbsc = Pattern.compile(".*00u(\\S+):6\\s(.*)([0123456789ABCDEF]{4}).*");
+                                    Matcher cbmsc = cbsc.matcher(Blockline);
+                                    String scall = "";
+                                    String binfo = "";
+                                    if (cbmsc.lookingAt()) {
+                                        scall = cbmsc.group(1);
+                                        binfo = cbmsc.group(2);
+                                        String pCheck = cbmsc.group(3);
+                                        String checkstring = "00u" + scall + ":6 " + binfo;
+                                        String check = q.checksum(checkstring);
+                                        if (check.equals(pCheck)) {
+                                            //Callsign in uppercase for APRS
+                                            scall = cleanCallForAprs(scall);
+                                            if (scall.length() > 0) {
+                                                //Looks like a valid call sign
+                                                byte[] cmps = binfo.substring(0, 11).getBytes();
+                                                int flg = cmps[0] - 32;
+                                                int latdegrees = cmps[1] - 32;
+                                                String s_latdegrees = String.format("%02d", latdegrees);
+                                                int latminutes = cmps[2] - 32;
+                                                String s_latminutes = String.format("%02d", latminutes);
+                                                int latrest = cmps[3] - 32;
+                                                String s_latrest = String.format("%02d", latrest);
+                                                int londegrees = cmps[4] - 32;
+                                                String s_londegrees = String.format("%03d", londegrees);
+                                                int lonminutes = cmps[5] - 32;
+                                                String s_lonminutes = String.format("%02d", lonminutes);
+                                                int lonrest = cmps[6] - 32;
+                                                String s_lonrest = String.format("%02d", lonrest);
+                                                int course = cmps[7] - 32;
+                                                String s_course = String.format("%03d", course);
+                                                int speed = cmps[8] - 32;
+                                                String s_speed = String.format("%03d", speed);
+                                                char c = (char) cmps[9];
+                                                String symbol = Character.toString(c);
+                                                int statusinx = cmps[10] - 32;
+                                                String statusmessage = binfo.substring(11);
+                                                if (statusinx <= igate.maxstatus) {
+                                                    statusmessage = igate.status[statusinx] + statusmessage;
+                                                }
+                                                String latstr = "S";
+                                                String lonstr = "W";
 
-                                        if (rxb.server.equals(Servers[i])) {
-                                            knownserver = true;
-                                            SNR[i] = snr;
-                                            Lastheard[i] = lh;
-                                            packets_received[i]++;
-                                            modes_received[i] = RxModemString;
-                                            strength[i] = snr_db;
-                                            break;
-                                        }
-                                    }
-                                    if (!knownserver) {
-                                        for (i = 0; i < Servers.length; i++) {
-                                            if (Servers[i].equals("")) {
-                                                Pattern sw = Pattern.compile("[A-Z0-9]+\\-*\\[0-9]*");
-                                                Matcher ssw = sw.matcher(rxb.server);
-                                                if (ssw.lookingAt() & rxb.server.length() > 3) {
-                                                    Servers[i] = rxb.server;
-                                                    SNR[i] = snr;
-                                                    Lastheard[i] = lh;
-                                                    packets_received[i]++;
-                                                    strength[i] = snr_db;
-                                                    mainui.addServer(rxb.server);
-                                                    break;
+                                                int x = flg & 32;
+                                                if (x == 32) {
+                                                    course += 180;
+                                                }
+                                                x = flg & 16;
+                                                if (x == 16) {
+                                                    speed += 90;
+                                                }
+                                                x = flg & 8;
+                                                if (x == 8) {
+                                                    latstr = "N";
+                                                }
+                                                x = flg & 4;
+                                                if (x == 4) {
+                                                    lonstr = "E";
+                                                }
+                                                x = flg & 2;
+                                                if (x == 2) {
+                                                    londegrees += 90;
+                                                    s_londegrees = String.format("%03d", londegrees);
+                                                }
+                                                String linfo = "!";
+                                                linfo += s_latdegrees;
+                                                linfo += s_latminutes;
+                                                linfo += ".";
+                                                linfo += s_latrest;
+                                                linfo += latstr;
+                                                linfo += "/";
+                                                linfo += s_londegrees;
+                                                linfo += s_lonminutes;
+                                                linfo += ".";
+                                                linfo += s_lonrest;
+                                                linfo += lonstr;
+                                                linfo += symbol;
+                                                linfo += s_course;
+                                                linfo += "/";
+                                                linfo += s_speed;
+                                                linfo += "/";
+                                                linfo += statusmessage;
+
+                                                String outstring = scall + ">PSKAPR,TCPIP*:" + linfo;
+
+//                                            System.out.println(outstring);
+                                                boolean igateSendOk = igate.write(outstring);
+                                                // Push this to aprs map too
+                                                mapsock.sendmessage(outstring);
+                                                outstring = "";
+                                                //If I run as server, send QSL
+                                                if (Main.WantServer && igateSendOk) {
+                                                    q.send_QSL_reply();
                                                 }
                                             }
                                         }
-
                                     }
-                                //Link request?
-                                //<SOH>00uVK2ETA><VK2ETA-5 064A<EOT>
-                                } else {
-                                    Pattern pl = Pattern.compile("^(\\S+)><(\\S+)");
-                                    Matcher ml = pl.matcher(rxb.payload);
-                                    if (ml.lookingAt()) {
-                                        String linkCall = ml.group(1);
-                                        String linkServer = ml.group(2);
-                                        String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
-                                        if (serverCall.equals(linkServer)) {
-                                            //$MSG = "$ServerCall>PSKAPR,TCPIP*::PSKAPR   :GATING $1";
-                                            String linkString = serverCall + ">PSKAPR,TCPIP*::PSKAPR   :GATING " + linkCall;
+                                } else if (Blockline.contains(":7 ")) {
+                                    //Ping request
+                                    //<SOH>00uVK2ETA:7 1830<EOT>
+                                    Pattern cbsc = Pattern.compile(".*00u(\\S+):7\\s([0123456789ABCDEF]{4}).*");
+                                    Matcher cbmsc = cbsc.matcher(Blockline);
+                                    String scall = "";
+                                    if (cbmsc.lookingAt()) {
+                                        scall = cbmsc.group(1).toUpperCase(Locale.US);
+                                        if (scall.length() > 1) {
+                                            //Some callsign present, reply with s/n
+                                            String uiMsg = "Ping request from " + scall;
+                                            q.Message(uiMsg, 10);
                                             try {
-                                                igate.write(linkString);
-                                                //Add station to list
-                                                igate.addStationToList(linkCall);
-                                                //Acknowledge
-                                                q.send_link_ack(linkCall);
-                                            } catch (IOException e) {
-                                                //Noting for now: check if recovery required
+                                                Thread.sleep(10);
+                                            } catch (Exception e) {
+                                                //Nothing
+                                            }
+                                            q.set_txstatus(txstatus.TXPingReply);
+                                            q.send_ping_reply();
+                                        }
+                                    }
+                                } else if (Blockline.contains(":8 ")) {
+                                    //Inquire request
+                                    //<SOH>00uVK2ETA:8 VK2ETA-5 B848<EOT>
+                                    Pattern cbsc = Pattern.compile(".*00u(\\S+):8\\s(\\S+)\\s([0123456789ABCDEF]{4}).*");
+                                    Matcher cbmsc = cbsc.matcher(Blockline);
+                                    String scall;
+                                    String reqcall;
+                                    if (cbmsc.lookingAt()) {
+                                        reqcall = cbmsc.group(1).toUpperCase(Locale.US);
+                                        scall = cbmsc.group(2).toUpperCase(Locale.US);
+                                        String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
+                                        if (scall.length() > 1 && reqcall.length() > 1 && scall.equals(serverCall.toUpperCase(Locale.US))) {
+                                            //Some callsigns present and match my call as sever, reply with s/n
+                                            String uiMsg = "Inquire request from " + reqcall;
+                                            q.Message(uiMsg, 5);
+                                            q.set_txstatus(txstatus.TXInqReply);
+                                            q.setReqCallsign(reqcall);
+                                            q.send_inquire_reply();
+                                        }
+                                    }
+                                }
+
+                                //System.out.println(Blockline);
+                                // unproto packets
+                                if (rxb.type.equals("u")) {
+                                    //Display received APRS message???? - Check the callsigns used
+                                    if (rxb.port.equals("26") & !Serverbeacon) {
+                                        if (rxb.call.toUpperCase(Locale.US).equals(configuration.getPreference("CALL").toUpperCase(Locale.US)) || rxb.call.equals(configuration.getPreference("PSKAPRS"))) {
+                                            if (rxb.msgtext.indexOf("ack") != 0 & rxb.msgtext.indexOf(":") != 0) {
+                                                MSGwindow += rxb.from + ": " + rxb.msgtext + "\n";
+                                                if (!Connected) {
+                                                    mainwindow += rxb.from + ": " + rxb.msgtext + "\n";
+                                                } else {
+                                                    q.Message("You received a message", 10);
+                                                }
+                                            }
+                                        }
+                                    } else if (rxb.port.equals("71") | rxb.port.equals("72")) {
+                                        //Ping reply from server
+                                        int i;
+                                        boolean knownserver = false;
+                                        Calendar cal = Calendar.getInstance();
+                                        int Hour = cal.get(Calendar.HOUR_OF_DAY);
+                                        int Minute = cal.get(Calendar.MINUTE);
+                                        String formathour = "0" + Integer.toString(Hour);
+                                        formathour = formathour.substring(formathour.length() - 2);
+                                        String formatminute = "0" + Integer.toString(Minute);
+                                        formatminute = formatminute.substring(formatminute.length() - 2);
+                                        String lh = formathour + ":" + formatminute;
+                                        for (i = 0; i < Servers.length; i++) {
+
+                                            if (rxb.server.equals(Servers[i])) {
+                                                knownserver = true;
+                                                SNR[i] = snr;
+                                                Lastheard[i] = lh;
+                                                packets_received[i]++;
+                                                modes_received[i] = RxModemString;
+                                                strength[i] = snr_db;
+                                                break;
+                                            }
+                                        }
+                                        if (!knownserver) {
+                                            for (i = 0; i < Servers.length; i++) {
+                                                if (Servers[i].equals("")) {
+                                                    Pattern sw = Pattern.compile("[A-Z0-9]+\\-*\\[0-9]*");
+                                                    Matcher ssw = sw.matcher(rxb.server);
+                                                    if (ssw.lookingAt() & rxb.server.length() > 3) {
+                                                        Servers[i] = rxb.server;
+                                                        SNR[i] = snr;
+                                                        Lastheard[i] = lh;
+                                                        packets_received[i]++;
+                                                        strength[i] = snr_db;
+                                                        mainui.addServer(rxb.server);
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
+                                        }
+                                        //Link request?
+                                        //<SOH>00uVK2ETA><VK2ETA-5 064A<EOT>
+                                    } else {
+                                        Pattern pl = Pattern.compile("^(\\S+)><(\\S+)");
+                                        Matcher ml = pl.matcher(rxb.payload);
+                                        if (ml.lookingAt()) {
+                                            String linkCall = ml.group(1).toUpperCase(Locale.US);
+                                            String linkServer = ml.group(2).toUpperCase(Locale.US);
+                                            String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER").toUpperCase(Locale.US);
+                                            //Clean call sign and ensure it is conforming to standard
+                                            String linkCallAprs = cleanCallForAprs(linkCall);
+                                            if (linkCallAprs.length() > 0 && serverCall.equals(linkServer)) {
+                                                //$MSG = "$ServerCall>PSKAPR,TCPIP*::PSKAPR   :GATING $1";
+                                                String linkString = igate.aprscall + ">PSKAPR,TCPIP*::PSKAPR   :GATING " + linkCallAprs;
+                                                try {
+                                                    igate.write(linkString);
+                                                    //Add station to list
+                                                    igate.addStationToList(linkCall);
+                                                    //Acknowledge
+                                                    q.send_link_ack(linkCall);
+                                                } catch (IOException e) {
+                                                    //Noting for now: check if recovery required
+                                                }
                                             }
                                         }
                                     }
-                                }
-                                // reject
-                            } else if (rxb.type.equals("r") & rxb.valid) {  // reject
-                                String rejectcall = "";
-                                String rejectreason = "";
-                                Pattern pr = Pattern.compile("^(\\S+):(.*)");
-                                Matcher mr = pr.matcher(rxb.payload);
-                                if (mr.lookingAt()) {
-                                    rejectcall = mr.group(1);
-                                    rejectreason = mr.group(2);
-                                }
+                                    // reject
+                                } else if (rxb.type.equals("r") & rxb.valid) {  // reject
+                                    String rejectcall = "";
+                                    String rejectreason = "";
+                                    Pattern pr = Pattern.compile("^(\\S+):(.*)");
+                                    Matcher mr = pr.matcher(rxb.payload);
+                                    if (mr.lookingAt()) {
+                                        rejectcall = mr.group(1);
+                                        rejectreason = mr.group(2);
+                                    }
 
-                                if (rejectcall.equals(mycall)) {
-                                    Status = "Listening";
-                                    Connected = false;
-                                    mainui.disableMboxMenu();
-                                    mainui.enableMnuPreferences2();
-                                    Bulletinmode = false;
-                                    Connecting = false;
-                                    Main.connectingPhase = false;
-                                    Main.Connecting_time = 0;
-                                    Scanning = false;
-                                    session = "";
-                                    Totalbytes = 0;
-                                    //q.send_rsid_command("OFF");
-                                    //q.Message("Rejected:" + rejectreason, 10);
-                                    log("Rejected:" + rejectreason);
-                                }
-                                // connect_ack
-                            } else if (rxb.type.equals("k") & rxb.valid) {
+                                    if (rejectcall.toUpperCase(Locale.US).equals(mycall.toUpperCase(Locale.US))) {
+                                        Status = "Listening";
+                                        Connected = false;
+                                        mainui.disableMboxMenu();
+                                        mainui.enableMnuPreferences2();
+                                        Bulletinmode = false;
+                                        Connecting = false;
+                                        Main.connectingPhase = false;
+                                        Main.Connecting_time = 0;
+                                        Scanning = false;
+                                        session = "";
+                                        Totalbytes = 0;
+                                        //q.send_rsid_command("OFF");
+                                        //q.Message("Rejected:" + rejectreason, 10);
+                                        log("Rejected:" + rejectreason);
+                                    }
+                                    // connect_ack
+                                } else if (rxb.type.equals("k") & rxb.valid) {
 
-                                Pattern pk = Pattern.compile("^(\\S+):\\d+\\s(\\S+):\\d+\\s(\\d)$");
-                                Matcher mk = pk.matcher(rxb.payload);
-                                if (mk.lookingAt()) {
-                                    rxb.server = mk.group(1);
-                                    rxb.call = mk.group(2);
-                                    rxb.serverBlocklength = mk.group(3);
-                                    String session = rxb.session;
-                                    char c = session.charAt(0);
-                                    if (c != 0) {
-                                        int i = (int) c - 32;
-                                        if (i < 64) {
-                                            sessions[i] = rxb.call + "<>" + rxb.server + ": ";
-                                        } else {
+                                    Pattern pk = Pattern.compile("^(\\S+):\\d+\\s(\\S+):\\d+\\s(\\d)$");
+                                    Matcher mk = pk.matcher(rxb.payload);
+                                    if (mk.lookingAt()) {
+                                        rxb.server = mk.group(1).toUpperCase(Locale.US);
+                                        rxb.call = mk.group(2).toUpperCase(Locale.US);
+                                        rxb.serverBlocklength = mk.group(3);
+                                        String session = rxb.session;
+                                        char c = session.charAt(0);
+                                        if (c != 0) {
+                                            int i = (int) c - 32;
+                                            if (i < 64) {
+                                                sessions[i] = rxb.call + "<>" + rxb.server + ": ";
+                                            } else {
 //                                                System.out.println("session out of range:" + i);
+                                            }
                                         }
                                     }
-                                }
-                                // are we  connected?
-                                //if (rxb.call.equals(rxb.mycall) & rxb.server.equals(configuration.getPreference("SERVER"))) {
-                                if (rxb.call.equals(rxb.mycall) & rxb.server.equals(q.getServer())) {
-                                    //txid on, rxid off. Not yet, we now wait until full connect exchange
-                                    //q.send_txrsid_command("OFF");
-                                    //q.send_rsid_command("ON"); 
-                                    Status = "Connected";
-                                    Connected = true;
-                                    Connecting = false;
-                                    Main.Connecting_time = 0;
-                                    Scanning = false;
-                                    summoning = false;
-                                    Main.linked = true;
-                                    Main.linkedserver = rxb.server;
-                                    mainui.disableMonitor();
-                                    mainui.disableMnuPreferences2();
+                                    // are we  connected?
+                                    //if (rxb.call.equals(rxb.mycall) & rxb.server.equals(configuration.getPreference("SERVER"))) {
+                                    if (rxb.call.toUpperCase(Locale.US).equals(rxb.mycall.toUpperCase(Locale.US)) 
+                                            & rxb.server.toUpperCase(Locale.US).equals(q.getServer().toUpperCase(Locale.US))) {
+                                        //txid on, rxid off. Not yet, we now wait until full connect exchange
+                                        //q.send_txrsid_command("OFF");
+                                        //q.send_rsid_command("ON"); 
+                                        Status = "Connected";
+                                        Connected = true;
+                                        Connecting = false;
+                                        Main.Connecting_time = 0;
+                                        Scanning = false;
+                                        summoning = false;
+                                        Main.linked = true;
+                                        Main.linkedserver = rxb.server;
+                                        mainui.disableMonitor();
+                                        mainui.disableMnuPreferences2();
 
-                                    // reset tx queue 
-                                    TX_Text = "";
-                                    Totalbytes = 0;
-                                    sm.initSession();
-                                    session = rxb.session;
-                                    sm.session_id = rxb.session;
-                                    sm.myserver = rxb.server;
-                                    protocolstr = rxb.protocol;
-                                    protocol = protocolstr.charAt(0) - 48;
+                                        // reset tx queue 
+                                        TX_Text = "";
+                                        Totalbytes = 0;
+                                        sm.initSession();
+                                        session = rxb.session;
+                                        sm.session_id = rxb.session;
+                                        sm.myserver = rxb.server;
+                                        protocolstr = rxb.protocol;
+                                        protocol = protocolstr.charAt(0) - 48;
 
-                                    File outb1 = new File(Main.HomePath + Main.Dirprefix + "Outbox");
-                                    int i1 = outb1.list().length;
-                                    if (i1 > 0) {
-                                        Main.mainwindow += "\nWaiting in outbox:" + Integer.toString(i1) + "\n";
+                                        File outb1 = new File(Main.HomePath + Main.Dirprefix + "Outbox");
+                                        int i1 = outb1.list().length;
+                                        if (i1 > 0) {
+                                            Main.mainwindow += "\nWaiting in outbox:" + Integer.toString(i1) + "\n";
+                                        }
+
+                                        File outb = new File(Main.Pendingdir);
+                                        int i = outb.list().length;
+                                        if (i > 0) {
+                                            Main.mainwindow += "Incomplete downloads:" + Integer.toString(i) + "\n\n";
+                                        }
+
                                     }
+                                    //Status block, are we a server?
+                                } else if (rxb.type.equals("s")
+                                        & rxb.valid & rxb.session.equals(session)) {
 
-                                    File outb = new File(Main.Pendingdir);
-                                    int i = outb.list().length;
-                                    if (i > 0) {
-                                        Main.mainwindow += "Incomplete downloads:" + Integer.toString(i) + "\n\n";
+                                    if (Main.TTYConnected.equals("Connecting")) {
+                                        Main.TTYConnected = "Connected";
+                                        Main.Connected = true;
+                                        mainui.disableMnuPreferences2();
+                                        status_received = true;
+                                        NumberOfAcks = maxNumberOfAcks;
+                                        sm.initSession();
+                                        String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
+                                        //Main.TX_Text = "\nHi, this is the PSKmail Server of " + serverCall + "\nVersion is " + application + "\n\n";
+                                        Main.TX_Text = serverCall + " V" + version + ", Hi\n";
+                                        Main.TX_Text += serverMail.getPendingList(serverCall, TTYCaller);
+                                        Main.TX_Text += Motd + "\n";
+                                        //We are now fully connected, stop TxIDs
+                                        //q.send_txrsid_command("OFF");
+                                        myrxstatus = sm.getTXStatus();
+                                        q.send_status(myrxstatus);  // send our status
                                     }
-
-                                }
-                                //Status block, are we a server?
-                            } else if (!Connected & (rxb.type.equals("s"))
-                                    & rxb.valid & rxb.session.equals(session)) {
-
-                                if (Main.TTYConnected.equals("Connecting")) {
-                                    Main.TTYConnected = "Connected";
-                                    Main.Connected = true;
-                                    mainui.disableMnuPreferences2();
-                                    status_received = true;
-                                    NumberOfAcks = maxNumberOfAcks;
-                                    sm.initSession();
-                                    String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
-                                    //Main.TX_Text = "\nHi, this is the PSKmail Server of " + serverCall + "\nVersion is " + application + "\n\n";
-                                    Main.TX_Text = serverCall + " V" + version + ", Hi\n";
-                                    Main.TX_Text += serverMail.getPendingList(serverCall, TTYCaller);
-                                    Main.TX_Text += Motd + "\n";
-                                    //We are now fully connected, stop TxIDs
-                                    //q.send_txrsid_command("OFF");
-                                    myrxstatus = sm.getTXStatus();
-                                    q.send_status(myrxstatus);  // send our status
-                                }
-                                // we got an abort, clean up...
-                            } else if (TTYConnected.equals("Connected")
-                                    & rxb.session.equals(session) & rxb.type.equals("a") | disconnect) {
-                                q.send_disconnect();
-                                disconnect = false;
-                                Status = "Listening";
-                                Connected = false;
-                                mainui.enableMnuPreferences2();
-                                TTYConnected = "";
-                                session = "";
-                                TX_Text = "";
-                                Totalbytes = 0;
-                                sm.initSession();
-                                int i;
-                                for (i = 0; i < 64; i++) {
-                                    Session.txbuffer[i] = "";
-                                }
-                                isDisconnected = true;
-                                sm.FileDownload = false;
-                                try {
-                                    if (sm.pFile != null) {
-                                        sm.pFile.close();
+                                } else if (rxb.radioMsgBlock) {//process RadioMsg message
+                                    if (WantRelayOverRadio | WantRelaySMSs | WantRelayEmails) {
+                                        radioMsgWorking = true;//Use either last RSID modem used if any or the default mode
+                                        RMsgProcessor.processBlock(Blockline, RMsgProcessor.FileNameString,
+                                                Main.lastRsidReceived.length() > 0 ? Main.lastRsidReceived : Main.RxModemString);
+                                        Main.lastRsidReceived = ""; //Reset for next RSID.
                                     }
-                                } catch (IOException e) {
-                                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, e);
                                 }
-                                //Set RXid ON for next connect request
-                                m.requestTxRsid("ON");
-                                m.setRxRsid("ON");
-                                // send disconnect packet to caller...
-                                //VK2ETA moved up to be first in sequence
-                                //q.send_disconnect();
-                                Main.RxDelay = Main.initialRxDelay;
-                                //TTY connect request from other client (I become a TTY server)
-                                //} else if (rxb.valid & rxb.type.equals("c")) { //now with access password
-                            } else if (rxb.type.equals("c")) {
+                            } //End of if NOT Connected
+                            if (rxb.type.equals("c")) {
                                 //Connect request
                                 //Pattern cmsg = Pattern.compile("<SOH>.0c(\\S+):1024\\s(\\S+):24\\s(\\d).*");
                                 Pattern cmsg = Pattern.compile("<SOH>.0c(\\S+):1024\\s(\\S+):24\\s(.*)[0-9A-F]{4}<EOT>.*");
                                 Matcher getcl = cmsg.matcher(Blockline);
                                 if (getcl.lookingAt()) {
-                                    //No access password and standard CRC
-                                    if (getcl.group(2).equals(q.callsignAsServer)) {
-                                        //Pass or need access password
+                                    if (matchServerCallWith(getcl.group(2))) {
                                         String newCaller = getcl.group(1);
-                                        if (TTYConnected.equals("Connected") && !newCaller.equals(TTYCaller)) {
+                                        if (TTYConnected.equals("Connected") && !newCaller.toUpperCase(Locale.US).equals(TTYCaller)) {
                                             //I am already in a session and this request is not from the same client, ignore
                                             q.Message("Con. request from " + newCaller + ". Ignored...", 5);
                                         } else {
                                             //I am not in a session, or the current client is connecting again, try to accept connection connect
-                                            TTYCaller = newCaller; 
-                                            if (rxb.valid && Main.accessPassword.length() == 0
-                                                    || rxb.validWithPW && Main.accessPassword.length() > 0) {
+                                            TTYCaller = newCaller;
+                                            //Password supplied matches or None required?
+                                            if ((rxb.valid && Main.accessPassword.length() == 0)
+                                                    || (rxb.validWithPW && Main.accessPassword.length() > 0)) {
                                                 //Clean any previous session data
-                                                //
                                                 disconnect = false;
                                                 Status = "Listening";
                                                 Connected = false;
@@ -1437,7 +1415,7 @@ public class Main {
                                                     //blocktime = (charval * 64 / 1000) + 4;
                                                 }
                                                 log("Connect request from " + TTYCaller);
-                                            } else if (rxb.valid && Main.accessPassword.length() > 0 ) {
+                                            } else if (rxb.valid && Main.accessPassword.length() > 0) {
                                                 //Need password but none provided. Send a reject block with a reason
                                                 m.requestTxRsid("ON");
                                                 m.setRxRsid("ON");
@@ -1447,15 +1425,43 @@ public class Main {
                                         }
                                     }
                                 }
-                            } else if (rxb.radioMsgBlock) {//process RadioMsg message
-                                if (WantRelayOverRadio | WantRelaySMSs | WantRelayEmails) {
-                                    radioMsgWorking = true;//Use either last RSID modem used if any or the default mode
-                                    RMsgProcessor.processBlock(Blockline, RMsgProcessor.FileNameString,
-                                            Main.lastRsidReceived.length() > 0 ? Main.lastRsidReceived : Main.RxModemString);
-                                    Main.lastRsidReceived = ""; //Reset for next RSID.
-                                }
                             }
-
+                            //Received an Abort, cleanup or a disconnect request
+                            if (TTYConnected.equals("Connected")
+                                    & rxb.session.equals(session) & rxb.type.equals("a") | disconnect) {
+                                q.send_disconnect();
+                                disconnect = false;
+                                Status = "Listening";
+                                Connected = false;
+                                mainui.enableMnuPreferences2();
+                                TTYConnected = "";
+                                session = "";
+                                TX_Text = "";
+                                Totalbytes = 0;
+                                sm.initSession();
+                                int i;
+                                for (i = 0; i < 64; i++) {
+                                    Session.txbuffer[i] = "";
+                                }
+                                isDisconnected = true;
+                                sm.FileDownload = false;
+                                try {
+                                    if (sm.pFile != null) {
+                                        sm.pFile.close();
+                                    }
+                                } catch (IOException e) {
+                                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, e);
+                                }
+                                //Set RXid ON for next connect request
+                                m.requestTxRsid("ON");
+                                m.setRxRsid("ON");
+                                // send disconnect packet to caller...
+                                //VK2ETA moved up to be first in sequence
+                                //q.send_disconnect();
+                                Main.RxDelay = Main.initialRxDelay;
+                                //TTY connect request from other client (I become a TTY server)
+                                //} else if (rxb.valid & rxb.type.equals("c")) { //now with access password
+                            }
                             if (debug) {
                                 System.out.println(rxb.server);
                                 System.out.println(rxb.test);
@@ -1501,7 +1507,7 @@ public class Main {
                                 | TTYConnected.equals("Connecting"))) {  //Allow timeouts when in connecting phase as well
                             //long now = System.currentTimeMillis();
                             Systime = System.currentTimeMillis();
-                            idlesecs = (int)((Systime - oldtime) / 1000);
+                            idlesecs = (int) ((Systime - oldtime) / 1000);
                             //Overall session idle timeout
                             String IdleTimeStr = configuration.getPreference("IDLETIME", "120");
                             int MaxSessionIdleTime = Integer.parseInt(IdleTimeStr); //In seconds
@@ -1558,9 +1564,9 @@ public class Main {
                             }
                              */
                             if ((m.BlockActive && !m.receivingStatusBlock && (idlesecs > (blocktime * 2.2 + m.firstCharDelay + RxDelay))) //Normal data block reception
-  //DEBUG 
+                                    //DEBUG 
                                     | (m.BlockActive && m.receivingStatusBlock && (idlesecs > (blocktime * (0.3) + m.firstCharDelay + RxDelay))) //Data block is status block
-  //DEBUG                           
+                                    //DEBUG                           
                                     | (!m.BlockActive && (idlesecs > blocktime * (0.5) + m.firstCharDelay + RxDelay)) // No data block received
                                     ) {
                                 oldtime = Systime;
@@ -1581,7 +1587,9 @@ public class Main {
                                     NumberOfAcks--;
                                     //Add 3 seconds to the rxDelay in case the client is slow to respond or has a long Tx delay (i.e. through a repeater)
                                     Main.RxDelay += 3;
-                                    if (RxDelay > 9) RxDelay = 9; //Max delay
+                                    if (RxDelay > 9) {
+                                        RxDelay = 9; //Max delay
+                                    }
                                 } else if (TTYConnected.equals("Connecting") & !status_received) {
                                     //Abandon connect trial
                                     Status = "Listening";
@@ -1767,7 +1775,7 @@ public class Main {
                 Mailheaderswindow += fl;
             }
             br.close();
-            
+
             //Create RadioMsgInbox
             File RadioMsgInbox = new File(HomePath + Dirprefix + DirInbox + Separator);
             if (!RadioMsgInbox.isDirectory()) {
@@ -1947,10 +1955,10 @@ public class Main {
         XmlRpc_URL = "http://" + XMLIP + ":7362/RPC2";
 
     }
-    
+
     //Fills array of Servers and passwords from the preferences
     public static void loadServerList() {
-        
+
         //Fill-in spinner for Servers, with passwords now
         //Format is Eg: vk2eta-1:pass1, vk2eta-2, vk2eta-3:pass3 (Note: vk2eta-2 does not use a password)
         String[] serverArrayOriginal = configuration.getPreference("SERVER").split(",");
@@ -1961,11 +1969,17 @@ public class Main {
             Matcher msc = viaPattern.matcher(serverArrayOriginal[i]);
             if (msc.find()) {
                 String callSign = "";
-                if (msc.group(1) != null) callSign = msc.group(1);
+                if (msc.group(1) != null) {
+                    callSign = msc.group(1);
+                }
                 String separator = "";
-                if (msc.group(2) != null) separator = msc.group(2);
+                if (msc.group(2) != null) {
+                    separator = msc.group(2);
+                }
                 String accessPassword = "";
-                if (msc.group(3) != null) accessPassword = msc.group(3);
+                if (msc.group(3) != null) {
+                    accessPassword = msc.group(3);
+                }
                 if (!callSign.equals("")) {
                     //viaValidEntries++;
                     serverArrayOriginal[i] = callSign;
@@ -1995,28 +2009,36 @@ public class Main {
             }
         }
         //Blank the rest. Index j already contains the first location to blank
-        for (;j < Servers.length; j++) {
-                Servers[j] = "";
-                ServersPasswords[j] = "";
+        for (; j < Servers.length; j++) {
+            Servers[j] = "";
+            ServersPasswords[j] = "";
         }
         //Set default one
         Main.myserver = Servers[0];
         Main.myserverpassword = ServersPasswords[0];
         //Re-size and blank the other arrays
-        SNR = new double [MAXNEWSERVERS];
-        for (int i=0; i<MAXNEWSERVERS;i++) SNR[i] = 0.0f;
+        SNR = new double[MAXNEWSERVERS];
+        for (int i = 0; i < MAXNEWSERVERS; i++) {
+            SNR[i] = 0.0f;
+        }
         Lastheard = new String[MAXNEWSERVERS];
-        for (int i=0; i<MAXNEWSERVERS;i++) Lastheard[i] = "";
+        for (int i = 0; i < MAXNEWSERVERS; i++) {
+            Lastheard[i] = "";
+        }
         packets_received = new int[MAXNEWSERVERS];
-        for (int i=0; i<MAXNEWSERVERS;i++) packets_received[i] = 0;
+        for (int i = 0; i < MAXNEWSERVERS; i++) {
+            packets_received[i] = 0;
+        }
         modes_received = new String[MAXNEWSERVERS];
-        for (int i=0; i<MAXNEWSERVERS;i++) modes_received[i] = "";
+        for (int i = 0; i < MAXNEWSERVERS; i++) {
+            modes_received[i] = "";
+        }
         strength = new int[MAXNEWSERVERS];
-        for (int i=0; i<MAXNEWSERVERS;i++) strength[i] = 0;
+        for (int i = 0; i < MAXNEWSERVERS; i++) {
+            strength[i] = 0;
+        }
     }
 
-    
-    
     private static void handlegpsd() {
         try {
             // Connect to gpsd at port 2947 on localhost
@@ -2281,7 +2303,7 @@ public class Main {
             }
         }
     }
-  
+
     static modemmodeenum convmodem(String mymodem) {
         modemmodeenum mode = modemmodeenum.THOR8;
 
@@ -2472,6 +2494,46 @@ public class Main {
             System.err.println("LogError: " + e.getMessage());
         }
         Main.mainwindow += (myTime() + " " + logtext + "\n");
+    }
+
+    //Check if we have a case insensitive match with my client's call
+    public static boolean matchClientCallWith(String call) {
+
+        if (call.trim().length() == 0) {
+            return false;
+        }
+        boolean mMatch2 = call.trim().toUpperCase(Locale.US).equals(Main.TTYCaller.trim().toUpperCase(Locale.US));
+
+        return mMatch2;
+    }
+
+    //Check if we have a strict match with my client's call
+    public static boolean matchServerCallWith(String call) {
+
+        if (call.trim().length() == 0) {
+            return false;
+        }
+        boolean mMatch2 = call.trim().toUpperCase(Locale.US).equals(Main.callsignAsServer.trim().toUpperCase(Locale.US));
+
+        return mMatch2;
+    }
+
+    public static String cleanCallForAprs(String call) {
+        String cleanCall = "";
+
+        //Remove any ABCN/ prefixes like FR/ and any suffixes like -15 or /mm and reject non-standard callsigns patterns
+        //Pattern pc = Pattern.compile(".*([a-z0-9]{1,3}[0-9]\\/)([a-z0-9]{1,3}[0-9][a-z0-9]{0,3}[a-zA-Z])(((\\/MM)|(\\/M)|(\\/PM)|(\\/P))|(\\-[a-z0-9]{1,2}))?.*", Pattern.CASE_INSENSITIVE);
+        Pattern pc = Pattern.compile("([a-z0-9]{1,3}[0-9]\\/)?([a-z0-9]{1,3}[0-9][a-z0-9]{0,3}[a-z])(((\\/MM)|(\\/M)|(\\/PM)|(\\/P))|(\\-[a-z0-9]{1,2}))?", Pattern.CASE_INSENSITIVE);
+        //System.out.println(Blockline);
+        Matcher mc = pc.matcher(call);
+        if (mc.lookingAt()) {
+            cleanCall = mc.group(2).toUpperCase(Locale.US);
+            if (mc.group(9) != null) {
+                //We have an APRS suffix (E.g. -12), add it
+                cleanCall += mc.group(9);
+            }
+        }
+        return cleanCall;
     }
 
 } // end Main class
