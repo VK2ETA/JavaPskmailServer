@@ -2379,6 +2379,7 @@ public class optionsdialog extends javax.swing.JDialog {
                 if (cleanCall.length() > 0) {
                     callsign = cleanCall;
                     Main.mycall = callsign;
+                    cf.setPreference("CALL", cleanCall);
                 }
             }
 
@@ -2576,7 +2577,7 @@ public class optionsdialog extends javax.swing.JDialog {
             //Pskmail Server preferences
             String callAsServer = txtCallsignAsServer.getText();
             if (callAsServer.length() > 0) {
-                callAsServer = callAsServer.replaceAll("[^a-zA-Z0-9\\/\\-]", "");
+                callAsServer = callAsServer.replaceAll("[^a-zA-Z0-9\\/\\-\\s]", "");
                 if (callAsServer.length() > 0) {
                     cf.setPreference("CALLSIGNASSERVER", callAsServer);
                     Main.callsignAsServer = callAsServer;

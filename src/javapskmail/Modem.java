@@ -186,7 +186,7 @@ public class Modem implements Runnable {
             } catch (IOException e) { //exception thrown by connectToFldigi() above
                 opened = false;
                 System.out.println("Error connecting to host.");
-                //We launch Fldigi automatically if path is provided and we are server or RadioMSG relay
+                //We launch Fldigi automatically if path is provided
                 if (launchResult == -1) {
                     Main.log.writelog("Could not connect to modem, only offline mode available.\n Please start fldigi and then restart this application for online work.", true);
                 } else if (launchResult == -2) {
@@ -898,6 +898,8 @@ public class Modem implements Runnable {
                     connectToFldigi();
                     //Reset mode as server
                     Sendln("<cmd>server</cmd>");
+                    //And reset RxRsid to ON
+                    setRxRsid("ON");
                     //Clear flags again in case they were reset in-between
                     Main.modemAutoRestartDelay = 0; //Clear auto-restart timer, no point in doubling up
                     Main.requestModemRestart = false; //Clear restart flag
@@ -1318,6 +1320,7 @@ public class Modem implements Runnable {
         Main.monitor += instr;
     }
 
+    /* Not Used
     public void WriteToMain(String instr) {
         Pattern pcnv = Pattern.compile("&(\\d\\d\\d);");
         Matcher mcvt = pcnv.matcher(instr);
@@ -1346,6 +1349,7 @@ public class Modem implements Runnable {
 //                                    System.out.print(instr);
         Main.mainwindow += instr;
     }
+    */
 
     private synchronized void putMessage(String BlockString)
             throws InterruptedException {

@@ -549,10 +549,8 @@ public class serverMail {
             //token = Long.toString(Math.abs(r.nextLong()), 12);
             token = Long.toString(Math.abs(r.nextLong()), 12);
             token = token.substring(token.length()-6);
-            //token = "tmp" + token;
-
-            //codedFile = Main.HomePath + Main.Dirprefix + "Outbox" + Main.Separator + token;
-            codedFile = Main.HomePath + Main.Dirprefix + "Outbox" + Main.Separator + Destination + "_-m-_" + token;
+            //Can't have a "/" in the filename as in vk2eta/pm
+            codedFile = Main.HomePath + Main.Dirprefix + "Outbox" + Main.Separator + Destination.replaceAll("\\/", "+") + "_-m-_" + token;
 
             Base64.encodeFileToFile(tmpfile, codedFile);
 
@@ -804,8 +802,9 @@ public class serverMail {
             //token = Long.toString(Math.abs(r.nextLong()), 12);
             token = Long.toString(Math.abs(r.nextLong()), 12);
             token = token.substring(token.length()-6);
-            //token = "tmp" + token;
-            codedFile = Main.HomePath + Main.Dirprefix + "Outbox" + Main.Separator + Destination + "_-w-_" + token;
+            //token = "tmp" + token
+            //Can't have the "/" in vk2eta/pm
+            codedFile = Main.HomePath + Main.Dirprefix + "Outbox" + Main.Separator + Destination.replaceAll("\\/", "+") + "_-w-_" + token;
             Base64.encodeFileToFile(tmpfile, codedFile);
             File dlfile = new File(tmpfile);
             if (dlfile.exists()) {
@@ -864,7 +863,9 @@ public class serverMail {
                     pendingType = pendingFn.substring(firstSep + 2, secondSep);
                     pendingToken = pendingFn.substring(secondSep + 2);
                 }
-                if (pendingCaller.equals(caller)) {
+                //Change back the "+" characters in file name into a "/" as in vk2eta/m
+                //if (pendingCaller.equals(caller)) {
+                if (pendingCaller.replaceAll("\\+", "/").equals(caller)) {
                     //Add this file to the list of pending downloads
                     //>FO5:PI4TUE:PA0R:JhyJkk:f:test.txt:496
                     returnList += ">FO5:" + server + ":" + caller + ":" + pendingToken + ":" + pendingType + ": :" + filesOutbox[i].length() + "\n";

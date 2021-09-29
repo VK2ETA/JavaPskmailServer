@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "0.9.6.00";
+    static String version = "0.9.7";
     static String application = "jpskmailserver " + "B" + version;// Used to preset an empty status
-    static String versionDate = "20210925";
+    static String versionDate = "20210929";
     static String host = "localhost";
     static int port = 7322;
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
@@ -540,22 +540,19 @@ public class Main {
                     if (m.checkBlock()) {
 
                         Blockline = m.getMessage();
-// System.out.println("BLOCK=" + Blockline);
+                        // System.out.println("BLOCK=" + Blockline);
                         RXBlock rxb = new RXBlock(Blockline);
                         if (!rxb.valid && !rxb.validWithPW) {
                             validblock = false;
                         } else {
                             validblock = true;
                         }
-
                         if (validblock & Monitor) {
                             char c = Blockline.charAt(6);
-
                             int i = (int) c - 32;
                             String calls = "";
                             if (i < 64) {
                                 calls = sessions[i];
-
                                 if (calls != null) {
                                     mainui.appendMainWindow(mainui.getClock() + " " + calls + Blockline + "\n");
                                 } else {
@@ -563,7 +560,6 @@ public class Main {
                                 }
                             }
                         }
-
                         if (!Bulletinmode & !IACmode) {
                             if (Connected) {
                                 // status block from server
@@ -730,7 +726,6 @@ public class Main {
                                 } else if (rxb.session.equals(session)) {
                                     myrxstatus = sm.doRXBuffer("", rxb.type);
                                 }
-
                                 // PI4TUE 0.9.33-13:28:52-IM46>
                                 if (Blockline.toUpperCase(Locale.US).contains(q.getServer().toUpperCase(Locale.US))) {
                                     //Pattern ppc = Pattern.compile(".*(\\d\\.\\d).*\\-\\d+:\\d+:(\\d+)\\-(.*)M(\\d+)");
@@ -775,23 +770,24 @@ public class Main {
                                 //End if (connected)
                             } else {
                                 //NOT connected
-                                if (Blockline.contains("QSL") & Blockline.toUpperCase(Locale.US).contains(q.callsign.toUpperCase(Locale.US))) {
+                                //if (Blockline.contains("QSL") & Blockline.toUpperCase(Locale.US).contains(q.callsign.toUpperCase(Locale.US))) {
+                                if (Blockline.contains("QSL") & Blockline.contains(" de ")) {
                                     String pCheck = "";
                                     //Pattern psc = Pattern.compile(".*de ([A-Z0-9\\-]+)\\s(?:(\\d*)|((\\d+)\\s+(\\d+))\\s)([0123456789ABCDEF]{4}).*");
-                                    Pattern psc = Pattern.compile(".*de ([A-Z0-9\\-]+)\\s*(?:(?:(\\d+\\s)(\\d+\\s))|(\\d*\\s))([0123456789ABCDEF]{4}).*");
+                                    Pattern psc = Pattern.compile(".*QSL(\\s[A-Za-z0-9\\-\\/]+)? de ([A-Za-z0-9\\-\\/]+)\\s*(((\\d+\\s)(\\d+\\s))|(\\d+\\s))?([0123456789ABCDEF]{4}).*");
                                     Matcher msc = psc.matcher(Blockline);
                                     String scall = "";
                                     rx_snr = "";
                                     String numberOfMails = "";
                                     if (msc.lookingAt()) {
-                                        scall = msc.group(1).toUpperCase(Locale.US);
-                                        if (msc.group(4) != null) {
-                                            rx_snr = msc.group(4).trim();
+                                        scall = msc.group(2);
+                                        if (msc.group(7) != null) {
+                                            rx_snr = msc.group(7).trim();
                                         } else {
-                                            rx_snr = msc.group(2).trim();
-                                            numberOfMails = msc.group(3).trim();
+                                            rx_snr = msc.group(5).trim();
+                                            numberOfMails = msc.group(6).trim();
                                         }
-                                        pCheck = msc.group(5);
+                                        pCheck = msc.group(8);
                                     }
                                     // fill the servers drop down list
                                     char soh = 1;
@@ -802,12 +798,12 @@ public class Main {
                                     } else if (!rx_snr.equals("") && !numberOfMails.equals("")) {
                                         checkstring = sohstr + "00uQSL " + q.callsign + " de " + scall + " " + rx_snr + " " + numberOfMails + " ";
                                         //System.out.println("RX_SNR:" + rx_snr);
-                                        mainui.appendMainWindow("From " + scall + ": " + rx_snr + "%, " + numberOfMails + " mails\n");
+                                        mainui.appendMainWindow("QSL from " + scall + ": " + rx_snr + "%, " + numberOfMails + " mails\n");
                                         setrxdata(scall, Integer.parseInt(rx_snr));
                                     } else if (!rx_snr.equals("") && numberOfMails.equals("")) {
                                         checkstring = sohstr + "00uQSL " + q.callsign + " de " + scall + " " + rx_snr + " ";
                                         //System.out.println("RX_SNR:" + rx_snr);
-                                        mainui.appendMainWindow("From " + scall + ": " + rx_snr + "%\n");
+                                        mainui.appendMainWindow("QSL from " + scall + ": " + rx_snr + "%\n");
                                         setrxdata(scall, Integer.parseInt(rx_snr));
                                     }
                                     String check = q.checksum(checkstring);
@@ -833,7 +829,7 @@ public class Main {
                                     String pCheck = "";
                                     rx_snr = "";
                                     if (msc.lookingAt()) {
-                                        scall = msc.group(1).toUpperCase(Locale.US);
+                                        scall = msc.group(1);
                                         rx_snr = msc.group(2);
                                         pCheck = msc.group(3);
                                     }
@@ -847,11 +843,9 @@ public class Main {
                                     } else {
                                         checkstring = "00u" + scall + ":71 ";
                                     }
-
                                     String check = q.checksum(checkstring);
                                     if (check.equals(pCheck)) {
                                         rxb.get_serverstat(scall);
-
                                         // switch off txrsid
                                         //                                      q.send_txrsid_command("OFF");
                                     } else {
@@ -870,7 +864,6 @@ public class Main {
                                         binfo = bmsc.group(3);
                                         String nodetype = bmsc.group(4);
                                         String pCheck = bmsc.group(5);
-
                                         binfo += nodetype;
                                         String checkstring = "00u" + scall + ":26 " + type + binfo;
                                         String check = q.checksum(checkstring);
@@ -943,12 +936,12 @@ public class Main {
                                                 Matcher gmm = gm.matcher(Blockline);
                                                 if (gmm.lookingAt()) {
                                                     //System.out.println("FOUND:" +  Blockline);
-                                                    String fromcall = gmm.group(1).toUpperCase(Locale.US);// + "         ";
+                                                    String fromcall = cleanCallForAprs(gmm.group(1));// + "         ";
                                                     //fromcall = fromcall.substring(0, 9);
                                                     String outcall = gmm.group(2).toUpperCase(Locale.US) + "         ";
                                                     outcall = outcall.substring(0, 9);
                                                     binfo = gmm.group(3);
-                                                    if (!mycall.equals(fromcall)) {
+                                                    if (!mycall.toUpperCase(Locale.US).equals(fromcall)) {
                                                         //Not for my Client's callsign (can be different to myserver's callsign)
                                                         String toxastir = gmm.group(2) + ">PSKAPR,TCPIP*,qAC," + gmm.group(1) + "::" + fromcall + "  " + ":" + gmm.group(3) + "\n";
                                                         mapsock.sendmessage(toxastir);
@@ -966,7 +959,6 @@ public class Main {
                                             }
                                             outstring = "";
                                         }
-
                                     }
                                 } else if (Blockline.contains(":25 ")) {
                                     // System.out.println(Blockline);
@@ -1130,10 +1122,11 @@ public class Main {
                                     String scall;
                                     String reqcall;
                                     if (cbmsc.lookingAt()) {
-                                        reqcall = cbmsc.group(1).toUpperCase(Locale.US);
-                                        scall = cbmsc.group(2).toUpperCase(Locale.US);
+                                        reqcall = cbmsc.group(1);
+                                        scall = cbmsc.group(2);
                                         String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
-                                        if (scall.length() > 1 && reqcall.length() > 1 && scall.equals(serverCall.toUpperCase(Locale.US))) {
+                                        if (scall.length() > 1 && reqcall.length() > 1 
+                                                && scall.toUpperCase(Locale.US).equals(serverCall.toUpperCase(Locale.US))) {
                                             //Some callsigns present and match my call as sever, reply with s/n
                                             String uiMsg = "Inquire request from " + reqcall;
                                             q.Message(uiMsg, 5);
@@ -1143,7 +1136,6 @@ public class Main {
                                         }
                                     }
                                 }
-
                                 //System.out.println(Blockline);
                                 // unproto packets
                                 if (rxb.type.equals("u")) {
@@ -1207,7 +1199,7 @@ public class Main {
                                         Pattern pl = Pattern.compile("^(\\S+)><(\\S+)");
                                         Matcher ml = pl.matcher(rxb.payload);
                                         if (ml.lookingAt()) {
-                                            String linkCall = ml.group(1).toUpperCase(Locale.US);
+                                            String linkCall = ml.group(1);
                                             String linkServer = ml.group(2).toUpperCase(Locale.US);
                                             String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER").toUpperCase(Locale.US);
                                             //Clean call sign and ensure it is conforming to standard
@@ -1237,7 +1229,6 @@ public class Main {
                                         rejectcall = mr.group(1);
                                         rejectreason = mr.group(2);
                                     }
-
                                     if (rejectcall.toUpperCase(Locale.US).equals(mycall.toUpperCase(Locale.US))) {
                                         Status = "Listening";
                                         Connected = false;
@@ -1256,7 +1247,6 @@ public class Main {
                                     }
                                     // connect_ack
                                 } else if (rxb.type.equals("k") & rxb.valid) {
-
                                     Pattern pk = Pattern.compile("^(\\S+):\\d+\\s(\\S+):\\d+\\s(\\d)$");
                                     Matcher mk = pk.matcher(rxb.payload);
                                     if (mk.lookingAt()) {
@@ -1291,7 +1281,6 @@ public class Main {
                                         Main.linkedserver = rxb.server;
                                         mainui.disableMonitor();
                                         mainui.disableMnuPreferences2();
-
                                         // reset tx queue 
                                         TX_Text = "";
                                         Totalbytes = 0;
@@ -1301,24 +1290,20 @@ public class Main {
                                         sm.myserver = rxb.server;
                                         protocolstr = rxb.protocol;
                                         protocol = protocolstr.charAt(0) - 48;
-
                                         File outb1 = new File(Main.HomePath + Main.Dirprefix + "Outbox");
                                         int i1 = outb1.list().length;
                                         if (i1 > 0) {
                                             Main.mainwindow += "\nWaiting in outbox:" + Integer.toString(i1) + "\n";
                                         }
-
                                         File outb = new File(Main.Pendingdir);
                                         int i = outb.list().length;
                                         if (i > 0) {
                                             Main.mainwindow += "Incomplete downloads:" + Integer.toString(i) + "\n\n";
                                         }
-
                                     }
                                     //Status block, are we a server?
                                 } else if (rxb.type.equals("s")
                                         & rxb.valid & rxb.session.equals(session)) {
-
                                     if (Main.TTYConnected.equals("Connecting")) {
                                         Main.TTYConnected = "Connected";
                                         Main.Connected = true;
@@ -1470,7 +1455,6 @@ public class Main {
                                 System.out.println(rxb.type);
                                 System.out.println(rxb.crc);
                                 System.out.println(rxb.port);
-
                                 if (rxb.valid == true) {
 //                                System.out.println("valid");
                                 }
@@ -1490,14 +1474,11 @@ public class Main {
                                 Main.Bulletinmode = false;
                                 Main.Status = "Listening";
                             }
-
                             mainwindow += Blockline;
                             Bulletin_time = 30;
-
                             // write to bulletins file...
                             bulletin.write(Blockline);
                             bulletin.flush();
-
                         } else if (Main.IACmode) {
                             sm.parseInput(Blockline);
                         }
@@ -1630,7 +1611,6 @@ public class Main {
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } // end while
-
         } finally {
             try {
                 if (!(bulletin == null)) {
@@ -1639,7 +1619,6 @@ public class Main {
             } catch (IOException ex) {
                 log.writelog("IO Exception when closing bulletins!", ex, true);
             }
-
         }
     } // end Main
 
@@ -1659,7 +1638,6 @@ public class Main {
                     break;
                 }
             }
-
             if (!knownserver) {
                 for (i = 0; i < 10; i++) {
                     if (Servers[i].equals("")) {
@@ -1691,12 +1669,10 @@ public class Main {
                 Separator = "\\";
                 onWindows = true;
             }
-
             // Where is this jar installed? Needs updating for windows?
             String path = mainpskmailui.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
             path = path.substring(0, path.lastIndexOf("/") + 1);
             Main.InstallPath = path;
-
             //Check if pskmail directory exists, create if not
             File dir = new File(HomePath + Dirprefix);
             if (!dir.isDirectory()) {
@@ -1717,12 +1693,10 @@ public class Main {
                 sentbox.mkdir();
             }
             File pendingfl = new File(HomePath + Dirprefix + "Pending" + Separator);
-
             if (!pendingfl.isDirectory()) {
                 pendingfl.mkdir();
             }
             File outpendingfl = new File(HomePath + Dirprefix + "Outpending" + Separator);
-
             if (!outpendingfl.isDirectory()) {
                 outpendingfl.mkdir();
             }
@@ -1838,10 +1812,8 @@ public class Main {
             APRSMessageNumber = 0;
             // Initialize send queue
             TX_Text = "";
-
             // init logfile
             Main.LogFile = configuration.getPreference("LOGFILE", "client.log");
-
             // Modem settings
             host = configuration.getPreference("MODEMIP");
             port = Integer.parseInt(configuration.getPreference("MODEMIPPORT", "7322"));
@@ -1853,11 +1825,9 @@ public class Main {
             } else {
                 compressedmail = false;
             }
-
             String profile = configuration.getPreference("BLOCKLENGTH", "5");
             CurrentModemProfile = profile;
             Character c = profile.charAt(0);
-
             // Get the default modem and the selected mode list
             // If this is not set by the client then set a decent default as
             // they will end up in THOR8 hell most often otherwise!!!
@@ -1871,7 +1841,6 @@ public class Main {
                 Main.defaultmode = convmodem(DefaultTXmodem);
                 configuration.setPreference("DEFAULTMODE", Main.DefaultTXmodem);
             }
-
             // Check if its empty, if so then set a decent default
             strunt = configuration.getPreference("MODES");
 // System.out.println("Defaultmode=" + strunt);                  
@@ -1881,9 +1850,7 @@ public class Main {
                 modes = "8543"; // PSK250, PSK250R, MFSK32, THOR22
                 configuration.setPreference("MODES", Main.modes);
             }
-
             modeprofile = new modemmodeenum[10];
-
             if (configuration.getPreference("GPSD", "0").equals("1")) {
                 WantGpsd = true;
             }
@@ -1898,7 +1865,6 @@ public class Main {
             } else {
                 aprsserverenabled = false;
             }
-
             //Server and RadioMsg globals
             if (configuration.getPreference("ENABLESERVER", "no").equals("yes")) {
                 WantServer = true;
@@ -1932,7 +1898,6 @@ public class Main {
             }
             callsignAsServer = configuration.getPreference("CALLSIGNASSERVER", "N0CAL");
             accessPassword = Main.configuration.getPreference("ACCESSPASSWORD").trim();
-
         } catch (Exception e) {
             MAXDCD = 3;
 //                q.backoff = "5";
@@ -1940,20 +1905,15 @@ public class Main {
             ICONlevel = "/";
             log.writelog("Problems with config parameter.", e, true);
         }
-
         //New: now contains a list of servers with optional passwords
         loadServerList();
         Main.mycall = configuration.getPreference("CALL");
         Freq_offset = Integer.parseInt(Main.configuration.getPreference("RIGOFFSET", "0"));
-
         String XMLIP = configuration.getPreference("MODEMIP", "127.0.0.1");
-
         if (XMLIP.equals("localhost")) {
             XMLIP = "127.0.0.1";
         }
-
         XmlRpc_URL = "http://" + XMLIP + ":7362/RPC2";
-
     }
 
     //Fills array of Servers and passwords from the preferences
@@ -2045,46 +2005,33 @@ public class Main {
             InetAddress addr = InetAddress.getByName("localhost");
             int target = 2947;
             SocketAddress sockaddr = new InetSocketAddress(addr, target);
-
             // Block no more than timeoutMs.
             // If the timeout occurs, SocketTimeoutException is thrown.
             int timeoutMs = 2000;   // 2 seconds
-
             gpsdSocket = new Socket();
             gpsdSocket.connect(sockaddr, timeoutMs);
             gpsdout = new PrintWriter(gpsdSocket.getOutputStream(), true);
             gpsdin = new BufferedReader(new InputStreamReader(
                     gpsdSocket.getInputStream()));
-
             String outgps = "?WATCH={\"enable\":true, \"nmea\":true };";
             gpsdout.println(outgps);
-
             long t0 = System.currentTimeMillis();
             t1 = t0;
-
             boolean ready = false;
-
             while (t1 - t0 < 2000 & !ready) {
-
                 t1 = System.currentTimeMillis();
-
                 String myRead = "";
-
                 if (gpsdin.ready()) {
                     myRead = gpsdin.readLine();
-
                     if (myRead.substring(0, 6).equals("$GPRMC")) {
                         HaveGPSD = true;
                         ready = true;
                     }
                 }
-
             }
-
             if (!HaveGPSD) {
                 q.Message("Problem with GPSD", 10);
             }
-
         } catch (UnknownHostException e) {
             q.Message("Cannot find GPSD", 10);
             HaveGPSD = false;
@@ -2092,12 +2039,10 @@ public class Main {
             q.Message("Cannot find gpsd", 10);
             HaveGPSD = false;
         }
-
         if (HaveGPSD) {
             gpsdata = new nmeaparser();     // Parser for nmea data
             q.Message("Connected to GPSD", 10);
         }
-
     }
 
     static public void getgpsddata() {
@@ -2105,13 +2050,11 @@ public class Main {
         Boolean ready = false;
 
         while (HaveGPSD & !ready) {
-
             try {
                 myRead = gpsdin.readLine();
             } catch (IOException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
-
             if (myRead.length() > 6) {
                 if (myRead.substring(0, 6).equals("$GPRMC")) {
                     gpsd_data = myRead.split(",");
@@ -2119,7 +2062,6 @@ public class Main {
                         gpsdata.validfix = true;
                         gpsdata.fixat = gpsd_data[1];
                     }
-
                     gpsdata.latitude = gpsd_data[3];
                     float latdata = Float.valueOf(gpsdata.latitude) / 100;
                     int degr = (int) latdata;
@@ -2129,7 +2071,6 @@ public class Main {
                         mindata *= -1;
                     }
                     GPSD_latitude = Float.toString(mindata);
-
                     gpsdata.longitude = gpsd_data[5];
                     float longdata = Float.valueOf(gpsdata.longitude) / 100;
                     degr = (int) longdata;
@@ -2139,10 +2080,8 @@ public class Main {
                         mindata *= -1;
                     }
                     GPSD_longitude = Float.toString(mindata);
-
                     gpsdata.speed = gpsd_data[7];
                     gpsdata.course = gpsd_data[8];
-
                     char[] buffer = new char[4000];
                     try {
                         int cnt = gpsdin.read(buffer);
@@ -2150,18 +2089,15 @@ public class Main {
                         Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-
                 configuration.setLatitude(GPSD_latitude);
                 configuration.setLongitude(GPSD_longitude);
-
                 ready = true;
             }
-
         }
-
     }
 
     static public void parsenmeadata(String nmeadata) {
+        
         gpsdata.newdata(nmeadata);
         if (gpsdata.getFixStatus()) {
             configuration.setLatitude(gpsdata.getLatitude());
@@ -2187,7 +2123,6 @@ public class Main {
                 configuration.setPreference("GPSENABLED", "no");
             }
         }
-
         if (configuration.getPreference("GPSENABLED", "no").equals("yes")) {
             try {
                 String speedforgps = configuration.getPreference("GPSSPEED", "4800");
@@ -2282,7 +2217,6 @@ public class Main {
                 //    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                 //}
             }
-
         } else {
             JustDowngradedRX = true; // Make TX mode downgrade first (if necessary)
             Main.mys2n = 50; //Reset to mid-range
@@ -2348,7 +2282,6 @@ public class Main {
         } else if (mymodem.equals("PSK125RC4")) {
             mode = modemmodeenum.PSK125RC4;
         }
-
         return mode;
     }
 
@@ -2396,7 +2329,6 @@ public class Main {
         } else if (mymodem.equals("m")) {
             mode = modemmodeenum.DOMINOEX11;
         }
-
         return mode;
     }
 
@@ -2411,7 +2343,6 @@ public class Main {
                 }
             }
         }
-
         return index;
     }
 
@@ -2489,7 +2420,6 @@ public class Main {
             out.write(myTime() + " " + logtext + "\n");
             //Close the output stream
             out.close();
-
         } catch (Exception e) {//Catch exception if any
             System.err.println("LogError: " + e.getMessage());
         }
@@ -2503,7 +2433,6 @@ public class Main {
             return false;
         }
         boolean mMatch2 = call.trim().toUpperCase(Locale.US).equals(Main.TTYCaller.trim().toUpperCase(Locale.US));
-
         return mMatch2;
     }
 
@@ -2514,7 +2443,6 @@ public class Main {
             return false;
         }
         boolean mMatch2 = call.trim().toUpperCase(Locale.US).equals(Main.callsignAsServer.trim().toUpperCase(Locale.US));
-
         return mMatch2;
     }
 
@@ -2529,12 +2457,13 @@ public class Main {
         if (mc.lookingAt()) {
             cleanCall = mc.group(2).toUpperCase(Locale.US);
             if (mc.group(9) != null) {
-                //We have an APRS suffix (E.g. -12), add it
+                //We have an APRS id (E.g. -12), add it
                 cleanCall += mc.group(9);
             }
         }
         return cleanCall;
     }
+
 
 } // end Main class
 

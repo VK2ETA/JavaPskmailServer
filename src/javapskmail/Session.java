@@ -770,7 +770,8 @@ public class Session {
         // ~GETBIN for TTY session...
         Pattern GBm = Pattern.compile("^\\s*~GETBIN\\s(\\S+)");
         Matcher gb = GBm.matcher(str);
-        //Open both ways                                    if (Main.TTYConnected.equals("Connected") & gb.lookingAt()) {
+        //Open both ways 
+        //if (Main.TTYConnected.equals("Connected") & gb.lookingAt()) {
         if (gb.lookingAt()) {
             foundMatchingCommand = true;
             String downloaddir = Main.HomePath + Main.Dirprefix + "Downloads" + Main.Separator;
@@ -1137,7 +1138,7 @@ public class Session {
                 } catch (Exception e) {
                     Main.log.writelog("Error when trying to open the pending file.", e, true);
                 }
-// compressed web page open...
+            // compressed web page open...
             } else if (fmm.group(4).equals("w")) {
                 //Compressed web page
                 CwwwDownload = true;
@@ -1271,7 +1272,7 @@ public class Session {
         }
 
         // >FO5:PI4TUE:PA0R:JhyJkk:f:test.txt:496
-        Pattern ofr = Pattern.compile("\\s*>FO(\\d):([A-Z0-9\\-]+):([A-Z0-9\\-]+):([A-Za-z0-9_-]+):(\\w)");
+        Pattern ofr = Pattern.compile("\\s*>FO(\\d):([a-zA-Z0-9\\-\\/]+):([a-zA-Z0-9\\-\\/]+):([A-Za-z0-9_-]+):(\\w)");
         Matcher ofrm = ofr.matcher(str);
         if (ofrm.lookingAt()) {
             foundMatchingCommand = true;
@@ -1299,7 +1300,7 @@ public class Session {
 
         // ~FO5:PI4TUE:PA0R:tmpasdkkdfj:u:test.txt:36
         // ~FO5:PI4TUE:PA0R-1:a30a69:s: :847 //E-mail upload to this TTYserver
-        Pattern ofr2 = Pattern.compile("\\s*~FO(\\d):([A-Z0-9\\-]+):([A-Z0-9\\-]+):([A-Za-z0-9_-]+):(\\w).*");
+        Pattern ofr2 = Pattern.compile("\\s*~FO(\\d):([a-zA-Z0-9\\-\\/]+):([a-zA-Z0-9\\-\\/]+):([A-Za-z0-9_-]+):(\\w).*");
         Matcher ofrm2 = ofr2.matcher(str);
         if (ofrm2.lookingAt()) {
             foundMatchingCommand = true;
@@ -1442,7 +1443,7 @@ public class Session {
                             pendingType = pendingFn.substring(firstSep + 2, secondSep);
                             pendingToken = pendingFn.substring(secondSep + 2);
                         }
-                        if (pendingCaller.equals(caller) && partialfile.equals(pendingToken)) {
+                        if (pendingCaller.replaceAll("\\+", "/").equals(caller) && partialfile.equals(pendingToken)) {
                             //Found a match, queue for TX at specified offset
                             int j = 0;
                             File penfOut = filesOutbox[i].getAbsoluteFile();
@@ -1510,7 +1511,7 @@ public class Session {
                             pendingType = pendingFn.substring(firstSep + 2, secondSep);
                             pendingToken = pendingFn.substring(secondSep + 2);
                         }
-                        if (pendingCaller.equals(caller) && deletefl.equals(pendingToken)) {
+                        if (pendingCaller.replaceAll("\\+", "/").equals(caller) && deletefl.equals(pendingToken)) {
                             //Found a match for callsign and token combination, delete file
                             File penfOut = filesOutbox[i].getAbsoluteFile();
                             if (penfOut.exists()) {

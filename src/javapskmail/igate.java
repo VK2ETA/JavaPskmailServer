@@ -123,11 +123,16 @@ public class igate {
         if (in.ready()) {
             while ((line = in.readLine()) != null) {
                 //VK2ETA Add listening for and forwarding of APRS messages
-                //if (line.length() > 0 & line.contains("PSKAPR") & !line.startsWith("#") & Main.mainui.APRS_IS.isSelected()) {
                 if (line.length() > 0 & !line.startsWith("#")) {
-//                     System.out.println(line);
+                    //System.out.println(line);
                     if (line.contains("PSKAPR") && line.contains("GATING")) {
-                        checkIfNeedsRemoval(line);
+                        //Find the station call and remove if previously gated here
+                        Pattern pl = Pattern.compile("^(\\w*\\-*\\d*)>(\\w*),*(.*?):(.)(\\w*\\-*\\d*)\\s*:GATING (.*)(\\{*.*)");
+                        Matcher ml = pl.matcher(line);
+                        if (ml.lookingAt()) {
+                            String tocall = ml.group(6).toUpperCase(Locale.US);
+                            removeStationFromList(tocall);
+                        }
                     } else { 
                         //Must be a message to be forwarded
                         //VK2ETA check what other frames may make it here and filter out if required
@@ -136,6 +141,7 @@ public class igate {
                         //elsif ($line =~ /^(\w*\-*\d*)>(\w*),*(.*?):(.)(\w*\-*\d*)\s*:(.*)(\{*.*)/) {	# message
                         doAprsRfForward(line);
                     }
+                    //if (line.length() > 0 & line.contains("PSKAPR") & !line.startsWith("#") & Main.mainui.APRS_IS.isSelected()) {
                     if (Main.mainui.APRS_IS.isSelected()) {
                         Main.aprsbeacontxt += line + "\n";
                     }
@@ -252,46 +258,6 @@ public class igate {
         return Integer.toString(Out);
     }
     
-    private static void checkIfNeedsRemoval(String line) {
-        //To-Do filter and check for removal
-    }
-
-    //Check that station is in the list and was last linked less than 30 minutes ago
-    public static boolean isStationLinked(String stationRaw) {
-        boolean inList = false;
-        String station = stationRaw.toUpperCase(Locale.US);
-
-        //Look in list if already registered
-        if (station.length() > 0) {
-            for (int i = 0; i < linkedStationsList.size(); i++) {
-                if (linkedStationsList.get(i).contains(station)) {
-                    //Was it less than 30 minutes ago?
-                    long lastLinkTime = 0L;
-                    String entry = linkedStationsList.get(i);
-                    String[] linkRecord = entry.split("\\|");
-                    if (linkRecord.length == 2) { //Valid entries only
-                        try {
-                            lastLinkTime = Long.parseLong(linkRecord[1]);
-                        } catch (NumberFormatException e) {
-                            //Nothing
-                        }
-                        //Max 30 minutes since last interaction as APRS-IS server seem to 
-                        //   hold the link for one hour approx.    
-                        if (System.currentTimeMillis() - lastLinkTime > 30 * 60000) {
-                            //Too old, remove
-                            linkedStationsList.remove(i);
-                        } else {
-                            //All good, valid link from that station
-                            inList = true;                            
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-        return inList;
-    }
-
     private static void doAprsRfForward(String line) {
         //elsif ($line =~ /^(\w*\-*\d*)>(\w*),*(.*?):(.)(\w*\-*\d*)\s*:(.*)(\{*.*)/) {	# message
         Pattern pl = Pattern.compile("^(\\w*\\-*\\d*)>(\\w*),*(.*?):(.)(\\w*\\-*\\d*)\\s*:(.*)(\\{*.*)");
@@ -303,10 +269,8 @@ public class igate {
             String type = ml.group(4);
             String tocall = ml.group(5).toUpperCase(Locale.US);
             String message = ml.group(6);
-            if (isStationLinked(tocall)) {
-                //Send over RF (we do not check for duplicates here (YET?)
-                //$TXServerStatus = "TXaprsmessage";
-                //send_frame($message);
+            if (getLinkedCall(tocall).length() > 0) {
+                //We have a valid call, send over RF. We do not check for duplicates here (YET?)
                 try {
                     String sendMessage = fromcall + ">PSKAPR::" + tocall + " :" + message;//For now + mesgnumber;
                     Main.q.setCallsign(tocall);
@@ -318,14 +282,50 @@ public class igate {
         }
     }
 
+    //Check that station is in the list and was last linked less than 45 minutes ago
+    public static String getLinkedCall(String stationRaw) {
+        String linkedCall = "";
+        //Aprs call sign (E.g. VK2ETA-5). Upper case, no prefix (E.g "fk8"), no suffix (E.g. "/pm"), but can have id (E.g. -10)
+        String station = stationRaw.toUpperCase(Locale.US);
+
+        //Look in list if already registered
+        if (station.length() > 0) {
+            for (int i = 0; i < linkedStationsList.size(); i++) {
+                if (linkedStationsList.get(i).toUpperCase(Locale.US).contains(station)) {
+                    //Was it less than 45 minutes ago?
+                    long lastLinkTime = 0L;
+                    String entry = linkedStationsList.get(i);
+                    String[] linkRecord = entry.split("\\|");
+                    if (linkRecord.length == 2) { //Valid entries only
+                        try {
+                            lastLinkTime = Long.parseLong(linkRecord[1]);
+                        } catch (NumberFormatException e) {
+                            //Nothing
+                        }
+                        //Max 45 minutes since last interaction as APRS-IS server seem to 
+                        //   hold the link for one hour approx.    
+                        if (System.currentTimeMillis() - lastLinkTime > 45 * 60000) {
+                            //Too old, remove
+                            linkedStationsList.remove(i);
+                        } else {
+                            //All good, valid link from that station, get the original call (E.g. fk8/vk2eta/pm)
+                            linkedCall = linkRecord[0];
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        return linkedCall;
+    }
    
     //Remove a Station to the linked stations list
     public static void removeStationFromList(String stationRaw) {
-        String station = stationRaw.toUpperCase(Locale.US);
+        String station = Main.cleanCallForAprs(stationRaw);
 
         if (station.length() > 0) {
             for (int i = 0; i < linkedStationsList.size(); i++) {
-                if (linkedStationsList.get(i).contains(station)) {
+                if (linkedStationsList.get(i).toUpperCase(Locale.US).contains(station)) {
                     linkedStationsList.remove(i);
                     break;
                 }
@@ -334,9 +334,9 @@ public class igate {
     }    
 
     //Add a Station to the linked stations list
-    public static void addStationToList(String newStationRaw) {
+    public static void addStationToList(String newStation) {
         boolean inList = false;
-        String newStation = newStationRaw.toUpperCase(Locale.US);
+
         //Look in list if already registered
         if (newStation.length() > 0) {
             for (int i = 0; i < linkedStationsList.size(); i++) {
@@ -363,9 +363,9 @@ public class igate {
                 } catch (NumberFormatException e) {
                     //Nothing
                 }
-                //Max 30 minutes since last interaction as APRS-IS server seem to 
+                //Max 45 minutes since last interaction as APRS-IS server seem to 
                 //   hold the link for one hour approx.    
-                if (System.currentTimeMillis() - lastLinkTime > 30 * 60000) {
+                if (System.currentTimeMillis() - lastLinkTime > 45 * 60000) {
                     //Too old, remove
                     linkedStationsList.remove(i);
                 }
