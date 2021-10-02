@@ -181,45 +181,35 @@ public class Session {
         rx_missing = "";
         int endblock;
         lastblock = (tx_lastsent.charAt(0) - 32);
-
-        endblock = (lastgoodblock_received + 64) % 64;;
-
+        endblock = (lastgoodblock_received + 64) % 64;
         int i = 0;
         int index = 0;
-
         int runvar = 0;
         if (lastblock < lastdisplayed) {
             runvar = lastblock + 64;
         } else {
             runvar = lastblock;
         }
-
         for (i = lastdisplayed + 1; i <= runvar; i++) {
             index = i % 64;
-
             if (rxbuffer[index].equals("")) {;
-
                 char m = (char) (index + 32);
                 rx_missing += Character.toString(m);
             }
         }
         // generate the status block      
-
         if (rx_missing.length() == 0) {
             Main.rxbusy = false;
         } else {
             Main.rxbusy = true;
         }
-
         goodblock = lastdisplayed;
         char last = (char) (lastgoodblock_received + 32);
         rx_lastreceived = Character.toString(last);
         char ok = (char) (goodblock + 32);
         rx_ok = Character.toString(ok);
-
         int Missedblocks = rx_missing.length();
         Main.Missedblocks = Missedblocks;
-
         if (Missedblocks > 8) {
             rx_missing = rx_missing.substring(0, 8);
         }
@@ -783,7 +773,17 @@ public class Session {
 
             if (mypath.length() > 0) {
 
-                String Destination = myserver;
+                String toCall;
+                String fromCall;
+                if (Main.TTYConnected.equals("Connected")) {
+                    //I am server
+                    toCall = Main.TTYCaller;
+                    fromCall = Main.callsignAsServer;
+                } else {
+                    //I am client
+                    toCall = this.myserver;
+                    fromCall =  Main.mycall;       
+                }
 
                 FileInputStream in = null;
 
@@ -882,16 +882,19 @@ public class Session {
                 String TrString = "";
                 File mycodedFile = new File(codedFile);
                 if (mycodedFile.isFile()) {
-                    TrString = ">FM:" + Main.q.callsign + ":" + Destination + ":"
+                    TrString = ">FM:" + Main.q.callsign + ":" + toCall + ":"
                             + token + ":u:" + myfile
                             + ":" + Long.toString(mycodedFile.length()) + "\n";
                 }
 
                 if (Main.Connected) {
                     if (mycodedFile.isFile()) {
-                        Main.TX_Text += "~FO5:" + Main.q.callsign + ":" + Destination + ":"
+                        //Client or server? (File transfers work both ways regarless of who initated the connection)
+                        
+                        Main.TX_Text += "~FO5:" + fromCall + ":" + toCall + ":"
                                 + token + ":u:" + myfile
                                 + ":" + Long.toString(mycodedFile.length()) + "\n";
+                        Main.filetype = "u"; //To use when we receive the ~FY command from the client
                     }
                 }
 
@@ -1053,6 +1056,7 @@ public class Session {
             }
         }
         // >FM:PI4TUE:PA0R:Jynhgf:f:test.txt:496
+        // >FM:fk8/vk2eta/pm:VK2ETA-1:tmp578bbbaa04091a76::changes.txt:506
         Pattern fm = Pattern.compile("\\s*>FM:(\\S+):(\\S+):(\\S+):(\\w):(.*):(\\d+)");
         Matcher fmm = fm.matcher(str);
         if (fmm.lookingAt()) {
@@ -1298,8 +1302,9 @@ public class Session {
             }
         }
 
-        // ~FO5:PI4TUE:PA0R:tmpasdkkdfj:u:test.txt:36
-        // ~FO5:PI4TUE:PA0R-1:a30a69:s: :847 //E-mail upload to this TTYserver
+        //~FO5:PI4TUE:PA0R:tmpasdkkdfj:u:test.txt:36
+        //~FO5:VK2ETA-5:VK2ETA-1:tmp578bbbaa04091a76:u:changes.txt:506
+        //~FO5:PI4TUE:PA0R-1:a30a69:s: :847 //E-mail upload to this TTYserver
         Pattern ofr2 = Pattern.compile("\\s*~FO(\\d):([a-zA-Z0-9\\-\\/]+):([a-zA-Z0-9\\-\\/]+):([A-Za-z0-9_-]+):(\\w).*");
         Matcher ofrm2 = ofr2.matcher(str);
         if (ofrm2.lookingAt()) {
@@ -1334,6 +1339,7 @@ public class Session {
         }
 
         // ~FY:tmpjGUytg:request partial email upload 
+        // ~FY:tmp578bbbaa04091a76:234
         Pattern yfr = Pattern.compile("\\s*~FY:([A-Za-z0-9]+):(\\d+)");
         Matcher yfrm = yfr.matcher(str);
         if (yfrm.lookingAt()) {
@@ -1474,7 +1480,9 @@ public class Session {
             Main.log("Sending file: " + filename);
         }
 
-        // ~FA:tmpjGUytg  delete output file in Outbox
+        // ~FA:tmpjGUytg  
+        // ~FA:tmp16a38514418197b776 
+        //Delete output file in Outbox OR in Outpending
         Pattern afr = Pattern.compile("\\s*~FA:([A-Za-z0-9]+)");
         Matcher afrm = afr.matcher(str);
         if (afrm.lookingAt()) {
@@ -1487,6 +1495,14 @@ public class Session {
                 //Since we don't know the file type from the ~FY command (s,w,f etc...),
                 //  we scan the directory for a match
                 String caller = Main.TTYCaller;
+                //Outpending folder first
+                File outpenf = new File(Main.Outpendingdir + deletefl);
+                if (outpenf.exists()) {
+                    outpenf.delete();
+                    Main.mainwindow += (Main.myTime() + " File Sent...\n");
+                    Main.FilesTextArea += " File Sent...\n";
+                }
+                //Outbox folder now
                 File[] filesOutbox;
                 // Get the list of files in the designated folder
                 File dir = new File(Main.HomePath + Main.Dirprefix + "Outbox");
@@ -1496,7 +1512,7 @@ public class Session {
                         return file.isFile();
                     }
                 };
-                //Generates an array of strings containing the file names to resume downloading
+                //Generates an array of strings containing the file names
                 filesOutbox = dir.listFiles(fileFilter);
                 for (int i = 0; i < filesOutbox.length; i++) {
                     String pendingCaller = "";
@@ -1820,7 +1836,7 @@ public class Session {
                     }
                     Main.Progress = 0;
 
-                    Main.log(ThisFile + " received");
+                    Main.log(ThisFile.replace(".gz", "") + " received");
 
                 }
                 // messages  download      - append tmpmessage to Inbox in mbox format                          
@@ -2457,7 +2473,8 @@ public class Session {
         }
         // write file
         if (FileDownload & !Firstline) {
-            Main.FilesTextArea += str + "\n";
+            //Do not display compressed data in the file text box
+            if (!Main.comp) Main.FilesTextArea += str + "\n";
             DataReceived += str.length();
             if (DataSize > 0) {
                 Main.Progress = 100 * DataReceived / DataSize;
@@ -2659,8 +2676,8 @@ public class Session {
             Maxblocklength = 5;
             Minblocklength = 4;
         }
-        //VK2ETA debug: Need a limit as to how much forward we can enqueue blocks, otherwise 
-        //   we overwrite to-be-retransmitted block with new ones
+        //VK2ETA debug: We need a limit as to how much forward we can enqueue blocks, otherwise 
+        //   we overwrite the to-be-retransmitted block with new ones
         while (i < (Nrblocks - nr_missing) && Main.TX_Text.length() > 0 &&
                 howFarBack < 32 ) {
             String newstring = "";

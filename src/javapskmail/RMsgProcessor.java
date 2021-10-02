@@ -343,116 +343,120 @@ public class RMsgProcessor {
             Thread myThread = new Thread() {
                 @Override
                 public void run() {
-                    //Request emails from server
-                    IMAPFolder folder = null;
-                    Store store = null;
-                    try {
-                        Properties props = System.getProperties();
-                        props.setProperty("mail.store.protocol", "imaps");
+                    Boolean keepInLoop = true;
+                    while (keepInLoop) {
+                        //Normally one shot
+                        keepInLoop = false;
+                        //Request emails from server
+                        IMAPFolder folder = null;
+                        Store store = null;
+                        try {
+                            Properties props = System.getProperties();
+                            props.setProperty("mail.store.protocol", "imaps");
 
-                        props.setProperty("mail.imap.starttls.enable", "true");
-                        props.setProperty("mail.imap.ssl.enable", "true");
+                            props.setProperty("mail.imap.starttls.enable", "true");
+                            props.setProperty("mail.imap.ssl.enable", "true");
 
-                        MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
-                        socketFactory.setTrustAllHosts(true);
-                        props.put("mail.imaps.ssl.socketFactory", socketFactory);
-                        //conflict with default instance, create a new one each time
-                        //Session session = Session.getDefaultInstance(props, null);
-                        Session session = Session.getInstance(props, null);
-                        store = session.getStore("imaps");
-                        //String emailAddress = Main.configuration.getPreference("SERVEREMAILADDRESS", "");
-                        String emailPassword = Main.configuration.getPreference("SERVERPASSWORD", "");
-                        String emailUsername = Main.configuration.getPreference("SERVERUSERNAME", "");
-                        String imapHost = Main.configuration.getPreference("SERVERIMAPHOST", "");
-                        store.connect(imapHost, emailUsername, emailPassword);
-                        folder = (IMAPFolder) store.getFolder("inbox");
-                        if (!folder.isOpen()) {
-                            folder.open(Folder.READ_WRITE);
-                        }
+                            MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
+                            socketFactory.setTrustAllHosts(true);
+                            props.put("mail.imaps.ssl.socketFactory", socketFactory);
+                            //conflict with default instance, create a new one each time
+                            //Session session = Session.getDefaultInstance(props, null);
+                            Session session = Session.getInstance(props, null);
+                            store = session.getStore("imaps");
+                            //String emailAddress = Main.configuration.getPreference("SERVEREMAILADDRESS", "");
+                            String emailPassword = Main.configuration.getPreference("SERVERPASSWORD", "");
+                            String emailUsername = Main.configuration.getPreference("SERVERUSERNAME", "");
+                            String imapHost = Main.configuration.getPreference("SERVERIMAPHOST", "");
+                            store.connect(imapHost, emailUsername, emailPassword);
+                            folder = (IMAPFolder) store.getFolder("inbox");
+                            if (!folder.isOpen()) {
+                                folder.open(Folder.READ_WRITE);
+                            }
 
-                        // Add messageCountListener to listen for new messages
-                        folder.addMessageCountListener(new MessageCountAdapter() {
-                            public void messagesAdded(MessageCountEvent ev) {
-                                Message[] messages = ev.getMessages();
-                                //Iterate through all the messages received
-                                for (int i = messages.length; i > 0; i--) {
-                                    String senderAddress = "";
-                                    String smsString = "";
-                                    try {
-                                        Message msg = messages[i - 1];
-                                        //From email address
-                                        senderAddress = msg.getFrom()[0].toString();
-                                        //Remove name and only keep email address proper
-                                        String[] emailAdresses = senderAddress.split("[ <>]+");
-                                        for (String fromPart : emailAdresses) {
-                                            if (fromPart.indexOf("@") > 0) {
-                                                senderAddress = fromPart;
-                                                break;
+                            // Add messageCountListener to listen for new messages
+                            folder.addMessageCountListener(new MessageCountAdapter() {
+                                public void messagesAdded(MessageCountEvent ev) {
+                                    Message[] messages = ev.getMessages();
+                                    //Iterate through all the messages received
+                                    for (int i = messages.length; i > 0; i--) {
+                                        String senderAddress = "";
+                                        String smsString = "";
+                                        try {
+                                            Message msg = messages[i - 1];
+                                            //From email address
+                                            senderAddress = msg.getFrom()[0].toString();
+                                            //Remove name and only keep email address proper
+                                            String[] emailAdresses = senderAddress.split("[ <>]+");
+                                            for (String fromPart : emailAdresses) {
+                                                if (fromPart.indexOf("@") > 0) {
+                                                    senderAddress = fromPart;
+                                                    break;
+                                                }
                                             }
-                                        }
-                                        //Save message time for making filenames later on
-                                        Calendar c1 = Calendar.getInstance(TimeZone.getDefault());
-                                        Date msgDateTime = msg.getReceivedDate();
-                                        c1.setTime(msgDateTime);
-                                        //Body
-                                        smsString = getBodyTextFromMessage(msg);
-                                        if (smsString.startsWith("\n")) {
-                                            smsString = smsString.substring(1);
-                                        }
-                                        if (smsString.endsWith("\r\n\r\n")) {
-                                            smsString = smsString.substring(0, smsString.length() - 4);
-                                        }
-                                        if (smsString.length() > 155) {
-                                            smsString = smsString.subSequence(0, 155 - 1) + " ...>";
-                                        }
-                                        String phoneNumber = "";
-                                        String smsSubject = msg.getSubject();
-                                        //SMS from gateway, convert phone number to E.164 format always
-                                        String smsGatewayDomain = Main.configuration.getPreference("SMSEMAILGATEWAY", "").trim();
-                                        if (smsGatewayDomain.length() > 0 && senderAddress.endsWith(smsGatewayDomain)) {
-                                            phoneNumber = senderAddress.replace("@" + smsGatewayDomain, "");
-                                            //Only store the phone number in international format, not the sms gateway
-                                            senderAddress = convertNumberToE164(phoneNumber);// + "@" + smsGatewayDomain;
-                                        } else {
-                                            //Not a reply to a previous radio message, add the subject line
-                                            if (!smsSubject.contains("Radio Message from ")
-                                                    && !smsSubject.contains("Reply from ")
-                                                    && !smsSubject.trim().equals("")) {
-                                                smsString = smsSubject
-                                                        + "\n" + smsString;
+                                            //Save message time for making filenames later on
+                                            Calendar c1 = Calendar.getInstance(TimeZone.getDefault());
+                                            Date msgDateTime = msg.getReceivedDate();
+                                            c1.setTime(msgDateTime);
+                                            //Body
+                                            smsString = getBodyTextFromMessage(msg);
+                                            if (smsString.startsWith("\n")) {
+                                                smsString = smsString.substring(1);
                                             }
+                                            if (smsString.endsWith("\r\n\r\n")) {
+                                                smsString = smsString.substring(0, smsString.length() - 4);
+                                            }
+                                            if (smsString.length() > 155) {
+                                                smsString = smsString.subSequence(0, 155 - 1) + " ...>";
+                                            }
+                                            String phoneNumber = "";
+                                            String smsSubject = msg.getSubject();
+                                            //SMS from gateway, convert phone number to E.164 format always
+                                            String smsGatewayDomain = Main.configuration.getPreference("SMSEMAILGATEWAY", "").trim();
+                                            if (smsGatewayDomain.length() > 0 && senderAddress.endsWith(smsGatewayDomain)) {
+                                                phoneNumber = senderAddress.replace("@" + smsGatewayDomain, "");
+                                                //Only store the phone number in international format, not the sms gateway
+                                                senderAddress = convertNumberToE164(phoneNumber);// + "@" + smsGatewayDomain;
+                                            } else {
+                                                //Not a reply to a previous radio message, add the subject line
+                                                if (!smsSubject.contains("Radio Message from ")
+                                                        && !smsSubject.contains("Reply from ")
+                                                        && !smsSubject.trim().equals("")) {
+                                                    smsString = smsSubject
+                                                            + "\n" + smsString;
+                                                }
+                                            }
+                                        } catch (Exception e) {
+                                            continue; //Skip processing that message
                                         }
-                                    } catch (Exception e) {
-                                        continue; //Skip processing that message
-                                    }
-                                    String emailFilterTo[] = passEmailFilter(senderAddress);
-                                    //Iterate through all the linked "to" stations as found in the SMS filter
-                                    for (String toString : emailFilterTo) {
-                                        //Blank string means nobody to send to
-                                        if (toString != null && !toString.equals("")) {
-                                            // Create message from cellular SMS
-                                            RMsgObject radioEmailMessage = new RMsgObject();
-                                            radioEmailMessage.to = toString;
-                                            radioEmailMessage.relay = Main.configuration.getPreference("CALLSIGNASSERVER", "");
-                                            radioEmailMessage.sms = smsString;
-                                            radioEmailMessage.via = ""; //only direct send
-                                            //String smsGatewayDomain = Main.configuration.getPreference("SMSEMAILGATEWAY", "").trim();
-                                            //Are we still asked to send immediately? Treat SMSs and emails individually. 
-                                            if (Main.configuration.getPreference("RELAYSMSSIMMEDIATELY", "").equals("yes")
-                                                    && isCellular(senderAddress)) {
-                                                //Keep only the phone number and get the alias if any
-                                                radioEmailMessage.from = Main.mainui.msgDisplayList.getAliasFromOrigin(senderAddress, toString);
-                                                //Create message and add in outbox list
-                                                RMsgTxList.addMessageToList(radioEmailMessage);
-                                            }
-                                            if (Main.configuration.getPreference("RELAYEMAILSIMMEDIATELY", "").equals("yes")
-                                                    && isEmail(senderAddress)) {
-                                                //Create message and add in outbox list
-                                                radioEmailMessage.from = Main.mainui.msgDisplayList.getAliasFromOrigin(senderAddress, toString);
-                                                RMsgTxList.addMessageToList(radioEmailMessage);
-                                            }
+                                        String emailFilterTo[] = passEmailFilter(senderAddress);
+                                        //Iterate through all the linked "to" stations as found in the SMS filter
+                                        for (String toString : emailFilterTo) {
+                                            //Blank string means nobody to send to
+                                            if (toString != null && !toString.equals("")) {
+                                                // Create message from cellular SMS
+                                                RMsgObject radioEmailMessage = new RMsgObject();
+                                                radioEmailMessage.to = toString;
+                                                radioEmailMessage.relay = Main.configuration.getPreference("CALLSIGNASSERVER", "");
+                                                radioEmailMessage.sms = smsString;
+                                                radioEmailMessage.via = ""; //only direct send
+                                                //String smsGatewayDomain = Main.configuration.getPreference("SMSEMAILGATEWAY", "").trim();
+                                                //Are we still asked to send immediately? Treat SMSs and emails individually. 
+                                                if (Main.configuration.getPreference("RELAYSMSSIMMEDIATELY", "").equals("yes")
+                                                        && isCellular(senderAddress)) {
+                                                    //Keep only the phone number and get the alias if any
+                                                    radioEmailMessage.from = Main.mainui.msgDisplayList.getAliasFromOrigin(senderAddress, toString);
+                                                    //Create message and add in outbox list
+                                                    RMsgTxList.addMessageToList(radioEmailMessage);
+                                                }
+                                                if (Main.configuration.getPreference("RELAYEMAILSIMMEDIATELY", "").equals("yes")
+                                                        && isEmail(senderAddress)) {
+                                                    //Create message and add in outbox list
+                                                    radioEmailMessage.from = Main.mainui.msgDisplayList.getAliasFromOrigin(senderAddress, toString);
+                                                    RMsgTxList.addMessageToList(radioEmailMessage);
+                                                }
 
-                                            /* We do not save the messages received from the internet in the incoming list as we (re)fetch them at each request
+                                                /* We do not save the messages received from the internet in the incoming list as we (re)fetch them at each request
                                             FileWriter out = null;
                                             //Create a file name for this received cellular SMS
                                             Calendar c1 = Calendar.getInstance(TimeZone.getDefault());
@@ -492,64 +496,74 @@ public class RMsgProcessor {
                                             //Perform notification on speaker/lights/vibrate of new message
                                             RadioMSG.middleToastText("Email Received: " + radioEmailMessage.fileName);
                                             //Need to forward it over Radio too?
-                                             */
-                                            //Sleep 1 second to ensure all SMSes have a different file name (1 second resolution)
-                                            //try {
-                                            //    Thread.sleep(1000);
-                                            //} catch (InterruptedException e) {
-                                            //}
+                                                 */
+                                                //Sleep 1 second to ensure all SMSes have a different file name (1 second resolution)
+                                                //try {
+                                                //    Thread.sleep(1000);
+                                                //} catch (InterruptedException e) {
+                                                //}
+                                            }
                                         }
                                     }
                                 }
+                            });
+                            // Check mail once in "freq" MILLIseconds
+                            //int freq = config.getPreferenceI("CHECKEMAILSEVERY", 600) * 1000; //converted to milliseconds
+                            int freq = 30000; //every 60 seconds for now 
+                            //Minimum every 10 seconds
+                            freq = freq < 30000 ? 30000 : freq;
+                            boolean supportsIdle = false;
+                            // //VK2ETA Debug only polling
+                            // /*
+                            try {
+                                if (folder instanceof IMAPFolder) {
+                                    IMAPFolder f = (IMAPFolder) folder;
+                                    System.out.println("Entering first idle()");
+                                    f.idle();
+                                    System.out.println("First idle() completed, must have got new mail");
+                                    supportsIdle = true;
+                                }
+                            } catch (FolderClosedException fex) {
+                                throw fex;
+                            } catch (MessagingException mex) {
+                                supportsIdle = false;
                             }
-                        });
-                        // Check mail once in "freq" MILLIseconds
-                        //int freq = config.getPreferenceI("CHECKEMAILSEVERY", 600) * 1000; //converted to milliseconds
-                        int freq = 30000; //every 30 seconds for now 
-                        //Minimum every 10 seconds
-                        freq = freq < 10000 ? 10000 : freq;
-                        boolean supportsIdle = false;
-                        try {
-                            if (folder instanceof IMAPFolder) {
-                                IMAPFolder f = (IMAPFolder) folder;
-                                f.idle();
-                                supportsIdle = true;
-                            }
-                        } catch (FolderClosedException fex) {
-                            throw fex;
-                        } catch (MessagingException mex) {
-                            supportsIdle = false;
-                        }
-                        for (;;) {
-                            if (supportsIdle && folder instanceof IMAPFolder) {
-                                IMAPFolder f = (IMAPFolder) folder;
-                                f.idle();
-                                //System.out.println("IDLE done");
-                            } else {
-                                Thread.sleep(freq); // sleep for freq milliseconds
-                                // This is to force the IMAP server to send us
-                                // EXISTS notifications.
-                                folder.getMessageCount();
-                            }
-                        }
-                    } catch (Exception e) {
-                        Exception e1 = e; //for debug
-                        //do something maybe
-                    } finally {
-                        try {
-                            if (folder != null && folder.isOpen()) {
-                                folder.close(true);
-                            }
-                            if (store != null) {
-                                store.close();
+                            // */
+                            for (;;) {
+                                if (supportsIdle && folder instanceof IMAPFolder) {
+                                    IMAPFolder f = (IMAPFolder) folder;
+                                    f.idle();
+                                    System.out.println("idle() completed, must have got new mail");
+                                } else {
+                                    Thread.sleep(freq); // sleep for freq milliseconds
+                                    // This is to force the IMAP server to send us
+                                    // EXISTS notifications.
+                                    folder.getMessageCount();
+                                }
                             }
                         } catch (Exception e) {
-                            //do nothing
+                            Exception e1 = e; //for debug
+                            //We have lost the connection with the server, restart the NewMailMonitor processing
+                            keepInLoop = true;
+                            System.out.println("Restarting NewMailMonitor loop");
+                            //do something maybe
+                        } finally {
+                            try {
+                                if (folder != null && folder.isOpen()) {
+                                    folder.close(true);
+                                }
+                                if (store != null) {
+                                    store.close();
+                                }
+                            } catch (Exception e) {
+                                //do nothing
+                            }
                         }
                     }
                 }
             };
             myThread.start();
+            myThread.setName("NewMailMonitor");
         }
     }
 
@@ -1808,6 +1822,7 @@ public class RMsgProcessor {
             }
         };
         myThread.start();
+        myThread.setName("SavingRMsg");
     }
 
 //Check that we have started receiving the picture associated with a text message within the allocated time.

@@ -97,7 +97,7 @@ public class Rigctl {
                 //Main.log.writelog("Problem with xmlrpc set frequency: " + ex, true);
                 function_ok = false;
             }
-        }
+        } else if (Frequency != null) Rigctl(); //Try to re-connect
         return "0";
     }
 
@@ -121,7 +121,7 @@ public class Rigctl {
                 //Main.log.writelog("Problem with xmlrpc set squelch_level: " + ex, true);
                 function_ok = false;
             }
-        }
+        } else if (Sql != 0) Rigctl(); //Try to re-connect
         return "0";
     }
 
@@ -145,7 +145,7 @@ public class Rigctl {
                 //Main.log.writelog("Problem with xmlrpc get frequency: " + ex, true);
                 function_ok = false;
             }
-        }
+        } else Rigctl(); //Try to re-connect
         return "0";
     }
 
@@ -165,7 +165,7 @@ public class Rigctl {
                 //          Main.log.writelog("Problem with xmlrpc get snr: " + np, true)
                 return "";
             }
-        }
+        } else Rigctl(); //Try to re-connect
 
         return "";
 
@@ -190,7 +190,7 @@ public class Rigctl {
                 //          Main.log.writelog("Problem with xmlrpc get quality: " + np, true)
                 return "";
             }
-        }
+        } else Rigctl(); //Try to re-connect
 
         return "";
 
@@ -220,7 +220,7 @@ public class Rigctl {
 //            System.out.println("SQL null"); 
                 return false;
             }
-        }
+        } else Rigctl(); //Try to re-connect
 
         return false;
 
@@ -239,7 +239,7 @@ public class Rigctl {
                 //Main.log.writelog("Problem with xmlrpc set SQL: " + ex, true);
                 function_ok = false;
             }
-        }
+        } else Rigctl(); //Try to re-connect
         return "0";
     }
 
@@ -283,7 +283,7 @@ public class Rigctl {
                 //Main.log.writelog("Problem with xmlrpc Tune: " + ex, true);
                 function_ok = false;
             }
-        }
+        } else Rigctl(); //Try to re-connect
     }
 
     public static void Abort() {
@@ -296,7 +296,7 @@ public class Rigctl {
                 //Main.log.writelog("Problem with xmlrpc Abort: " + ex, true);
                 function_ok = false;
             }
-        }
+        } else Rigctl(); //Try to re-connect
     }
     
     
@@ -316,7 +316,7 @@ public class Rigctl {
                 //Main.log.writelog("Problem with xmlrpc SetAudiofreq: " + ex, true);
                 function_ok = false;
             }
-        }
+        } else if (!function_ok) Rigctl(); //Try to re-connect
         return -1;
     }
 

@@ -328,7 +328,9 @@ public class Modem implements Runnable {
         //Clear running flag as we expect to kill the Fldigi task first
         fldigiRunning = false;
         myOutputStreamThread.start();
+        myOutputStreamThread.setName("FldigiConsole");
         myThread.start();
+        myThread.setName("FldigiLaunch");
         //Wait up to 30 seconds for launch
         int waitCount = 0;
         opened = false;

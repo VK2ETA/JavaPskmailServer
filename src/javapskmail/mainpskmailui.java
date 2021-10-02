@@ -2107,7 +2107,7 @@ public class mainpskmailui extends javax.swing.JFrame {
 
         FileReadButton.setFont(new java.awt.Font("Metal", 1, 11)); // NOI18N
         FileReadButton.setForeground(new java.awt.Color(0, 102, 0));
-        FileReadButton.setText(bundle.getString("mainpskmailui.FileReadButton.text"));
+        FileReadButton.setText(mainpskmailui.getString("mainpskmailui.FileReadButton.text")); // NOI18N
         FileReadButton.setMaximumSize(new java.awt.Dimension(110, 25));
         FileReadButton.setMinimumSize(new java.awt.Dimension(80, 25));
         FileReadButton.setPreferredSize(new java.awt.Dimension(90, 25));
@@ -4411,7 +4411,7 @@ private void chkBeaconStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIR
     }
 
 private void FileReadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FileReadButtonActionPerformed
-// TODO add your handling code here:
+
     Main.q.Message(mainpskmailui.getString("Choose_File_to_read..."), 5);
     String myfile = "";
     if (evt.getSource() == FileReadButton) {
@@ -4436,8 +4436,8 @@ private void FileReadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GE
 }//GEN-LAST:event_FileReadButtonActionPerformed
 
 private void mnuBulletinsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuBulletinsActionPerformed
+
     try {
-        // TODO add your handling code here:
         Main.q.Message(mainpskmailui.getString("Deleting_bulletin_file..."), 5);
         String bulletinpath = null;
         if (File.separator.equals("/")) {
@@ -4456,13 +4456,13 @@ private void mnuBulletinsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
         }
     }
 private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AbortButtonActionPerformed
-    // TODO add your handling code here:
+
     AbortButtonAction();
 
 }//GEN-LAST:event_AbortButtonActionPerformed
 
             private void bConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bConnectActionPerformed
-                // TODO add your handling code here:
+
                 Main.summoning = false;
                 if (Main.Connected) {
                     ConnectButtonAction();
@@ -4484,7 +4484,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             }//GEN-LAST:event_mnuGetTidestationsActionPerformed
 
             private void mnuGetTideActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuGetTideActionPerformed
-                // TODO add your handling code here:
+
                 if (Main.Connected) {
                     String tidestationnumber = "";
                     tidestationnumber = txtMainEntry.getText();
@@ -4500,7 +4500,6 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             }//GEN-LAST:event_mnuGetTideActionPerformed
 
             private void mnuGetAPRSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuGetAPRSActionPerformed
-                // TODO add your handling code here:
 
                 if (Main.Connected) {
                     Main.TX_Text += "~GETNEAR\n";
@@ -4511,7 +4510,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             }//GEN-LAST:event_mnuGetAPRSActionPerformed
 
             private void mnuGetServerfqActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuGetServerfqActionPerformed
-                // TODO add your handling code here:
+
                 if (Main.Connected) {
                     Main.TX_Text += "~GETSERVERS\n";
                     Main.q.Message(mainpskmailui.getString("Getting_list_of_servers_from_the_web..."), 5);
@@ -4531,7 +4530,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             }//GEN-LAST:event_mnuGetPskmailNewsActionPerformed
 
             private void mnuHeadersActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuHeadersActionPerformed
-                // TODO add your handling code here:
+
                 Main.sm.deleteFile("headers");
                 Main.sm.makeFile("headers");
                 Main.q.Message(mainpskmailui.getString("Delete_list_of_mail_headers..."), 5);
@@ -4558,12 +4557,13 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             }//GEN-LAST:event_ListFilesButtonActionPerformed
 
             private void DownloadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DownloadButtonActionPerformed
-                // TODO add your handling code here:
+
                 if (Main.Connected) {
                     String file = txtMainEntry.getText();
                     if (file.length() > 0) {
                         Main.TX_Text += "~GETBIN " + file + "\n";
                         Main.q.Message(mainpskmailui.getString("Requsting_file_") + file, 5);
+                        Main.FilesTextArea += mainpskmailui.getString("Requsting_file_") + file + "\n";
                     } else {
                         Main.q.Message(mainpskmailui.getString("Which_file_shall_I_get?"), 5);
                     }
@@ -4573,8 +4573,9 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             }//GEN-LAST:event_DownloadButtonActionPerformed
 
             private void FileConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FileConnectActionPerformed
-                // TODO add your handling code here:
-                if (Main.Connected) {
+
+                ConnectButtonAction();
+                /*if (Main.Connected) {
                     Main.TX_Text += ("~QUIT" + "\n");
                     lblStatus.setText(mainpskmailui.getString("Discon"));
                     lblStatus.setForeground(Color.RED);
@@ -4589,16 +4590,19 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                         Main.connectingPhase = true;
                         Connect_time = 5;
                         Main.q.send_frame("");
-                        Main.q.Message(mainpskmailui.getString("Choose_File_to_read..."), 5);
+                        Main.q.Message(mainpskmailui.getString("Connecting to server..."), 5);
                     } catch (InterruptedException ex) {
                         Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
+                */
             }//GEN-LAST:event_FileConnectActionPerformed
 
             private void FileAbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FileAbortButtonActionPerformed
+
+                AbortButtonAction();
+                /*
                 try {
-                    // TODO add your handling code here:
                     Main.Bulletinmode = false;
                     lblStatus.setText(mainpskmailui.getString("Listening"));
                     lblStatus.setForeground(Color.lightGray);
@@ -4624,10 +4628,11 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
         } catch (InterruptedException ex) {
             Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
         }
+                    */
     }//GEN-LAST:event_FileAbortButtonActionPerformed
 
             private void UpdateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UpdateButtonActionPerformed
-                // TODO add your handling code here:
+
                 if (!Main.Connected) {
                     Main.q.Message(mainpskmailui.getString("You_need_to_connect_first..."), 5);
                 } else {
@@ -4644,14 +4649,14 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                         if (dfile.isFile()) {
                             Main.TX_Text += "~GETBIN " + myfile + "\n";
                             Main.q.Message(mainpskmailui.getString("Updating_") + myfile, 5);
+                            Main.FilesTextArea += mainpskmailui.getString("Updating_") + myfile + "\n";
                         }
-
                     }
                 }
             }//GEN-LAST:event_UpdateButtonActionPerformed
 
             private void mnuMboxListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuMboxListActionPerformed
-                // TODO add your handling code here:
+
                 if (Main.Connected) {
                     Main.TX_Text += "~LISTLOCAL\n";
                     Main.q.Message(mainpskmailui.getString("Requesting_list_of_local_mails_on_the_server"), 5);
@@ -4821,6 +4826,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             Main.Connecting_time = 0;
             Main.Scanning = false;
             Main.sm.FileDownload = false;
+            Main.comp = false;
             try {
                 if (Main.sm.pFile != null) {
                     Main.sm.pFile.close();
@@ -4867,6 +4873,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
         Main.Connecting_time = 0;
         Main.Scanning = false;
         Main.sm.FileDownload = false;
+        Main.comp = false;
         lblStatus.setText(mainpskmailui.getString("Listening"));
         lblStatus.setForeground(Color.lightGray);
         Main.Status = mainpskmailui.getString("Listening");
@@ -4916,6 +4923,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
         Main.Connected = false;
         Main.TTYConnected = "";
         Main.sm.FileDownload = false;
+        Main.comp = false;
         Main.m.setModemModeNow(Main.defaultmode);
     }
 
@@ -5782,6 +5790,7 @@ private void FileSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GE
                                 + token + ":u:" + myfile
                                 + ":" + Long.toString(mycodedFile.length()) + "\n";
                         Main.q.Message(mainpskmailui.getString("Uploading_") + myfile, 5);
+                        Main.FilesTextArea += mainpskmailui.getString("Uploading_") + myfile + "\n";
                         Main.filetype = "u";
                     }
                 }

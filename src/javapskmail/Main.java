@@ -33,11 +33,12 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "0.9.7";
+    static String version = "0.9.8";
     static String application = "jpskmailserver " + "B" + version;// Used to preset an empty status
-    static String versionDate = "20210929";
+    static String versionDate = "20211002";
     static String host = "localhost";
-    static int port = 7322;
+    static int port = 7322; //ARQ IP port
+    static String xmlPort = "7362"; //XML IP port
     static boolean modemTestMode = false; //For when we check that Fldigi is effectively running as expected
     static long lastModemCharTime = 0L;
     static boolean requestModemRestart = false;
@@ -389,6 +390,7 @@ public class Main {
             myThread.setDaemon(true);
             //System.out.println("Launching modem thread.");
             myThread.start();
+            myThread.setName("Modem");
 
             //vk2eta debug
             //System.out.println("Starting UI timers");
@@ -405,6 +407,7 @@ public class Main {
             mapsock.setPort(aprsserverport);
             mapsock.setPortopen(aprsserverenabled);
             mapsock.start();
+            mapsock.setName("AprsMapSock");
 
             // init modemarray
             Modemarray = m.pmodes;
@@ -709,6 +712,7 @@ public class Main {
                                     session = "";
                                     Totalbytes = 0;
                                     sm.FileDownload = false;
+                                    comp = false;
                                     try {
                                         if (sm.pFile != null) {
                                             sm.pFile.close();
@@ -1365,6 +1369,7 @@ public class Main {
                                                 }
                                                 //isDisconnected = true;
                                                 sm.FileDownload = false;
+                                                comp = false;
                                                 try {
                                                     if (sm.pFile != null) {
                                                         sm.pFile.close();
@@ -1430,6 +1435,7 @@ public class Main {
                                 }
                                 isDisconnected = true;
                                 sm.FileDownload = false;
+                                comp = false;
                                 try {
                                     if (sm.pFile != null) {
                                         sm.pFile.close();
@@ -1817,6 +1823,7 @@ public class Main {
             // Modem settings
             host = configuration.getPreference("MODEMIP");
             port = Integer.parseInt(configuration.getPreference("MODEMIPPORT", "7322"));
+            xmlPort = configuration.getPreference("MODEMXMLPORT", "7362");
             ModemPreamble = configuration.getPreference("MODEMPREAMBLE", "0");
             ModemPostamble = configuration.getPreference("MODEMPOSTAMBLE", "0");
             // Mail settings
@@ -1913,7 +1920,7 @@ public class Main {
         if (XMLIP.equals("localhost")) {
             XMLIP = "127.0.0.1";
         }
-        XmlRpc_URL = "http://" + XMLIP + ":7362/RPC2";
+        XmlRpc_URL = "http://" + XMLIP + ":" + xmlPort.trim() + "/RPC2";
     }
 
     //Fills array of Servers and passwords from the preferences

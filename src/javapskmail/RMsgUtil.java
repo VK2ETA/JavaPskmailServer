@@ -555,6 +555,7 @@ public class RMsgUtil {
             }
         };
         myThread.start();
+        myThread.setName("SendingRmsgAck");
     }
 
     //Right-pad string with spaces, up to 50 characters

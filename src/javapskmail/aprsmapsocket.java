@@ -116,6 +116,7 @@ public class aprsmapsocket extends Thread {
             client = new aprsmapclient();
             client.setClientSocket(clientSocket);
             client.start();
+            client.setName("APRSmapClient");
             list.add(client);
             // And wait for the next one
         }

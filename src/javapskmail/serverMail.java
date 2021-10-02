@@ -872,6 +872,11 @@ public class serverMail {
                 } 
             }
         }
+        //Now check the outpending directory
+        
+        
+        
+        
         return returnList;
     }
     

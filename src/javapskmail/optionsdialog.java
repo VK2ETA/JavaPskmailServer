@@ -371,6 +371,7 @@ public class optionsdialog extends javax.swing.JDialog {
             // Modem connection settings
             this.txtModemIPAddress.setText(Main.configuration.getPreference("MODEMIP", "LOCALHOST"));
             this.txtModemIPPort.setText(Main.configuration.getPreference("MODEMIPPORT", "7322"));
+            this.txtModemXMLPort.setText(Main.configuration.getPreference("MODEMXMLPORT", "7362"));
             this.txtModemPostamble.setText(Main.configuration.getPreference("MODEMPOSTAMBLE"));
             this.txtModemPreamble.setText(Main.configuration.getPreference("MODEMPREAMBLE"));
             this.txtFldigipath.setText(Main.configuration.getPreference("FLDIGIAPPLICATIONPATH"));
@@ -769,20 +770,6 @@ public class optionsdialog extends javax.swing.JDialog {
         chkAPRSServer = new javax.swing.JCheckBox();
         lblPortNumber = new javax.swing.JLabel();
         txtAPRSServerPort = new javax.swing.JTextField();
-        pnlModem = new javax.swing.JPanel();
-        lblModemIPAddress = new javax.swing.JLabel();
-        txtModemIPAddress = new javax.swing.JTextField();
-        lblModemIPPort = new javax.swing.JLabel();
-        txtModemIPPort = new javax.swing.JTextField();
-        lblModemPreamble = new javax.swing.JLabel();
-        txtModemPreamble = new javax.swing.JTextField();
-        lblModemPostamble = new javax.swing.JLabel();
-        txtModemPostamble = new javax.swing.JTextField();
-        txtFldigipath = new javax.swing.JTextField();
-        jLabel19 = new javax.swing.JLabel();
-        spinEveryXHours = new javax.swing.JSpinner();
-        lblHours = new javax.swing.JLabel();
-        lblFldigiAutorestart = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         jCheckBoxRigctl = new javax.swing.JCheckBox();
         jLabelRigStatus = new javax.swing.JLabel();
@@ -817,6 +804,22 @@ public class optionsdialog extends javax.swing.JDialog {
         jLabel15 = new javax.swing.JLabel();
         CB_DOMEX22 = new javax.swing.JCheckBox();
         CB_DOMEX11 = new javax.swing.JCheckBox();
+        pnlModem = new javax.swing.JPanel();
+        lblModemIPAddress = new javax.swing.JLabel();
+        txtModemIPAddress = new javax.swing.JTextField();
+        lblModemIPPort = new javax.swing.JLabel();
+        txtModemIPPort = new javax.swing.JTextField();
+        lblModemPreamble = new javax.swing.JLabel();
+        txtModemPreamble = new javax.swing.JTextField();
+        lblModemPostamble = new javax.swing.JLabel();
+        txtModemPostamble = new javax.swing.JTextField();
+        txtFldigipath = new javax.swing.JTextField();
+        jLabel19 = new javax.swing.JLabel();
+        spinEveryXHours = new javax.swing.JSpinner();
+        lblHours = new javax.swing.JLabel();
+        lblFldigiAutorestart = new javax.swing.JLabel();
+        txtModemXMLPort = new javax.swing.JTextField();
+        lblModemXmlPort = new javax.swing.JLabel();
         pnlButtons = new javax.swing.JPanel();
         bOK = new javax.swing.JButton();
         jDesktopPane1 = new javax.swing.JDesktopPane();
@@ -1881,123 +1884,6 @@ public class optionsdialog extends javax.swing.JDialog {
 
         tabOptions.addTab("Devices", pnlGPS);
 
-        pnlModem.setBorder(javax.swing.BorderFactory.createTitledBorder("Modem settings"));
-
-        lblModemIPAddress.setText(optionsdialog.getString("IP ADDRESS")); // NOI18N
-
-        txtModemIPAddress.setText(optionsdialog.getString("LOCALHOST")); // NOI18N
-        txtModemIPAddress.setToolTipText(optionsdialog.getString("LOCALHOST IS DEFAULT, RESTART IF CHANGING")); // NOI18N
-        txtModemIPAddress.setPreferredSize(new java.awt.Dimension(120, 25));
-
-        lblModemIPPort.setText(optionsdialog.getString("IP PORT")); // NOI18N
-
-        txtModemIPPort.setText("7322");
-        txtModemIPPort.setToolTipText(optionsdialog.getString("7322 IS DEFAULT, RESTART IF CHANGING")); // NOI18N
-        txtModemIPPort.setPreferredSize(new java.awt.Dimension(120, 25));
-
-        lblModemPreamble.setText(optionsdialog.getString("FRAME PREAMBLE")); // NOI18N
-
-        txtModemPreamble.setToolTipText(optionsdialog.getString("A STRING TO SEND BEFORE EACH FRAME")); // NOI18N
-        txtModemPreamble.setPreferredSize(new java.awt.Dimension(120, 25));
-
-        lblModemPostamble.setText(optionsdialog.getString("FRAME POSTAMBLE")); // NOI18N
-
-        txtModemPostamble.setToolTipText(optionsdialog.getString("A STRING TO SEND AFTER EACH FRAME")); // NOI18N
-        txtModemPostamble.setPreferredSize(new java.awt.Dimension(120, 25));
-
-        txtFldigipath.setText("fldigi");
-        txtFldigipath.setToolTipText(bundle1.getString("FLDIGI PATH")); // NOI18N
-        txtFldigipath.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtFldigipathActionPerformed(evt);
-            }
-        });
-
-        jLabel19.setText(optionsdialog.getString("FLDIGIAPPLICATIONPATH")); // NOI18N
-
-        spinEveryXHours.setModel(new javax.swing.SpinnerNumberModel(1, 0, 24, 1));
-        spinEveryXHours.setToolTipText(optionsdialog.getString("TO RESTART FLDIGI IN A FRESH STATE. 0 = DISABLED.")); // NOI18N
-
-        lblHours.setText(optionsdialog.getString("HOURS")); // NOI18N
-
-        lblFldigiAutorestart.setText(optionsdialog.getString("FLDIGIAUTORESTART")); // NOI18N
-
-        javax.swing.GroupLayout pnlModemLayout = new javax.swing.GroupLayout(pnlModem);
-        pnlModem.setLayout(pnlModemLayout);
-        pnlModemLayout.setHorizontalGroup(
-            pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlModemLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(txtFldigipath)
-                .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlModemLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lblFldigiAutorestart)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 109, Short.MAX_VALUE)
-                .addComponent(spinEveryXHours, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(3, 3, 3)
-                .addComponent(lblHours, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(63, 63, 63))
-            .addGroup(pnlModemLayout.createSequentialGroup()
-                .addGap(47, 47, 47)
-                .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlModemLayout.createSequentialGroup()
-                        .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(lblModemIPPort)
-                            .addComponent(lblModemPreamble)
-                            .addComponent(lblModemPostamble)
-                            .addComponent(lblModemIPAddress))
-                        .addGap(3, 3, 3)
-                        .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtModemIPAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtModemIPPort, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtModemPreamble, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtModemPostamble, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(jLabel19))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        pnlModemLayout.setVerticalGroup(
-            pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(pnlModemLayout.createSequentialGroup()
-                .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlModemLayout.createSequentialGroup()
-                        .addGap(32, 32, 32)
-                        .addComponent(lblModemIPAddress))
-                    .addGroup(pnlModemLayout.createSequentialGroup()
-                        .addGap(31, 31, 31)
-                        .addComponent(txtModemIPAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(3, 3, 3)
-                .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlModemLayout.createSequentialGroup()
-                        .addGap(2, 2, 2)
-                        .addComponent(lblModemIPPort))
-                    .addComponent(txtModemIPPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(2, 2, 2)
-                .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlModemLayout.createSequentialGroup()
-                        .addGap(2, 2, 2)
-                        .addComponent(lblModemPreamble))
-                    .addComponent(txtModemPreamble, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(2, 2, 2)
-                .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(pnlModemLayout.createSequentialGroup()
-                        .addGap(2, 2, 2)
-                        .addComponent(lblModemPostamble))
-                    .addComponent(txtModemPostamble, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 39, Short.MAX_VALUE)
-                .addComponent(jLabel19)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtFldigipath, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(spinEveryXHours, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblHours, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblFldigiAutorestart))
-                .addGap(33, 33, 33))
-        );
-
-        tabOptions.addTab("Modem", pnlModem);
-
         jPanel1.setLayout(new java.awt.GridBagLayout());
 
         jCheckBoxRigctl.setText(optionsdialog.getString("USE RIGCTL")); // NOI18N
@@ -2323,6 +2209,143 @@ public class optionsdialog extends javax.swing.JDialog {
 
         tabOptions.addTab("Modes", jPanel2);
 
+        pnlModem.setBorder(javax.swing.BorderFactory.createTitledBorder("Modem settings"));
+
+        lblModemIPAddress.setText(optionsdialog.getString("IP ADDRESS")); // NOI18N
+
+        txtModemIPAddress.setText(optionsdialog.getString("LOCALHOST")); // NOI18N
+        txtModemIPAddress.setToolTipText(optionsdialog.getString("LOCALHOST IS DEFAULT, RESTART IF CHANGING")); // NOI18N
+        txtModemIPAddress.setPreferredSize(new java.awt.Dimension(120, 25));
+
+        lblModemIPPort.setText(optionsdialog.getString("IP PORT")); // NOI18N
+
+        txtModemIPPort.setText("7322");
+        txtModemIPPort.setToolTipText(optionsdialog.getString("7322 IS DEFAULT, RESTART IF CHANGING")); // NOI18N
+        txtModemIPPort.setPreferredSize(new java.awt.Dimension(120, 25));
+        txtModemIPPort.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtModemIPPortActionPerformed(evt);
+            }
+        });
+
+        lblModemPreamble.setText(optionsdialog.getString("FRAME PREAMBLE")); // NOI18N
+
+        txtModemPreamble.setToolTipText(optionsdialog.getString("A STRING TO SEND BEFORE EACH FRAME")); // NOI18N
+        txtModemPreamble.setPreferredSize(new java.awt.Dimension(120, 25));
+
+        lblModemPostamble.setText(optionsdialog.getString("FRAME POSTAMBLE")); // NOI18N
+
+        txtModemPostamble.setToolTipText(optionsdialog.getString("A STRING TO SEND AFTER EACH FRAME")); // NOI18N
+        txtModemPostamble.setPreferredSize(new java.awt.Dimension(120, 25));
+
+        txtFldigipath.setText("fldigi");
+        txtFldigipath.setToolTipText(bundle1.getString("FLDIGI PATH")); // NOI18N
+        txtFldigipath.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtFldigipathActionPerformed(evt);
+            }
+        });
+
+        jLabel19.setText(optionsdialog.getString("FLDIGIAPPLICATIONPATH")); // NOI18N
+
+        spinEveryXHours.setModel(new javax.swing.SpinnerNumberModel(1, 0, 24, 1));
+        spinEveryXHours.setToolTipText(optionsdialog.getString("TO RESTART FLDIGI IN A FRESH STATE. 0 = DISABLED.")); // NOI18N
+
+        lblHours.setText(optionsdialog.getString("HOURS")); // NOI18N
+
+        lblFldigiAutorestart.setText(optionsdialog.getString("FLDIGIAUTORESTART")); // NOI18N
+
+        txtModemXMLPort.setText("7362");
+        txtModemXMLPort.setToolTipText(optionsdialog.getString("7362 IS DEFAULT, RESTART IF CHANGING")); // NOI18N
+        txtModemXMLPort.setPreferredSize(new java.awt.Dimension(120, 25));
+
+        lblModemXmlPort.setText(optionsdialog.getString("XML PORT")); // NOI18N
+
+        javax.swing.GroupLayout pnlModemLayout = new javax.swing.GroupLayout(pnlModem);
+        pnlModem.setLayout(pnlModemLayout);
+        pnlModemLayout.setHorizontalGroup(
+            pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlModemLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(txtFldigipath)
+                .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlModemLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(lblFldigiAutorestart)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 109, Short.MAX_VALUE)
+                .addComponent(spinEveryXHours, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(3, 3, 3)
+                .addComponent(lblHours, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(63, 63, 63))
+            .addGroup(pnlModemLayout.createSequentialGroup()
+                .addGap(47, 47, 47)
+                .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlModemLayout.createSequentialGroup()
+                        .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblModemIPPort)
+                            .addComponent(lblModemPreamble)
+                            .addComponent(lblModemPostamble)
+                            .addComponent(lblModemIPAddress)
+                            .addComponent(lblModemXmlPort))
+                        .addGap(3, 3, 3)
+                        .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtModemIPAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtModemIPPort, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtModemPreamble, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtModemPostamble, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtModemXMLPort, javax.swing.GroupLayout.PREFERRED_SIZE, 135, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jLabel19))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        pnlModemLayout.setVerticalGroup(
+            pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlModemLayout.createSequentialGroup()
+                .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlModemLayout.createSequentialGroup()
+                        .addGap(32, 32, 32)
+                        .addComponent(lblModemIPAddress))
+                    .addGroup(pnlModemLayout.createSequentialGroup()
+                        .addGap(31, 31, 31)
+                        .addComponent(txtModemIPAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(3, 3, 3)
+                .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlModemLayout.createSequentialGroup()
+                        .addGap(2, 2, 2)
+                        .addComponent(lblModemIPPort))
+                    .addComponent(txtModemIPPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlModemLayout.createSequentialGroup()
+                        .addGap(3, 3, 3)
+                        .addComponent(txtModemXMLPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(pnlModemLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblModemXmlPort)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlModemLayout.createSequentialGroup()
+                        .addGap(2, 2, 2)
+                        .addComponent(lblModemPreamble))
+                    .addComponent(txtModemPreamble, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(2, 2, 2)
+                .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(pnlModemLayout.createSequentialGroup()
+                        .addGap(2, 2, 2)
+                        .addComponent(lblModemPostamble))
+                    .addComponent(txtModemPostamble, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel19)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtFldigipath, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(pnlModemLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(spinEveryXHours, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblHours, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblFldigiAutorestart))
+                .addGap(25, 25, 25))
+        );
+
+        tabOptions.addTab("Modem", pnlModem);
+
         getContentPane().add(tabOptions, new java.awt.GridBagConstraints());
         tabOptions.setEnabledAt(3, true);
 
@@ -2543,6 +2566,7 @@ public class optionsdialog extends javax.swing.JDialog {
             // Modem connection settings
             cf.setPreference("MODEMIP", txtModemIPAddress.getText());
             cf.setPreference("MODEMIPPORT", txtModemIPPort.getText());
+            cf.setPreference("MODEMXMLPORT", txtModemXMLPort.getText());
             cf.setPreference("MODEMPOSTAMBLE", txtModemPostamble.getText());
             cf.setPreference("MODEMPREAMBLE", txtModemPreamble.getText());
             cf.setPreference("FLDIGIAPPLICATIONPATH", txtFldigipath.getText());
@@ -3025,6 +3049,10 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
         // TODO add your handling code here:
     }//GEN-LAST:event_txtFldigipathActionPerformed
 
+    private void txtModemIPPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtModemIPPortActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtModemIPPortActionPerformed
+
     /**
      * A mode is checked/unchecked so the mode list should be refilled
      */
@@ -3351,6 +3379,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JLabel lblModemIPPort;
     private javax.swing.JLabel lblModemPostamble;
     private javax.swing.JLabel lblModemPreamble;
+    private javax.swing.JLabel lblModemXmlPort;
     private javax.swing.JLabel lblOffsetmin;
     private javax.swing.JLabel lblPassword;
     private javax.swing.JLabel lblPortNumber;
@@ -3391,6 +3420,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JTextField txtModemIPPort;
     private javax.swing.JTextField txtModemPostamble;
     private javax.swing.JTextField txtModemPreamble;
+    private javax.swing.JTextField txtModemXMLPort;
     private javax.swing.JPasswordField txtPopPassword;
     private javax.swing.JTextField txtPopUser;
     private javax.swing.JTextField txtPophost;
