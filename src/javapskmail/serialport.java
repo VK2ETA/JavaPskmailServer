@@ -206,7 +206,7 @@ public class serialport {
           * using the current operating system.
           * @return
           */
-         public ArrayList getCommports()
+         public ArrayList<String> getCommports()
          {
             ArrayList<String> myarr = new ArrayList<String>();
 

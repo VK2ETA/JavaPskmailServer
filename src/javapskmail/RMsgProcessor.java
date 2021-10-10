@@ -513,8 +513,6 @@ public class RMsgProcessor {
                             //Minimum every 10 seconds
                             freq = freq < 30000 ? 30000 : freq;
                             boolean supportsIdle = false;
-                            // //VK2ETA Debug only polling
-                            // /*
                             try {
                                 if (folder instanceof IMAPFolder) {
                                     IMAPFolder f = (IMAPFolder) folder;
@@ -528,7 +526,6 @@ public class RMsgProcessor {
                             } catch (MessagingException mex) {
                                 supportsIdle = false;
                             }
-                            // */
                             for (;;) {
                                 if (supportsIdle && folder instanceof IMAPFolder) {
                                     IMAPFolder f = (IMAPFolder) folder;
@@ -1388,6 +1385,7 @@ public class RMsgProcessor {
     }
     
     //Process the message now that it is complete (may have had to wait for the picture component)
+    @SuppressWarnings("unchecked")
     public static void processTextMessage(final RMsgObject mMessage) {
         boolean saveAndDisplay;
 
@@ -1670,7 +1668,7 @@ public class RMsgProcessor {
                                         RMsgTxList.addMessageToList(fullMessage);
                                     } else {
                                         //We are resending from this relay (default). Create blank list
-                                        ArrayList<RMsgObject> resendList = new ArrayList();
+                                        ArrayList<RMsgObject> resendList = new ArrayList<RMsgObject>();
                                         //What type of qtc did we receive?
                                         //process email request
                                         if (Main.WantRelayOverRadio && !emailRequest) {

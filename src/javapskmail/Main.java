@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "0.9.8";
+    static String version = "0.9.9";
     static String application = "jpskmailserver " + "B" + version;// Used to preset an empty status
-    static String versionDate = "20211002";
+    static String versionDate = "20211010";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -429,7 +429,9 @@ public class Main {
             //m.setRxRsid("ON");
             //q.send_txrsid_command("ON");
             //Launch separate thread to monitor and relay incoming emails and messages if required
+            System.out.println("About to call startemail");
             RMsgProcessor.startEmailsAndSMSsMonitor();
+            System.out.println("Returned from startemail");
 
             //vk2eta debug
             //System.out.println("entering receive loop");

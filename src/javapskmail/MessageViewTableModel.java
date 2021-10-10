@@ -34,11 +34,11 @@ public class MessageViewTableModel extends AbstractTableModel{
      public static final int SIZE_INDEX = 3;
 
      protected String[] columnNames;
-     protected Vector dataVector;
+     protected Vector<email> dataVector;
 
      public MessageViewTableModel(String[] columnNames) {
          this.columnNames = columnNames;
-         dataVector = new Vector();
+         dataVector = new Vector<email>();
      }
 
     @Override

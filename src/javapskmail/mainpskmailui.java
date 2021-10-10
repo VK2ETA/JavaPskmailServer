@@ -163,7 +163,7 @@ public class mainpskmailui extends javax.swing.JFrame {
      */
     public mainpskmailui() {
 
-        System.out.println("Entering mainpskmailui");
+        //System.out.println("Entering mainpskmailui");
 
         initComponents();
         ButtonGroup RB = new ButtonGroup();
@@ -463,7 +463,7 @@ public class mainpskmailui extends javax.swing.JFrame {
                             //Note: Squelch will be set to minimum below
                             System.out.println("Timeout on receipt of data from modem. Entering test mode");
                         } else {
-                            if (System.currentTimeMillis() - Main.lastModemCharTime > 115000) {// = 1 minutes+ 55 seconds
+                            if (System.currentTimeMillis() - Main.lastModemCharTime > 115000) {// = 1 minutes + 55 seconds
                                 //We have a hang modem, request an Flgdigi restart
                                 //NO, just kill it
                                 System.out.println("Modem test period exausted, Killing modem process");
@@ -1144,7 +1144,7 @@ public class mainpskmailui extends javax.swing.JFrame {
         //Vk2eta debug: done after main window is set visible 
         //timer200ms.start();
         //vk2eta debug
-        System.out.println("Exiting mainpskmailui");
+        //System.out.println("Exiting mainpskmailui");
 
     }
 
@@ -1634,12 +1634,12 @@ public class mainpskmailui extends javax.swing.JFrame {
         jPanel4 = new javax.swing.JPanel();
         bContacts1 = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
-        jComboRMsgTo = new javax.swing.JComboBox();
+        jComboRMsgTo = new javax.swing.JComboBox<>();
         jPanel5 = new javax.swing.JPanel();
         jRadBtnAliasOnly = new javax.swing.JRadioButton();
         jRadBtnAliasAndAddress = new javax.swing.JRadioButton();
         jPanel2 = new javax.swing.JPanel();
-        jComboRMsgVia = new javax.swing.JComboBox();
+        jComboRMsgVia = new javax.swing.JComboBox<>();
         scrRadioMessages = new javax.swing.JScrollPane();
         tblRadioMsgs = new javax.swing.JTable();
         pnlRMSgButtons = new javax.swing.JPanel();
@@ -1652,7 +1652,7 @@ public class mainpskmailui extends javax.swing.JFrame {
         pnlStatus = new javax.swing.JPanel();
         snLabel = new javax.swing.JLabel();
         StatusLabel = new javax.swing.JLabel();
-        cboServer = new javax.swing.JComboBox();
+        cboServer = new javax.swing.JComboBox<>();
         spnMinute = new javax.swing.JSpinner();
         ProgressBar = new javax.swing.JProgressBar();
         jTextField1 = new javax.swing.JTextField();
@@ -4128,47 +4128,9 @@ public class mainpskmailui extends javax.swing.JFrame {
             }// </editor-fold>//GEN-END:initComponents
 
 private void mnuQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuQuitActionPerformed
-// TODO add your handling code here:
-    /*
-    try {
-           // store the config file if present
-
-            File f1 = new File( "configuration.xml");
-             File f2 = new File(Main.HomePath + Main.Dirprefix + "configuration.xml");
-
-            if (f1.isFile()) {
-
-            InputStream in = new FileInputStream(f1);
-
-      //Overwrite the file.
-            OutputStream out = new FileOutputStream(f2);
-
-            byte[] buf = new byte[1024];
-            int len;
-            while ((len = in.read(buf)) > 0){
-                out.write(buf, 0, len);
-            }
-            in.close();
-            out.close();
-
-            Main.m.Sendln("<cmd>normal</cmd>\n");
-            
-            try {
-                Main.m.pout.close();
-                Main.m.in.close();
-            } catch (IOException ex) {
-  //              Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
-            }
- 
-            Main.q.Message(mainpskmailui.getString("Config_File_stored."), 10);
-         }
-        }
-
-        catch (Exception e) {
-                 Main.q.Message(mainpskmailui.getString("problem_writing_the_config_file"), 10);
-         }
-     */
     Main.m.Sendln("<cmd>normal</cmd>\n");
+
+    Main.m.killFldigi(true); //We are exiting
 
     try {
         if (Main.m.pout != null) {
@@ -4177,9 +4139,6 @@ private void mnuQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
         if (Main.m.in != null) {
             Main.m.in.close();
         }
-
-        Main.m.killFldigi(true); //We are exiting
-
     } catch (IOException ex) {
         Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
     } catch (NullPointerException np) {
@@ -4469,7 +4428,7 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
                 } else {
                     Connectwindow cw = new Connectwindow(this, true);
                     cw.setLocationRelativeTo(this);
-                    cw.show();
+                    cw.setVisible(true);
                 }
             }//GEN-LAST:event_bConnectActionPerformed
 
@@ -5533,7 +5492,7 @@ private void bSummonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST
     } else {
         Connectwindow cw = new Connectwindow(this, true);
         cw.setLocationRelativeTo(this);
-        cw.show();
+        cw.setVisible(true);
     }
 
     /*
@@ -5855,8 +5814,9 @@ private void mnuUploadsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
 }//GEN-LAST:event_mnuUploadsActionPerformed
 
 private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-    // TODO add your handling code here:
     Main.m.Sendln("<cmd>normal</cmd>\n");
+
+    Main.m.killFldigi(true); //We are exiting
 
     try {
         if (Main.m.pout != null) {
@@ -5865,16 +5825,13 @@ private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:even
         if (Main.m.in != null) {
             Main.m.in.close();
         }
-
-        Main.m.killFldigi(true); //Kill Fldigi to exit
-
     } catch (IOException ex) {
         Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
     } catch (NullPointerException np) {
         Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, np);
     }
     dispose();
-    System.exit(0);
+    System.exit(0); //calling the method is a must
 }//GEN-LAST:event_formWindowClosing
 
 private void mnuDownloadsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuDownloadsActionPerformed
@@ -8291,8 +8248,6 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                //vk2eta debug 
-                System.out.println("Starting GUI thread");
                 new mainpskmailui().setVisible(true);
             }
         });
@@ -8373,7 +8328,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JComboBox cboAPRS2nd;
     private javax.swing.JComboBox cboAPRSIcon;
     private javax.swing.JComboBox cboBeaconPeriod;
-    public javax.swing.JComboBox cboServer;
+    public javax.swing.JComboBox<String> cboServer;
     private javax.swing.JCheckBox chkAutoLink;
     private javax.swing.JCheckBox chkBeacon;
     private javax.swing.JRadioButtonMenuItem defaultmnu;
@@ -8382,8 +8337,8 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JTextField freq2;
     private javax.swing.JTextField freq3;
     private javax.swing.JTextField freq4;
-    private javax.swing.JComboBox jComboRMsgTo;
-    private javax.swing.JComboBox jComboRMsgVia;
+    private javax.swing.JComboBox<String> jComboRMsgTo;
+    private javax.swing.JComboBox<String> jComboRMsgVia;
     private javax.swing.JMenuItem jGetIAC;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;

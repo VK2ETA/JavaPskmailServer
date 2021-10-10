@@ -255,7 +255,7 @@ public class optionsdialog extends javax.swing.JDialog {
                 // remove the items first
                 this.cboGPSSerialPort.removeAllItems();
 
-                ListIterator li = portList.listIterator();
+                ListIterator<String> li = portList.listIterator();
                 while (li.hasNext()) {
                     cboGPSSerialPort.addItem(li.next());
                     portFound = true;
@@ -763,7 +763,7 @@ public class optionsdialog extends javax.swing.JDialog {
         lblPortscbo = new javax.swing.JLabel();
         lblSpeed = new javax.swing.JLabel();
         cboGPSSpeed = new javax.swing.JComboBox();
-        cboGPSSerialPort = new javax.swing.JComboBox();
+        cboGPSSerialPort = new javax.swing.JComboBox<>();
         chkGpsd = new javax.swing.JCheckBox();
         bGetSerPorts = new javax.swing.JButton();
         frAPRSServer = new javax.swing.JPanel();
@@ -797,7 +797,7 @@ public class optionsdialog extends javax.swing.JDialog {
         CB_THOR22 = new javax.swing.JCheckBox();
         CB_MFSK16 = new javax.swing.JCheckBox();
         CB_THOR8 = new javax.swing.JCheckBox();
-        cboModes = new javax.swing.JComboBox();
+        cboModes = new javax.swing.JComboBox<>();
         jLabel13 = new javax.swing.JLabel();
         CB_DOMEX5 = new javax.swing.JCheckBox();
         jPanel3 = new javax.swing.JPanel();
@@ -3301,9 +3301,9 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JButton bGetSerPorts;
     private javax.swing.JButton bOK;
     private javax.swing.JButton bPosConverter;
-    private javax.swing.JComboBox cboGPSSerialPort;
+    private javax.swing.JComboBox<String> cboGPSSerialPort;
     private javax.swing.JComboBox cboGPSSpeed;
-    private javax.swing.JComboBox cboModes;
+    private javax.swing.JComboBox<String> cboModes;
     private javax.swing.JCheckBox checkboxEnablePskmailServer;
     private javax.swing.JCheckBox checkboxRelayEmail;
     private javax.swing.JCheckBox checkboxRelayEmailsImmediately;

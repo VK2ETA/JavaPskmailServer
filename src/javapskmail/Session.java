@@ -2676,7 +2676,7 @@ public class Session {
             Maxblocklength = 5;
             Minblocklength = 4;
         }
-        //VK2ETA debug: We need a limit as to how much forward we can enqueue blocks, otherwise 
+        //VK2ETA bug: We need a limit as to how much forward we can enqueue blocks, otherwise 
         //   we overwrite the to-be-retransmitted block with new ones
         while (i < (Nrblocks - nr_missing) && Main.TX_Text.length() > 0 &&
                 howFarBack < 32 ) {

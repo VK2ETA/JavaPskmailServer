@@ -198,7 +198,7 @@ public class AddressBook extends javax.swing.JFrame  {
         bDelete = new javax.swing.JButton();
         pnlTop = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        lstContacts = new javax.swing.JList();
+        lstContacts = new javax.swing.JList<>();
         jSeparator1 = new javax.swing.JSeparator();
         RMsgPanel = new javax.swing.JPanel();
         checkToCallsign = new javax.swing.JCheckBox();
@@ -1127,7 +1127,7 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblMMSI;
     private javax.swing.JLabel lblNickname;
-    private javax.swing.JList lstContacts;
+    private javax.swing.JList<contact> lstContacts;
     private javax.swing.JMenuItem mnuClose;
     private javax.swing.JMenuItem mnuCopy;
     private javax.swing.JMenuItem mnuCut;

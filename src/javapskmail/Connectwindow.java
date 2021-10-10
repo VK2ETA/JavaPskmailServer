@@ -232,9 +232,9 @@ public class Connectwindow extends javax.swing.JDialog {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        jComboBoxTXModem = new javax.swing.JComboBox();
-        jComboBoxRXModem = new javax.swing.JComboBox();
-        cboServerConnect = new javax.swing.JComboBox();
+        jComboBoxTXModem = new javax.swing.JComboBox<>();
+        jComboBoxRXModem = new javax.swing.JComboBox<>();
+        cboServerConnect = new javax.swing.JComboBox<>();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -467,9 +467,9 @@ public class Connectwindow extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton ConnectServerButton;
     private javax.swing.JButton ServerConnectCancel;
-    private javax.swing.JComboBox cboServerConnect;
-    private javax.swing.JComboBox jComboBoxRXModem;
-    private javax.swing.JComboBox jComboBoxTXModem;
+    private javax.swing.JComboBox<String> cboServerConnect;
+    private javax.swing.JComboBox<String> jComboBoxRXModem;
+    private javax.swing.JComboBox<String> jComboBoxTXModem;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

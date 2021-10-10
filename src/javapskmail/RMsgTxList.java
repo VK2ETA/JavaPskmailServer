@@ -22,7 +22,7 @@ import java.util.LinkedList;
 
 public class RMsgTxList {
 
-    public static final LinkedList messageList = new LinkedList();
+    public static final LinkedList<RMsgObject> messageList = new LinkedList<RMsgObject>();
 
 
     //Get length of message list
