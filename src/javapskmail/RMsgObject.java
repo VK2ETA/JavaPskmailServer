@@ -643,8 +643,8 @@ public class RMsgObject {
                             }
                             //Build picture filename and extract bitmap to send
                             String pictureFn = mFilename.replace(".txt", ".png");
-                            String filePath = Main.HomePath + Main.Dirprefix
-                                    + "RadioMsgImages" + Main.Separator;
+                            String filePath = Main.homePath + Main.dirPrefix
+                                    + "RadioMsgImages" + Main.separator;
                             mMessage.picture = Bitmap.decodeFile(filePath + pictureFn);
                         }
                     }
@@ -786,8 +786,8 @@ public class RMsgObject {
             //Inbox first
             if (whichFolders == 1 || whichFolders == 3) {
                 // Get the list of files in the designated folder
-                File dir = new File(Main.HomePath + Main.Dirprefix
-                        + Main.DirInbox);
+                File dir = new File(Main.homePath + Main.dirPrefix
+                        + Main.dirInbox);
                 filesInbox = dir.listFiles();
                 FileFilter fileFilter = new FileFilter() {
                     public boolean accept(File file) {
@@ -800,8 +800,8 @@ public class RMsgObject {
             //Sent items next
             if (whichFolders == 2 || whichFolders == 3) {
                 // Get the list of files in the designated folder
-                File dir = new File(Main.HomePath + Main.Dirprefix
-                        + Main.DirSent);
+                File dir = new File(Main.homePath + Main.dirPrefix
+                        + Main.dirSent);
                 filesSent = dir.listFiles();
                 FileFilter fileFilter = new FileFilter() {
                     public boolean accept(File file) {
@@ -855,13 +855,13 @@ public class RMsgObject {
                 });
             }
 
-            String sentDirPath = Main.HomePath + Main.Dirprefix + Main.DirSent;
+            String sentDirPath = Main.homePath + Main.dirPrefix + Main.dirSent;
             RMsgObject mMessage;
             for (int i = 0; i < files.length; i++) {
                 //Iterate through all the files to extract the data for display
                 boolean fromSentFolder = files[i].getAbsolutePath().contains(sentDirPath);
                 //Choose between Sent and Inbox folders
-                String msgFolder = fromSentFolder ? Main.DirSent : Main.DirInbox;
+                String msgFolder = fromSentFolder ? Main.dirSent : Main.dirInbox;
                 mMessage = extractMsgObjectFromFile(msgFolder, files[i].getName(), false);//Text part only
                 RMsgDisplayItem mDisplayItem = new RMsgDisplayItem(mMessage, 0f, 0f, false, fromSentFolder);
                 //mDisplayItem.mMessage = mMessage;
@@ -892,8 +892,8 @@ public class RMsgObject {
             //Inbox first
             if (whichFolders == 1 || whichFolders == 3) {
                 // Get the list of files in the designated folder
-                File dir = new File(Main.HomePath + Main.Dirprefix
-                        + Main.DirInbox);
+                File dir = new File(Main.homePath + Main.dirPrefix
+                        + Main.dirInbox);
                 filesInbox = dir.listFiles();
                 FileFilter fileFilter = new FileFilter() {
                     public boolean accept(File file)
@@ -907,8 +907,8 @@ public class RMsgObject {
             //Sent items next
             if (whichFolders == 2 || whichFolders == 3) {
                 // Get the list of files in the designated folder
-                File dir = new File(Main.HomePath + Main.Dirprefix
-                        + Main.DirSent);
+                File dir = new File(Main.homePath + Main.dirPrefix
+                        + Main.dirSent);
                 filesSent = dir.listFiles();
                 FileFilter fileFilter = new FileFilter() {
                     public boolean accept(File file)
@@ -963,14 +963,14 @@ public class RMsgObject {
                 });
             }
 
-            String sentDirPath = Main.HomePath + Main.Dirprefix + Main.DirSent;
+            String sentDirPath = Main.homePath + Main.dirPrefix + Main.dirSent;
             RMsgObject mMessage;
             for (int i = 0; i < files.length; i++)
             {
                 //Iterate through all the files to extract the data for display
                 boolean fromSentFolder = files[i].getAbsolutePath().contains(sentDirPath);
                 //Choose between Sent and Inbox folders
-                String msgFolder = fromSentFolder ? Main.DirSent : Main.DirInbox;
+                String msgFolder = fromSentFolder ? Main.dirSent : Main.dirInbox;
                 mMessage = extractMsgObjectFromFile(msgFolder, files[i].getName(), false);//Text part only
                 //Check this below displayItem mDisplayItem = new displayItem(mMessage, 0f, 0f, false, fromSentFolder);
                 String mDisplayItem = mMessage.formatForList(fromSentFolder);

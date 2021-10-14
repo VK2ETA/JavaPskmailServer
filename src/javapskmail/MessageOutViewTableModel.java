@@ -58,7 +58,7 @@ public class MessageOutViewTableModel extends AbstractTableModel{
      }
 
      public Object getValueAt(int row, int column) {
-         email mymail = (email)dataVector.get(row);
+         Email mymail = (Email)dataVector.get(row);
          switch (column) {
              case TO_INDEX:
                 return mymail.getTo();
@@ -75,7 +75,7 @@ public class MessageOutViewTableModel extends AbstractTableModel{
 
     @Override
      public void setValueAt(Object value, int row, int column) {
-         email mymail = (email)dataVector.get(row);
+         Email mymail = (Email)dataVector.get(row);
          fireTableCellUpdated(row, column);
      }
 
@@ -87,7 +87,7 @@ public class MessageOutViewTableModel extends AbstractTableModel{
          return columnNames.length;
      }
 
-     public void addRow(email mymail) {
+     public void addRow(Email mymail) {
          dataVector.add(mymail);
          fireTableRowsInserted(
             dataVector.size() - 1,
@@ -95,7 +95,7 @@ public class MessageOutViewTableModel extends AbstractTableModel{
      }
 
      public Object getRowObject(int row){
-        email mymail = (email)dataVector.get(row);
+        Email mymail = (Email)dataVector.get(row);
         return mymail;
      }
 

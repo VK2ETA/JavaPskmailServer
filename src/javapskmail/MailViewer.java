@@ -27,10 +27,10 @@ import javax.swing.JOptionPane;
  */
 public class MailViewer extends javax.swing.JFrame {
     
-    email myobject; // The email that this window will display
+    Email myobject; // The email that this window will display
 
     /** Creates new form MailViewer */
-    public MailViewer(email inmail) {
+    public MailViewer(Email inmail) {
         initComponents();
         myobject = inmail;
         if (myobject != null){
@@ -182,13 +182,13 @@ public class MailViewer extends javax.swing.JFrame {
         pnlTop.setPreferredSize(new java.awt.Dimension(515, 100));
         pnlTop.setLayout(new java.awt.GridBagLayout());
 
-        lblSubjectLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13));
+        lblSubjectLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
         lblSubjectLabel.setText(bundle.getString("MailViewer.lblSubjectLabel.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         pnlTop.add(lblSubjectLabel, gridBagConstraints);
 
-        lblFromLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13));
+        lblFromLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
         lblFromLabel.setText(bundle.getString("MailViewer.lblFromLabel.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -196,7 +196,7 @@ public class MailViewer extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         pnlTop.add(lblFromLabel, gridBagConstraints);
 
-        lblReplytoLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13));
+        lblReplytoLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
         lblReplytoLabel.setText(bundle.getString("MailViewer.lblReplytoLabel.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -204,7 +204,7 @@ public class MailViewer extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         pnlTop.add(lblReplytoLabel, gridBagConstraints);
 
-        lblDateLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13));
+        lblDateLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
         lblDateLabel.setText(bundle.getString("MailViewer.lblDateLabel.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -212,7 +212,7 @@ public class MailViewer extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         pnlTop.add(lblDateLabel, gridBagConstraints);
 
-        lblToLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13));
+        lblToLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
         lblToLabel.setText(bundle.getString("MailViewer.lblToLabel.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -350,7 +350,7 @@ public class MailViewer extends javax.swing.JFrame {
         pnlTopButtons.setPreferredSize(new java.awt.Dimension(515, 40));
         pnlTopButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        bReply.setFont(new java.awt.Font("Ubuntu", 1, 12));
+        bReply.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
         bReply.setForeground(new java.awt.Color(0, 102, 51));
         bReply.setText(bundle.getString("MailViewer.bReply.text")); // NOI18N
         bReply.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
@@ -364,7 +364,7 @@ public class MailViewer extends javax.swing.JFrame {
         });
         pnlTopButtons.add(bReply);
 
-        bForward.setFont(new java.awt.Font("Ubuntu", 1, 12));
+        bForward.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
         bForward.setForeground(new java.awt.Color(0, 102, 51));
         bForward.setText(bundle.getString("MailViewer.bForward.text")); // NOI18N
         bForward.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));

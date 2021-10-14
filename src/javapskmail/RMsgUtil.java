@@ -33,11 +33,11 @@ import java.util.regex.Pattern;
 
 public class RMsgUtil {
 
-
+    static java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("javapskmail/Bundle");
 
 
     public static void addEntryToLog(String entry) {
-        String logFileName = Main.HomePath + Main.Dirprefix + "RadioMsg.log";
+        String logFileName = Main.homePath + Main.dirPrefix + "RadioMsg.log";
         File logFile = new File(logFileName);
         if (!logFile.exists())
         {
@@ -124,7 +124,7 @@ public class RMsgUtil {
     //Delete file
     public static boolean deleteFile(String mFolder, String fileName, boolean adviseDeletion) {
 
-        String fullFileName = Main.HomePath + Main.Dirprefix + mFolder + Main.Separator + fileName;
+        String fullFileName = Main.homePath + Main.dirPrefix + mFolder + Main.separator + fileName;
         File n = new File(fullFileName);
         if (!n.isFile()) {
             //RadioMSG.middleToastText("Message file " + fileName + " Not Found. Deleted?");
@@ -132,6 +132,7 @@ public class RMsgUtil {
         } else {
             n.delete();
             if (adviseDeletion) {
+                Main.q.Message(bundle.getString("RMsgUtil.MessageDeleted"), 5);
                 //RadioMSG.middleToastText("Message Deleted...");
                 //addEntryToLog(Messaging.dateTimeStamp() + ": Deleted file " + fileName);
             }
@@ -144,9 +145,9 @@ public class RMsgUtil {
     //Copy binary or text files from one folder to another CONSERVING THE NAME and CONDITIONALLY LOGGING THE ACTION
     public static boolean copyAnyFile(String originFolder, String fileName, String destinationFolder, boolean adviseCopy) {
 
-        File dir = new File(Main.HomePath + Main.Dirprefix + destinationFolder);
+        File dir = new File(Main.homePath + Main.dirPrefix + destinationFolder);
         if (dir.exists()) {
-            String fullFileName = Main.HomePath + Main.Dirprefix + originFolder + Main.Separator + fileName;
+            String fullFileName = Main.homePath + Main.dirPrefix + originFolder + Main.separator + fileName;
             File mFile = new File(fullFileName);
             if (!mFile.isFile()) {
                 //Main.PostToTerminal("File " + fileName + " not found in " + destinationFolder + "\n");
@@ -156,7 +157,7 @@ public class RMsgUtil {
                 FileInputStream fileInputStrm = null;
                 try {
                     fileInputStrm = new FileInputStream(fullFileName);
-                    String fullDestinationFileName = Main.HomePath + Main.Dirprefix + destinationFolder + Main.Separator + fileName;
+                    String fullDestinationFileName = Main.homePath + Main.dirPrefix + destinationFolder + Main.separator + fileName;
                     fileOutputStrm = new FileOutputStream(fullDestinationFileName);
                     byte[] mBytebuffer = new byte[256];
                     int byteCount = 0;
@@ -199,9 +200,9 @@ public class RMsgUtil {
                                       String destinationFolder, String newFileName) {
         boolean result = true;
 
-        File dir = new File(Main.HomePath + Main.Dirprefix + destinationFolder);
+        File dir = new File(Main.homePath + Main.dirPrefix + destinationFolder);
         if (dir.exists()) {
-            String fullFileName = Main.HomePath + Main.Dirprefix + originFolder + Main.Separator + fileName;
+            String fullFileName = Main.homePath + Main.dirPrefix + originFolder + Main.separator + fileName;
             File mFile = new File(fullFileName);
             if (!mFile.isFile()) {
                 result = false;
@@ -210,7 +211,7 @@ public class RMsgUtil {
                 FileInputStream fileInputStrm = null;
                 try {
                     fileInputStrm = new FileInputStream(fullFileName);
-                    String fullDestinationFileName = Main.HomePath + Main.Dirprefix + destinationFolder + Main.Separator + newFileName;
+                    String fullDestinationFileName = Main.homePath + Main.dirPrefix + destinationFolder + Main.separator + newFileName;
                     fileOutputStrm = new FileOutputStream(fullDestinationFileName);
                     byte[] mBytebuffer = new byte[256];
                     int byteCount = 0;
@@ -268,13 +269,13 @@ public class RMsgUtil {
             String latstring;
             String lonstring;
             // Get the GPS position data or the preset data
-            if (Main.gpsdata.getFixStatus()) {
-                if (!Main.HaveGPSD) {
-                    latstring = Main.gpsdata.getLatitude();
-                    lonstring = Main.gpsdata.getLongitude();
+            if (Main.gpsData.getFixStatus()) {
+                if (!Main.haveGPSD) {
+                    latstring = Main.gpsData.getLatitude();
+                    lonstring = Main.gpsData.getLongitude();
                 } else {
-                    latstring = Main.GPSD_latitude;
-                    lonstring = Main.GPSD_longitude;
+                    latstring = Main.gpsdLatitude;
+                    lonstring = Main.gpsdLongitude;
                 }
                 //course = Main.gpsdata.getCourse();
                 //speed = Main.gpsdata.getSpeed();
@@ -422,8 +423,8 @@ public class RMsgUtil {
         {
             //First separate the header from the data fields (Headers are never compressed)
             //For this read the data file until we find the form information
-            File fi = new File(Main.HomePath + Main.Dirprefix
-                    + mDir + Main.Separator + mFileName);
+            File fi = new File(Main.homePath + Main.dirPrefix
+                    + mDir + Main.separator + mFileName);
             FileInputStream fileISi = new FileInputStream(fi);
             BufferedReader buf = new BufferedReader(new InputStreamReader(fileISi));
             dataString = "";
@@ -475,7 +476,7 @@ public class RMsgUtil {
         try
         {
             // Get the list of files in the designated folder
-            File dir = new File(Main.HomePath + Main.Dirprefix
+            File dir = new File(Main.homePath + Main.dirPrefix
                     + mFolder);
             File[] files = dir.listFiles();
             FileFilter fileFilter = new FileFilter() {
@@ -513,14 +514,14 @@ public class RMsgUtil {
                     if (ackPosition > 0) {
                         //Wait for any TXing to complete
                         int waitCount = 0;
-                        while (Main.TXActive && waitCount < 100) { //Max 5 seconds
+                        while (Main.TxActive && waitCount < 100) { //Max 5 seconds
                             Thread.sleep(50);
                             waitCount++;
                         }
                         //Only send if we waiting less than 5 seconds otherwise it is pointless
                         if (waitCount < 100) {
                             //Mark as TXing
-                            Main.TXActive = true;
+                            Main.TxActive = true;
                             //Time for reception to finish trailing tones
                             //Wait 3 seconds for the Rx to be fully completed
                             int remainingSleep = 3000 - 100 * waitCount;
@@ -530,15 +531,15 @@ public class RMsgUtil {
                             //If CRC is wrong send double tone
                             if (positiveAck) {
                                 //
-                                Rigctl.Tune();
+                                RigCtrl.Tune();
                                 Thread.sleep(500);
-                                Rigctl.Abort();
+                                RigCtrl.Abort();
                             } else {
                                 //oldAudioFreq = Rigctl.SetAudiofreq(2200); //Does not work if either TX lock or reset to carrier is on
                                 for (int x = 0; x < 5; x++) {
-                                    Rigctl.Tune();
+                                    RigCtrl.Tune();
                                     Thread.sleep(150);
-                                    Rigctl.Abort();
+                                    RigCtrl.Abort();
                                     //Restore modem to last audio frequency
                                     Thread.sleep(300);
                                 }
@@ -546,7 +547,7 @@ public class RMsgUtil {
                                 //    Rigctl.SetAudiofreq(oldAudioFreq);
                                 //}
                             }
-                            Main.TXActive = false;
+                            Main.TxActive = false;
                         }
                     }
                 } catch (Exception e) {

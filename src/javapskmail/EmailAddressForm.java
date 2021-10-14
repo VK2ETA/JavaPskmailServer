@@ -24,8 +24,8 @@ import java.util.ArrayList;
 public class EmailAddressForm extends javax.swing.JDialog {
     private String contfilename;    // probably contacts.csv
     private File contfile;          // File handle for contacts.csv
-    private contact contact;        // A contact object
-    private ArrayList<contact> contactlist = new ArrayList<contact>(); // Used to hold all the contacts
+    private Contact contact;        // A contact object
+    private ArrayList<Contact> contactlist = new ArrayList<Contact>(); // Used to hold all the contacts
 
     private String Tolist="";
     private String Copylist="";
@@ -34,7 +34,7 @@ public class EmailAddressForm extends javax.swing.JDialog {
     public EmailAddressForm(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        contfilename = Main.HomePath+Main.Dirprefix+"contacts.csv";
+        contfilename = Main.homePath+Main.dirPrefix+"contacts.csv";
         FetchContacts();
         DisplayContacts();
     }
@@ -257,7 +257,7 @@ public class EmailAddressForm extends javax.swing.JDialog {
      * Save all the user set data
      */
     private void SaveData(){
-        contact mycontact;
+        Contact mycontact;
         // Get number of items in the list
         int tosize = this.lstTo.getModel().getSize();
         int copysize = this.lstCopy.getModel().getSize();
@@ -265,14 +265,14 @@ public class EmailAddressForm extends javax.swing.JDialog {
         // Get all to item objects
         for (int i=0; i<tosize; i++) {
             Object item = lstTo.getModel().getElementAt(i);
-            mycontact = (contact) item;
+            mycontact = (Contact) item;
             Tolist += "\""+mycontact.getFirstName()+" "+mycontact.getLastName()+"\" <"+mycontact.getEmail()+">"+", ";
         }
 
         // Get all com item objects
         for (int i=0; i<copysize; i++) {
             Object item = lstCopy.getModel().getElementAt(i);
-            mycontact = (contact) item;
+            mycontact = (Contact) item;
             Copylist += "\""+mycontact.getFirstName()+" "+mycontact.getLastName()+"\" <"+mycontact.getEmail()+">"+", ";
         }
         
@@ -338,7 +338,7 @@ public class EmailAddressForm extends javax.swing.JDialog {
     private void AddToAddressee(){
         // Check if there is a selected row
         Integer row;
-        contact mycontact;
+        Contact mycontact;
         DefaultListModel myListModel;
         DefaultListModel myContactListModel;
 
@@ -346,7 +346,7 @@ public class EmailAddressForm extends javax.swing.JDialog {
             // Is there a selected row in the list?
             row = this.lstContacts.getSelectedIndex();
             if (row > -1) {
-                mycontact = (contact) this.lstContacts.getSelectedValue();
+                mycontact = (Contact) this.lstContacts.getSelectedValue();
                 myListModel = (DefaultListModel) this.lstTo.getModel();
                 myContactListModel = (DefaultListModel) this.lstContacts.getModel();
                 myContactListModel.remove(row);
@@ -363,7 +363,7 @@ public class EmailAddressForm extends javax.swing.JDialog {
     private void AddCopyAddressee(){
             // Check if there is a selected row
         Integer row;
-        contact mycontact;
+        Contact mycontact;
         DefaultListModel myToModel;
         DefaultListModel myFromModel;
 
@@ -371,7 +371,7 @@ public class EmailAddressForm extends javax.swing.JDialog {
             // Is there a selected row in the list?
             row = this.lstContacts.getSelectedIndex();
             if (row > -1) {
-                mycontact = (contact) this.lstContacts.getSelectedValue();
+                mycontact = (Contact) this.lstContacts.getSelectedValue();
                 myToModel = (DefaultListModel) this.lstCopy.getModel();
                 myFromModel = (DefaultListModel) this.lstContacts.getModel();
                 myFromModel.remove(row);
@@ -388,7 +388,7 @@ public class EmailAddressForm extends javax.swing.JDialog {
     private void RemoveToAddressee(){
         // Check if there is a selected row
         Integer row;
-        contact mycontact;
+        Contact mycontact;
         DefaultListModel myToModel;
         DefaultListModel myFromModel;
 
@@ -396,7 +396,7 @@ public class EmailAddressForm extends javax.swing.JDialog {
             // Is there a selected row in the list?
             row = this.lstTo.getSelectedIndex();
             if (row > -1) {
-                mycontact = (contact) this.lstTo.getSelectedValue();
+                mycontact = (Contact) this.lstTo.getSelectedValue();
                 myFromModel = (DefaultListModel) this.lstTo.getModel();
                 myToModel = (DefaultListModel) this.lstContacts.getModel();
                 myFromModel.remove(row);
@@ -413,7 +413,7 @@ public class EmailAddressForm extends javax.swing.JDialog {
     private void RemoveCopyAddressee(){
             // Check if there is a selected row
         Integer row;
-        contact mycontact;
+        Contact mycontact;
         DefaultListModel myToModel;
         DefaultListModel myFromModel;
 
@@ -421,7 +421,7 @@ public class EmailAddressForm extends javax.swing.JDialog {
             // Is there a selected row in the list?
             row = this.lstCopy.getSelectedIndex();
             if (row > -1) {
-                mycontact = (contact) this.lstCopy.getSelectedValue();
+                mycontact = (Contact) this.lstCopy.getSelectedValue();
                 myFromModel = (DefaultListModel) this.lstCopy.getModel();
                 myToModel = (DefaultListModel) this.lstContacts.getModel();
                 myFromModel.remove(row);
@@ -475,7 +475,7 @@ public class EmailAddressForm extends javax.swing.JDialog {
 
             while((linestring = br.readLine()) != null) {
                 // Create another contact object and feed it the csv string
-                contact = new contact();
+                contact = new Contact();
                 contact.LoadCSV(linestring);
                 contactlist.add(contact);
             }
@@ -491,7 +491,7 @@ public class EmailAddressForm extends javax.swing.JDialog {
      */
     private void DisplayContacts(){
         try {
-            contact mycontact;
+            Contact mycontact;
             DefaultListModel myListModel;
             myListModel = (DefaultListModel) this.lstContacts.getModel();
             myListModel.clear();

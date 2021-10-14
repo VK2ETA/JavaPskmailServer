@@ -42,8 +42,8 @@ public class GetWebPageDialog extends javax.swing.JDialog {
 
     
     private void saveAllData() {
-        String path = Main.HomePath + Main.Dirprefix;
-        config c = new config(path);
+        String path = Main.homePath + Main.dirPrefix;
+        Config c = new Config(path);
         c.SetWebPages(WebPage1.getText(), WebPage2.getText(), WebPage3.getText(), WebPage4.getText(), WebPage5.getText(), WebPage6.getText());
         c.SetWebPagesB(URL1b.getText(), URL2b.getText(), URL3b.getText(), URL4b.getText(), URL5b.getText(), URL6b.getText());
         c.SetWebPagesE(URL1e.getText(), URL2e.getText(), URL3e.getText(), URL4e.getText(), URL5e.getText(), URL6e.getText());
@@ -494,19 +494,19 @@ public class GetWebPageDialog extends javax.swing.JDialog {
 
     private void WebButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WebButton1ActionPerformed
 
-        if (Main.Connected) {
+        if (Main.connected) {
             if (this.WebPage1.getText().length() > 0) {
                 if (Main.compressedmail) {
                     if (URL1b.getText().equals("") | URL1e.getText().equals("")) {
-                        Main.TX_Text += "~TGETZIP " + this.WebPage1.getText() + "\n";
+                        Main.txText += "~TGETZIP " + this.WebPage1.getText() + "\n";
                     } else {
-                        Main.TX_Text += "~TGETZIP " + this.WebPage1.getText() + " begin:" + URL1b.getText() + " end:" + URL1e.getText() + "\n";
+                        Main.txText += "~TGETZIP " + this.WebPage1.getText() + " begin:" + URL1b.getText() + " end:" + URL1e.getText() + "\n";
                     }
                 } else {
                     if (URL1b.getText().equals("") | URL1e.getText().equals("")) {
-                        Main.TX_Text += "~TGET " + this.WebPage1.getText() + "\n";
+                        Main.txText += "~TGET " + this.WebPage1.getText() + "\n";
                     } else {
-                        Main.TX_Text += "~TGET " + this.WebPage1.getText() + " begin:" + URL1b.getText() + " end:" + URL1e.getText() + "\n";
+                        Main.txText += "~TGET " + this.WebPage1.getText() + " begin:" + URL1b.getText() + " end:" + URL1e.getText() + "\n";
                     }
                 }
                 saveAllData();
@@ -519,19 +519,19 @@ public class GetWebPageDialog extends javax.swing.JDialog {
 
     private void WebButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WebButton2ActionPerformed
 
-        if (Main.Connected) {
+        if (Main.connected) {
             if (this.WebPage2.getText().length() > 0) {
                 if (Main.compressedmail) {
                     if (URL2b.getText().equals("") | URL2e.getText().equals("")) {
-                        Main.TX_Text += "~TGETZIP " + this.WebPage2.getText() + "\n";
+                        Main.txText += "~TGETZIP " + this.WebPage2.getText() + "\n";
                     } else {
-                        Main.TX_Text += "~TGETZIP " + this.WebPage2.getText() + " begin:" + URL2b.getText() + " end:" + URL2e.getText() + "\n";
+                        Main.txText += "~TGETZIP " + this.WebPage2.getText() + " begin:" + URL2b.getText() + " end:" + URL2e.getText() + "\n";
                     }
                 } else {
                     if (URL2b.getText().equals("") | URL2e.getText().equals("")) {
-                        Main.TX_Text += "~TGET " + this.WebPage2.getText() + "\n";
+                        Main.txText += "~TGET " + this.WebPage2.getText() + "\n";
                     } else {
-                        Main.TX_Text += "~TGET " + this.WebPage2.getText() + " begin:" + URL2b.getText() + " end:" + URL2e.getText() + "\n";
+                        Main.txText += "~TGET " + this.WebPage2.getText() + " begin:" + URL2b.getText() + " end:" + URL2e.getText() + "\n";
                     }
                 }
                 saveAllData();
@@ -544,19 +544,19 @@ public class GetWebPageDialog extends javax.swing.JDialog {
 
     private void WebButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WebButton3ActionPerformed
 
-        if (Main.Connected) {
+        if (Main.connected) {
             if (this.WebPage3.getText().length() > 0) {
                 if (Main.compressedmail) {
                     if (URL3b.getText().equals("") | URL3e.getText().equals("")) {
-                        Main.TX_Text += "~TGETZIP " + this.WebPage3.getText() + "\n";
+                        Main.txText += "~TGETZIP " + this.WebPage3.getText() + "\n";
                     } else {
-                        Main.TX_Text += "~TGETZIP " + this.WebPage3.getText() + " begin:" + URL3b.getText() + " end:" + URL3e.getText() + "\n";
+                        Main.txText += "~TGETZIP " + this.WebPage3.getText() + " begin:" + URL3b.getText() + " end:" + URL3e.getText() + "\n";
                     }
                 } else {
                     if (URL3b.getText().equals("") | URL3e.getText().equals("")) {
-                        Main.TX_Text += "~TGET " + this.WebPage3.getText() + "\n";
+                        Main.txText += "~TGET " + this.WebPage3.getText() + "\n";
                     } else {
-                        Main.TX_Text += "~TGET " + this.WebPage3.getText() + " begin:" + URL3b.getText() + " end:" + URL3e.getText() + "\n";
+                        Main.txText += "~TGET " + this.WebPage3.getText() + " begin:" + URL3b.getText() + " end:" + URL3e.getText() + "\n";
                     }
                 }
                 saveAllData();
@@ -569,19 +569,19 @@ public class GetWebPageDialog extends javax.swing.JDialog {
 
     private void WebButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WebButton4ActionPerformed
 
-        if (Main.Connected) {
+        if (Main.connected) {
             if (this.WebPage4.getText().length() > 0) {
                 if (Main.compressedmail) {
                     if (URL4b.getText().equals("") | URL4e.getText().equals("")) {
-                        Main.TX_Text += "~TGETZIP " + this.WebPage4.getText() + "\n";
+                        Main.txText += "~TGETZIP " + this.WebPage4.getText() + "\n";
                     } else {
-                        Main.TX_Text += "~TGETZIP " + this.WebPage4.getText() + " begin:" + URL4b.getText() + " end:" + URL4e.getText() + "\n";
+                        Main.txText += "~TGETZIP " + this.WebPage4.getText() + " begin:" + URL4b.getText() + " end:" + URL4e.getText() + "\n";
                     }
                 } else {
                     if (URL4b.getText().equals("") | URL4e.getText().equals("")) {
-                        Main.TX_Text += "~TGET " + this.WebPage4.getText() + "\n";
+                        Main.txText += "~TGET " + this.WebPage4.getText() + "\n";
                     } else {
-                        Main.TX_Text += "~TGET " + this.WebPage4.getText() + " begin:" + URL4b.getText() + " end:" + URL4e.getText() + "\n";
+                        Main.txText += "~TGET " + this.WebPage4.getText() + " begin:" + URL4b.getText() + " end:" + URL4e.getText() + "\n";
                     }
                 }
                 saveAllData();
@@ -594,19 +594,19 @@ public class GetWebPageDialog extends javax.swing.JDialog {
 
     private void WebButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WebButton5ActionPerformed
 
-        if (Main.Connected) {
+        if (Main.connected) {
             if (this.WebPage5.getText().length() > 0) {
                 if (Main.compressedmail) {
                     if (URL5b.getText().equals("") | URL5e.getText().equals("")) {
-                        Main.TX_Text += "~TGETZIP " + this.WebPage5.getText() + "\n";
+                        Main.txText += "~TGETZIP " + this.WebPage5.getText() + "\n";
                     } else {
-                        Main.TX_Text += "~TGETZIP " + this.WebPage5.getText() + " begin:" + URL5b.getText() + " end:" + URL5e.getText() + "\n";
+                        Main.txText += "~TGETZIP " + this.WebPage5.getText() + " begin:" + URL5b.getText() + " end:" + URL5e.getText() + "\n";
                     }
                 } else {
                     if (URL5b.getText().equals("") | URL5e.getText().equals("")) {
-                        Main.TX_Text += "~TGET " + this.WebPage5.getText() + "\n";
+                        Main.txText += "~TGET " + this.WebPage5.getText() + "\n";
                     } else {
-                        Main.TX_Text += "~TGET " + this.WebPage5.getText() + " begin:" + URL5b.getText() + " end:" + URL5e.getText() + "\n";
+                        Main.txText += "~TGET " + this.WebPage5.getText() + " begin:" + URL5b.getText() + " end:" + URL5e.getText() + "\n";
                     }
                 }
                 saveAllData();
@@ -619,19 +619,19 @@ public class GetWebPageDialog extends javax.swing.JDialog {
 
     private void WebButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_WebButton6ActionPerformed
 
-        if (Main.Connected) {
+        if (Main.connected) {
             if (this.WebPage6.getText().length() > 0) {
                 if (Main.compressedmail) {
                     if (URL6b.getText().equals("") | URL6e.getText().equals("")) {
-                        Main.TX_Text += "~TGETZIP " + this.WebPage6.getText() + "\n";
+                        Main.txText += "~TGETZIP " + this.WebPage6.getText() + "\n";
                     } else {
-                        Main.TX_Text += "~TGETZIP " + this.WebPage6.getText() + " begin:" + URL6b.getText() + " end:" + URL6e.getText() + "\n";
+                        Main.txText += "~TGETZIP " + this.WebPage6.getText() + " begin:" + URL6b.getText() + " end:" + URL6e.getText() + "\n";
                     }
                 } else {
                     if (URL6b.getText().equals("") | URL6e.getText().equals("")) {
-                        Main.TX_Text += "~TGET " + this.WebPage6.getText() + "\n";
+                        Main.txText += "~TGET " + this.WebPage6.getText() + "\n";
                     } else {
-                        Main.TX_Text += "~TGET " + this.WebPage6.getText() + " begin:" + URL6b.getText() + " end:" + URL6e.getText() + "\n";
+                        Main.txText += "~TGET " + this.WebPage6.getText() + " begin:" + URL6b.getText() + " end:" + URL6e.getText() + "\n";
                     }
                 }
                 saveAllData();
@@ -648,9 +648,9 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         if (url1.length() > 0) {
             String webText = "";
             if (URL1b.getText().equals("") | URL1e.getText().equals("")) {
-                webText = serverMail.readWebPage(url1, "", false);
+                webText = ServerMail.readWebPage(url1, "", false);
             } else {
-                webText = serverMail.readWebPage(url1, " begin:" + URL1b.getText() + " end:" + URL1e.getText(), false);
+                webText = ServerMail.readWebPage(url1, " begin:" + URL1b.getText() + " end:" + URL1e.getText(), false);
                 //test: webText = serverMail.readRawWebPage(url1, " begin:" + URL1b.getText() + " end:" + URL1e.getText(), false);
             }
             if (webText.length() > 0) {

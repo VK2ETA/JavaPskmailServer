@@ -245,9 +245,9 @@ public class RMsgDisplayList {
             String group2 = msc.group(2);
             //First look into the To preferences to see if any exist
             String keyStr = fromAlias.replaceAll("=", "");
-            for (int i=0; i < mainpskmailui.toArray.length; i++) {
-                if (mainpskmailui.toArray[i].equals(keyStr)) {
-                    return mainpskmailui.toAliasArray[i];
+            for (int i=0; i < MainPskmailUi.toArray.length; i++) {
+                if (MainPskmailUi.toArray[i].equals(keyStr)) {
+                    return MainPskmailUi.toAliasArray[i];
                 }
             }
             //Otherwise might have been deleted, look into message history

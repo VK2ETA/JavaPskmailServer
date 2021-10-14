@@ -81,7 +81,7 @@ public class MessageHeaderViewTableModel extends AbstractTableModel{
 
     @Override
      public void setValueAt(Object value, int row, int column) {
-         email mymail = (email)dataVector.get(row);
+         Email mymail = (Email)dataVector.get(row);
          fireTableCellUpdated(row, column);
      }
 

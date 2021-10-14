@@ -76,7 +76,9 @@ public class RMsgProcessor {
     static int cpuload;
 
     // Error handling and logging object
-    static loggingclass log;
+    static LoggingClass log;
+    
+    static boolean alreadyWarned = false;
 
     public static void processor() {
         //Nothing as this is a service
@@ -307,9 +309,9 @@ public class RMsgProcessor {
             if (mMessage.picture != null) {
                 MimeBodyPart attachPart = new MimeBodyPart();
                 try {
-                    String fullPath = Main.HomePath
-                            + Main.Dirprefix + Main.DirImages
-                            + Main.Separator + mMessage.fileName.replace(".txt", ".png");
+                    String fullPath = Main.homePath
+                            + Main.dirPrefix + Main.dirImages
+                            + Main.separator + mMessage.fileName.replace(".txt", ".png");
                     attachPart.attachFile(fullPath);
                 } catch (IOException ex) {
                     ex.printStackTrace();
@@ -516,9 +518,10 @@ public class RMsgProcessor {
                             try {
                                 if (folder instanceof IMAPFolder) {
                                     IMAPFolder f = (IMAPFolder) folder;
-                                    System.out.println("Entering first idle()");
+                                    //System.out.println("Entering first idle()");
+                                    Main.q.Message("Monitoring New Email Messages", 5);
                                     f.idle();
-                                    System.out.println("First idle() completed, must have got new mail");
+                                    //System.out.println("First idle() completed, must have got new mail");
                                     supportsIdle = true;
                                 }
                             } catch (FolderClosedException fex) {
@@ -530,7 +533,7 @@ public class RMsgProcessor {
                                 if (supportsIdle && folder instanceof IMAPFolder) {
                                     IMAPFolder f = (IMAPFolder) folder;
                                     f.idle();
-                                    System.out.println("idle() completed, must have got new mail");
+                                    //System.out.println("idle() completed, must have got new mail");
                                 } else {
                                     Thread.sleep(freq); // sleep for freq milliseconds
                                     // This is to force the IMAP server to send us
@@ -542,8 +545,16 @@ public class RMsgProcessor {
                             Exception e1 = e; //for debug
                             //We have lost the connection with the server, restart the NewMailMonitor processing
                             keepInLoop = true;
-                            System.out.println("Restarting NewMailMonitor loop");
-                            //do something maybe
+                            if (!alreadyWarned) {
+                                Main.q.Message("Can't connect to Imap server", 5);
+                                alreadyWarned = true;
+                            }
+                            try {
+                                Thread.sleep(10000); //Retry in 10 seconds
+                            } catch (InterruptedException e2) {
+                                //Nothing
+                            }
+                            //System.out.println("Restarting NewMailMonitor loop");
                         } finally {
                             try {
                                 if (folder != null && folder.isOpen()) {
@@ -874,7 +885,7 @@ public class RMsgProcessor {
                         break; //Hard stop: enough to send
                     }
                     //Enqueue message for sorting. Get full message with binary data.
-                    RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.DirInbox, recDisplayItem.mMessage.fileName, true);
+                    RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirInbox, recDisplayItem.mMessage.fileName, true);
                     //Coming from this relay station
                     fullMessage.relay = Main.callsignAsServer.trim();
                     //Remove via information to make sure it is not forwarded
@@ -946,10 +957,10 @@ public class RMsgProcessor {
             javax.mail.Session session = javax.mail.Session.getInstance(props, null); //Conflicts with local Session.java, must be explicit
             store = session.getStore("imaps");
             String imapHost = Main.configuration.getPreference("SERVERIMAPHOST");
-            String emailAddress = Main.configuration.getPreference("SERVEREMAILADDRESS");
+            String userName = Main.configuration.getPreference("SERVERUSERNAME");
             String emailPassword = Main.configuration.getPreference("SERVERPASSWORD");
             //store.connect("imap.googlemail.com",emailAddress, emailPassword);
-            store.connect(imapHost, emailAddress, emailPassword);
+            store.connect(imapHost, userName, emailPassword);
             folder = (IMAPFolder) store.getFolder("inbox");
             if (!folder.isOpen()) {
                 folder.open(Folder.READ_WRITE);
@@ -1073,17 +1084,17 @@ public class RMsgProcessor {
             }
         } catch (Error err) {
             err.printStackTrace();
-            Main.log.writelog("Error accessing Folder: " + err.getMessage() + "\n", true);
+            Main.log.writelog("Error accessing Folder: " + err.getMessage() + "\n", false);
             //throw (err);
         } catch (FolderNotFoundException e) {
             Exception e1 = e;
-            Main.log.writelog("E-mail folder not found: " + e1.getMessage() + "\n", true);
+            Main.log.writelog("E-mail folder not found: " + e1.getMessage() + "\n", false);
         } catch (MessagingException e) {
             Exception e1 = e;
-            Main.log.writelog("Error accessing emails: " + e1.getMessage() + "\n", true);
+            Main.log.writelog("Error accessing emails: " + e1.getMessage() + "\n", false);
         } catch (Exception e) {
             Exception e1 = e;
-            Main.log.writelog("Error accessing emails: " + e1.getMessage() + "\n", true);
+            Main.log.writelog("Error accessing emails: " + e1.getMessage() + "\n", false);
         } finally {
             try {
                 if (folder != null && folder.isOpen()) {
@@ -1172,7 +1183,7 @@ public class RMsgProcessor {
                         break; //Hard stop: enough to send
                     }
                     //Enqueue message for sorting. Get full message with binary data.
-                    RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.DirSent, recDisplayItem.mMessage.fileName, true);
+                    RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirSent, recDisplayItem.mMessage.fileName, true);
                     //Coming from this relay station
                     if (fullMessage.from.equals(Main.callsignAsServer.toLowerCase(Locale.US).trim())) {
                         fullMessage.relay = "";
@@ -1434,8 +1445,8 @@ public class RMsgProcessor {
                             //Save message as received, display it and see what we can do with it
                             resultString = mMessage.rawRxString;
                         }
-                        String inboxFolderPath = Main.HomePath
-                                + Main.Dirprefix + Main.DirInbox + Main.Separator;
+                        String inboxFolderPath = Main.homePath
+                                + Main.dirPrefix + Main.dirInbox + Main.separator;
                         File msgReceivedFile = new File(inboxFolderPath + mMessage.fileName);
                         if (msgReceivedFile.exists()) {
                             msgReceivedFile.delete();
@@ -1550,15 +1561,15 @@ public class RMsgProcessor {
                                 if (messageAuthorized && msc.find()) {
                                     muteUnmute = msc.group(1);
                                     if (muteUnmute.equals("mute")) {
-                                        Main.WantRelayEmailsImmediat = false;
-                                        Main.WantRelaySMSsImmediat = false;
+                                        Main.wantRelayEmailsImmediat = false;
+                                        Main.wantRelaySMSsImmediat = false;
                                         cmdOk = true;
                                     } else if (muteUnmute.equals("unmute")) {
                                         if (Main.configuration.getPreference("RELAYEMAILSIMMEDIATELY", "no").equals("yes")) {
-                                            Main.WantRelayEmailsImmediat = true;
+                                            Main.wantRelayEmailsImmediat = true;
                                         }
                                         if (Main.configuration.getPreference("RELAYSMSSIMMEDIATELY", "no").equals("yes")) {
-                                            Main.WantRelaySMSsImmediat = true;
+                                            Main.wantRelaySMSsImmediat = true;
                                         }
                                         cmdOk = true;
                                     }
@@ -1584,9 +1595,6 @@ public class RMsgProcessor {
                             //Resend limit is hard coded to 20 messages to be resent
                             if (matchMyCallWith(mMessage.via, false) ||
                                     (matchMyCallWith(mMessage.to, false) && mMessage.via.equals(""))) {
-                                //Not used anymore
-                                //boolean directRequest = (matchMyCallWith(mMessage.to, false)
-                                //        && mMessage.via.equals(""));
                                 //Only properly received (and secured) messages
                                 if (messageAuthorized) {
                                     RMsgUtil.sendBeeps(true);
@@ -1598,7 +1606,7 @@ public class RMsgProcessor {
                                             String extractedStr = mMessage.sms.substring(6).replaceAll("[^0-9]", "");
                                             //Any number following or preceding
                                             numberOf = Integer.valueOf(extractedStr);
-                                        } catch (Exception e) {
+                                        } catch (NumberFormatException e) {
                                             numberOf = 1;
                                         }
                                     }
@@ -1608,11 +1616,13 @@ public class RMsgProcessor {
                                     // "p" for last X position reports only, "a" for last X sms from "all" as in for a third party,
                                     // "e" for last e-Mails (short version), "f" for last e-Mails (fuller version),
                                     // "le" for last e-Mails since last qtc (short version), "lf" for last e-Mails since last qtc (fuller version),
+                                    //"w" for Radio based messages only (no email, no Sms)
                                     Long forLast = 0L;
                                     Boolean forAll = false;
                                     Boolean emailRequest = false;
                                     Boolean positionsOnly = false;
                                     Boolean forceRelaying = false;
+                                    Boolean radioWaveOnly = false;
                                     String extractedStr = "";
                                     if (mMessage.sms.length() > 6) {
                                         extractedStr = mMessage.sms.substring(6).replaceAll("[^a-zA-Z]", "").toLowerCase(Locale.US);
@@ -1631,27 +1641,31 @@ public class RMsgProcessor {
                                             numberOf = -1;
                                         } else if (extractedStr.contains("a")) { //All messages even if for someone else
                                             forAll = true;
-                                        } else if (extractedStr.contains("r")) { //Just force relaying this message to the final destination
-                                            forceRelaying = true;
-                                        } else if (extractedStr.startsWith("e") & Main.WantRelayEmails) { //E-Mail messages request (short version)
+                                        } else if (extractedStr.startsWith("e") & Main.wantRelayEmails) { //E-Mail messages request (short version)
                                             emailRequest = true;
-                                        } else if (extractedStr.startsWith("f") & Main.WantRelayEmails) { //E-Mail messages request (Full(er) version)
+                                        } else if (extractedStr.startsWith("f") & Main.wantRelayEmails) { //E-Mail messages request (Full(er) version)
                                             emailRequest = true;
-                                        } else if (extractedStr.startsWith("le") & Main.WantRelayEmails) { //E-Mail messages request (short version)
+                                        } else if (extractedStr.startsWith("le") & Main.wantRelayEmails) { //E-Mail messages request (short version)
                                             emailRequest = true;
                                             numberOf = -1;
-                                        } else if (extractedStr.startsWith("lf") & Main.WantRelayEmails) { //E-Mail messages request (Full(er) version)
+                                        } else if (extractedStr.startsWith("lf") & Main.wantRelayEmails) { //E-Mail messages request (Full(er) version)
                                             emailRequest = true;
                                             numberOf = -1;
                                         }
+                                        if (extractedStr.contains("w")) { //only radio received/transmitted messages (no-email)
+                                            radioWaveOnly = true;
+                                        }
+                                        if (extractedStr.contains("r")) { //Just force relaying this message to the final destination
+                                            forceRelaying = true;
+                                        }
                                     }
                                     //Are we asked to relay that QTC message to it's destination?
-                                    if (Main.WantRelayOverRadio && forceRelaying && !matchMyCallWith(mMessage.to, false) 
+                                    if (Main.wantRelayOverRadio && forceRelaying && !matchMyCallWith(mMessage.to, false) 
                                             && matchMyCallWith(mMessage.via, false)) {
                                         //Remove the "r" from the string and forward the rest of the QTC request as is
                                         extractedStr = mMessage.sms.substring(6).replaceAll("r", "");
                                         //Get full message with binary data
-                                        RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.DirInbox, mMessage.fileName, true);
+                                        RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirInbox, mMessage.fileName, true);
                                         //Add relay and remove via information
                                         fullMessage.relay = fullMessage.via;
                                         fullMessage.via = "";
@@ -1671,13 +1685,13 @@ public class RMsgProcessor {
                                         ArrayList<RMsgObject> resendList = new ArrayList<RMsgObject>();
                                         //What type of qtc did we receive?
                                         //process email request
-                                        if (Main.WantRelayOverRadio && !emailRequest) {
+                                        if (Main.wantRelayOverRadio && !emailRequest) {
                                             resendList = buildNonEmailResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
                                         }
                                         //We are repeating existing received messages
                                         // & (Main.WantRelayEmails | Main.WantRelaySMSs | Main.WantRelayOverRadio)
                                         ArrayList<RMsgObject> emailList;
-                                        if ((Main.WantRelayEmails || Main.WantRelaySMSs) && !positionsOnly) {
+                                        if ((Main.wantRelayEmails || Main.wantRelaySMSs) && !positionsOnly && !radioWaveOnly) {
                                             emailList = buildEmailResendList(mMessage, numberOf, extractedStr.endsWith("f"), forAll);
                                             resendList.addAll(emailList);
                                         }
@@ -1729,10 +1743,10 @@ public class RMsgProcessor {
                                 String toStr = RMsgUtil.extractDestination(mMessage.to);
                                 //Looks like an email address? Send via internet as email
                                 if (isEmail(toStr)) {
-                                    if (messageAuthorized & Main.WantRelayEmails) {
+                                    if (messageAuthorized & Main.wantRelayEmails) {
                                         RMsgUtil.sendBeeps(true);
                                         //Get full message with binary data
-                                        RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.DirInbox, mMessage.fileName, true);
+                                        RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirInbox, mMessage.fileName, true);
                                         //remove alias prefix 
                                         fullMessage.to = RMsgUtil.extractDestination(fullMessage.to);
                                         //Only forward properly received (and secured) messages
@@ -1747,9 +1761,9 @@ public class RMsgProcessor {
                                     //Added +XXXnnnnnnnnnnn country code style
                                     //tbf if (config.getPreferenceB("SMSSENDRELAY", false)) {
                                     //Get the full message including any picture (as saved on file)
-                                    if (messageAuthorized & Main.WantRelaySMSs) {
+                                    if (messageAuthorized & Main.wantRelaySMSs) {
                                         RMsgUtil.sendBeeps(true);
-                                        RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.DirInbox, mMessage.fileName, true);
+                                        RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirInbox, mMessage.fileName, true);
                                         //remove alias prefix 
                                         fullMessage.to = RMsgUtil.extractDestination(fullMessage.to);
                                         //Only forward properly received (and secured) messages
@@ -1762,10 +1776,10 @@ public class RMsgProcessor {
                                     //}
                                 } else if (toStr.equals("*") || mMessage.to.length() > 0) { //To ALL or at least one character call-sign or name? Send over Radio
                                     //Only forward properly received messages (allows relay over radio even if access password is not supplied)
-                                    if ((mMessage.crcValid || mMessage.crcValidWithPW) && Main.WantRelayOverRadio) {
+                                    if ((mMessage.crcValid || mMessage.crcValidWithPW) && Main.wantRelayOverRadio) {
                                         RMsgUtil.sendBeeps(true);
                                         //Get full message with binary data
-                                        RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.DirInbox, mMessage.fileName, true);
+                                        RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirInbox, mMessage.fileName, true);
                                         //Add relay and remove via information
                                         fullMessage.relay = fullMessage.via;
                                         fullMessage.via = "";
@@ -1873,7 +1887,7 @@ public class RMsgProcessor {
         //           File consolelog = new File (HomePath + Dirprefix + "logfile");
         try {
             // Create file
-            FileWriter logstream = new FileWriter(Main.HomePath + Main.Dirprefix + "logfile", true);
+            FileWriter logstream = new FileWriter(Main.homePath + Main.dirPrefix + "logfile", true);
             BufferedWriter out = new BufferedWriter(logstream);
 
             out.write(myTime() + " " + logtext + "\n");

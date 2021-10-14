@@ -158,7 +158,7 @@ public class FrequencyHelper extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(18, 28, 0, 0);
         getContentPane().add(jLabel4, gridBagConstraints);
 
-        lblDialFq.setFont(new java.awt.Font("Ubuntu", 1, 15));
+        lblDialFq.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
         lblDialFq.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblDialFq.setText(bundle.getString("FrequencyHelper.lblDialFq.text")); // NOI18N
         lblDialFq.setBorder(javax.swing.BorderFactory.createEtchedBorder());

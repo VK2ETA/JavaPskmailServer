@@ -27,9 +27,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import static javapskmail.modemmodeenum.CTSTIA;
-import static javapskmail.modemmodeenum.PSK125RC4;
-import static javapskmail.modemmodeenum.DOMINOEX5;
+import static javapskmail.ModemModesEnum.CTSTIA;
+import static javapskmail.ModemModesEnum.PSK125RC4;
+import static javapskmail.ModemModesEnum.DOMINOEX5;
 import javax.swing.SwingUtilities;
 
 /**
@@ -49,7 +49,7 @@ public class Modem implements Runnable {
     public String outLine = "";
     public PrintWriter pout;
     public InputStream in;
-    static config configuration; // Static config object
+    static Config configuration; // Static config object
     static final int MAXQUEUE = 8;
     private Vector<String> messages = new Vector<String>();
     private String BlockString;
@@ -75,29 +75,29 @@ public class Modem implements Runnable {
         "BPSK1000>", "PSK63RC5>", "PSK63RC10>", "PSK250RC3>",
         "PSK125RC4>", "DominoEX 22>", "DominoEX 11>"};
 
-    public final modemmodeenum[] pmodes = {modemmodeenum.PSK500R,
-        modemmodeenum.THOR8,
-        modemmodeenum.MFSK16,
-        modemmodeenum.THOR22,
-        modemmodeenum.MFSK32,
-        modemmodeenum.PSK250R,
-        modemmodeenum.PSK500R,
-        modemmodeenum.PSK500,
-        modemmodeenum.PSK250,
-        modemmodeenum.PSK125,
-        modemmodeenum.PSK63,
-        modemmodeenum.PSK125R,
-        modemmodeenum.MFSK64,
-        modemmodeenum.THOR11,
-        modemmodeenum.DOMINOEX5,
-        modemmodeenum.CTSTIA,
-        modemmodeenum.PSK1000,
-        modemmodeenum.PSK63RC5,
-        modemmodeenum.PSK63RC10,
-        modemmodeenum.PSK250RC3,
-        modemmodeenum.PSK125RC4,
-        modemmodeenum.DOMINOEX22,
-        modemmodeenum.DOMINOEX11,};
+    public final ModemModesEnum[] pmodes = {ModemModesEnum.PSK500R,
+        ModemModesEnum.THOR8,
+        ModemModesEnum.MFSK16,
+        ModemModesEnum.THOR22,
+        ModemModesEnum.MFSK32,
+        ModemModesEnum.PSK250R,
+        ModemModesEnum.PSK500R,
+        ModemModesEnum.PSK500,
+        ModemModesEnum.PSK250,
+        ModemModesEnum.PSK125,
+        ModemModesEnum.PSK63,
+        ModemModesEnum.PSK125R,
+        ModemModesEnum.MFSK64,
+        ModemModesEnum.THOR11,
+        ModemModesEnum.DOMINOEX5,
+        ModemModesEnum.CTSTIA,
+        ModemModesEnum.PSK1000,
+        ModemModesEnum.PSK63RC5,
+        ModemModesEnum.PSK63RC10,
+        ModemModesEnum.PSK250RC3,
+        ModemModesEnum.PSK125RC4,
+        ModemModesEnum.DOMINOEX22,
+        ModemModesEnum.DOMINOEX11,};
     public final String[] smodes = {"     ", "THOR8", "MFSK16", "THOR22", "MFSK32", "PSK250R",
         "PSK500R", "PSK500", "PSK250", "PSK125",
         "PSK63", "PSK125R", "MFSK64", "THOR11", "DOMINOEX5", "CTSTIA", "PSK1000",
@@ -225,7 +225,7 @@ public class Modem implements Runnable {
                 Main.lastModemCharTime = System.currentTimeMillis();
                 //int exitCode = fldigiProc.waitFor();
                 //(re-)init Rigctl
-                Rigctl.Rigctl();
+                RigCtrl.Rigctl();
             } else if (launchResult == +1) {
                 Main.log.writelog("Can't Launch Fldigi, check program path and name in options", true);
             }
@@ -415,7 +415,7 @@ public class Modem implements Runnable {
         //debug
         fldigiLaunchThread.interrupt();
         //Reset transmit flag so that we return to Rx strait away
-        Main.TXActive = false;
+        Main.TxActive = false;
         return result;
     }
  
@@ -468,7 +468,7 @@ public class Modem implements Runnable {
         return result;
     }
    
-    public String getTXModemString(modemmodeenum mode) {
+    public String getTXModemString(ModemModesEnum mode) {
         try {
             String Txmodemstring = "";
             Txmodemstring = getModemString(mode);
@@ -485,7 +485,7 @@ public class Modem implements Runnable {
         String rsidstart = "<cmd><rsid>";
         String rsidend = "</rsid></cmd>";
         if (!s.equals("")) {
-            Main.SendCommand += (rsidstart + s + rsidend);
+            Main.sendCommand += (rsidstart + s + rsidend);
         }
     }
 
@@ -497,7 +497,7 @@ public class Modem implements Runnable {
         String txrsidstart = "<cmd><txrsid>";
         String txrsidend = "</txrsid></cmd>";
         if (!s.equals("")) {
-            Main.SendCommand += (txrsidstart + s + txrsidend);
+            Main.sendCommand += (txrsidstart + s + txrsidend);
         }
     }
    
@@ -511,7 +511,7 @@ public class Modem implements Runnable {
     /**
      * Send a mode command to the modem
      */
-    public void setModemModeNow(modemmodeenum mode) throws NullPointerException {
+    public void setModemModeNow(ModemModesEnum mode) throws NullPointerException {
         String modeset = "";
 
         try {
@@ -582,7 +582,7 @@ public class Modem implements Runnable {
         }
 
         if (!modeset.equals("")) {
-            if (Main.Status.equals("Connected") && !Main.q.equals(modeset)) {
+            if (Main.status.equals("Connected") && !Main.q.equals(modeset)) {
                 // During connected state
                 //             Main.TX_Text += connstr + "\n";                
             } else {
@@ -666,7 +666,7 @@ public class Modem implements Runnable {
         }
     }
 
-    public String getModemString(modemmodeenum mode) {
+    public String getModemString(ModemModesEnum mode) {
         int i;
         String modemString = "unknown";
         for (i = 1; i < pmodes.length; i++) {
@@ -679,7 +679,7 @@ public class Modem implements Runnable {
         return "";
     }
 
-    public String getAltModemString(modemmodeenum mode) {
+    public String getAltModemString(ModemModesEnum mode) {
         int i;
         String modemString = "unknown";
         for (i = 1; i < 9; i++) {
@@ -692,66 +692,66 @@ public class Modem implements Runnable {
     }
 
     public void setcurrentmodetable(String modes) {
-        for (int i = 0; i < Main.Currentmodes.length; i++) {
-            Main.Currentmodes[i] = "      ";
+        for (int i = 0; i < Main.currentModes.length; i++) {
+            Main.currentModes[i] = "      ";
         }
 
         for (int i = 0; i < modes.length(); i++) {
             if (modes.substring(i, i + 1).equals("0")) {
-                Main.Modes[modes.length() - i] = "default";
+                Main.modes[modes.length() - i] = "default";
             } else if (modes.substring(i, i + 1).equals("1")) {
-                Main.Modes[modes.length() - i] = "THOR8";
+                Main.modes[modes.length() - i] = "THOR8";
             } else if (modes.substring(i, i + 1).equals("2")) {
-                Main.Modes[modes.length() - i] = "MFSK16";
+                Main.modes[modes.length() - i] = "MFSK16";
             } else if (modes.substring(i, i + 1).equals("3")) {
-                Main.Modes[modes.length() - i] = "THOR22";
+                Main.modes[modes.length() - i] = "THOR22";
             } else if (modes.substring(i, i + 1).equals("4")) {
-                Main.Modes[modes.length() - i] = "MFSK32";
+                Main.modes[modes.length() - i] = "MFSK32";
             } else if (modes.substring(i, i + 1).equals("5")) {
-                Main.Modes[modes.length() - i] = "PSK250R";
+                Main.modes[modes.length() - i] = "PSK250R";
             } else if (modes.substring(i, i + 1).equals("6")) {
-                Main.Modes[modes.length() - i] = "PSK500R";
+                Main.modes[modes.length() - i] = "PSK500R";
             } else if (modes.substring(i, i + 1).equals("7")) {
-                Main.Modes[modes.length() - i] = "PSK500";
+                Main.modes[modes.length() - i] = "PSK500";
             } else if (modes.substring(i, i + 1).equals("8")) {
-                Main.Modes[modes.length() - i] = "PSK250";
+                Main.modes[modes.length() - i] = "PSK250";
             } else if (modes.substring(i, i + 1).equals("9")) {
-                Main.Modes[modes.length() - i] = "PSK125";
+                Main.modes[modes.length() - i] = "PSK125";
             } else if (modes.substring(i, i + 1).equals("a")) {
-                Main.Modes[modes.length() - i] = "PSK63";
+                Main.modes[modes.length() - i] = "PSK63";
             } else if (modes.substring(i, i + 1).equals("b")) {
-                Main.Modes[modes.length() - i] = "PSK125R";
+                Main.modes[modes.length() - i] = "PSK125R";
             } else if (modes.substring(i, i + 1).equals("c")) {
-                Main.Modes[modes.length() - i] = "MFSK64";
+                Main.modes[modes.length() - i] = "MFSK64";
             } else if (modes.substring(i, i + 1).equals("d")) {
-                Main.Modes[modes.length() - i] = "THOR11";
+                Main.modes[modes.length() - i] = "THOR11";
             } else if (modes.substring(i, i + 1).equals("n")) {
-                Main.Modes[modes.length() - i] = "DOMINOEX5";
+                Main.modes[modes.length() - i] = "DOMINOEX5";
             } else if (modes.substring(i, i + 1).equals("f")) {
-                Main.Modes[modes.length() - i] = "CTSTIA";
+                Main.modes[modes.length() - i] = "CTSTIA";
             } else if (modes.substring(i, i + 1).equals("g")) {
-                Main.Modes[modes.length() - i] = "PSK1000";
+                Main.modes[modes.length() - i] = "PSK1000";
             } else if (modes.substring(i, i + 1).equals("h")) {
-                Main.Modes[modes.length() - i] = "PSK63RC5";
+                Main.modes[modes.length() - i] = "PSK63RC5";
             } else if (modes.substring(i, i + 1).equals("i")) {
-                Main.Modes[modes.length() - i] = "PSK63RC10";
+                Main.modes[modes.length() - i] = "PSK63RC10";
             } else if (modes.substring(i, i + 1).equals("j")) {
-                Main.Modes[modes.length() - i] = "PSK250RC3";
+                Main.modes[modes.length() - i] = "PSK250RC3";
             } else if (modes.substring(i, i + 1).equals("k")) {
-                Main.Modes[modes.length() - i] = "PSK125RC4";
+                Main.modes[modes.length() - i] = "PSK125RC4";
             } else if (modes.substring(i, i + 1).equals("l")) {
-                Main.Modes[modes.length() - i] = "DOMINOEX22";
+                Main.modes[modes.length() - i] = "DOMINOEX22";
             } else if (modes.substring(i, i + 1).equals("m")) {
-                Main.Modes[modes.length() - i] = "DOMINOEX11";
+                Main.modes[modes.length() - i] = "DOMINOEX11";
             }
 //          System.out.println(Main.Modes[modes.length() - i]);
-            Main.Currentmodes = Main.Modes;
+            Main.currentModes = Main.modes;
         }
     }
 
-    public modemmodeenum getModeOffList(int index) {
-        modemmodeenum mode = Main.defaultmode;
-        String mymodem = Main.Currentmodes[index];
+    public ModemModesEnum getModeOffList(int index) {
+        ModemModesEnum mode = Main.defaultmode;
+        String mymodem = Main.currentModes[index];
         //for (int i = 0; i < Main.Currentmodes.length; i++) {
             //System.out.println(Main.Currentmodes[i]);
         //}
@@ -759,52 +759,52 @@ public class Modem implements Runnable {
         //  System.out.println("modem:" + mymodem);
 
         if (mymodem.equals("THOR8")) {
-            mode = modemmodeenum.THOR8;
+            mode = ModemModesEnum.THOR8;
         } else if (mymodem.equals("MFSK16")) {
-            mode = modemmodeenum.MFSK16;
+            mode = ModemModesEnum.MFSK16;
         } else if (mymodem.equals("THOR22")) {
-            mode = modemmodeenum.THOR22;
+            mode = ModemModesEnum.THOR22;
         } else if (mymodem.equals("MFSK32")) {
-            mode = modemmodeenum.MFSK32;
+            mode = ModemModesEnum.MFSK32;
         } else if (mymodem.equals("PSK250R")) {
-            mode = modemmodeenum.PSK250R;
+            mode = ModemModesEnum.PSK250R;
         } else if (mymodem.equals("PSK500R")) {
-            mode = modemmodeenum.PSK500R;
+            mode = ModemModesEnum.PSK500R;
         } else if (mymodem.equals("PSK500")) {
-            mode = modemmodeenum.PSK500;
+            mode = ModemModesEnum.PSK500;
         } else if (mymodem.equals("PSK250")) {
-            mode = modemmodeenum.PSK250;
+            mode = ModemModesEnum.PSK250;
         } else if (mymodem.equals("PSK125")) {
-            mode = modemmodeenum.PSK125;
+            mode = ModemModesEnum.PSK125;
         } else if (mymodem.equals("PSK63")) {
-            mode = modemmodeenum.PSK63;
+            mode = ModemModesEnum.PSK63;
         } else if (mymodem.equals("PSK125R")) {
-            mode = modemmodeenum.PSK125R;
+            mode = ModemModesEnum.PSK125R;
         } else if (mymodem.equals("MFSK64")) {
-            mode = modemmodeenum.MFSK64;
+            mode = ModemModesEnum.MFSK64;
         } else if (mymodem.equals("THOR11")) {
-            mode = modemmodeenum.THOR11;
+            mode = ModemModesEnum.THOR11;
         } else if (mymodem.equals("DOMINOEX5")) {
-            mode = modemmodeenum.DOMINOEX5;
+            mode = ModemModesEnum.DOMINOEX5;
         } else if (mymodem.equals("CTSTIA")) {
-            mode = modemmodeenum.CTSTIA;
+            mode = ModemModesEnum.CTSTIA;
         } else if (mymodem.equals("PSK63RC5")) {
-            mode = modemmodeenum.PSK63RC5;
+            mode = ModemModesEnum.PSK63RC5;
         } else if (mymodem.equals("PSK63RC10")) {
-            mode = modemmodeenum.PSK63RC10;
+            mode = ModemModesEnum.PSK63RC10;
         } else if (mymodem.equals("PSK250RC3")) {
-            mode = modemmodeenum.PSK250RC3;
+            mode = ModemModesEnum.PSK250RC3;
         } else if (mymodem.equals("PSK125RC4")) {
-            mode = modemmodeenum.PSK125RC4;
+            mode = ModemModesEnum.PSK125RC4;
         } else if (mymodem.equals("DOMINOEX22")) {
-            mode = modemmodeenum.DOMINOEX22;
+            mode = ModemModesEnum.DOMINOEX22;
         } else if (mymodem.equals("DOMINOEX11")) {
-            mode = modemmodeenum.DOMINOEX11;
+            mode = ModemModesEnum.DOMINOEX11;
         }
         return mode;
     }
 
-    public int getModemPos(modemmodeenum mode) {
+    public int getModemPos(ModemModesEnum mode) {
         int i;
         int modemPos = 0;
         for (i = 1; i < 9; i++) {
@@ -817,7 +817,7 @@ public class Modem implements Runnable {
     }
 
     //VK2ETA fix this for alt modes
-    public int getAltModemPos(modemmodeenum mode) {
+    public int getAltModemPos(ModemModesEnum mode) {
         int i;
         int modemPos = 0;
         for (i = 1; i < 9; i++) {
@@ -830,7 +830,7 @@ public class Modem implements Runnable {
     }
 
     //Returns the theoretical blocktime so that timings are correct when we change RX modes
-    public int getBlockTime(modemmodeenum mode) {
+    public int getBlockTime(ModemModesEnum mode) {
         double cps = 2;
         double myblocktime = 0;
 
@@ -997,11 +997,11 @@ public class Modem implements Runnable {
                 }
             }
             myChar = (char) back;
-            if (myChar == 2) {
-                Main.stxflag = false;
-            }
-//         System.out.println( back);
-//         System.out.println( myChar);
+            //if (myChar == 2) {
+            //    Main.stxflag = false;
+            //}
+            //         System.out.println( back);
+            //         System.out.println( myChar);
             return myChar;
         } catch (IOException e) {
             if (!exitingSoon) {
@@ -1076,9 +1076,9 @@ public class Modem implements Runnable {
 
             while (true) {
 
-                if (Main.RxModem == modemmodeenum.CTSTIA) {
+                if (Main.rxModem == ModemModesEnum.CTSTIA) {
                     inChar = GetByte();
-                    modemmodeenum myrxmode = checkMode(inChar);
+                    ModemModesEnum myrxmode = checkMode(inChar);
                     if (inChar > 64 & inChar < 73) {
                         first = inChar - 65;
                         inChar = GetByte();
@@ -1092,8 +1092,8 @@ public class Modem implements Runnable {
                         first = 0;
                         //lst = 0;
                     } else if (inChar == 6) {
-                        if (Main.TXActive) {
-                            Main.TXActive = false;
+                        if (Main.TxActive) {
+                            Main.TxActive = false;
                         }
                     } else {           // no contestia                      
                         inChar = (char) 178;
@@ -1134,8 +1134,8 @@ public class Modem implements Runnable {
                             BlockString += "<SOH>";
                             //We continue on a new block, reset timeout counter
                             Main.oldtime = System.currentTimeMillis();
-                            Main.RXBlocksize = BlockString.length() - 17;
-                            Main.Totalbytes += Main.RXBlocksize;
+                            Main.RxBlockSize = BlockString.length() - 17;
+                            Main.totalBytes += Main.RxBlockSize;
                             try {
                                 putMessage(BlockString);
                                 BlockString = "<SOH>";
@@ -1160,7 +1160,7 @@ public class Modem implements Runnable {
                             BlockString += "<EOT>";
                             //RM reset block reception if active
                             BlockActive = false;
-                            Main.EOTrcv = true;
+                            Main.EotRcved = true;
 //VK2ETA simplify DCD         if (!Main.Connected) {
 //                                Main.DCD = 2;
 //                            } else {
@@ -1179,7 +1179,7 @@ public class Modem implements Runnable {
                     case 6:
                         //Returning from TX
                         //Start timeout count for TTY server mode (but update only once)
-                        if (Main.TXActive) {
+                        if (Main.TxActive) {
                             Main.oldtime = System.currentTimeMillis();
                         }
                         Main.m.receivingStatusBlock = false; //Reset now as there may not be an EOT to reset it
@@ -1189,25 +1189,25 @@ public class Modem implements Runnable {
                         //Main.TXActive = false;
                         if (Main.summoning) {
                             Main.summoning = false;
-                            Main.setFreq(Main.freqstore);
+                            Main.setFreq(Main.freqStore);
                         }
                         //String myrxmodem = Main.RxModemString;
                         //VK2ETA review need for config value usage here (legacy?)
                         //  if (!myrxmodem.equals("") & !Main.configuration.getBlocklength().equals("0")) {
                         //Sendln("<cmd><mode>" + myrxmodem + "</mode></cmd>\n");
-                        Sendln("", Main.RxModemString.trim(), "");
+                        Sendln("", Main.rxModemString.trim(), "");
                         //Reset Rx timeout counter
                         Main.lastCharacterTime = System.currentTimeMillis();
                         //And restart rxdelay counter if we are in a server session
-                        if (!Main.TTYConnected.equals("")) {
-                            Main.RxDelayCount = Main.RxDelay;
+                        if (!Main.ttyConnected.equals("")) {
+                            Main.rxDelayCount = Main.rxDelay;
                         } else {
-                            Main.RxDelayCount = 0.0f; //Make sure it is zero in all other cases
+                            Main.rxDelayCount = 0.0f; //Make sure it is zero in all other cases
                         }
                         //Reset TxRSID as it is OFF by default and needs to be enabled when required
                         Main.m.requestTxRsid("OFF");
                         //Does not solve intermittent TXID issue
-                        Main.TXActive = false;
+                        Main.TxActive = false;
                         //Save Radio  Message in Sent Box
                         saveSentRadioMSg();
                         break;
@@ -1222,7 +1222,7 @@ public class Modem implements Runnable {
                             Main.lastCharacterTime = System.currentTimeMillis();
                             //RM check if we have the start of a RadioMessage block
                             if (!Main.receivingRadioMsg) {
-                                Matcher msc = RXBlock.validRMsgHeader.matcher(BlockString);
+                                Matcher msc = RxBlock.validRMsgHeader.matcher(BlockString);
                                 if (msc.find()) {
                                     //Processor.CrcString = msc.group(1);
                                     Main.receivingRadioMsg = true;
@@ -1269,7 +1269,7 @@ public class Modem implements Runnable {
                                 } else { //We must have received an RSID                         
                                     Main.possibleRadioMsg = System.currentTimeMillis();
                                     //Open squelch...a frame may be coming
-                                    Rigctl.SetSql(Main.sqlfloor);
+                                    RigCtrl.SetSql(Main.SQL_FLOOR);
                                     //Reset receiving radio message as we are getting a new message in all logic and the RSID would have resetted the modem anyway
                                     Main.receivingRadioMsg = false;
                                     Main.haveSOH = false;
@@ -1289,16 +1289,16 @@ public class Modem implements Runnable {
                                                 //With average
                                                 //Main.RxDelay = decayAverage(Main.RxDelay, validPskmailRxDelay, 3);
                                                 //Without average
-                                                Main.RxDelay = validPskmailRxDelay + 0; //Allow for RSID silence and processing
+                                                Main.rxDelay = validPskmailRxDelay + 0; //Allow for RSID silence and processing
                                             }
                                         }
-                                        Main.RxModem = pmodes[mi];
-                                        Main.RxModemString = smodes[mi];
+                                        Main.rxModem = pmodes[mi];
+                                        Main.rxModemString = smodes[mi];
                                         //Mark time when we received an RSID to block mode and 
                                         // frequency change until we are sure we are not receiving a
                                         // Radio Message.
                                     } else if (mi == 0) { //False alarm, not a valid RSID or not a unsupported mode
-                                        Main.TxModem = Main.RxModem;
+                                        Main.txModem = Main.rxModem;
                                     }
                                 }
                                 notifier = "";
@@ -1331,7 +1331,7 @@ public class Modem implements Runnable {
                 //Resets if invalid characters are found in the address line, or it is longer than 52 characters
                 if (BlockActive && !Main.receivingRadioMsg
                         && BlockString.length() > 3) {
-                    Matcher msc = RXBlock.invalidCharsInHeaderPattern.matcher(BlockString);
+                    Matcher msc = RxBlock.invalidCharsInHeaderPattern.matcher(BlockString);
                     if (msc.find() || BlockString.length() > 52) {
                         //Reset time of RSID since we now know it CANNOT be a Radio Message.
                         Main.possibleRadioMsg = 0L;
@@ -1364,14 +1364,14 @@ public class Modem implements Runnable {
         return modemindex;
     }
 
-    public modemmodeenum getModeFromIndex(int modemindex) {
-        modemmodeenum outmode = modemmodeenum.PSK500R;
-        int maxmodems = Main.Currentmodes.length;
+    public ModemModesEnum getModeFromIndex(int modemindex) {
+        ModemModesEnum outmode = ModemModesEnum.PSK500R;
+        int maxmodems = Main.currentModes.length;
 
         if (modemindex >= 0 & modemindex <= maxmodems) {
             outmode = getModeOffList(modemindex);
         } else {
-            outmode = Main.TxModem;
+            outmode = Main.txModem;
         }
 
         return outmode;
@@ -1385,8 +1385,8 @@ public class Modem implements Runnable {
                 Logger.getLogger(Modem.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        Main.monitor += Character.toString(inchar);
-        Main.Accu += Character.toString(inchar);
+        Main.monitorText += Character.toString(inchar);
+        //Main.Accu += Character.toString(inchar);
     }
 
     public void WriteToMonitor(String instr) {
@@ -1397,7 +1397,7 @@ public class Modem implements Runnable {
                 Logger.getLogger(Modem.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        Main.monitor += instr;
+        Main.monitorText += instr;
     }
 
     /* Not Used
@@ -1478,8 +1478,8 @@ public class Modem implements Runnable {
                     + String.format(Locale.US, "%02d%02d%02d", c1.get(Calendar.HOUR_OF_DAY),
                             c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND)) + ".txt";
             //Save the text part of the message
-            String sentFolderPath = Main.HomePath
-                    + Main.Dirprefix + Main.DirSent + Main.Separator;
+            String sentFolderPath = Main.homePath
+                    + Main.dirPrefix + Main.dirSent + Main.separator;
             txedMessage.fileName = sentFileNameString;
             File msgSentFile = new File(sentFolderPath + sentFileNameString);
             if (msgSentFile.exists()) {
@@ -1551,8 +1551,8 @@ public class Modem implements Runnable {
         }
     }
   
-    private modemmodeenum checkMode(char c) {
-        modemmodeenum mymode = modemmodeenum.CTSTIA;
+    private ModemModesEnum checkMode(char c) {
+        ModemModesEnum mymode = ModemModesEnum.CTSTIA;
 
         //  "Mode:(.*)>"     
         c_escape = false;
@@ -1579,8 +1579,8 @@ public class Modem implements Runnable {
                 int m = getmodeindex(myaccu);
 
                 mymode = getModeFromIndex(m);
-                Main.RxModem = pmodes[m];
-                Main.RxModemString = smodes[m];
+                Main.rxModem = pmodes[m];
+                Main.rxModemString = smodes[m];
             }
         }
         return mymode;

@@ -29,7 +29,7 @@ import java.awt.Graphics;
  */
 public class AddressEdit extends javax.swing.JDialog {
 
-    private contact myContact;          // Holds the edited contact
+    private Contact myContact;          // Holds the edited contact
     private boolean exitstatus=false;   // Shows if the window was closed using ok or cancel
         
     /** Creates new form AddressEdit */
@@ -514,6 +514,9 @@ public class AddressEdit extends javax.swing.JDialog {
             java.util.logging.Logger.getLogger(AddressEdit.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
+        //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -591,11 +594,11 @@ public class AddressEdit extends javax.swing.JDialog {
         }
     }
     
-    public contact getMyContact() {
+    public Contact getMyContact() {
         return myContact;
     }
 
-    public void setMyContact(contact myContact) {
+    public void setMyContact(Contact myContact) {
         this.myContact = myContact;
         DisplayContact();
     }

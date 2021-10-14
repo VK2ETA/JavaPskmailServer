@@ -25,7 +25,7 @@ public class AddressBookRenderer extends DefaultListCellRenderer {
             Object value, int index, boolean isSelected,
             boolean cellHasFocus) {
         super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-        contact mc = (contact) value;
+        Contact mc = (Contact) value;
         String ds = mc.getFirstName().trim()
                 + " " + mc.getLastName().trim()
                 + " " + ((mc.getHamCallsign().trim().length() > 0) ? mc.getHamCallsign().trim() : mc.getOtherCallsign().trim())

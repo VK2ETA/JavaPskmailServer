@@ -34,11 +34,11 @@ public class MessageViewTableModel extends AbstractTableModel{
      public static final int SIZE_INDEX = 3;
 
      protected String[] columnNames;
-     protected Vector<email> dataVector;
+     protected Vector<Email> dataVector;
 
      public MessageViewTableModel(String[] columnNames) {
          this.columnNames = columnNames;
-         dataVector = new Vector<email>();
+         dataVector = new Vector<Email>();
      }
 
     @Override
@@ -65,7 +65,7 @@ public class MessageViewTableModel extends AbstractTableModel{
      }
 
      public Object getValueAt(int row, int column) {
-         email mymail = (email)dataVector.get(row);
+         Email mymail = (Email)dataVector.get(row);
          switch (column) {
              case FROM_INDEX:
                 return mymail.getFrom();
@@ -82,7 +82,7 @@ public class MessageViewTableModel extends AbstractTableModel{
 
     @Override
      public void setValueAt(Object value, int row, int column) {
-         email mymail = (email)dataVector.get(row);
+         Email mymail = (Email)dataVector.get(row);
          fireTableCellUpdated(row, column);
      }
 
@@ -94,7 +94,7 @@ public class MessageViewTableModel extends AbstractTableModel{
          return columnNames.length;
      }
 
-     public void addRow(email mymail) {
+     public void addRow(Email mymail) {
         boolean add = dataVector.add(mymail);
         if (add){
         fireTableRowsInserted(
@@ -104,7 +104,7 @@ public class MessageViewTableModel extends AbstractTableModel{
      }
 
      public Object getRowObject(int row){
-        email mymail = (email)dataVector.get(row);
+        Email mymail = (Email)dataVector.get(row);
         return mymail;
      }
 

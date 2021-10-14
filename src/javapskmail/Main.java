@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "0.9.9";
-    static String application = "jpskmailserver " + "B" + version;// Used to preset an empty status
-    static String versionDate = "20211010";
+    static String version = "3.0.0.0";
+    static String application = "jPskmail " + version;// Used to preset an empty status
+    static String versionDate = "20211014";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -45,96 +45,93 @@ public class Main {
     static int modemAutoRestartDelay = 0; //In minutes, 10080 = 7 days = once per week by default
     public static boolean justReceivedRSID = false;
     static boolean onWindows = true;
-    static String ModemPreamble = "";  // String to send before each frame
-    static String ModemPostamble = ""; // String to send after each frame
-    static modemmodeenum Mymode = modemmodeenum.PSK500R;
-    static modemmodeenum[] modeprofile;
-    static modemmodeenum linkmode = modemmodeenum.PSK500R;
+    static String modemPreamble = "";  // String to send before each frame
+    static String modemPostamble = ""; // String to send after each frame
+    static ModemModesEnum linkmode = ModemModesEnum.PSK500R;
     static int modemnumber = 0;
-    static modemmodeenum defaultmode = modemmodeenum.PSK500R;
-    static String CurrentModemProfile = "0";
+    static ModemModesEnum defaultmode = ModemModesEnum.PSK500R;
+    static String currentModemProfile = "0";
     static int sending_link = 5;
     static int sending_beacon = 0;
-    static boolean CBeacon = true;
-    static String HomePath = "";
-    static String InstallPath = "";
-    static String Dirprefix = "/.pskmail/";
-    static String Separator = "/";
+    static boolean compBeacon = true;
+    static String homePath = "";
+    static String installPath = "";
+    static String dirPrefix = "/.pskmail/";
+    static String separator = "/";
     //RadioMsg directories
-    static final String DirInbox = "RadioMsgInbox";
-    static final String DirArchive = "RadioMsgArchive";
-    static final String DirSent = "RadioMsgSentbox";
+    static final String dirInbox = "RadioMsgInbox";
+    static final String dirArchive = "RadioMsgArchive";
+    static final String dirSent = "RadioMsgSentbox";
     //static final String DirTemp = "Temp";
     //static final String DirLogs = "Logs";
-    static final String DirImages = "RadioMsg-Images";
+    static final String dirImages = "RadioMsg-Images";
     static final String messageLogFile = "RadioMsg.log";
     //
-    static String Mailoutfile = "";
+    static String mailOutFile = "";
     static File pending = null;
-    static String pendingstr = "";
-    static String Pendingdir = "";
-    static String Outpendingdir = "";
+    static String pendingStr = "";
+    static String pendingDir = "";
+    static String outPendingDir = "";
     static String filetype = "";
     static String myfile = "";
     static String fileDestination = "";
     static File consolelog = null;
-    static String LogFile = "client.log";
-    static String Transactions = "";
+    static String logFile = "client.log";
+    static String transactions = "";
     static boolean compressedmail = false;
-    static boolean Bulletinmode = false;
-    static boolean IACmode = false;
+    static boolean bulletinMode = false;
+    static boolean iacMode = false;
     static boolean comp = false;
     static boolean debug = false;
-    static String Sendline = "";
-    static String SendCommand = "";
+    static String sendLine = "";
+    static String sendCommand = "";
     static String telnethost = "";
     static String telnetport = "";
     static String userid = "";
     static String pass = "";
     static int DCD = 0;
     static int MAXDCD = 3;
-    static int Persistence = 4;
+    //static int Persistence = 4;
     //static boolean BlockActive = false;
-    static boolean EOTrcv = false;
-    static String TXblocklength = "5";
-    static int Maxblocks = 8;
-    static int RXBlocksize = 0;
-    static int Totalbytes = 0;
-    static boolean TXActive = false;
-    static int Second = 30;  // Beacon second
-    static String[] Modes = {"       ", "THOR8", "MFSK16", "THOR22",
+    static boolean EotRcved = false;
+    static String txBlockLength = "5";
+    static int maxBlocks = 8;
+    static int RxBlockSize = 0;
+    static int totalBytes = 0;
+    static boolean TxActive = false;
+    static int second = 30;  // Beacon second
+    static String[] modes = {"       ", "THOR8", "MFSK16", "THOR22",
         "MFSK32", "PSK250R", "PSK500R", "PSK500",
         "PSK250", "PSK63", "PSK125R", "MFSK64", "THOR11",
         "DOMINOEX5", "CTSTIA", "DOMINOEX22", "DOMINOEX11"};
     static String[] AltModes = {"       ", "THOR8", "MFSK16", "THOR22",
         "MFSK32", "PSK125R", "PSK250R", "PSK250", "PSK250", "CTSTIA"};
     @SuppressWarnings("StaticNonFinalUsedInInitialization")
-    static String[] Currentmodes = Modes;
-    static boolean UseAlttable = false;
-    static String modes = "8543"; // PSK250, PSK250R, MFSK32, THOR22
-    static int Bulletin_time = 0;
-    static modemmodeenum TxModem = modemmodeenum.PSK500R;
-    static modemmodeenum RxModem = modemmodeenum.PSK500R;
-    static modemmodeenum Modemarray[];
-    static String RxModemString = "PSK250R";
-    static String DefaultTXmodem = "PSK250R";
-    static String LastRxModem = "PSK250R";
-    static String LastTxModem = "PSK250R";
+    static String[] currentModes = modes;
+    static String modesListStr = "8543"; // PSK250, PSK250R, MFSK32, THOR22
+    static int bulletinTime = 0;
+    static ModemModesEnum txModem = ModemModesEnum.PSK500R;
+    static ModemModesEnum rxModem = ModemModesEnum.PSK500R;
+    static ModemModesEnum[] modemArray;
+    static String rxModemString = "PSK250R";
+    static String defaultTxModem = "PSK250R";
+    static String lastRxModem = "PSK250R";
+    static String lastTxModem = "PSK250R";
     static boolean wantbulletins = true;
 
     // globals to pass info to gui windows
-    static String monitor = "";
-    static boolean Monitor = false;
+    static String monitorText = "";
+    static boolean monitorMode = false;
     static boolean monmutex = false;
     static String mainwindow = "";
     static boolean mainmutex = false;
-    static String MSGwindow = "";
-    static String Mailheaderswindow = "";
-    static String FilesTextArea = "";
-    static String Status = "Listening";
-    static String Statusline = "";
-    static String Accu = "";
-    static int StatusLineTimer;
+    static String msgWindow = "";
+    static String mailHeadersWindow = "";
+    static String filesTextArea = "";
+    static String status = "Listening";
+    static String statusLine = "";
+    //static String Accu = "";
+    static int statusLineTimer;
     static boolean txbusy = false;
     static boolean rxbusy = false;
     static boolean autolink = true;
@@ -142,111 +139,111 @@ public class Main {
     static String protocolstr = "1";
 
     // globals for communication
-    static String Icon;
+    static String icon;
     static String ICONlevel;
-    static int APRSMessageNumber;
-    static String APRS_Server = "netherlands.aprs2.net";
-    static String APRSCall = "";
+    static int aprsMessageNumber;
+    static String aprsServer = "netherlands.aprs2.net";
+    static String aprsCall = "";
     static String mycall;     // mycall from options
     static String myserver;    // myserver from options
     static String myserverpassword; //For mini-server requiring password for access
-    static String TTYCaller;     // TTY caller
-    static String TTYConnected = "";
-    static String TTYmodes = "6";
+    static String ttyCaller;     // TTY caller
+    static String ttyConnected = "";
+    static String ttyModes = "6";
     static String Motd = "";
     static boolean disconnect = false;
     static long Systime;
     static int DCDthrow;
     //RxDelay is the measured delay between the return to Rx of the server and the end of the RSID tx by the client
     static final double initialRxDelay = 2.0f;//Initial 2 seconds delay of RX just in case
-    static double RxDelay = initialRxDelay;
-    static double RxDelayCount = initialRxDelay;
+    static double rxDelay = initialRxDelay;
+    static double rxDelayCount = initialRxDelay;
     static String connectsecond;
     static long oldtime = 0L;
-    static int Missedblocks = 0;
+    static int missedBlocks = 0;
     static long blockval = 0; //msec 
     static int charval = 0; //msecs
     static int chartime = 0;
     static int blocktime; // seconds
     static int idlesecs = 0;
-    static String LastBlockExchange = "  ";
-    static long LastSessionExchangeTime = 0;
+    static String lastBlockExchange = "  ";
+    static long lastSessionExchangeTime = 0;
     static boolean isDisconnected = false;
-    static boolean Connected = false;
+    static boolean connected = false;
     public static boolean connectingPhase = false; //True from connect request until receipt of greeting/Server info
     public static boolean Connecting = false; //True until first acknowledgment of server's connect ack
-    static int Connecting_time = 0;
-    static boolean Aborting = false;
-    static boolean Scanning = false;
+    static int connectingTime = 0;
+    static boolean aborting = false;
+    static boolean scanning = false;
     static boolean linked = false; // flag for link ack
-    static String linkedserver = "";
-    static int[][] rxdata = new int[10][10];
+    static String linkedServer = "";
+    static int[][] rxData = new int[10][10];
     static String session = ""; // present session
-    static String oldsession = "";
+    static String oldSession = "";
     static String[] sessions = new String[64];
-    static boolean validblock = true;
-    static String myrxstatus = "   "; // last rx status
-    static String TX_Text; // output queue
-    static int Progress = 0;
-    static String DataSize = "";
+    static boolean validBlock = true;
+    static String myRxStatus = "   "; // last rx status
+    static String txText; // output queue
+    static int progress = 0;
+    static String dataSize = "";
     final static int MAXNEWSERVERS = 100; //100 additional servers heard on the air
-    static String Servers[] = {""};
-    static String ServersPasswords[] = {""};
-    static double AvgTxMissing = 0;
-    static double AvgRxMissing = 0;
-    static double hiss2n = 50;
-    static double mys2n = 50;
+    static String[] serversArray = {""};
+    static String[] serversPasswordArray = {""};
+    static double avgTxMissing = 0;
+    static double avgRxMissing = 0;
+    static double hisS2n = 50;
+    static double myS2n = 50;
     static double snr = 0.0;
-    static String rx_snr = "";
-    static double SNR[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    static String Lastheard[] = {"", "", "", "", "", "", "", "", "", ""};
-    static int packets_received[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    static String modes_received[] = {"", "", "", "", "", "", "", "", "", ""};
+    static String rxSnr = "";
+    static double[] serversSnrArray = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    static String[] lastHeardArray = {"", "", "", "", "", "", "", "", "", ""};
+    static int[] packetsRcved = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    static String[] modesRcved = {"", "", "", "", "", "", "", "", "", ""};
     static int strength[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     static int snr_db = 0;
-    static int TimeoutPolls = 0;
-    static boolean JustDowngradedRX = false;
-    static boolean status_received = false;
+    static int timeoutPolls = 0;
+    static boolean justDowngradedRx = false;
+    static boolean statusRcved = false;
     static final int maxNumberOfAcks = 5;
-    static int NumberOfAcks = maxNumberOfAcks;
-    static int Freq_offset = 1000;
-    static int Quality = 0;
+    static int numberOfAcks = maxNumberOfAcks;
+    static int freqOffset = 1000;
+    static int quality = 0;
     static int sql = 30;
-    static int sqlfloor = 1;
-    static String statustxt = "";
-    static boolean stxflag = false;
+    static final int SQL_FLOOR = 1;
+    static String statusText = "";
+    //static boolean stxflag = false;
 
     // Positions
-    static String Positions[][] = new String[100][5];
+    static String[][] positionsArray = new String[100][5];
     // GPS handles
-    static serialport gpsport;    // Serial port object
-    static nmeaparser gpsdata;    // Parser for nmea data
+    static GpsSerialPort gpsPort;    // Serial port object
+    static NmeaParser gpsData;    // Parser for nmea data
     // gpsd data
-    static boolean HaveGPSD = false;
-    static boolean WantGpsd = false;
-    static boolean NewGPSD = false;
-    static boolean WantRigctl = false;
+    static boolean haveGPSD = false;
+    static boolean wantGpsd = false;
+    static boolean newGPSD = false;
+    static boolean wantRigctl = false;
     static boolean wantScanner = false;
-    static boolean Scanenabled = true;
-    static String CurrentFreq = "0";
-    static String ServerFreq = "0";
-    static String freqstore = "0";
+    static boolean scanEnabled = true;
+    static String currentFreq = "0";
+    static String serverFreq = "0";
+    static String freqStore = "0";
     static boolean summoning = false;
-    static String GPSD_latitude = "";
-    static String GPSD_longitude = "";
+    static String gpsdLatitude = "";
+    static String gpsdLongitude = "";
     static Socket gpsdSocket = null;
-    static PrintWriter gpsdout = null;
-    static BufferedReader gpsdin = null;
-    static String gpsd_data[] = {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""};
+    static PrintWriter gpsdOut = null;
+    static BufferedReader gpsdIn = null;
+    static String[] gpsdDataArray = {"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""};
     static long t1 = System.currentTimeMillis();
-    static boolean wantigate = false;
+    static boolean wantIgate = false;
     //Pskmail server and RadioMsg 
-    static boolean WantServer = false;
-    static boolean WantRelayOverRadio = false;
-    static boolean WantRelayEmails = false;
-    static boolean WantRelayEmailsImmediat = false;
-    static boolean WantRelaySMSs = false;
-    static boolean WantRelaySMSsImmediat = false;
+    static boolean wantServer = false;
+    static boolean wantRelayOverRadio = false;
+    static boolean wantRelayEmails = false;
+    static boolean wantRelayEmailsImmediat = false;
+    static boolean wantRelaySMSs = false;
+    static boolean wantRelaySMSsImmediat = false;
     //Time at which to re-start scanning if we disabled it by command over the air
     static long restartScanAtEpoch = 0L;
 
@@ -255,31 +252,31 @@ public class Main {
 
     //crypto
     static String strkey = "1234";
-    static String Passwrd = "password";
-    static String hispubkey = "";
-    static crypt cr = null;
+    static String sessionPasswrd = "password";
+    static String hisPubKey = "";
+    static Crypt cr = null;
     static String serverVersion = "1.1";
     static double sversion = 1.1;
 
     static Session sm = null;
-    static String aprsbeacontxt = "";
-    static boolean Serverbeacon = false;
+    static String aprsBeaconText = "";
+    static boolean serverBeacon = false;
 
-    static String XmlRpc_URL = "http://127.0.0.1:7362/RPC2";
+    static String xmlRpcURL = "http://127.0.0.1:7362/RPC2";
 
     // arq object
-    static arq q;
+    static Arq q;
     // Config object
-    public static config configuration; // Static config object
+    public static Config configuration; // Static config object
     // Error handling and logging object
-    static loggingclass log;
+    static LoggingClass log;
 
     // Our main window
-    static mainpskmailui mainui;
+    static MainPskmailUi mainui;
 
     // Modem handle
     static public Modem m;
-    static String RXmodemindex = "";
+    static String rxModemIndex = "";
 
     // File handles
     static FileWriter bulletin = null;
@@ -287,9 +284,9 @@ public class Main {
     // DCD
     static String DCDstr;
     // APRS server socket
-    static aprsmapsocket mapsock;
-    static boolean aprsserverenabled = true;
-    static Integer aprsserverport = 8063;
+    static AprsMapSocket mapSock;
+    static boolean aprsServerEnabled = true;
+    static Integer aprsServerPort = 8063;
     static Amp2 Bul;
 
     //Radio Messages variables
@@ -297,7 +294,7 @@ public class Main {
     static public long possibleRadioMsg = 0L; //Time at which we just an RSID, a Radio message is possible.
     static public String lastRsidReceived = ""; //Last RSID received from modem (string)
     static public boolean radioMsgWorking = false; //Radiomsg processing emails or web pages - do not scan
-    static public String FileNameString = "";
+    static public String fileNameString = "";
     static public long lastCharacterTime = 0L;//Time of last character received from Modem
     static public boolean haveSOH = false;
 
@@ -317,8 +314,8 @@ public class Main {
         }
 
         // Create error handling class
-        log = new loggingclass("jpskmail.log");
-
+        log = new LoggingClass("jpskmail.log");
+        
         try {
             String Blockline = "";
 
@@ -326,7 +323,7 @@ public class Main {
             handlefolderstructure();
 
             // Create config object
-            configuration = new config(HomePath + Dirprefix);
+            configuration = new Config(homePath + dirPrefix);
 
             host = configuration.getPreference("MODEMIP");
 
@@ -345,7 +342,7 @@ public class Main {
              */
             // Make arq object
             //System.out.println("About to create new ARQ.");            
-            q = new arq();
+            q = new Arq();
 
             q.Message(version, 10);
 
@@ -356,21 +353,21 @@ public class Main {
             Bul.init();
             Thread.sleep(1000);
 
-            if (WantGpsd & !onWindows) {
+            if (wantGpsd & !onWindows) {
                 handlegpsd();
             }
 
             // Handle GPS
-            if (!HaveGPSD) {
+            if (!haveGPSD) {
                 handlegps();
             }
             // Make session object
             //System.out.println("About to create new Session.");            
-            sm = new Session();  // session, class
+            sm = new Session();  // Session, class
 
             // Show the main window (center screen)
             //System.out.println("about to new mainpskmailui");
-            mainui = new mainpskmailui();
+            mainui = new MainPskmailUi();
             //System.out.println("about to pack");
             mainui.pack();
             //System.out.println("about to setLocationRelativeTo");
@@ -403,19 +400,19 @@ public class Main {
             //System.out.println("Timers started");
 
             // Start the aprs server socket
-            mapsock = new aprsmapsocket();
-            mapsock.setPort(aprsserverport);
-            mapsock.setPortopen(aprsserverenabled);
-            mapsock.start();
-            mapsock.setName("AprsMapSock");
+            mapSock = new AprsMapSocket();
+            mapSock.setPort(aprsServerPort);
+            mapSock.setPortopen(aprsServerEnabled);
+            mapSock.start();
+            mapSock.setName("AprsMapSock");
 
             // init modemarray
-            Modemarray = m.pmodes;
+            modemArray = m.pmodes;
 
             // init rxdata array
             for (int i = 0; i < 10; i++) {
                 for (int j = 0; j < 0; j++) {
-                    rxdata[i][j] = 0;
+                    rxData[i][j] = 0;
                 }
             }
 
@@ -429,30 +426,30 @@ public class Main {
             //m.setRxRsid("ON");
             //q.send_txrsid_command("ON");
             //Launch separate thread to monitor and relay incoming emails and messages if required
-            System.out.println("About to call startemail");
+            //System.out.println("About to call startemail");
             RMsgProcessor.startEmailsAndSMSsMonitor();
-            System.out.println("Returned from startemail");
+            //System.out.println("Returned from startemail");
 
             //vk2eta debug
             //System.out.println("entering receive loop");
             while (true) {
                 //Wait for return to Rx if we are transmitting
-                while (TXActive) {
+                while (TxActive) {
                     Thread.sleep(50);
                 }
 
                 // Send a command to the modem ?
                 //VK2ETA not through SendCommand anymore (Mutex)
-                m.Sendln(SendCommand);
+                m.Sendln(sendCommand);
                 Thread.sleep(50);
-                SendCommand = "";
+                sendCommand = "";
 
                 //Handle RadioMsg messages only when fully idle
-                if (Sendline.length() == 0 & !TXActive
-                        & !Connected & !Connecting & !Aborting
-                        & TTYConnected.equals("") & !receivingRadioMsg) {
+                if (sendLine.length() == 0 & !TxActive
+                        & !connected & !Connecting & !aborting
+                        & ttyConnected.equals("") & !receivingRadioMsg) {
                     if (RMsgTxList.getAvailableLength() > 0) {
-                        Main.TXActive = true; //Moved up to prevent change in mode when replying
+                        Main.TxActive = true; //Moved up to prevent change in mode when replying
                         m.txMessage = RMsgTxList.getOldest();
                         //Set Mode
                         //SendCommand += "<cmd><mode>" + m.txMessage.rxMode + "</mode></cmd>";
@@ -469,7 +466,7 @@ public class Main {
                         String toSend = "\n\n" + m.txMessage.formatForTx(false) + "\n"; //No CCIR modes for now
                         m.Sendln(toSend, m.txMessage.rxMode, "ON"); //Tx Rsid ON
                         //Log in monitor screen
-                        Main.monitor += "\n*TX*  " + "<SOH>"
+                        Main.monitorText += "\n*TX*  " + "<SOH>"
                                 + toSend.replace(Character.toString((char) 1), "")
                                         .replace(Character.toString((char) 4), "") + "<EOT>";
                         //Sendline = "";
@@ -480,15 +477,15 @@ public class Main {
 
                 // if (Sendline.length() > 0) {System.out.println("MAIN:" + Sendline);   }        
                 // see if tx active and DCD is off and we have exhausted the extra reception delay
-                if (Sendline.length() > 0 & !TXActive & DCD == 0 & RxDelayCount < 0.1f) {
+                if (sendLine.length() > 0 & !TxActive & DCD == 0 & rxDelayCount < 0.1f) {
                     //System.out.println("MAIN2:" + Sendline);
                     //VK2ETA DCDthrow not used 
                     //DCDthrow = generator.nextInt(Persistence);
                     //     System.out.println("DCD:" + DCDthrow);               
-                    if (Connected | Connecting | Aborting | !TTYConnected.equals("")) {
+                    if (connected | Connecting | aborting | !ttyConnected.equals("")) {
                         //We are in some session as client or server
-                        if (Aborting) {
-                            Aborting = false;
+                        if (aborting) {
+                            aborting = false;
                         }
                     } else {
                         //Reset DCD for next round if we are not in a session
@@ -497,7 +494,7 @@ public class Main {
                     //VK2ETA DCDthrow not used 
                     //if (DCDthrow == 0) {
                     //      System.out.println("MAIN3:" + Sendline); 
-                    String Sendline_cp = Sendline;
+                    String Sendline_cp = sendLine;
                     try {
 //       System.out.println("MAIN4:" + Sendline_cp);                   
                         int TxDelay = 0;
@@ -509,7 +506,7 @@ public class Main {
                         if (TxDelay > 0) {
                             Thread.sleep(TxDelay * 1000);
                         }
-                        Main.TXActive = true;
+                        Main.TxActive = true;
                         // System.out.println("MAIN5" );                        
                         //  Add a 2 seconds delay when mode is MFSK16 (1 sec for MFSK32) to prevent overlaps as
                         //  the trail of MFSK is very long
@@ -521,18 +518,23 @@ public class Main {
                         //Try to stop Fldigi locking up by having a delay between the mode change and the data
                         //  block as Fldigi needs to re-initialize the modem at each mode change
                         //String SendMode = "<cmd><mode>" + m.getTXModemString(TxModem) + "</mode></cmd>";
-                        String SendMode = m.getTXModemString(TxModem);
+                        String SendMode = m.getTXModemString(txModem);
                         //System.out.println("TXMODEM for connect:" + m.getTXModemString(TxModem));
                         //       System.out.println("MAIN6:" + Sendline_cp);
                         //m.Sendln(SendMode);
                         //Thread.sleep(250);
                         m.Sendln(Sendline_cp, SendMode, "");
                         Sendline_cp = "";
-                        Sendline = "";
+                        sendLine = "";
                     } catch (Exception e) {
-                        Main.monitor += ("\nModem problem. Is fldigi running?");
+                        Main.monitorText += ("\nModem problem. Is fldigi running?");
                         log.writelog("Modem problem. Is fldigi running?", e, true);
                     }
+                    //} else {
+                    //    if (!Connected & !Connecting) {
+                    //        DCD = MAXDCD;
+                    //    }
+                    //}
                     //} else {
                     //    if (!Connected & !Connecting) {
                     //        DCD = MAXDCD;
@@ -546,13 +548,13 @@ public class Main {
 
                         Blockline = m.getMessage();
                         // System.out.println("BLOCK=" + Blockline);
-                        RXBlock rxb = new RXBlock(Blockline);
+                        RxBlock rxb = new RxBlock(Blockline);
                         if (!rxb.valid && !rxb.validWithPW) {
-                            validblock = false;
+                            validBlock = false;
                         } else {
-                            validblock = true;
+                            validBlock = true;
                         }
-                        if (validblock & Monitor) {
+                        if (validBlock & monitorMode) {
                             char c = Blockline.charAt(6);
                             int i = (int) c - 32;
                             String calls = "";
@@ -565,14 +567,14 @@ public class Main {
                                 }
                             }
                         }
-                        if (!Bulletinmode & !IACmode) {
-                            if (Connected) {
+                        if (!bulletinMode & !iacMode) {
+                            if (connected) {
                                 // status block from server
                                 if (rxb.type.equals("s")
                                         & rxb.valid & rxb.session.equals(session)) {
-                                    oldsession = session;
+                                    oldSession = session;
                                     idlesecs = 0;      // reset idle timer
-                                    Main.TimeoutPolls = 0; // Reset timeout polls count
+                                    Main.timeoutPolls = 0; // Reset timeout polls count
                                     // set blocktime for idle time measurement...
                                     if (Blockline.length() > 8) {
                                         charval = (int) (blockval / (Blockline.length() - 4)); // msec
@@ -583,33 +585,33 @@ public class Main {
                                     //Move processing of block before decision on mode upgrade
                                     sm.RXStatus(rxb.payload);   // parse incoming status packet
                                     // get the tx status
-                                    myrxstatus = sm.getTXStatus();
-                                    if (!LastBlockExchange.equals(sm.getBlockExchanges())) {
-                                        LastSessionExchangeTime = System.currentTimeMillis() / 1000;
-                                        LastBlockExchange = sm.getBlockExchanges();
+                                    myRxStatus = sm.getTXStatus();
+                                    if (!lastBlockExchange.equals(sm.getBlockExchanges())) {
+                                        lastSessionExchangeTime = System.currentTimeMillis() / 1000;
+                                        lastBlockExchange = sm.getBlockExchanges();
                                     }
                                     // set the modem type for TX if client. For TTY server, adjust TX mode based on received s2n from TTY client.
                                     //Common data needed for later
                                     String pbyte = rxb.protocol;
                                     char pchr = pbyte.charAt(0);
                                     int pint = (int) pchr;
-                                    if (TTYConnected.equals("Connected")) {
+                                    if (ttyConnected.equals("Connected")) {
                                         //Auto speed/mode adjustment
                                         //I am a TTY server (protocol byte = quality of receive by client)
                                         //Turn RXid and TXid OFF as I am a server and I received a good "s" block
                                         m.setRxRsid("OFF");
                                         //Exception is for frequency sensitive modes like MFSK16, MFSK8, DOMINOEX5
                                         //VK2ETA wrong location as it can get reset with status requests
-                                        if (Main.TxModem == modemmodeenum.MFSK16
-                                                || Main.TxModem == modemmodeenum.MFSK8
-                                                || Main.TxModem == modemmodeenum.DOMINOEX5) {
+                                        if (Main.txModem == ModemModesEnum.MFSK16
+                                                || Main.txModem == ModemModesEnum.MFSK8
+                                                || Main.txModem == ModemModesEnum.DOMINOEX5) {
                                             m.requestTxRsid("ON");
                                             //} else {
                                             //    q.send_txrsid_command("OFF");
                                         }
                                         //Adjust my TX mode (as a server) AND the Client's TX modes
                                         pint = (pint - 32) * 100 / 90;
-                                        hiss2n = decayaverage(hiss2n, pint, 2);
+                                        hisS2n = decayaverage(hisS2n, pint, 2);
                                         //Get current RX modem position in table
                                         int currentmodeindex = 0;
                                         //Should I upgrade/downgrade my TX mode?
@@ -621,59 +623,59 @@ public class Main {
                                             Session.sameRepeat = 0;
                                             Session.lastTx_missing = Session.tx_missing;
                                         }
-                                        AvgTxMissing = decayaverage(AvgTxMissing, Session.tx_missing.length(), 2);
-                                        if (AvgTxMissing > 3 || Session.sameRepeat > 2) {
+                                        avgTxMissing = decayaverage(avgTxMissing, Session.tx_missing.length(), 2);
+                                        if (avgTxMissing > 3 || Session.sameRepeat > 2) {
                                             //Downgrade Tx mode
-                                            currentmodeindex = getClientModeIndex(Main.TxModem);
-                                            if (currentmodeindex < TTYmodes.length() - 1) { //List in decreasing order of speed
-                                                Main.TxModem = getClientMode(currentmodeindex + 1);
+                                            currentmodeindex = getClientModeIndex(Main.txModem);
+                                            if (currentmodeindex < ttyModes.length() - 1) { //List in decreasing order of speed
+                                                Main.txModem = getClientMode(currentmodeindex + 1);
                                                 m.requestTxRsid("ON");
                                                 sm.SetBlocklength(5); //restart with medium block length
-                                                JustDowngradedRX = false; // Make RX mode downgrade first (if necessary)
+                                                justDowngradedRx = false; // Make RX mode downgrade first (if necessary)
                                             }
                                             //Reset link quality indicators
-                                            AvgTxMissing = 0;
-                                            Main.hiss2n = 50; //Reset to mid-range
+                                            avgTxMissing = 0;
+                                            Main.hisS2n = 50; //Reset to mid-range
                                         } else {
-                                            if ((hiss2n > 85) & (AvgTxMissing < 1)) {
+                                            if ((hisS2n > 85) & (avgTxMissing < 1)) {
                                                 //Upgrade Rx speed
-                                                currentmodeindex = getClientModeIndex(Main.TxModem);
+                                                currentmodeindex = getClientModeIndex(Main.txModem);
                                                 if (currentmodeindex > 0) { //List in decreasing order of speed
-                                                    Main.TxModem = getClientMode(currentmodeindex - 1);
+                                                    Main.txModem = getClientMode(currentmodeindex - 1);
                                                     m.requestTxRsid("ON");
                                                     sm.SetBlocklength(4); //restart with small block length
-                                                    JustDowngradedRX = true; // Make TX mode downgrade first (if necessary)
+                                                    justDowngradedRx = true; // Make TX mode downgrade first (if necessary)
                                                 }
-                                                Main.hiss2n = 50; //Reset to mid-range
+                                                Main.hisS2n = 50; //Reset to mid-range
                                             }
                                         }
                                         //Should I upgrade the client's TX mode?
-                                        mys2n = decayaverage(mys2n, Main.snr, 2);
+                                        myS2n = decayaverage(myS2n, Main.snr, 2);
                                         currentmodeindex = 0;
-                                        AvgRxMissing = decayaverage(AvgRxMissing, Session.rx_missing.length(), 2);
-                                        if (AvgRxMissing > 3) {
+                                        avgRxMissing = decayaverage(avgRxMissing, Session.rx_missing.length(), 2);
+                                        if (avgRxMissing > 3) {
                                             //Downgrade Rx speed
-                                            currentmodeindex = getClientModeIndex(Main.RxModem);
-                                            if (currentmodeindex < TTYmodes.length() - 1) { //List in decreasing order of speed
-                                                Main.RxModem = getClientMode(currentmodeindex + 1);
-                                                Main.RxModemString = m.getModemString(Main.RxModem);
-                                                blocktime = m.getBlockTime(Main.RxModem);
-                                                JustDowngradedRX = true; // Make TX mode downgrade first (if necessary)
+                                            currentmodeindex = getClientModeIndex(Main.rxModem);
+                                            if (currentmodeindex < ttyModes.length() - 1) { //List in decreasing order of speed
+                                                Main.rxModem = getClientMode(currentmodeindex + 1);
+                                                Main.rxModemString = m.getModemString(Main.rxModem);
+                                                blocktime = m.getBlockTime(Main.rxModem);
+                                                justDowngradedRx = true; // Make TX mode downgrade first (if necessary)
                                             }
                                             //Reset link quality indicators
-                                            AvgRxMissing = 0;
-                                            Main.mys2n = 50; //Reset to mid-range
+                                            avgRxMissing = 0;
+                                            Main.myS2n = 50; //Reset to mid-range
                                         } else {
-                                            if ((Main.mys2n > 85) & (AvgRxMissing < 1)) {
+                                            if ((Main.myS2n > 85) & (avgRxMissing < 1)) {
                                                 //Upgrade Rx speed
-                                                currentmodeindex = getClientModeIndex(Main.RxModem);
+                                                currentmodeindex = getClientModeIndex(Main.rxModem);
                                                 if (currentmodeindex > 0) { //List in decreasing order of speed
-                                                    Main.RxModem = getClientMode(currentmodeindex - 1);
-                                                    Main.RxModemString = m.getModemString(Main.RxModem);
-                                                    blocktime = m.getBlockTime(Main.RxModem);
-                                                    JustDowngradedRX = false; // Make RX mode downgrade first (if necessary)
+                                                    Main.rxModem = getClientMode(currentmodeindex - 1);
+                                                    Main.rxModemString = m.getModemString(Main.rxModem);
+                                                    blocktime = m.getBlockTime(Main.rxModem);
+                                                    justDowngradedRx = false; // Make RX mode downgrade first (if necessary)
                                                 }
-                                                Main.mys2n = 50; //Reset to mid-range
+                                                Main.myS2n = 50; //Reset to mid-range
                                             }
                                         }
                                     } else { //I am a client (protocol byte = my TX mode)
@@ -681,38 +683,38 @@ public class Main {
                                         m.setRxRsid("ON");
                                         pint = (int) pchr - 48;
                                         if (pint < 9 & pint > 0) {
-                                            TxModem = m.getModeOffList(pint);
-                                            if (CurrentModemProfile.equals("0")) {
-                                                TxModem = RxModem;
+                                            txModem = m.getModeOffList(pint);
+                                            if (currentModemProfile.equals("0")) {
+                                                txModem = rxModem;
                                             }
                                         } else if (pint == 0) {
-                                            TxModem = RxModem;
+                                            txModem = rxModem;
                                         }
                                     }
                                     //Still data to send or mising block to resend?
-                                    if (Session.tx_missing.length() > 0 | Main.TX_Text.length() > 0) {
+                                    if (Session.tx_missing.length() > 0 | Main.txText.length() > 0) {
                                         String outstr = sm.doTXbuffer();
                                         q.send_data(outstr);
                                     } else {
-                                        myrxstatus = sm.getTXStatus();
-                                        q.send_status(myrxstatus);  // send our status
+                                        myRxStatus = sm.getTXStatus();
+                                        q.send_status(myRxStatus);  // send our status
                                     }
-                                    Main.validblock = true;
+                                    Main.validBlock = true;
                                 } else if (rxb.type.equals("p")
                                         & rxb.valid & rxb.session.equals(session)) {
                                     sm.RXStatus(rxb.payload);   // parse incoming status packet
 
-                                    myrxstatus = sm.getTXStatus();
-                                    q.send_status(myrxstatus);  // send our status
+                                    myRxStatus = sm.getTXStatus();
+                                    q.send_status(myRxStatus);  // send our status
                                     Main.txbusy = true;
                                     //Disconnect request
                                 } else if (rxb.type.equals("d") & (rxb.session.equals(session) | rxb.session.equals("0"))) {
-                                    Status = "Listening";
-                                    Connected = false;
+                                    status = "Listening";
+                                    connected = false;
                                     mainui.disableMboxMenu();
                                     mainui.enableMnuPreferences2();
                                     session = "";
-                                    Totalbytes = 0;
+                                    totalBytes = 0;
                                     sm.FileDownload = false;
                                     comp = false;
                                     try {
@@ -728,9 +730,9 @@ public class Main {
                                     // discard
                                     // info block
                                 } else if (rxb.valid & rxb.session.equals(session)) {
-                                    myrxstatus = sm.doRXBuffer(rxb.payload, rxb.type);
+                                    myRxStatus = sm.doRXBuffer(rxb.payload, rxb.type);
                                 } else if (rxb.session.equals(session)) {
-                                    myrxstatus = sm.doRXBuffer("", rxb.type);
+                                    myRxStatus = sm.doRXBuffer("", rxb.type);
                                 }
                                 // PI4TUE 0.9.33-13:28:52-IM46>
                                 if (Blockline.toUpperCase(Locale.US).contains(q.getServer().toUpperCase(Locale.US))) {
@@ -753,13 +755,13 @@ public class Main {
                                         if (sversion > 1.1) {
                                             //     System.out.println("success");
                                             sm.hispubkey = mpc.group(4);
-                                            hispubkey = sm.hispubkey;
+                                            hisPubKey = sm.hispubkey;
 
-                                            cr = new crypt();
+                                            cr = new Crypt();
 
-                                            String output = cr.encrypt(sm.hispubkey, Passwrd);
+                                            String output = cr.encrypt(sm.hispubkey, sessionPasswrd);
 
-                                            Main.TX_Text += "~Mp" + output + "\n";
+                                            Main.txText += "~Mp" + output + "\n";
                                             //   System.out.println(Main.TX_Text);                                        
                                         }
                                     } else {
@@ -783,14 +785,14 @@ public class Main {
                                     Pattern psc = Pattern.compile(".*QSL(\\s[A-Za-z0-9\\-\\/]+)? de ([A-Za-z0-9\\-\\/]+)\\s*(((\\d+\\s)(\\d+\\s))|(\\d+\\s))?([0123456789ABCDEF]{4}).*");
                                     Matcher msc = psc.matcher(Blockline);
                                     String scall = "";
-                                    rx_snr = "";
+                                    rxSnr = "";
                                     String numberOfMails = "";
                                     if (msc.lookingAt()) {
                                         scall = msc.group(2);
                                         if (msc.group(7) != null) {
-                                            rx_snr = msc.group(7).trim();
+                                            rxSnr = msc.group(7).trim();
                                         } else {
-                                            rx_snr = msc.group(5).trim();
+                                            rxSnr = msc.group(5).trim();
                                             numberOfMails = msc.group(6).trim();
                                         }
                                         pCheck = msc.group(8);
@@ -799,27 +801,27 @@ public class Main {
                                     char soh = 1;
                                     String sohstr = Character.toString(soh);
                                     String checkstring = "";
-                                    if (rx_snr.equals("")) {
+                                    if (rxSnr.equals("")) {
                                         checkstring = sohstr + "00uQSL " + q.callsign + " de " + scall + " ";
-                                    } else if (!rx_snr.equals("") && !numberOfMails.equals("")) {
-                                        checkstring = sohstr + "00uQSL " + q.callsign + " de " + scall + " " + rx_snr + " " + numberOfMails + " ";
+                                    } else if (!rxSnr.equals("") && !numberOfMails.equals("")) {
+                                        checkstring = sohstr + "00uQSL " + q.callsign + " de " + scall + " " + rxSnr + " " + numberOfMails + " ";
                                         //System.out.println("RX_SNR:" + rx_snr);
-                                        mainui.appendMainWindow("QSL from " + scall + ": " + rx_snr + "%, " + numberOfMails + " mails\n");
-                                        setrxdata(scall, Integer.parseInt(rx_snr));
-                                    } else if (!rx_snr.equals("") && numberOfMails.equals("")) {
-                                        checkstring = sohstr + "00uQSL " + q.callsign + " de " + scall + " " + rx_snr + " ";
+                                        mainui.appendMainWindow("QSL from " + scall + ": " + rxSnr + "%, " + numberOfMails + " mails\n");
+                                        setrxdata(scall, Integer.parseInt(rxSnr));
+                                    } else if (!rxSnr.equals("") && numberOfMails.equals("")) {
+                                        checkstring = sohstr + "00uQSL " + q.callsign + " de " + scall + " " + rxSnr + " ";
                                         //System.out.println("RX_SNR:" + rx_snr);
-                                        mainui.appendMainWindow("QSL from " + scall + ": " + rx_snr + "%\n");
-                                        setrxdata(scall, Integer.parseInt(rx_snr));
+                                        mainui.appendMainWindow("QSL from " + scall + ": " + rxSnr + "%\n");
+                                        setrxdata(scall, Integer.parseInt(rxSnr));
                                     }
                                     String check = q.checksum(checkstring);
                                     if (check.equals(pCheck)) {
                                         rxb.get_serverstat(scall);
                                         int i = 0;
                                         boolean knownserver = false;
-                                        for (i = 0; i < Servers.length; i++) {
+                                        for (i = 0; i < serversArray.length; i++) {
                                             //                              System.out.println(Servers[i] + scall);
-                                            if (scall.equals(Servers[i])) {
+                                            if (scall.equals(serversArray[i])) {
                                                 knownserver = true;
                                                 break;
                                             }
@@ -833,19 +835,19 @@ public class Main {
                                     Matcher msc = psc.matcher(Blockline);
                                     String scall = "";
                                     String pCheck = "";
-                                    rx_snr = "";
+                                    rxSnr = "";
                                     if (msc.lookingAt()) {
                                         scall = msc.group(1);
-                                        rx_snr = msc.group(2);
+                                        rxSnr = msc.group(2);
                                         pCheck = msc.group(3);
                                     }
                                     // fill the servers drop down list
                                     String checkstring = "";
-                                    if (!rx_snr.equals("")) {
-                                        checkstring = "00u" + scall + ":71 " + rx_snr + " ";
+                                    if (!rxSnr.equals("")) {
+                                        checkstring = "00u" + scall + ":71 " + rxSnr + " ";
                                         //                                       System.out.println("RX_SNR:" + rx_snr);
-                                        mainui.appendMainWindow("From " + scall + ": " + rx_snr + "%\n");
-                                        setrxdata(scall, Integer.parseInt(rx_snr));
+                                        mainui.appendMainWindow("From " + scall + ": " + rxSnr + "%\n");
+                                        setrxdata(scall, Integer.parseInt(rxSnr));
                                     } else {
                                         checkstring = "00u" + scall + ":71 ";
                                     }
@@ -885,28 +887,28 @@ public class Main {
                                                 //VK2ETA>PSKAPR,TCPIP*,qAC,T2SYDNEY:!2712.85S/15303.72E.test aprs 2
                                                 outstring = scall + ">PSKAPR,TCPIP*:" + type + binfo;
 //                                                System.out.println(outstring);
-                                                boolean igateSendOk = igate.write(outstring);
+                                                boolean igateSendOk = Igate.write(outstring);
                                                 // Push this to aprs map too
-                                                mapsock.sendmessage(outstring);
+                                                mapSock.sendmessage(outstring);
                                                 //If I run as server, send QSL
-                                                if (Main.WantServer && igateSendOk) {
+                                                if (Main.wantServer && igateSendOk) {
                                                     q.send_QSL_reply();
                                                 }
                                                 //record heard server stations?????
                                                 if (nodetype.equals("&")) {
                                                     // is serverbeacon
-                                                    Serverbeacon = true;
+                                                    serverBeacon = true;
                                                     int i;
                                                     boolean knownserver = false;
-                                                    for (i = 0; i < Servers.length; i++) {
-                                                        if (scall.equals(Servers[i])) {
+                                                    for (i = 0; i < serversArray.length; i++) {
+                                                        if (scall.equals(serversArray[i])) {
                                                             //Already in list, exit
                                                             knownserver = true;
                                                             break;
                                                         }
-                                                        if (!knownserver && Servers[i].length() == 0) {
+                                                        if (!knownserver && serversArray[i].length() == 0) {
                                                             //Not known, add it at first blank spot
-                                                            Servers[i] = scall;
+                                                            serversArray[i] = scall;
                                                             mainui.addServer(scall);
                                                             break;
                                                         }
@@ -929,9 +931,9 @@ public class Main {
                                                     outstring += ":";
                                                     outstring += binfo;
                                                     outstring += mnumber;
-                                                    boolean igateSendOk = igate.write(outstring);
+                                                    boolean igateSendOk = Igate.write(outstring);
                                                     // Push this to aprs map too
-                                                    mapsock.sendmessage(outstring);
+                                                    mapSock.sendmessage(outstring);
                                                     mainui.appendMainWindow(outstring);
                                                 }
                                             } else if (scall.length() > 0) {
@@ -950,14 +952,14 @@ public class Main {
                                                     if (!mycall.toUpperCase(Locale.US).equals(fromcall)) {
                                                         //Not for my Client's callsign (can be different to myserver's callsign)
                                                         String toxastir = gmm.group(2) + ">PSKAPR,TCPIP*,qAC," + gmm.group(1) + "::" + fromcall + "  " + ":" + gmm.group(3) + "\n";
-                                                        mapsock.sendmessage(toxastir);
+                                                        mapSock.sendmessage(toxastir);
                                                         //test: VK2ETA>PSKAPR,TCPIP*::vk2eta-1 :test aprs 1
                                                         //VK2ZZZ>APWW11,TCPIP*,qAC,T2LUBLIN::VK2XXX-8 :Hello Jack Long time no see!{21}
                                                         String aprsmessage = fromcall + ">PSKAPR,TCPIP*::" + outcall + ":" + binfo;
-                                                        boolean igateSendOk = igate.write(aprsmessage);
+                                                        boolean igateSendOk = Igate.write(aprsmessage);
                                                         //System.out.println(aprsmessage);
                                                         //If I run as server, send QSL
-                                                        if (Main.WantServer && igateSendOk) {
+                                                        if (Main.wantServer && igateSendOk) {
                                                             q.send_QSL_reply();
                                                         }
                                                     }
@@ -993,7 +995,7 @@ public class Main {
                                         //Changed back to always open
                                         if (check.equals(pCheck)) {
                                             String subject = "Short email from " + scall;
-                                            String resultStr = serverMail.sendMail(scall, email, subject, body, ""); //last param is attachementFileName
+                                            String resultStr = ServerMail.sendMail(scall, email, subject, body, ""); //last param is attachementFileName
                                             //If I run as server, send QSL
                                             if (resultStr.contains("Message sent")) {
                                                 q.send_QSL_reply();
@@ -1039,8 +1041,8 @@ public class Main {
                                                 String symbol = Character.toString(c);
                                                 int statusinx = cmps[10] - 32;
                                                 String statusmessage = binfo.substring(11);
-                                                if (statusinx <= igate.maxstatus) {
-                                                    statusmessage = igate.status[statusinx] + statusmessage;
+                                                if (statusinx <= Igate.maxstatus) {
+                                                    statusmessage = Igate.status[statusinx] + statusmessage;
                                                 }
                                                 String latstr = "S";
                                                 String lonstr = "W";
@@ -1088,12 +1090,12 @@ public class Main {
                                                 String outstring = scall + ">PSKAPR,TCPIP*:" + linfo;
 
 //                                            System.out.println(outstring);
-                                                boolean igateSendOk = igate.write(outstring);
+                                                boolean igateSendOk = Igate.write(outstring);
                                                 // Push this to aprs map too
-                                                mapsock.sendmessage(outstring);
+                                                mapSock.sendmessage(outstring);
                                                 outstring = "";
                                                 //If I run as server, send QSL
-                                                if (Main.WantServer && igateSendOk) {
+                                                if (Main.wantServer && igateSendOk) {
                                                     q.send_QSL_reply();
                                                 }
                                             }
@@ -1116,7 +1118,7 @@ public class Main {
                                             } catch (Exception e) {
                                                 //Nothing
                                             }
-                                            q.set_txstatus(txstatus.TXPingReply);
+                                            q.set_txstatus(TxStatus.TXPingReply);
                                             q.send_ping_reply();
                                         }
                                     }
@@ -1136,7 +1138,7 @@ public class Main {
                                             //Some callsigns present and match my call as sever, reply with s/n
                                             String uiMsg = "Inquire request from " + reqcall;
                                             q.Message(uiMsg, 5);
-                                            q.set_txstatus(txstatus.TXInqReply);
+                                            q.set_txstatus(TxStatus.TXInqReply);
                                             q.setReqCallsign(reqcall);
                                             q.send_inquire_reply();
                                         }
@@ -1146,11 +1148,11 @@ public class Main {
                                 // unproto packets
                                 if (rxb.type.equals("u")) {
                                     //Display received APRS message???? - Check the callsigns used
-                                    if (rxb.port.equals("26") & !Serverbeacon) {
+                                    if (rxb.port.equals("26") & !serverBeacon) {
                                         if (rxb.call.toUpperCase(Locale.US).equals(configuration.getPreference("CALL").toUpperCase(Locale.US)) || rxb.call.equals(configuration.getPreference("PSKAPRS"))) {
                                             if (rxb.msgtext.indexOf("ack") != 0 & rxb.msgtext.indexOf(":") != 0) {
-                                                MSGwindow += rxb.from + ": " + rxb.msgtext + "\n";
-                                                if (!Connected) {
+                                                msgWindow += rxb.from + ": " + rxb.msgtext + "\n";
+                                                if (!connected) {
                                                     mainwindow += rxb.from + ": " + rxb.msgtext + "\n";
                                                 } else {
                                                     q.Message("You received a message", 10);
@@ -1169,28 +1171,28 @@ public class Main {
                                         String formatminute = "0" + Integer.toString(Minute);
                                         formatminute = formatminute.substring(formatminute.length() - 2);
                                         String lh = formathour + ":" + formatminute;
-                                        for (i = 0; i < Servers.length; i++) {
+                                        for (i = 0; i < serversArray.length; i++) {
 
-                                            if (rxb.server.equals(Servers[i])) {
+                                            if (rxb.server.equals(serversArray[i])) {
                                                 knownserver = true;
-                                                SNR[i] = snr;
-                                                Lastheard[i] = lh;
-                                                packets_received[i]++;
-                                                modes_received[i] = RxModemString;
+                                                serversSnrArray[i] = snr;
+                                                lastHeardArray[i] = lh;
+                                                packetsRcved[i]++;
+                                                modesRcved[i] = rxModemString;
                                                 strength[i] = snr_db;
                                                 break;
                                             }
                                         }
                                         if (!knownserver) {
-                                            for (i = 0; i < Servers.length; i++) {
-                                                if (Servers[i].equals("")) {
+                                            for (i = 0; i < serversArray.length; i++) {
+                                                if (serversArray[i].equals("")) {
                                                     Pattern sw = Pattern.compile("[A-Z0-9]+\\-*\\[0-9]*");
                                                     Matcher ssw = sw.matcher(rxb.server);
                                                     if (ssw.lookingAt() & rxb.server.length() > 3) {
-                                                        Servers[i] = rxb.server;
-                                                        SNR[i] = snr;
-                                                        Lastheard[i] = lh;
-                                                        packets_received[i]++;
+                                                        serversArray[i] = rxb.server;
+                                                        serversSnrArray[i] = snr;
+                                                        lastHeardArray[i] = lh;
+                                                        packetsRcved[i]++;
                                                         strength[i] = snr_db;
                                                         mainui.addServer(rxb.server);
                                                         break;
@@ -1212,11 +1214,11 @@ public class Main {
                                             String linkCallAprs = cleanCallForAprs(linkCall);
                                             if (linkCallAprs.length() > 0 && serverCall.equals(linkServer)) {
                                                 //$MSG = "$ServerCall>PSKAPR,TCPIP*::PSKAPR   :GATING $1";
-                                                String linkString = igate.aprscall + ">PSKAPR,TCPIP*::PSKAPR   :GATING " + linkCallAprs;
+                                                String linkString = Igate.aprsCall + ">PSKAPR,TCPIP*::PSKAPR   :GATING " + linkCallAprs;
                                                 try {
-                                                    igate.write(linkString);
+                                                    Igate.write(linkString);
                                                     //Add station to list
-                                                    igate.addStationToList(linkCall);
+                                                    Igate.addStationToList(linkCall);
                                                     //Acknowledge
                                                     q.send_link_ack(linkCall);
                                                 } catch (IOException e) {
@@ -1236,17 +1238,17 @@ public class Main {
                                         rejectreason = mr.group(2);
                                     }
                                     if (rejectcall.toUpperCase(Locale.US).equals(mycall.toUpperCase(Locale.US))) {
-                                        Status = "Listening";
-                                        Connected = false;
+                                        status = "Listening";
+                                        connected = false;
                                         mainui.disableMboxMenu();
                                         mainui.enableMnuPreferences2();
-                                        Bulletinmode = false;
+                                        bulletinMode = false;
                                         Connecting = false;
                                         Main.connectingPhase = false;
-                                        Main.Connecting_time = 0;
-                                        Scanning = false;
+                                        Main.connectingTime = 0;
+                                        scanning = false;
                                         session = "";
-                                        Totalbytes = 0;
+                                        totalBytes = 0;
                                         //q.send_rsid_command("OFF");
                                         //q.Message("Rejected:" + rejectreason, 10);
                                         log("Rejected:" + rejectreason);
@@ -1277,31 +1279,31 @@ public class Main {
                                         //txid on, rxid off. Not yet, we now wait until full connect exchange
                                         //q.send_txrsid_command("OFF");
                                         //q.send_rsid_command("ON"); 
-                                        Status = "Connected";
-                                        Connected = true;
+                                        status = "Connected";
+                                        connected = true;
                                         Connecting = false;
-                                        Main.Connecting_time = 0;
-                                        Scanning = false;
+                                        Main.connectingTime = 0;
+                                        scanning = false;
                                         summoning = false;
                                         Main.linked = true;
-                                        Main.linkedserver = rxb.server;
+                                        Main.linkedServer = rxb.server;
                                         mainui.disableMonitor();
                                         mainui.disableMnuPreferences2();
                                         // reset tx queue 
-                                        TX_Text = "";
-                                        Totalbytes = 0;
+                                        txText = "";
+                                        totalBytes = 0;
                                         sm.initSession();
                                         session = rxb.session;
                                         sm.session_id = rxb.session;
                                         sm.myserver = rxb.server;
                                         protocolstr = rxb.protocol;
                                         protocol = protocolstr.charAt(0) - 48;
-                                        File outb1 = new File(Main.HomePath + Main.Dirprefix + "Outbox");
+                                        File outb1 = new File(Main.homePath + Main.dirPrefix + "Outbox");
                                         int i1 = outb1.list().length;
                                         if (i1 > 0) {
                                             Main.mainwindow += "\nWaiting in outbox:" + Integer.toString(i1) + "\n";
                                         }
-                                        File outb = new File(Main.Pendingdir);
+                                        File outb = new File(Main.pendingDir);
                                         int i = outb.list().length;
                                         if (i > 0) {
                                             Main.mainwindow += "Incomplete downloads:" + Integer.toString(i) + "\n\n";
@@ -1310,28 +1312,28 @@ public class Main {
                                     //Status block, are we a server?
                                 } else if (rxb.type.equals("s")
                                         & rxb.valid & rxb.session.equals(session)) {
-                                    if (Main.TTYConnected.equals("Connecting")) {
-                                        Main.TTYConnected = "Connected";
-                                        Main.Connected = true;
+                                    if (Main.ttyConnected.equals("Connecting")) {
+                                        Main.ttyConnected = "Connected";
+                                        Main.connected = true;
                                         mainui.disableMnuPreferences2();
-                                        status_received = true;
-                                        NumberOfAcks = maxNumberOfAcks;
+                                        statusRcved = true;
+                                        numberOfAcks = maxNumberOfAcks;
                                         sm.initSession();
                                         String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
                                         //Main.TX_Text = "\nHi, this is the PSKmail Server of " + serverCall + "\nVersion is " + application + "\n\n";
-                                        Main.TX_Text = serverCall + " V" + version + ", Hi\n";
-                                        Main.TX_Text += serverMail.getPendingList(serverCall, TTYCaller);
-                                        Main.TX_Text += Motd + "\n";
+                                        Main.txText = serverCall + " V" + version + ", Hi\n";
+                                        Main.txText += ServerMail.getPendingList(serverCall, ttyCaller);
+                                        Main.txText += Motd + "\n";
                                         //We are now fully connected, stop TxIDs
                                         //q.send_txrsid_command("OFF");
-                                        myrxstatus = sm.getTXStatus();
-                                        q.send_status(myrxstatus);  // send our status
+                                        myRxStatus = sm.getTXStatus();
+                                        q.send_status(myRxStatus);  // send our status
                                     }
                                 } else if (rxb.radioMsgBlock) {//process RadioMsg message
-                                    if (WantRelayOverRadio | WantRelaySMSs | WantRelayEmails) {
+                                    if (wantRelayOverRadio | wantRelaySMSs | wantRelayEmails) {
                                         radioMsgWorking = true;//Use either last RSID modem used if any or the default mode
                                         RMsgProcessor.processBlock(Blockline, RMsgProcessor.FileNameString,
-                                                Main.lastRsidReceived.length() > 0 ? Main.lastRsidReceived : Main.RxModemString);
+                                                Main.lastRsidReceived.length() > 0 ? Main.lastRsidReceived : Main.rxModemString);
                                         Main.lastRsidReceived = ""; //Reset for next RSID.
                                     }
                                 }
@@ -1344,27 +1346,27 @@ public class Main {
                                 if (getcl.lookingAt()) {
                                     if (matchServerCallWith(getcl.group(2))) {
                                         String newCaller = getcl.group(1);
-                                        if (TTYConnected.equals("Connected") && !newCaller.toUpperCase(Locale.US).equals(TTYCaller)) {
+                                        if (ttyConnected.equals("Connected") && !newCaller.toUpperCase(Locale.US).equals(ttyCaller)) {
                                             //I am already in a session and this request is not from the same client, ignore
                                             q.Message("Con. request from " + newCaller + ". Ignored...", 5);
                                         } else {
                                             //I am not in a session, or the current client is connecting again, try to accept connection connect
-                                            TTYCaller = newCaller;
+                                            ttyCaller = newCaller;
                                             //Password supplied matches or None required?
                                             if ((rxb.valid && Main.accessPassword.length() == 0)
                                                     || (rxb.validWithPW && Main.accessPassword.length() > 0)) {
                                                 //Clean any previous session data
                                                 disconnect = false;
-                                                Status = "Listening";
-                                                Connected = false;
+                                                status = "Listening";
+                                                connected = false;
                                                 mainui.enableMnuPreferences2();
-                                                TTYConnected = "";
+                                                ttyConnected = "";
                                                 //Reset RxDelay too
-                                                RxDelay = initialRxDelay;
+                                                rxDelay = initialRxDelay;
                                                 //
                                                 session = "";
-                                                TX_Text = "";
-                                                Totalbytes = 0;
+                                                txText = "";
+                                                totalBytes = 0;
                                                 sm.initSession();
                                                 for (int i = 0; i < 64; i++) {
                                                     Session.txbuffer[i] = "";
@@ -1380,56 +1382,56 @@ public class Main {
                                                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, e);
                                                 }
                                                 // send TTY acknowledge
-                                                String tmp = "Connect request from " + TTYCaller;
+                                                String tmp = "Connect request from " + ttyCaller;
                                                 //Set TX mode to mode requested by client
-                                                TTYmodes = getcl.group(3);
+                                                ttyModes = getcl.group(3);
                                                 //Old protocol, simulate symetric modes
-                                                if (TTYmodes == null) {
-                                                    TTYmodes = "0";
+                                                if (ttyModes == null) {
+                                                    ttyModes = "0";
                                                 }
-                                                String myTxmodem = TTYmodes.substring(0, 1);
+                                                String myTxmodem = ttyModes.substring(0, 1);
                                                 if (myTxmodem.equals("0")) {
-                                                    Main.TxModem = Main.RxModem;
-                                                } else if (TTYmodes.length() > 1) {
-                                                    TTYmodes = TTYmodes.substring(1);
-                                                    Main.TxModem = getmodem(myTxmodem);
+                                                    Main.txModem = Main.rxModem;
+                                                } else if (ttyModes.length() > 1) {
+                                                    ttyModes = ttyModes.substring(1);
+                                                    Main.txModem = getmodem(myTxmodem);
                                                 }
-                                                LastSessionExchangeTime = System.currentTimeMillis() / 1000; //Set initial value of session timeout
+                                                lastSessionExchangeTime = System.currentTimeMillis() / 1000; //Set initial value of session timeout
                                                 m.requestTxRsid("ON");
                                                 m.setRxRsid("ON");
                                                 q.Message(tmp, 10);
-                                                q.send_ack(TTYCaller);
-                                                status_received = false;
-                                                TimeoutPolls = 0;
+                                                q.send_ack(ttyCaller);
+                                                statusRcved = false;
+                                                timeoutPolls = 0;
                                                 if (Blockline.length() > 8) {
                                                     charval = (int) (blockval / (Blockline.length() - 4)); // msec
-                                                    blocktime = m.getBlockTime(Main.RxModem); //Use pre-calculated value
+                                                    blocktime = m.getBlockTime(Main.rxModem); //Use pre-calculated value
                                                     //blocktime = (charval * 64 / 1000) + 4;
                                                 }
-                                                log("Connect request from " + TTYCaller);
+                                                log("Connect request from " + ttyCaller);
                                             } else if (rxb.valid && Main.accessPassword.length() > 0) {
                                                 //Need password but none provided. Send a reject block with a reason
                                                 m.requestTxRsid("ON");
                                                 m.setRxRsid("ON");
                                                 log("Connect attempted with missing password when one is required");
-                                                q.send_reject(TTYCaller, "Server requires a password\n");
+                                                q.send_reject(ttyCaller, "Server requires a password\n");
                                             }
                                         }
                                     }
                                 }
                             }
                             //Received an Abort, cleanup or a disconnect request
-                            if (TTYConnected.equals("Connected")
+                            if (ttyConnected.equals("Connected")
                                     & rxb.session.equals(session) & rxb.type.equals("a") | disconnect) {
                                 q.send_disconnect();
                                 disconnect = false;
-                                Status = "Listening";
-                                Connected = false;
+                                status = "Listening";
+                                connected = false;
                                 mainui.enableMnuPreferences2();
-                                TTYConnected = "";
+                                ttyConnected = "";
                                 session = "";
-                                TX_Text = "";
-                                Totalbytes = 0;
+                                txText = "";
+                                totalBytes = 0;
                                 sm.initSession();
                                 int i;
                                 for (i = 0; i < 64; i++) {
@@ -1451,7 +1453,7 @@ public class Main {
                                 // send disconnect packet to caller...
                                 //VK2ETA moved up to be first in sequence
                                 //q.send_disconnect();
-                                Main.RxDelay = Main.initialRxDelay;
+                                Main.rxDelay = Main.initialRxDelay;
                                 //TTY connect request from other client (I become a TTY server)
                                 //} else if (rxb.valid & rxb.type.equals("c")) { //now with access password
                             }
@@ -1468,7 +1470,7 @@ public class Main {
                                 }
                             }
                             //End of //if  NO bulletin mode & NO IAC mode
-                        } else if (Main.Bulletinmode) {
+                        } else if (Main.bulletinMode) {
                             // Bulletin mode
                             Blockline = Blockline.substring(5);
                             if (Blockline.length() > 9) {
@@ -1479,21 +1481,21 @@ public class Main {
                             if (mb.find()) {
                                 Blockline = "\n----------\n";
                                 bulletin.write(Blockline);
-                                Main.Bulletinmode = false;
-                                Main.Status = "Listening";
+                                Main.bulletinMode = false;
+                                Main.status = "Listening";
                             }
                             mainwindow += Blockline;
-                            Bulletin_time = 30;
+                            bulletinTime = 30;
                             // write to bulletins file...
                             bulletin.write(Blockline);
                             bulletin.flush();
-                        } else if (Main.IACmode) {
+                        } else if (Main.iacMode) {
                             sm.parseInput(Blockline);
                         }
                     } else { // if NO (m.checkBlock())
                         // no block coming...and we are server (or received a connect request)
-                        if (!Main.TXActive & (TTYConnected.equals("Connected")
-                                | TTYConnected.equals("Connecting"))) {  //Allow timeouts when in connecting phase as well
+                        if (!Main.TxActive & (ttyConnected.equals("Connected")
+                                | ttyConnected.equals("Connecting"))) {  //Allow timeouts when in connecting phase as well
                             //long now = System.currentTimeMillis();
                             Systime = System.currentTimeMillis();
                             idlesecs = (int) ((Systime - oldtime) / 1000);
@@ -1504,18 +1506,18 @@ public class Main {
                                 MaxSessionIdleTime = 60; //Minimum 1 minute
                             }
                             if (MaxSessionIdleTime > 0) {  //Zero mean never disconnect, use with care
-                                long SessionIdleSec = (Systime / 1000) - LastSessionExchangeTime;
+                                long SessionIdleSec = (Systime / 1000) - lastSessionExchangeTime;
                                 if (SessionIdleSec > MaxSessionIdleTime) {
                                     //Disconnect session
                                     disconnect = false;
-                                    Status = "Listening";
-                                    Connected = false;
+                                    status = "Listening";
+                                    connected = false;
                                     mainui.enableMnuPreferences2();
                                     mainui.disableMboxMenu();
-                                    TTYConnected = "";
+                                    ttyConnected = "";
                                     session = "";
-                                    TX_Text = "";
-                                    Totalbytes = 0;
+                                    txText = "";
+                                    totalBytes = 0;
                                     int i;
                                     for (i = 0; i < 64; i++) {
                                         Session.txbuffer[i] = "";
@@ -1552,59 +1554,59 @@ public class Main {
                                 System.out.println("test 3");
                             }
                              */
-                            if ((m.BlockActive && !m.receivingStatusBlock && (idlesecs > (blocktime * 2.2 + m.firstCharDelay + RxDelay))) //Normal data block reception
+                            if ((m.BlockActive && !m.receivingStatusBlock && (idlesecs > (blocktime * 2.2 + m.firstCharDelay + rxDelay))) //Normal data block reception
                                     //DEBUG 
-                                    | (m.BlockActive && m.receivingStatusBlock && (idlesecs > (blocktime * (0.3) + m.firstCharDelay + RxDelay))) //Data block is status block
+                                    | (m.BlockActive && m.receivingStatusBlock && (idlesecs > (blocktime * (0.3) + m.firstCharDelay + rxDelay))) //Data block is status block
                                     //DEBUG                           
-                                    | (!m.BlockActive && (idlesecs > blocktime * (0.5) + m.firstCharDelay + RxDelay)) // No data block received
+                                    | (!m.BlockActive && (idlesecs > blocktime * (0.5) + m.firstCharDelay + rxDelay)) // No data block received
                                     ) {
                                 oldtime = Systime;
-                                Main.TimeoutPolls += 1;
+                                Main.timeoutPolls += 1;
                                 // Check if we need to downgrade modes
-                                if (Main.TimeoutPolls > 1) {
+                                if (Main.timeoutPolls > 1) {
                                     DowngradeOneMode();
-                                    TimeoutPolls = 0;
+                                    timeoutPolls = 0;
                                 }
-                                if (TTYConnected.equals("Connecting") & !status_received & NumberOfAcks > 0) {
+                                if (ttyConnected.equals("Connecting") & !statusRcved & numberOfAcks > 0) {
                                     // repeat sending ack...
                                     //Turn RXid and TXid ON as I am repeating a connect ack
                                     m.setRxRsid("ON");
                                     m.requestTxRsid("ON");
-                                    q.send_ack(TTYCaller);
-                                    status_received = false;
+                                    q.send_ack(ttyCaller);
+                                    statusRcved = false;
                                     idlesecs = 0;
-                                    NumberOfAcks--;
+                                    numberOfAcks--;
                                     //Add 3 seconds to the rxDelay in case the client is slow to respond or has a long Tx delay (i.e. through a repeater)
-                                    Main.RxDelay += 3;
-                                    if (RxDelay > 9) {
-                                        RxDelay = 9; //Max delay
+                                    Main.rxDelay += 3;
+                                    if (rxDelay > 9) {
+                                        rxDelay = 9; //Max delay
                                     }
-                                } else if (TTYConnected.equals("Connecting") & !status_received) {
+                                } else if (ttyConnected.equals("Connecting") & !statusRcved) {
                                     //Abandon connect trial
-                                    Status = "Listening";
-                                    Connected = false;
+                                    status = "Listening";
+                                    connected = false;
                                     mainui.enableMnuPreferences2();
                                     mainui.disableMboxMenu();
-                                    TTYConnected = "";
+                                    ttyConnected = "";
                                     session = "";
-                                    TX_Text = "";
-                                    Totalbytes = 0;
+                                    txText = "";
+                                    totalBytes = 0;
                                     int i;
                                     for (i = 0; i < 64; i++) {
                                         Session.txbuffer[i] = "";
                                     }
                                     isDisconnected = true;
-                                    Main.RxDelay = Main.initialRxDelay;
+                                    Main.rxDelay = Main.initialRxDelay;
                                     //Set RXid ON for next connect request
                                     //q.send_txrsid_command("OFF");
                                     m.setRxRsid("ON");
-                                } else if (TTYConnected.equals("Connected")) {
+                                } else if (ttyConnected.equals("Connected")) {
                                     // We are in a session, send a poll
                                     //Turn RXid and TXid ON as I am repeating a status request
                                     m.setRxRsid("ON");
                                     m.requestTxRsid("ON");
-                                    myrxstatus = sm.getTXStatus();
-                                    q.send_status(myrxstatus);  // send our status
+                                    myRxStatus = sm.getTXStatus();
+                                    q.send_status(myRxStatus);  // send our status
                                     idlesecs = 0;
                                 }
                             }
@@ -1640,16 +1642,16 @@ public class Main {
         try {
             int i;
             boolean knownserver = false;
-            for (i = 0; i < Servers.length; i++) {
-                if (myServer.equals(Servers[i])) {
+            for (i = 0; i < serversArray.length; i++) {
+                if (myServer.equals(serversArray[i])) {
                     knownserver = true;
                     break;
                 }
             }
             if (!knownserver) {
                 for (i = 0; i < 10; i++) {
-                    if (Servers[i].equals("")) {
-                        Servers[i] = myServer;
+                    if (serversArray[i].equals("")) {
+                        serversArray[i] = myServer;
                         mainui.addServer(myServer);
                         break;
                     }
@@ -1667,76 +1669,76 @@ public class Main {
 
         // are we on Linux?
         try {
-            HomePath = System.getProperty("user.home");
+            homePath = System.getProperty("user.home");
             if (File.separator.equals("/")) {
-                Dirprefix = "/.pskmail/";
-                Separator = "/";
+                dirPrefix = "/.pskmail/";
+                separator = "/";
                 onWindows = false;
             } else {
-                Dirprefix = "\\pskmail\\";
-                Separator = "\\";
+                dirPrefix = "\\pskmail\\";
+                separator = "\\";
                 onWindows = true;
             }
             // Where is this jar installed? Needs updating for windows?
-            String path = mainpskmailui.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+            String path = MainPskmailUi.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
             path = path.substring(0, path.lastIndexOf("/") + 1);
-            Main.InstallPath = path;
+            Main.installPath = path;
             //Check if pskmail directory exists, create if not
-            File dir = new File(HomePath + Dirprefix);
+            File dir = new File(homePath + dirPrefix);
             if (!dir.isDirectory()) {
                 dir.mkdir();
             }
             //Check if Outbox directory exists, create if not
             if (File.separator.equals("/")) {
-                Separator = "/";
+                separator = "/";
             } else {
-                Separator = "\\";
+                separator = "\\";
             }
-            File outbox = new File(HomePath + Dirprefix + "Outbox" + Separator);
+            File outbox = new File(homePath + dirPrefix + "Outbox" + separator);
             if (!outbox.isDirectory()) {
                 outbox.mkdir();
             }
-            File sentbox = new File(HomePath + Dirprefix + "Sent" + Separator);
+            File sentbox = new File(homePath + dirPrefix + "Sent" + separator);
             if (!sentbox.isDirectory()) {
                 sentbox.mkdir();
             }
-            File pendingfl = new File(HomePath + Dirprefix + "Pending" + Separator);
+            File pendingfl = new File(homePath + dirPrefix + "Pending" + separator);
             if (!pendingfl.isDirectory()) {
                 pendingfl.mkdir();
             }
-            File outpendingfl = new File(HomePath + Dirprefix + "Outpending" + Separator);
+            File outpendingfl = new File(homePath + dirPrefix + "Outpending" + separator);
             if (!outpendingfl.isDirectory()) {
                 outpendingfl.mkdir();
             }
 
             //Check if Downloads directory exists, create if not
             if (File.separator.equals("/")) {
-                Separator = "/";
+                separator = "/";
             } else {
-                Separator = "\\";
+                separator = "\\";
             }
-            File downloads = new File(HomePath + Dirprefix + "Downloads" + Separator);
+            File downloads = new File(homePath + dirPrefix + "Downloads" + separator);
             if (!downloads.isDirectory()) {
                 downloads.mkdir();
             }
 
             //Check if Pending directory exists, create if not
             if (File.separator.equals("/")) {
-                Separator = "/";
+                separator = "/";
             } else {
-                Separator = "\\";
+                separator = "\\";
             }
-            pendingstr = HomePath + Dirprefix + "Pending" + Separator;
-            pending = new File(pendingstr);
+            pendingStr = homePath + dirPrefix + "Pending" + separator;
+            pending = new File(pendingStr);
             if (!pending.isDirectory()) {
                 pending.mkdir();
             }
-            Pendingdir = HomePath + Dirprefix + "Pending" + Separator;
-            Outpendingdir = HomePath + Dirprefix + "Outpending" + Separator;
-            Transactions = HomePath + Dirprefix + "Transactions";
+            pendingDir = homePath + dirPrefix + "Pending" + separator;
+            outPendingDir = homePath + dirPrefix + "Outpending" + separator;
+            transactions = homePath + dirPrefix + "Transactions";
 
             // Check if bulletin file  exists, create if not
-            File fFile = new File(Main.HomePath + Main.Dirprefix + "Downloads" + Separator + "bulletins");
+            File fFile = new File(Main.homePath + Main.dirPrefix + "Downloads" + separator + "bulletins");
             if (!fFile.exists()) {
                 fFile.createNewFile();
             }
@@ -1744,7 +1746,7 @@ public class Main {
             bulletin = new FileWriter(fFile, true);
 
             // check if headers file exists, and read in contents 
-            File fh = new File(HomePath + Dirprefix + "headers");
+            File fh = new File(homePath + dirPrefix + "headers");
             if (!fh.exists()) {
                 fh.createNewFile();
             }
@@ -1754,27 +1756,27 @@ public class Main {
             String s;
             while ((s = br.readLine()) != null) {
                 String fl = s + "\n";
-                Mailheaderswindow += fl;
+                mailHeadersWindow += fl;
             }
             br.close();
 
             //Create RadioMsgInbox
-            File RadioMsgInbox = new File(HomePath + Dirprefix + DirInbox + Separator);
+            File RadioMsgInbox = new File(homePath + dirPrefix + dirInbox + separator);
             if (!RadioMsgInbox.isDirectory()) {
                 RadioMsgInbox.mkdir();
             }
             //Create RadioMsgSentbox
-            File RadioMsgSentbox = new File(HomePath + Dirprefix + DirSent + Separator);
+            File RadioMsgSentbox = new File(homePath + dirPrefix + dirSent + separator);
             if (!RadioMsgSentbox.isDirectory()) {
                 RadioMsgSentbox.mkdir();
             }
             //Create RadioMsgImages
-            File RadioMsgImages = new File(HomePath + Dirprefix + DirImages + Separator);
+            File RadioMsgImages = new File(homePath + dirPrefix + dirImages + separator);
             if (!RadioMsgImages.isDirectory()) {
                 RadioMsgImages.mkdir();
             }
             //Create RadioMsgArchive Directory
-            File RadioMsgArchive = new File(HomePath + Dirprefix + DirArchive + Separator);
+            File RadioMsgArchive = new File(homePath + dirPrefix + dirArchive + separator);
             if (!RadioMsgArchive.isDirectory()) {
                 RadioMsgArchive.mkdir();
             }
@@ -1809,25 +1811,25 @@ public class Main {
              */
 
             // get password
-            Passwrd = configuration.getPreference("PASSWORD");
+            sessionPasswrd = configuration.getPreference("PASSWORD");
             // try to initialize MAXDCD from Prefs
             DCDstr = configuration.getPreference("DCD", "3");
             MAXDCD = Integer.parseInt(DCDstr);
             // try to initialize Icon from Prefs
-            Icon = configuration.getPreference("ICON", "y");
+            icon = configuration.getPreference("ICON", "y");
             ICONlevel = configuration.getPreference("ICON2", "/");
             // Initialize APRSMessageNumber
-            APRSMessageNumber = 0;
+            aprsMessageNumber = 0;
             // Initialize send queue
-            TX_Text = "";
+            txText = "";
             // init logfile
-            Main.LogFile = configuration.getPreference("LOGFILE", "client.log");
+            Main.logFile = configuration.getPreference("LOGFILE", "client.log");
             // Modem settings
             host = configuration.getPreference("MODEMIP");
             port = Integer.parseInt(configuration.getPreference("MODEMIPPORT", "7322"));
             xmlPort = configuration.getPreference("MODEMXMLPORT", "7362");
-            ModemPreamble = configuration.getPreference("MODEMPREAMBLE", "0");
-            ModemPostamble = configuration.getPreference("MODEMPOSTAMBLE", "0");
+            modemPreamble = configuration.getPreference("MODEMPREAMBLE", "0");
+            modemPostamble = configuration.getPreference("MODEMPOSTAMBLE", "0");
             // Mail settings
             if (configuration.getPreference("COMPRESSED", "yes").equals("yes")) {
                 compressedmail = true;
@@ -1835,94 +1837,93 @@ public class Main {
                 compressedmail = false;
             }
             String profile = configuration.getPreference("BLOCKLENGTH", "5");
-            CurrentModemProfile = profile;
+            currentModemProfile = profile;
             Character c = profile.charAt(0);
             // Get the default modem and the selected mode list
             // If this is not set by the client then set a decent default as
             // they will end up in THOR8 hell most often otherwise!!!
             String strunt = configuration.getPreference("DEFAULTMODE");
             if (!strunt.isEmpty()) {
-                DefaultTXmodem = configuration.getPreference("DEFAULTMODE");
-                defaultmode = convmodem(DefaultTXmodem);
-                LastTxModem = LastRxModem = DefaultTXmodem;
+                defaultTxModem = configuration.getPreference("DEFAULTMODE");
+                defaultmode = convmodem(defaultTxModem);
+                lastTxModem = lastRxModem = defaultTxModem;
             } else {
-                DefaultTXmodem = "PSK250R";
-                Main.defaultmode = convmodem(DefaultTXmodem);
-                configuration.setPreference("DEFAULTMODE", Main.DefaultTXmodem);
+                defaultTxModem = "PSK250R";
+                Main.defaultmode = convmodem(defaultTxModem);
+                configuration.setPreference("DEFAULTMODE", Main.defaultTxModem);
             }
             // Check if its empty, if so then set a decent default
             strunt = configuration.getPreference("MODES");
 // System.out.println("Defaultmode=" + strunt);                  
             if (!strunt.isEmpty()) {
-                modes = configuration.getPreference("MODES");
+                modesListStr = configuration.getPreference("MODES");
             } else {
-                modes = "8543"; // PSK250, PSK250R, MFSK32, THOR22
-                configuration.setPreference("MODES", Main.modes);
+                modesListStr = "8543"; // PSK250, PSK250R, MFSK32, THOR22
+                configuration.setPreference("MODES", Main.modesListStr);
             }
-            modeprofile = new modemmodeenum[10];
             if (configuration.getPreference("GPSD", "0").equals("1")) {
-                WantGpsd = true;
+                wantGpsd = true;
             }
             if (configuration.getPreference("SCANNER", "no").equals("yes")) {
                 wantScanner = true;
             }
             // APRSServerSettings
             //
-            aprsserverport = Integer.parseInt(configuration.getPreference("APRSSERVERPORT", "8063"));
+            aprsServerPort = Integer.parseInt(configuration.getPreference("APRSSERVERPORT", "8063"));
             if (configuration.getPreference("APRSSERVER", "yes").equals("yes")) {
-                aprsserverenabled = true;
+                aprsServerEnabled = true;
             } else {
-                aprsserverenabled = false;
+                aprsServerEnabled = false;
             }
             //Server and RadioMsg globals
             if (configuration.getPreference("ENABLESERVER", "no").equals("yes")) {
-                WantServer = true;
+                wantServer = true;
             } else {
-                WantServer = false;
+                wantServer = false;
             }
             if (configuration.getPreference("RELAYOVERRADIO", "no").equals("yes")) {
-                WantRelayOverRadio = true;
+                wantRelayOverRadio = true;
             } else {
-                WantRelayOverRadio = false;
+                wantRelayOverRadio = false;
             }
             if (configuration.getPreference("RELAYEMAILS", "no").equals("yes")) {
-                WantRelayEmails = true;
+                wantRelayEmails = true;
             } else {
-                WantRelayEmails = false;
+                wantRelayEmails = false;
             }
             if (configuration.getPreference("RELAYEMAILSIMMEDIATELY", "no").equals("yes")) {
-                WantRelayEmailsImmediat = true;
+                wantRelayEmailsImmediat = true;
             } else {
-                WantRelayEmailsImmediat = false;
+                wantRelayEmailsImmediat = false;
             }
             if (configuration.getPreference("RELAYSMSS", "no").equals("yes")) {
-                WantRelaySMSs = true;
+                wantRelaySMSs = true;
             } else {
-                WantRelaySMSs = false;
+                wantRelaySMSs = false;
             }
             if (configuration.getPreference("RELAYSMSSIMMEDIATELY", "no").equals("yes")) {
-                WantRelaySMSsImmediat = true;
+                wantRelaySMSsImmediat = true;
             } else {
-                WantRelaySMSsImmediat = false;
+                wantRelaySMSsImmediat = false;
             }
             callsignAsServer = configuration.getPreference("CALLSIGNASSERVER", "N0CAL");
             accessPassword = Main.configuration.getPreference("ACCESSPASSWORD").trim();
         } catch (Exception e) {
             MAXDCD = 3;
 //                q.backoff = "5";
-            Icon = "y";
+            icon = "y";
             ICONlevel = "/";
             log.writelog("Problems with config parameter.", e, true);
         }
         //New: now contains a list of servers with optional passwords
         loadServerList();
         Main.mycall = configuration.getPreference("CALL");
-        Freq_offset = Integer.parseInt(Main.configuration.getPreference("RIGOFFSET", "0"));
+        freqOffset = Integer.parseInt(Main.configuration.getPreference("RIGOFFSET", "0"));
         String XMLIP = configuration.getPreference("MODEMIP", "127.0.0.1");
         if (XMLIP.equals("localhost")) {
             XMLIP = "127.0.0.1";
         }
-        XmlRpc_URL = "http://" + XMLIP + ":" + xmlPort.trim() + "/RPC2";
+        xmlRpcURL = "http://" + XMLIP + ":" + xmlPort.trim() + "/RPC2";
     }
 
     //Fills array of Servers and passwords from the preferences
@@ -1968,39 +1969,39 @@ public class Main {
             }
         }
         //Copy only non null strings to final array
-        Servers = new String[MAXNEWSERVERS];
-        ServersPasswords = new String[Servers.length];
+        serversArray = new String[MAXNEWSERVERS];
+        serversPasswordArray = new String[serversArray.length];
         int j = 0;
         for (int i = 0; i < serverArrayOriginal.length && i < MAXNEWSERVERS; i++) {
             if (serverArrayOriginal[i].length() > 0) {
-                Servers[j] = serverArrayOriginal[i];
-                ServersPasswords[j++] = serverPasswordArrayOriginal[i];
+                serversArray[j] = serverArrayOriginal[i];
+                serversPasswordArray[j++] = serverPasswordArrayOriginal[i];
             }
         }
         //Blank the rest. Index j already contains the first location to blank
-        for (; j < Servers.length; j++) {
-            Servers[j] = "";
-            ServersPasswords[j] = "";
+        for (; j < serversArray.length; j++) {
+            serversArray[j] = "";
+            serversPasswordArray[j] = "";
         }
         //Set default one
-        Main.myserver = Servers[0];
-        Main.myserverpassword = ServersPasswords[0];
+        Main.myserver = serversArray[0];
+        Main.myserverpassword = serversPasswordArray[0];
         //Re-size and blank the other arrays
-        SNR = new double[MAXNEWSERVERS];
+        serversSnrArray = new double[MAXNEWSERVERS];
         for (int i = 0; i < MAXNEWSERVERS; i++) {
-            SNR[i] = 0.0f;
+            serversSnrArray[i] = 0.0f;
         }
-        Lastheard = new String[MAXNEWSERVERS];
+        lastHeardArray = new String[MAXNEWSERVERS];
         for (int i = 0; i < MAXNEWSERVERS; i++) {
-            Lastheard[i] = "";
+            lastHeardArray[i] = "";
         }
-        packets_received = new int[MAXNEWSERVERS];
+        packetsRcved = new int[MAXNEWSERVERS];
         for (int i = 0; i < MAXNEWSERVERS; i++) {
-            packets_received[i] = 0;
+            packetsRcved[i] = 0;
         }
-        modes_received = new String[MAXNEWSERVERS];
+        modesRcved = new String[MAXNEWSERVERS];
         for (int i = 0; i < MAXNEWSERVERS; i++) {
-            modes_received[i] = "";
+            modesRcved[i] = "";
         }
         strength = new int[MAXNEWSERVERS];
         for (int i = 0; i < MAXNEWSERVERS; i++) {
@@ -2019,37 +2020,37 @@ public class Main {
             int timeoutMs = 2000;   // 2 seconds
             gpsdSocket = new Socket();
             gpsdSocket.connect(sockaddr, timeoutMs);
-            gpsdout = new PrintWriter(gpsdSocket.getOutputStream(), true);
-            gpsdin = new BufferedReader(new InputStreamReader(
+            gpsdOut = new PrintWriter(gpsdSocket.getOutputStream(), true);
+            gpsdIn = new BufferedReader(new InputStreamReader(
                     gpsdSocket.getInputStream()));
             String outgps = "?WATCH={\"enable\":true, \"nmea\":true };";
-            gpsdout.println(outgps);
+            gpsdOut.println(outgps);
             long t0 = System.currentTimeMillis();
             t1 = t0;
             boolean ready = false;
             while (t1 - t0 < 2000 & !ready) {
                 t1 = System.currentTimeMillis();
                 String myRead = "";
-                if (gpsdin.ready()) {
-                    myRead = gpsdin.readLine();
+                if (gpsdIn.ready()) {
+                    myRead = gpsdIn.readLine();
                     if (myRead.substring(0, 6).equals("$GPRMC")) {
-                        HaveGPSD = true;
+                        haveGPSD = true;
                         ready = true;
                     }
                 }
             }
-            if (!HaveGPSD) {
+            if (!haveGPSD) {
                 q.Message("Problem with GPSD", 10);
             }
         } catch (UnknownHostException e) {
             q.Message("Cannot find GPSD", 10);
-            HaveGPSD = false;
+            haveGPSD = false;
         } catch (IOException e) {
             q.Message("Cannot find gpsd", 10);
-            HaveGPSD = false;
+            haveGPSD = false;
         }
-        if (HaveGPSD) {
-            gpsdata = new nmeaparser();     // Parser for nmea data
+        if (haveGPSD) {
+            gpsData = new NmeaParser();     // Parser for nmea data
             q.Message("Connected to GPSD", 10);
         }
     }
@@ -2058,48 +2059,48 @@ public class Main {
         String myRead = "";
         Boolean ready = false;
 
-        while (HaveGPSD & !ready) {
+        while (haveGPSD & !ready) {
             try {
-                myRead = gpsdin.readLine();
+                myRead = gpsdIn.readLine();
             } catch (IOException ex) {
                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
             if (myRead.length() > 6) {
                 if (myRead.substring(0, 6).equals("$GPRMC")) {
-                    gpsd_data = myRead.split(",");
-                    if (gpsd_data[1].length() > 2) {
-                        gpsdata.validfix = true;
-                        gpsdata.fixat = gpsd_data[1];
+                    gpsdDataArray = myRead.split(",");
+                    if (gpsdDataArray[1].length() > 2) {
+                        gpsData.validfix = true;
+                        gpsData.fixat = gpsdDataArray[1];
                     }
-                    gpsdata.latitude = gpsd_data[3];
-                    float latdata = Float.valueOf(gpsdata.latitude) / 100;
+                    gpsData.latitude = gpsdDataArray[3];
+                    float latdata = Float.valueOf(gpsData.latitude) / 100;
                     int degr = (int) latdata;
                     float mindata = (latdata - degr) / 60 * 100;
                     mindata = degr + mindata;
-                    if (gpsd_data[4].equals("S")) {
+                    if (gpsdDataArray[4].equals("S")) {
                         mindata *= -1;
                     }
-                    GPSD_latitude = Float.toString(mindata);
-                    gpsdata.longitude = gpsd_data[5];
-                    float longdata = Float.valueOf(gpsdata.longitude) / 100;
+                    gpsdLatitude = Float.toString(mindata);
+                    gpsData.longitude = gpsdDataArray[5];
+                    float longdata = Float.valueOf(gpsData.longitude) / 100;
                     degr = (int) longdata;
                     mindata = (longdata - degr) / 60 * 100;
                     mindata = degr + mindata;
-                    if (gpsd_data[6].equals("W")) {
+                    if (gpsdDataArray[6].equals("W")) {
                         mindata *= -1;
                     }
-                    GPSD_longitude = Float.toString(mindata);
-                    gpsdata.speed = gpsd_data[7];
-                    gpsdata.course = gpsd_data[8];
+                    gpsdLongitude = Float.toString(mindata);
+                    gpsData.speed = gpsdDataArray[7];
+                    gpsData.course = gpsdDataArray[8];
                     char[] buffer = new char[4000];
                     try {
-                        int cnt = gpsdin.read(buffer);
+                        int cnt = gpsdIn.read(buffer);
                     } catch (IOException ex) {
                         Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                configuration.setLatitude(GPSD_latitude);
-                configuration.setLongitude(GPSD_longitude);
+                configuration.setLatitude(gpsdLatitude);
+                configuration.setLongitude(gpsdLongitude);
                 ready = true;
             }
         }
@@ -2107,12 +2108,12 @@ public class Main {
 
     static public void parsenmeadata(String nmeadata) {
         
-        gpsdata.newdata(nmeadata);
-        if (gpsdata.getFixStatus()) {
-            configuration.setLatitude(gpsdata.getLatitude());
-            configuration.setLongitude(gpsdata.getLongitude());
-            configuration.setSpeed(gpsdata.getSpeed());
-            configuration.setCourse(gpsdata.getCourse());
+        gpsData.newdata(nmeadata);
+        if (gpsData.getFixStatus()) {
+            configuration.setLatitude(gpsData.getLatitude());
+            configuration.setLongitude(gpsData.getLongitude());
+            configuration.setSpeed(gpsData.getSpeed());
+            configuration.setCourse(gpsData.getCourse());
         }
     }
 
@@ -2121,13 +2122,13 @@ public class Main {
      */
     private static void handlegps() {
         // GPS
-        gpsport = new serialport();       // Serial port object
-        gpsdata = new nmeaparser();     // Parser for nmea data
+        gpsPort = new GpsSerialPort();       // Serial port object
+        gpsData = new NmeaParser();     // Parser for nmea data
         String portforgps = configuration.getPreference("GPSPORT");
 
         // Make sure the selected port still exists!
         if (configuration.getPreference("GPSENABLED").equals("yes")) {
-            if (!gpsport.checkComPort(portforgps)) {
+            if (!gpsPort.checkComPort(portforgps)) {
                 Main.log.writelog("Serial port " + portforgps + " does not exist! Was the GPS removed? Disabling GPS.", true);
                 configuration.setPreference("GPSENABLED", "no");
             }
@@ -2136,11 +2137,11 @@ public class Main {
             try {
                 String speedforgps = configuration.getPreference("GPSSPEED", "4800");
                 int speedygps = Integer.parseInt(speedforgps);
-                gpsport.connect(portforgps, speedygps);
+                gpsPort.connect(portforgps, speedygps);
                 // Check if the port is open
-                if (!gpsport.curstate) {
+                if (!gpsPort.curstate) {
                     // Disconnect and set it off
-                    gpsport.disconnect();
+                    gpsPort.disconnect();
                     configuration.setPreference("GPSENABLED", "no");
                 }
                 /*if (portforgps.contains("USB"))
@@ -2153,10 +2154,10 @@ public class Main {
     }
 
     static void setFreq(String freq) {
-        if (Rigctl.opened) {
-            int fr = Integer.parseInt(Main.CurrentFreq) + Rigctl.OFF;
-            freqstore = Integer.toString(fr);
-            Rigctl.Setfreq(freq);
+        if (RigCtrl.opened) {
+            int fr = Integer.parseInt(Main.currentFreq) + RigCtrl.OFF;
+            freqStore = Integer.toString(fr);
+            RigCtrl.Setfreq(freq);
             summoning = true;
         }
     }
@@ -2207,16 +2208,16 @@ public class Main {
         int currentmodeindex = 0;
 
         //Alternate Rx and Tx speed downgrades
-        if (Main.JustDowngradedRX) {
-            JustDowngradedRX = false;
-            Main.hiss2n = 50; //Reset to mid-range
+        if (Main.justDowngradedRx) {
+            justDowngradedRx = false;
+            Main.hisS2n = 50; //Reset to mid-range
             //Downgrade Tx mode
-            currentmodeindex = getClientModeIndex(Main.TxModem);
-            if (currentmodeindex < TTYmodes.length() - 1) { //List in decreasing order of speed
-                Main.TxModem = getClientMode(currentmodeindex + 1);
+            currentmodeindex = getClientModeIndex(Main.txModem);
+            if (currentmodeindex < ttyModes.length() - 1) { //List in decreasing order of speed
+                Main.txModem = getClientMode(currentmodeindex + 1);
                 sm.SetBlocklength(5); //restart with medium block length
                 m.requestTxRsid("ON");
-                String TxMode = m.getTXModemString(Main.TxModem);
+                String TxMode = m.getTXModemString(Main.txModem);
                 //String SendMode = "<cmd><mode>" + TxMode + "</mode></cmd>";
                 //m.Sendln(SendMode);
                 m.Sendln("", TxMode, "");
@@ -2227,14 +2228,14 @@ public class Main {
                 //}
             }
         } else {
-            JustDowngradedRX = true; // Make TX mode downgrade first (if necessary)
-            Main.mys2n = 50; //Reset to mid-range
-            currentmodeindex = getClientModeIndex(Main.RxModem);
-            if (currentmodeindex < TTYmodes.length() - 1) { //List in decreasing order of speed
-                Main.RxModem = getClientMode(currentmodeindex + 1);
-                Main.RxModemString = m.getModemString(Main.RxModem);
-                blocktime = m.getBlockTime(Main.RxModem);
-                String TxMode = m.getTXModemString(Main.TxModem);
+            justDowngradedRx = true; // Make TX mode downgrade first (if necessary)
+            Main.myS2n = 50; //Reset to mid-range
+            currentmodeindex = getClientModeIndex(Main.rxModem);
+            if (currentmodeindex < ttyModes.length() - 1) { //List in decreasing order of speed
+                Main.rxModem = getClientMode(currentmodeindex + 1);
+                Main.rxModemString = m.getModemString(Main.rxModem);
+                blocktime = m.getBlockTime(Main.rxModem);
+                String TxMode = m.getTXModemString(Main.txModem);
                 //String SendMode = "<cmd><mode>" + TXmd + "</mode></cmd>";
                 //m.Sendln(SendMode);
                 m.Sendln("", TxMode, ""); //Just change mode
@@ -2247,107 +2248,107 @@ public class Main {
         }
     }
 
-    static modemmodeenum convmodem(String mymodem) {
-        modemmodeenum mode = modemmodeenum.THOR8;
+    static ModemModesEnum convmodem(String mymodem) {
+        ModemModesEnum mode = ModemModesEnum.THOR8;
 
         if (mymodem.equals("THOR8")) {
-            mode = modemmodeenum.THOR8;
+            mode = ModemModesEnum.THOR8;
         } else if (mymodem.equals("MFSK16")) {
-            mode = modemmodeenum.MFSK16;
+            mode = ModemModesEnum.MFSK16;
         } else if (mymodem.equals("THOR22")) {
-            mode = modemmodeenum.THOR22;
+            mode = ModemModesEnum.THOR22;
         } else if (mymodem.equals("MFSK32")) {
-            mode = modemmodeenum.MFSK32;
+            mode = ModemModesEnum.MFSK32;
         } else if (mymodem.equals("PSK250R")) {
-            mode = modemmodeenum.PSK250R;
+            mode = ModemModesEnum.PSK250R;
         } else if (mymodem.equals("PSK500R")) {
-            mode = modemmodeenum.PSK500R;
+            mode = ModemModesEnum.PSK500R;
         } else if (mymodem.equals("PSK1000")) {
-            mode = modemmodeenum.PSK1000;
+            mode = ModemModesEnum.PSK1000;
         } else if (mymodem.equals("PSK500")) {
-            mode = modemmodeenum.PSK500;
+            mode = ModemModesEnum.PSK500;
         } else if (mymodem.equals("PSK250")) {
-            mode = modemmodeenum.PSK250;
+            mode = ModemModesEnum.PSK250;
         } else if (mymodem.equals("PSK125")) {
-            mode = modemmodeenum.PSK125;
+            mode = ModemModesEnum.PSK125;
         } else if (mymodem.equals("PSK63")) {
-            mode = modemmodeenum.PSK63;
+            mode = ModemModesEnum.PSK63;
         } else if (mymodem.equals("PSK125R")) {
-            mode = modemmodeenum.PSK125R;
+            mode = ModemModesEnum.PSK125R;
         } else if (mymodem.equals("DOMINOEX5")) {
-            mode = modemmodeenum.DOMINOEX5;
+            mode = ModemModesEnum.DOMINOEX5;
         } else if (mymodem.equals("CTSTIA")) {
-            mode = modemmodeenum.CTSTIA;
+            mode = ModemModesEnum.CTSTIA;
         } else if (mymodem.equals("DOMINOEX22")) {
-            mode = modemmodeenum.DOMINOEX22;
+            mode = ModemModesEnum.DOMINOEX22;
         } else if (mymodem.equals("DOMINOEX11")) {
-            mode = modemmodeenum.DOMINOEX11;
+            mode = ModemModesEnum.DOMINOEX11;
         } else if (mymodem.equals("PSK63RC5")) {
-            mode = modemmodeenum.PSK63RC5;
+            mode = ModemModesEnum.PSK63RC5;
         } else if (mymodem.equals("PSK63RC10")) {
-            mode = modemmodeenum.PSK63RC10;
+            mode = ModemModesEnum.PSK63RC10;
         } else if (mymodem.equals("PSK250RC3")) {
-            mode = modemmodeenum.PSK250RC3;
+            mode = ModemModesEnum.PSK250RC3;
         } else if (mymodem.equals("PSK125RC4")) {
-            mode = modemmodeenum.PSK125RC4;
+            mode = ModemModesEnum.PSK125RC4;
         }
         return mode;
     }
 
-    static modemmodeenum getmodem(String mymodem) {
-        modemmodeenum mode = modemmodeenum.THOR8;
+    static ModemModesEnum getmodem(String mymodem) {
+        ModemModesEnum mode = ModemModesEnum.THOR8;
 
         if (mymodem.equals("1")) {
-            mode = modemmodeenum.THOR8;
+            mode = ModemModesEnum.THOR8;
         } else if (mymodem.equals("2")) {
-            mode = modemmodeenum.MFSK16;
+            mode = ModemModesEnum.MFSK16;
         } else if (mymodem.equals("3")) {
-            mode = modemmodeenum.THOR22;
+            mode = ModemModesEnum.THOR22;
         } else if (mymodem.equals("4")) {
-            mode = modemmodeenum.MFSK32;
+            mode = ModemModesEnum.MFSK32;
         } else if (mymodem.equals("5")) {
-            mode = modemmodeenum.PSK250R;
+            mode = ModemModesEnum.PSK250R;
         } else if (mymodem.equals("6")) {
-            mode = modemmodeenum.PSK500R;
+            mode = ModemModesEnum.PSK500R;
         } else if (mymodem.equals("g")) {
-            mode = modemmodeenum.PSK1000;
+            mode = ModemModesEnum.PSK1000;
         } else if (mymodem.equals("7")) {
-            mode = modemmodeenum.PSK500;
+            mode = ModemModesEnum.PSK500;
         } else if (mymodem.equals("8")) {
-            mode = modemmodeenum.PSK250;
+            mode = ModemModesEnum.PSK250;
         } else if (mymodem.equals("9")) {
-            mode = modemmodeenum.PSK125;
+            mode = ModemModesEnum.PSK125;
         } else if (mymodem.equals("a")) {
-            mode = modemmodeenum.PSK63;
+            mode = ModemModesEnum.PSK63;
         } else if (mymodem.equals("b")) {
-            mode = modemmodeenum.PSK125R;
+            mode = ModemModesEnum.PSK125R;
         } else if (mymodem.equals("n")) {
-            mode = modemmodeenum.DOMINOEX5;
+            mode = ModemModesEnum.DOMINOEX5;
         } else if (mymodem.equals("f")) {
-            mode = modemmodeenum.CTSTIA;
+            mode = ModemModesEnum.CTSTIA;
         } else if (mymodem.equals("h")) {
-            mode = modemmodeenum.PSK63RC5;
+            mode = ModemModesEnum.PSK63RC5;
         } else if (mymodem.equals("i")) {
-            mode = modemmodeenum.PSK63RC10;
+            mode = ModemModesEnum.PSK63RC10;
         } else if (mymodem.equals("j")) {
-            mode = modemmodeenum.PSK250RC3;
+            mode = ModemModesEnum.PSK250RC3;
         } else if (mymodem.equals("k")) {
-            mode = modemmodeenum.PSK125RC4;
+            mode = ModemModesEnum.PSK125RC4;
         } else if (mymodem.equals("l")) {
-            mode = modemmodeenum.DOMINOEX22;
+            mode = ModemModesEnum.DOMINOEX22;
         } else if (mymodem.equals("m")) {
-            mode = modemmodeenum.DOMINOEX11;
+            mode = ModemModesEnum.DOMINOEX11;
         }
         return mode;
     }
 
     //Returns the index of the parameter mode in the client supplied list of modes
-    public static int getClientModeIndex(modemmodeenum mode) {
+    public static int getClientModeIndex(ModemModesEnum mode) {
         int index = 0;
 
-        if (TTYmodes.length() > 0) {
-            for (int i = 0; i < TTYmodes.length(); i++) {
-                if (Main.getmodem(TTYmodes.substring(i, i + 1)) == mode) {
+        if (ttyModes.length() > 0) {
+            for (int i = 0; i < ttyModes.length(); i++) {
+                if (Main.getmodem(ttyModes.substring(i, i + 1)) == mode) {
                     index = i;
                 }
             }
@@ -2356,10 +2357,10 @@ public class Main {
     }
 
     //Returns the modemmodeenum pointed to by the parameter in the client's array of selected modes
-    public static modemmodeenum getClientMode(int index) {
+    public static ModemModesEnum getClientMode(int index) {
 
-        if (index >= 0 && index < TTYmodes.length()) {
-            return Main.getmodem(TTYmodes.substring(index, index + 1));
+        if (index >= 0 && index < ttyModes.length()) {
+            return Main.getmodem(ttyModes.substring(index, index + 1));
         }
         //No match return something (MFSK16)
         return Main.getmodem("2");
@@ -2368,8 +2369,8 @@ public class Main {
     static int getserverindex(String server) {
         int i = 0;
         int o = 10;
-        for (i = 0; i < Servers.length; i++) {
-            if (server.equals(Servers[i])) {
+        for (i = 0; i < serversArray.length; i++) {
+            if (server.equals(serversArray[i])) {
                 o = i;
             }
         }
@@ -2379,8 +2380,8 @@ public class Main {
     static void setrxdata(String server, int data) {
         int i = getserverindex(server);
         if (i < MAXNEWSERVERS - 1) {
-            System.arraycopy(rxdata[i], 0, rxdata[i], 1, 8);
-            rxdata[i][0] = data;
+            System.arraycopy(rxData[i], 0, rxData[i], 1, 8);
+            rxData[i][0] = data;
         }
     }
 
@@ -2389,8 +2390,8 @@ public class Main {
         int acc = 0;
         int avg = 0;
         for (i = 0; i < 10; i++) {
-            if (rxdata[index][i] > 0) {
-                acc += rxdata[index][i];
+            if (rxData[index][i] > 0) {
+                acc += rxData[index][i];
                 avg = acc / (i + 1);
             }
         }
@@ -2423,7 +2424,7 @@ public class Main {
 
         try {
             // Create file
-            FileWriter logstream = new FileWriter(HomePath + Dirprefix + LogFile, true);
+            FileWriter logstream = new FileWriter(homePath + dirPrefix + logFile, true);
             BufferedWriter out = new BufferedWriter(logstream);
 
             out.write(myTime() + " " + logtext + "\n");
@@ -2441,7 +2442,7 @@ public class Main {
         if (call.trim().length() == 0) {
             return false;
         }
-        boolean mMatch2 = call.trim().toUpperCase(Locale.US).equals(Main.TTYCaller.trim().toUpperCase(Locale.US));
+        boolean mMatch2 = call.trim().toUpperCase(Locale.US).equals(Main.ttyCaller.trim().toUpperCase(Locale.US));
         return mMatch2;
     }
 

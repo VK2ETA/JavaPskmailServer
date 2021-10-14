@@ -132,9 +132,9 @@ public class Amp2 {
                     Progname = mprg.group(4);
                     if (crc.equals(Main.q.checksum(mprg.group(2)))) {
 //                        System.out.println(Progname);
-                        Main.FilesTextArea += Progname + "\n";
+                        Main.filesTextArea += Progname + "\n";
                         Message("Receiving bulletin ", 10);
-                        Main.Bulletinmode = true;
+                        Main.bulletinMode = true;
                     }
                     Accu = "";
                     len = 0;
@@ -170,7 +170,7 @@ public class Amp2 {
                 System.out.println("PROBLEM with append");
             }
                 Message("End of TX " + Filename, 10);
-                Main.Bulletinmode = false;
+                Main.bulletinMode = false;
                     Accu = "";
                     Blocks = 0;
                     Blockrnr = 0.0;
@@ -213,10 +213,10 @@ public class Amp2 {
  //System.out.println(Accu); 
                     if (crc.equals(Main.q.checksum(meat))) {
 //                        System.out.println(Filename);
-                        Main.FilesTextArea += "Receiving bulletin: " + Filename + "\n";
+                        Main.filesTextArea += "Receiving bulletin: " + Filename + "\n";
 //                        System.out.println("Hash is " + hash);
                         Blockrnr = 0;
-                        Main.Bulletinmode = true;
+                        Main.bulletinMode = true;
                     }
                     Accu = "";
                     len = 0;
@@ -272,7 +272,7 @@ public class Amp2 {
                     iz = -1;
                     crc = "";
                     noindex = true;
-                    Main.Bulletinmode = true;
+                    Main.bulletinMode = true;
                 }
             } else {                             //still reading
                 Matcher mfil = siz1.matcher(Accu);
@@ -329,7 +329,7 @@ public class Amp2 {
                                 Main.mainwindow += "*";
                             }
 
-                            Main.FilesTextArea += data + "\n";
+                            Main.filesTextArea += data + "\n";
                         }
                         catch (Exception ex){
                             System.out.println("Exception appending text to main");
@@ -410,11 +410,11 @@ public class Amp2 {
     private boolean checkbulletin(String Filename) {
         boolean result = true;
 
-        File Bulldir = new File(Main.HomePath + Main.Dirprefix + "bulletins" + Main.Separator);
+        File Bulldir = new File(Main.homePath + Main.dirPrefix + "bulletins" + Main.separator);
         if (!Bulldir.isDirectory()) {
             Bulldir.mkdir();
         }
-        File fnam = new File(Bulldir + Main.Separator + Filename);
+        File fnam = new File(Bulldir + Main.separator + Filename);
 
         if (!fnam.exists()) {
             result = false;
@@ -445,8 +445,8 @@ public class Amp2 {
         Blockrnr += 1;
         
         if (Filelength > 0) {
-            Main.Progress = (int) (Blockrnr/Blocks * 100);
-            Main.mainui.ProgressBar.setValue(Main.Progress);
+            Main.progress = (int) (Blockrnr/Blocks * 100);
+            Main.mainui.ProgressBar.setValue(Main.progress);
             Main.mainui.ProgressBar.setStringPainted(true);
         }
 
@@ -585,14 +585,14 @@ public class Amp2 {
                
                 BufferedWriter writer = null;
 
-                File Bulldir = new File(Main.HomePath + Main.Dirprefix + "bulletins" + Main.Separator);
+                File Bulldir = new File(Main.homePath + Main.dirPrefix + "bulletins" + Main.separator);
                 if (!Bulldir.isDirectory()) {
                     Bulldir.mkdir();
                 }
                 
                 if (b64) {
 // System.out.println("B64 file");                   
-                   zipfile = Bulldir + Main.Separator + filename + ".gz";
+                   zipfile = Bulldir + Main.separator + filename + ".gz";
                    try {
                         Base64.decodeToFile(content, zipfile);
                    }
@@ -620,7 +620,7 @@ public class Amp2 {
                     }
                 } else {
                     try {
-                        writer = new BufferedWriter(new FileWriter(Bulldir + Main.Separator + filename));
+                        writer = new BufferedWriter(new FileWriter(Bulldir + Main.separator + filename));
                         writer.write(content);
 //                        Main.mainui.appendMainWindow("\n" + content);
                         Main.mainwindow += "\n" + content;
@@ -665,11 +665,11 @@ public class Amp2 {
         }
         
         
-        Main.Progress = 0;
+        Main.progress = 0;
         Blockrnr = 0;
-        Main.Bulletinmode = false;
-        Main.Bulletin_time = 0;
-        Main.mainui.ProgressBar.setValue(Main.Progress);
+        Main.bulletinMode = false;
+        Main.bulletinTime = 0;
+        Main.mainui.ProgressBar.setValue(Main.progress);
         Main.mainui.ProgressBar.setStringPainted(false); 
 //        Main.mainui.appendMainWindow("\n");
         Main.mainwindow += "\n";
@@ -788,8 +788,8 @@ public static String readFile(String filename)
 }    
 
     public void Message(String msg, int time) {
-        Main.Statusline = msg;
-        Main.StatusLineTimer = time;
+        Main.statusLine = msg;
+        Main.statusLineTimer = time;
     }
 
 

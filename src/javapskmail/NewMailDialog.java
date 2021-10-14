@@ -85,7 +85,7 @@ public class NewMailDialog extends javax.swing.JFrame {
         pnlEmailButtons.setPreferredSize(new java.awt.Dimension(390, 40));
         pnlEmailButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        bOK.setFont(new java.awt.Font("Ubuntu", 1, 12));
+        bOK.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("javapskmail/Bundle"); // NOI18N
         bOK.setText(bundle.getString("NewMailDialog.bOK.text")); // NOI18N
         bOK.setMaximumSize(new java.awt.Dimension(80, 30));
@@ -98,7 +98,7 @@ public class NewMailDialog extends javax.swing.JFrame {
         });
         pnlEmailButtons.add(bOK);
 
-        add_attachment.setFont(new java.awt.Font("Ubuntu", 1, 12));
+        add_attachment.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
         add_attachment.setText(bundle.getString("NewMailDialog.add_attachment.text")); // NOI18N
         add_attachment.setMaximumSize(new java.awt.Dimension(105, 30));
         add_attachment.setMinimumSize(new java.awt.Dimension(105, 25));
@@ -149,7 +149,7 @@ public class NewMailDialog extends javax.swing.JFrame {
         jScrollPane1.setPreferredSize(new java.awt.Dimension(400, 300));
 
         NewTxtArea.setColumns(20);
-        NewTxtArea.setFont(new java.awt.Font("DejaVu Sans Mono", 0, 12));
+        NewTxtArea.setFont(new java.awt.Font("DejaVu Sans Mono", 0, 12)); // NOI18N
         NewTxtArea.setLineWrap(true);
         NewTxtArea.setRows(5);
         NewTxtArea.setWrapStyleWord(true);
@@ -382,7 +382,7 @@ private void SendEmail(){
             }
             NewMailText += ".\n.\n";
 
-            File sent = new File(Main.HomePath + Main.Dirprefix + "Sentmail");
+            File sent = new File(Main.homePath + Main.dirPrefix + "Sentmail");
             out = new FileWriter(sent, true);
             out.write("\n" + Main.myTime());
             out.write(NewMailText);
@@ -391,7 +391,7 @@ private void SendEmail(){
             Random r = new Random();
             String token = Long.toString(Math.abs(r.nextLong()), 12);
             token = "tmp" + token;
-            File outFile = new File(Main.HomePath + Main.Dirprefix + "Outbox" + Main.Separator + token);
+            File outFile = new File(Main.homePath + Main.dirPrefix + "Outbox" + Main.separator + token);
             out = new FileWriter(outFile);
             out.write(NewMailText);
             out.close();
@@ -479,7 +479,7 @@ private void OldSendMail(){
 
                 NewMailText += ".\n.\n";
 
-                File sent = new File(Main.HomePath + Main.Dirprefix + "Sentmail");
+                File sent = new File(Main.homePath + Main.dirPrefix + "Sentmail");
                 out = new FileWriter(sent, true);
                 out.write("\n" + Main.myTime());
                 out.write(NewMailText);
@@ -488,7 +488,7 @@ private void OldSendMail(){
                 Random r = new Random();
                 String token = Long.toString(Math.abs(r.nextLong()), 12);
                 token = "tmp" + token;
-                File outFile = new File(Main.HomePath + Main.Dirprefix + "Outbox" + Main.Separator + token);
+                File outFile = new File(Main.homePath + Main.dirPrefix + "Outbox" + Main.separator + token);
                 out = new FileWriter(outFile);
                 out.write(NewMailText);
                 out.close();
@@ -505,7 +505,7 @@ private void OldSendMail(){
  * Refresh the email grid on the parent
  */
 private void RefreshEmailgrids(){
-    mainpskmailui mu = (mainpskmailui) this.getParent();
+    MainPskmailUi mu = (MainPskmailUi) this.getParent();
     if (mu != null)
     {
         mu.refreshEmailGrid();
@@ -522,7 +522,7 @@ private void add_attachmentActionPerformed(java.awt.event.ActionEvent evt) {//GE
 private void addattachment(){
     try {
         // The file we will get
-        File attach = new File(Main.HomePath);
+        File attach = new File(Main.homePath);
  
         JFileChooser chooser = new JFileChooser(attach);
         int returnVal = chooser.showOpenDialog(chooser);

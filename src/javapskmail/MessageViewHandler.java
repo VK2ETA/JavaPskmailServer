@@ -28,8 +28,8 @@ public class MessageViewHandler {
     private File[] files;          // Used to select another target, i.e. outbox, sent, trash etc
     private String mboxfilename;
     private File mboxfile;
-    private email mymail;
-    private ArrayList<email> emaillist = new ArrayList<email>(); // Used to hold all the emails
+    private Email mymail;
+    private ArrayList<Email> emaillist = new ArrayList<Email>(); // Used to hold all the emails
 
     /**
      * Constructs the messageviewhandler class
@@ -71,7 +71,7 @@ public class MessageViewHandler {
             while (src.hasNext()){
                 retur = src.next();
                 // Create an email object, add that to the list
-                mymail = new email(retur);
+                mymail = new Email(retur);
                 emaillist.add(mymail);
             }
             return true;
@@ -109,7 +109,7 @@ public class MessageViewHandler {
                 }
                 //Close the input stream
                 in.close();
-                mymail = new email(whole);
+                mymail = new Email(whole);
                 mymail.SetFileName(mys.getName());
                 emaillist.add(mymail);
             }
@@ -125,7 +125,7 @@ public class MessageViewHandler {
      * Get the raw list of emails
      * @return
      */
-    public ArrayList<email> getEmaillist() {
+    public ArrayList<Email> getEmaillist() {
         return emaillist;
     }
 

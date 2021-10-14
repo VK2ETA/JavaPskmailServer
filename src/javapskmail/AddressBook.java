@@ -46,8 +46,8 @@ public class AddressBook extends javax.swing.JFrame  {
 
     private String contfilename;    // probably contacts.csv
     private File contfile;          // File handle for contacts.csv  
-    private contact contact;        // A contact object
-    private ArrayList<contact> contactlist = new ArrayList<contact>(); // Used to hold all the contacts
+    private Contact contact;        // A contact object
+    private ArrayList<Contact> contactlist = new ArrayList<Contact>(); // Used to hold all the contacts
     private Boolean SaveNeed = false; // Set to true after a change and before save
 
     private java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("javapskmail/Bundle");  
@@ -55,7 +55,7 @@ public class AddressBook extends javax.swing.JFrame  {
     /** Creates new form NewMailDialog */
     public AddressBook() {
         initComponents();
-        contfilename = Main.HomePath+Main.Dirprefix+"contacts.csv";
+        contfilename = Main.homePath+Main.dirPrefix+"contacts.csv";
         FetchContacts();
         DisplayContacts();
     }
@@ -116,7 +116,7 @@ public class AddressBook extends javax.swing.JFrame  {
      */
     private void DisplayContacts(){
         try {
-            contact mycontact;
+            Contact mycontact;
             DefaultListModel myListModel;
             myListModel = (DefaultListModel) this.lstContacts.getModel();
             myListModel.clear();
@@ -160,7 +160,7 @@ public class AddressBook extends javax.swing.JFrame  {
             contactlist.clear();
             while((linestring = br.readLine()) != null) { 
                 // Create another contact object and feed it the csv string
-                contact = new contact();
+                contact = new Contact();
                 contact.LoadCSV(linestring);
                 contactlist.add(contact);
             }   
@@ -811,8 +811,8 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         try {
             AddressEdit myEditwindow;
             // Create the contact object
-            contact myContact;
-            myContact = new contact();
+            Contact myContact;
+            myContact = new Contact();
             // Show the editor, set and get our local contact object
             myEditwindow = new AddressEdit(this, true);
             myEditwindow.setMyContact(myContact);
@@ -841,12 +841,12 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private void lstContactsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lstContactsMouseClicked
         // Check if there is a selected row
         Integer row;
-        contact mycontact;
+        Contact mycontact;
         // Not a necessary check now but I am keeping it for a future addition
         if(evt.getClickCount() == 1) {
             row = this.lstContacts.getSelectedIndex();
             if (row > -1) {
-                mycontact = (contact) this.lstContacts.getSelectedValue();
+                mycontact = (Contact) this.lstContacts.getSelectedValue();
                 previewcontact(mycontact);
             }
         } else if(evt.getClickCount() == 2) {
@@ -863,13 +863,13 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private void EditContact(){
         // Check if there is a selected row
         Integer row;
-        contact mycontact;
+        Contact mycontact;
 
         try {
             // Is there a selected row in the list?
             row = this.lstContacts.getSelectedIndex();
             if (row > -1) {
-                mycontact = (contact) this.lstContacts.getSelectedValue();
+                mycontact = (Contact) this.lstContacts.getSelectedValue();
                 AddressEdit myEditwindow;
                 // Show the editor, set and get our local contact object
                 myEditwindow = new AddressEdit(this, true);
@@ -898,7 +898,7 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private void deletecontact(){
         // Check if there is a selected row
         Integer row;
-        contact mycontact;
+        Contact mycontact;
         Object[] options = {"Yes, delete!", "No, keep!"};
         DefaultListModel myListModel;
         
@@ -907,7 +907,7 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
         // Is there a selected row in the list?
         row = lstContacts.getSelectedIndex();
         if (row > -1) {
-            mycontact = (contact) lstContacts.getSelectedValue();
+            mycontact = (Contact) lstContacts.getSelectedValue();
             if (mycontact != null) {
                 int n = JOptionPane.showOptionDialog(this, "Would you like to delete this contact?\n"
                 + mycontact.getFirstName()+ " " +mycontact.getLastName(),
@@ -924,7 +924,7 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
                     // Update internal list
                     contactlist.clear();
                     for (int i = 0; i < myListModel.getSize(); i++) {
-                        mycontact = (contact) myListModel.get(i);
+                        mycontact = (Contact) myListModel.get(i);
                         // Initialize the list with items
                         contactlist.add(i, mycontact);
                     }
@@ -949,7 +949,7 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
      */
     private void SaveToFile(){
          try{
-            contact mycontact;
+            Contact mycontact;
             //Save all the contacts to a file
             FileWriter fstream = new FileWriter(contfilename);
             BufferedWriter out = new BufferedWriter(fstream);
@@ -1020,7 +1020,7 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private void Saveas(){
         //Create a file chooser
         final JFileChooser fc = new JFileChooser();
-        contact mycontact;
+        Contact mycontact;
         try {
             //In response to a button click:
             int returnVal = fc.showSaveDialog(this);
@@ -1048,7 +1048,7 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
      * Show the contact info at the bottom of the address book
      * @param mycontact 
      */
-    private void previewcontact(contact mycontact){
+    private void previewcontact(Contact mycontact){
         if (mycontact != null){
             txtFirstName.setText(mycontact.getFirstName());
             txtLastName.setText(mycontact.getLastName());
@@ -1127,7 +1127,7 @@ private void mnuCloseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRS
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblMMSI;
     private javax.swing.JLabel lblNickname;
-    private javax.swing.JList<contact> lstContacts;
+    private javax.swing.JList<Contact> lstContacts;
     private javax.swing.JMenuItem mnuClose;
     private javax.swing.JMenuItem mnuCopy;
     private javax.swing.JMenuItem mnuCut;

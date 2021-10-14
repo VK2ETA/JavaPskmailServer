@@ -29,6 +29,7 @@ import java.net.URISyntaxException;
 public class RMsgMessageViewer extends javax.swing.JFrame {
     
     RMsgDisplayItem mDisplayItem; // The Radio Message that this window will display
+    java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("javapskmail/Bundle"); 
 
     /** Creates new form */
     public RMsgMessageViewer(RMsgDisplayItem mDisplayItem) {
@@ -36,6 +37,13 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
         this.mDisplayItem = mDisplayItem;
         if (mDisplayItem != null){
             LoadRadioMessage();
+        }        
+        if (mDisplayItem.myOwn) {
+            //Disable reply button if my own message
+            bReply.setEnabled(false);
+        } else {
+            //Disable Send again if not my own
+            bTxAgain.setEnabled(false);
         }
     }
 
@@ -47,6 +55,7 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
             this.lblRmsgViewerFrom.setText("");
             this.lblRmsgViewerCoord.setText("");
             this.txtRMsgViewerSms.setText("");
+            this.lblRmsgViewerTo.setText("");
             this.lblRmsgViewerVia.setText("");
             this.txtRMsgViewerEntry.setText("");
 
@@ -55,7 +64,9 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
                 this.txtRMsgViewerSms.setText(mDisplayItem.mMessage.sms); //No tracking
                 this.lblRmsgViewerFn.setText(mDisplayItem.mMessage.fileName);
                 this.lblRmsgViewerFrom.setText(mDisplayItem.mMessage.from);
-                this.lblRmsgViewerVia.setText(mDisplayItem.myOwn ? mDisplayItem.mMessage.via : mDisplayItem.mMessage.relay);
+                this.lblRmsgViewerTo.setText(mDisplayItem.mMessage.to.equals("*") ? 
+                        bundle.getString("RMsgMessageViewer.ALL") : mDisplayItem.mMessage.to);
+                this.lblRmsgViewerVia.setText(mDisplayItem.myOwn ? mDisplayItem.mMessage.relay : mDisplayItem.mMessage.via);
                 if (mDisplayItem.mMessage.msgHasPosition) {
                     RMsgLocation pos = mDisplayItem.mMessage.position;
                     this.lblRmsgViewerCoord.setText(pos.getLatitude() + "," + pos.getLongitude());
@@ -102,12 +113,14 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
         pnlTop = new javax.swing.JPanel();
         lblFromLabel = new javax.swing.JLabel();
         lblTo = new javax.swing.JLabel();
+        lblTo1 = new javax.swing.JLabel();
         lblDateTime = new javax.swing.JLabel();
         lblCoordinates = new javax.swing.JLabel();
         lblRmsgViewerFrom = new javax.swing.JLabel();
-        lblRmsgViewerVia = new javax.swing.JLabel();
+        lblRmsgViewerTo = new javax.swing.JLabel();
         lblRmsgViewerFn = new javax.swing.JLabel();
         lblRmsgViewerCoord = new javax.swing.JLabel();
+        lblRmsgViewerVia = new javax.swing.JLabel();
         pnlBottom = new javax.swing.JPanel();
         txtRMsgViewerEntry = new javax.swing.JTextField();
         pnlContent = new javax.swing.JPanel();
@@ -125,9 +138,6 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
         mnuClose = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         mnuCopy = new javax.swing.JMenuItem();
-        mnuMessage = new javax.swing.JMenu();
-        mnuReply = new javax.swing.JMenuItem();
-        mnuForward = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("javapskmail/Bundle"); // NOI18N
@@ -156,11 +166,19 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         pnlTop.add(lblTo, gridBagConstraints);
 
+        lblTo1.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
+        lblTo1.setText(bundle.getString("RMsgMessageViewer.lblVia.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        pnlTop.add(lblTo1, gridBagConstraints);
+
         lblDateTime.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
         lblDateTime.setText(bundle.getString("RMsgMessageViewer.lblDateTime.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         pnlTop.add(lblDateTime, gridBagConstraints);
 
@@ -168,7 +186,7 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
         lblCoordinates.setText(bundle.getString("RMsgMessageViewer.lblCoordinates.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         pnlTop.add(lblCoordinates, gridBagConstraints);
 
@@ -181,19 +199,18 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
         gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
         pnlTop.add(lblRmsgViewerFrom, gridBagConstraints);
 
-        lblRmsgViewerVia.setText(bundle.getString("RMsgMessageViewer.lblRmsgViewerVia.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
-        pnlTop.add(lblRmsgViewerVia, gridBagConstraints);
+        pnlTop.add(lblRmsgViewerTo, gridBagConstraints);
 
         lblRmsgViewerFn.setText(bundle.getString("RMsgMessageViewer.lblRmsgViewerFn.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
@@ -202,11 +219,20 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
         lblRmsgViewerCoord.setText(bundle.getString("RMsgMessageViewer.lblRmsgViewerCoord.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 0.5;
         gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
         pnlTop.add(lblRmsgViewerCoord, gridBagConstraints);
+
+        lblRmsgViewerVia.setText("jLabel1");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 0.5;
+        gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
+        pnlTop.add(lblRmsgViewerVia, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -380,26 +406,6 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
 
         mnuEmailViewer.add(jMenu2);
 
-        mnuMessage.setText(bundle.getString("RMsgMessageViewer.mnuMessage.text_2")); // NOI18N
-
-        mnuReply.setText(bundle.getString("RMsgMessageViewer.mnuReply.text")); // NOI18N
-        mnuReply.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuReplyActionPerformed(evt);
-            }
-        });
-        mnuMessage.add(mnuReply);
-
-        mnuForward.setText(bundle.getString("RMsgMessageViewer.mnuForward.text_3")); // NOI18N
-        mnuForward.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mnuForwardActionPerformed(evt);
-            }
-        });
-        mnuMessage.add(mnuForward);
-
-        mnuEmailViewer.add(mnuMessage);
-
         setJMenuBar(mnuEmailViewer);
 
         pack();
@@ -411,40 +417,25 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_mnuCloseActionPerformed
 
-    /**
-     * Create a new message based upon this one
-     * @param evt
-     */
-    private void mnuReplyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuReplyActionPerformed
-        //Main.mainui.ReplyMail(myobject.getFrom(), myobject.getSubject());
-    }//GEN-LAST:event_mnuReplyActionPerformed
-
-    private void mnuForwardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuForwardActionPerformed
-        //Main.mainui.ForwardMail(myobject.getSubject(), myobject.getContent());
-    }//GEN-LAST:event_mnuForwardActionPerformed
-
     // Create a reply email
     private void bReplyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bReplyActionPerformed
+
         String intext = txtRMsgViewerEntry.getText();
         if (intext.trim().length() > 0) {
-        RMsgTxList.addMessageToList(mDisplayItem.mMessage.from, mDisplayItem.mMessage.relay, intext,
-            false, null, 0L, null);
+            RMsgTxList.addMessageToList(mDisplayItem.mMessage.from, mDisplayItem.mMessage.relay, intext,
+                    false, null, 0L, null);
         } else {
-           //Main.mainui.myarq.Message(mainpskmailui.getString("you_must_select_to"), 5); 
-        }
+            Main.q.Message(bundle.getString("RMsgMessageViewer.TypeAReplyFirst"), 5);
+        }    
     }//GEN-LAST:event_bReplyActionPerformed
 
     private void bForwardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bForwardActionPerformed
-        //String intext = txtRMsgViewerEntry.getText();
-        //if (intext.trim().length() > 0) {
+
         RMsgObject fwRMsg = mDisplayItem.mMessage;
-        fwRMsg.to = mainpskmailui.selectedTo; //As selected in the Main UI
+        fwRMsg.to = Main.mainui.selectedTo; //As selected in the Main UI
         fwRMsg.via = fwRMsg.relay; //Use the same route in reverse
-        fwRMsg.to = mainpskmailui.selectedTo;
         RMsgTxList.addMessageToList(fwRMsg);
-        //} else {
-           //Main.mainui.myarq.Message(mainpskmailui.getString("you_must_select_to"), 5); 
-        //}
+
     }//GEN-LAST:event_bForwardActionPerformed
 
     private void bShowOnMapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bShowOnMapActionPerformed
@@ -463,7 +454,19 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
     }//GEN-LAST:event_bShowOnMapActionPerformed
 
     private void bDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bDeleteActionPerformed
-        // TODO add your handling code here:
+
+        String mFileName = mDisplayItem.mMessage.fileName;
+        //Get the message including binary data
+        final String msgFolder = mDisplayItem.myOwn ? Main.dirSent : Main.dirInbox;
+        RMsgUtil.deleteFile(msgFolder, mFileName, true);// Advise deletion
+        if (mDisplayItem.mMessage.picture != null) {
+            String pictureFileName = mFileName.replace(".txt", ".png");
+            RMsgUtil.deleteFile(Main.dirImages, pictureFileName, true);// Advise deletion
+        }
+        this.setVisible(false);
+        this.dispose();
+        Main.mainui.buildDisplayList();
+        Main.mainui.loadRadioMsg();
     }//GEN-LAST:event_bDeleteActionPerformed
 
     private void txtRMsgViewerEntryMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtRMsgViewerEntryMouseClicked
@@ -475,7 +478,14 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
     }//GEN-LAST:event_txtRMsgViewerEntryActionPerformed
 
     private void bTxAgainActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bTxAgainActionPerformed
-        // TODO add your handling code here:
+
+        if (RMsgProcessor.matchMyCallWith(mDisplayItem.mMessage.from, false)) {
+            //From me, therefore send as is
+            RMsgTxList.addMessageToList(mDisplayItem.mMessage);
+        } else {
+            //Not mine, warn to use forward instead
+            Main.q.Message(bundle.getString("RMsgMessageViewer.NotSentByYouUseForwardInstead"), 5);
+        }
     }//GEN-LAST:event_bTxAgainActionPerformed
 
 
@@ -495,15 +505,14 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
     private javax.swing.JLabel lblRmsgViewerCoord;
     private javax.swing.JLabel lblRmsgViewerFn;
     private javax.swing.JLabel lblRmsgViewerFrom;
+    private javax.swing.JLabel lblRmsgViewerTo;
     private javax.swing.JLabel lblRmsgViewerVia;
     private javax.swing.JLabel lblTo;
+    private javax.swing.JLabel lblTo1;
     private javax.swing.JMenuItem mnuClose;
     private javax.swing.JMenuItem mnuCopy;
     private javax.swing.JMenuBar mnuEmailViewer;
-    private javax.swing.JMenuItem mnuForward;
-    private javax.swing.JMenu mnuMessage;
     private javax.swing.JMenuItem mnuPrint;
-    private javax.swing.JMenuItem mnuReply;
     private javax.swing.JPanel pnlBottom;
     private javax.swing.JPanel pnlContent;
     private javax.swing.JPanel pnlTop;

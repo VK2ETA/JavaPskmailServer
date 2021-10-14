@@ -588,7 +588,7 @@ public class Base64
                 oos   = new java.io.ObjectOutputStream( b64os );
             
             oos.writeObject( serializableObject );
-        }   // end try
+        }   // end try   // end try   // end try   // end try
         catch( java.io.IOException e )
         {
             e.printStackTrace();
@@ -718,7 +718,7 @@ public class Base64
             
                 gzos.write( source, off, len );
                 gzos.close();
-            }   // end try
+            }   // end try   // end try   // end try   // end try
             catch( java.io.IOException e )
             {
                 e.printStackTrace();
@@ -1103,7 +1103,7 @@ public class Base64
                       new java.io.FileOutputStream( filename ), Base64.ENCODE );
             bos.write( dataToEncode );
             success = true;
-        }   // end try
+        }   // end try   // end try   // end try   // end try
         catch( java.io.IOException e )
         {
             
@@ -1137,7 +1137,7 @@ public class Base64
                           new java.io.FileOutputStream( filename ), Base64.DECODE );
                 bos.write( dataToDecode.getBytes( PREFERRED_ENCODING ) );
                 success = true;
-        }   // end try
+        }   // end try   // end try   // end try   // end try
         catch( java.io.IOException e )
         {
             success = false;
@@ -1196,7 +1196,7 @@ public class Base64
             decodedData = new byte[ length ];
             System.arraycopy( buffer, 0, decodedData, 0, length );
             
-        }   // end try
+        }   // end try   // end try   // end try   // end try
         catch( java.io.IOException e )
         {
             System.err.println( "Error decoding from file " + filename );
@@ -1244,7 +1244,7 @@ public class Base64
             // Save in a variable to return
             encodedData = new String( buffer, 0, length, Base64.PREFERRED_ENCODING );
                 
-        }   // end try
+        }   // end try   // end try   // end try   // end try
         catch( java.io.IOException e )
         {
             System.err.println( "Error encoding from file " + filename );
