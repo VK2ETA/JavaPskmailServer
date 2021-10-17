@@ -951,10 +951,11 @@ public class Modem implements Runnable {
             return '\0';
         }
         //Normal run, read a byte
+        int back = '\0';
         try {
             //Changed to int to prevent 255(char) to be read as -1(byte)
             //byte back = (byte) in.read();
-            int back = in.read();
+            back = in.read();
             //Broken socket?
             if (back == -1 || Main.requestModemRestart) {
                 if (back == -1) {
@@ -1005,7 +1006,20 @@ public class Modem implements Runnable {
             return myChar;
         } catch (IOException e) {
             if (!exitingSoon) {
-                System.out.println("Error reading from modem (IOException): " + e);
+                try {
+                    System.out.println("Error reading from modem (IOException), restarting Fldigi: " + e);
+                    connectToFldigi();
+                    //Reset mode as server
+                    Sendln("<cmd>server</cmd>");
+                    //And reset RxRsid to ON
+                    setRxRsid("ON");
+                    //Clear flags again in case they were reset in-between
+                    Main.modemAutoRestartDelay = 0; //Clear auto-restart timer, no point in doubling up
+                    Main.requestModemRestart = false; //Clear restart flag
+                    back = in.read();
+                } catch (Exception e3) {
+                    //Nothing we try once only
+                }
             }
             //Modem was forcibly killed either by operator or the program monitoring
             return '\0';  // should not happen.

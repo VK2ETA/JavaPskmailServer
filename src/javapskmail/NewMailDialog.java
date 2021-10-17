@@ -415,91 +415,65 @@ private void bOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:eve
     Main.mainui.refreshEmailGrid();
 }//GEN-LAST:event_bOKActionPerformed
 
-/**
- * This is the send email method used before the address book was added
- */
-private void OldSendMail(){
-    
-    String CheckToField = NewToField.getText();
-    String CopyField = this.NewCopyField.getText();
-    String filteredToField = "";
-
-  Pattern cTF = Pattern.compile("(<*)([A-Za-z0-9_.+-]+\\@[A-Za-z0-9_.-]+)(>*).*");
-
-  /* String to split. */
-  String[] temp;
-  String mystr = "";
-  String mystr2 = "";
-  String mystr3 = "";
-  mystr = CheckToField.replaceAll(",", "%");
-  mystr2 = mystr.replaceAll("\\s", "%");
-  mystr3 = mystr2.replaceAll("<", "%");
-  
-  /* delimiter */
-  String delimiter = "%";
-  /* given string will be split by the argument delimiter provided. */
-  temp = mystr3.split(delimiter);
-
-  /* print substrings */
-  for(int i =0; i < temp.length ; i++) {
-     Matcher am = cTF.matcher(temp[i]);
-     if (am.lookingAt()){
-         if (filteredToField.length() > 0) {
-             filteredToField += ",";
-         }
-        filteredToField += am.group(2);
-     }
-  }
-        if (filteredToField.length() > 0) {
-            FileWriter out = null;
-
-            try {
-                String NewMailText = "\n~SEND\n";
-                if (!Main.configuration.getPreference("RETURNADDRESS").equals("")) {
-                    NewMailText += "From: " + Main.configuration.getPreference("RETURNADDRESS") + "\n";
-                }
-                NewMailText += "To: " + filteredToField + "\n";
-                NewMailText += "Subject: " + NewSubjectField.getText() + "\n";
-                NewMailText += NewTxtArea.getText();
-                String s = "";
-                String att = "";
-
-                if (myattachment.length() > 0) {
-                    att = Base64.encodeFromFile(myattachment);
-                    File ff = new File(myattachment);
-                    String name = ff.getName();
-
-                        if (att.length() > 0) {
-                            NewMailText += "\nYour attachment: filename=" + Character.toString('"') + name + Character.toString('"') + "\n";
-                            NewMailText += att + "\n";
-                        }
-                         myattachment = "";
-                }
-    //     System.out.println(att);
-
-                NewMailText += ".\n.\n";
-
-                File sent = new File(Main.homePath + Main.dirPrefix + "Sentmail");
-                out = new FileWriter(sent, true);
-                out.write("\n" + Main.myTime());
-                out.write(NewMailText);
-                out.close();
-
-                Random r = new Random();
-                String token = Long.toString(Math.abs(r.nextLong()), 12);
-                token = "tmp" + token;
-                File outFile = new File(Main.homePath + Main.dirPrefix + "Outbox" + Main.separator + token);
-                out = new FileWriter(outFile);
-                out.write(NewMailText);
-                out.close();
-                this.setVisible(false);
-                RefreshEmailgrids();
-
-            } catch (IOException ex) {
-                Logger.getLogger(NewMailDialog.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-}
+    /**
+     * This is the send email method used before the address book was added
+     *
+     * private void OldSendMail(){
+     *
+     * String CheckToField = NewToField.getText(); String CopyField =
+     * this.NewCopyField.getText(); String filteredToField = "";
+     *
+     * Pattern cTF =
+     * Pattern.compile("(<*)([A-Za-z0-9_.+-]+\\@[A-Za-z0-9_.-]+)(>*).*");
+     *
+     * // String to split. String[] temp; String mystr = ""; String mystr2 = "";
+     * String mystr3 = ""; mystr = CheckToField.replaceAll(",", "%"); mystr2 =
+     * mystr.replaceAll("\\s", "%"); mystr3 = mystr2.replaceAll("<", "%");
+     *
+     * // delimiter String delimiter = "%"; // given string will be split by the
+     * argument delimiter provided. temp = mystr3.split(delimiter);
+     *
+     * // print substrings for(int i =0; i < temp.length ; i++) {
+     * Matcher am = cTF.matcher(temp[i]);
+     * if (am.lookingAt()){
+     * if (filteredToField.length() > 0) { filteredToField += ","; }
+     * filteredToField += am.group(2); } } if (filteredToField.length() > 0) {
+     * FileWriter out = null;
+     *
+     * try { String NewMailText = "\n~SEND\n"; if
+     * (!Main.configuration.getPreference("RETURNADDRESS").equals("")) {
+     * NewMailText += "From: " +
+     * Main.configuration.getPreference("RETURNADDRESS") + "\n"; } NewMailText
+     * += "To: " + filteredToField + "\n"; NewMailText += "Subject: " +
+     * NewSubjectField.getText() + "\n"; NewMailText += NewTxtArea.getText();
+     * String s = ""; String att = "";
+     *
+     * if (myattachment.length() > 0) { att =
+     * Base64.encodeFromFile(myattachment); File ff = new File(myattachment);
+     * String name = ff.getName();
+     *
+     * if (att.length() > 0) { NewMailText += "\nYour attachment: filename=" +
+     * Character.toString('"') + name + Character.toString('"') + "\n";
+     * NewMailText += att + "\n"; } myattachment = ""; } //
+     * System.out.println(att);
+     *
+     * NewMailText += ".\n.\n";
+     *
+     * File sent = new File(Main.homePath + Main.dirPrefix + "Sentmail"); out =
+     * new FileWriter(sent, true); out.write("\n" + Main.myTime());
+     * out.write(NewMailText); out.close();
+     *
+     * Random r = new Random(); String token =
+     * Long.toString(Math.abs(r.nextLong()), 12); token = "tmp" + token; File
+     * outFile = new File(Main.homePath + Main.dirPrefix + "Outbox" +
+     * Main.separator + token); out = new FileWriter(outFile);
+     * out.write(NewMailText); out.close(); this.setVisible(false);
+     * RefreshEmailgrids();
+     *
+     * } catch (IOException ex) {
+     * Logger.getLogger(NewMailDialog.class.getName()).log(Level.SEVERE, null,
+     * ex); } } }
+     */
 
 /**
  * Refresh the email grid on the parent

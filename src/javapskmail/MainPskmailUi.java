@@ -5854,9 +5854,10 @@ private void mnuDownloadsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
     }
 }//GEN-LAST:event_mnuDownloadsActionPerformed
 
+//File/Pending transactions?
 private void mnuFileListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuFileListActionPerformed
-    // TODO add your handling code here:
 
+    /*
     File tr = new File(Main.transactions);
     FileReader fr1 = null;
 
@@ -5886,7 +5887,8 @@ private void mnuFileListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+    */
+    //VK2ETA: valid only as client really
     File outb1 = new File(Main.homePath + Main.dirPrefix + "Outbox");
     int i1 = outb1.list().length;
     Main.mainwindow += "\nOutbox:" + Integer.toString(i1) + "\n";
@@ -6260,8 +6262,7 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
         try {
             if (Main.compressedmail) {
                 // TBD: Experimental patch
-                CompressEmailSend();
-                //SendCompressedEmail();
+                compressedEmailSend();
             } else {
                 // Prepare and send the mail
                 File dir = new File(Main.homePath + Main.dirPrefix + "Outbox");
@@ -6307,7 +6308,7 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
      * Send outgoing emails. Compress and send
      *
      * TBD: GAMMAL
-     */
+
     private void SendCompressedEmail() {
         try {
             // Get all emails in the outbox folder, those are standard outgoing emails
@@ -6387,11 +6388,14 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
             Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
+     */
+    
+    
     /**
      * New routine to send compressed email.
      */
-    private void CompressEmailSend() {
+    private void compressedEmailSend() {
+        
         try {
             // Get all emails in the outbox folder, those are standard outgoing emails
             File dir = new File(Main.homePath + Main.dirPrefix + "Outbox");
@@ -6405,17 +6409,16 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
                     Main.mailOutFile = Main.homePath + Main.dirPrefix + "Outbox" + File.separator + myemail.getFileName();
                     int j = Main.mailOutFile.lastIndexOf(File.separator);
                     String filename = (j > -1) ? Main.mailOutFile.substring(j + 1) : Main.mailOutFile;
-                    Compressandsend(filename);
+                    compressAndSend(filename);
                 } else {
                     // No row selected so just go ahead and send them all
                     for (File iterfilename : files) {
                         Main.mailOutFile = iterfilename.toString();
                         int j = Main.mailOutFile.lastIndexOf(File.separator);
                         String filename = (j > -1) ? Main.mailOutFile.substring(j + 1) : Main.mailOutFile;
-                        Compressandsend(filename);
+                        compressAndSend(filename);
                     }
                 }
-
             }
         } catch (Exception ex) {
             Main.log.writelog("Failed when sending email.", true);
@@ -6428,7 +6431,7 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
      *
      * @param filename
      */
-    private void Compressandsend(String filename) {
+    private void compressAndSend(String filename) {
         try {
             String zippedfile = Main.homePath + Main.dirPrefix + "tmp.mail";
             String codedfile = Main.homePath + Main.dirPrefix + "tmp2.mail";
@@ -6489,6 +6492,7 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
         }
     }
 
+    /*
     private void SendPendingfiles() {
         File pendir = new File(Main.pendingDir);
         File[] pendingfiles = pendir.listFiles();
@@ -6505,7 +6509,8 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
             }
         }
     }
-
+    */
+    
 private void APRSServerSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_APRSServerSelectActionPerformed
     // TODO add your handling code here:
     Main.aprsServer = (String) APRSServerSelect.getSelectedItem();

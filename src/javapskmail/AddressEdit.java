@@ -575,8 +575,10 @@ public class AddressEdit extends javax.swing.JDialog {
                 myContact.setLastName(this.txtLastName.getText().toString());
                 myContact.setNickname(this.txtNickname.getText().toString());
                 myContact.setEmail(this.txtEmail.getText().toString());
-                myContact.setHamCallsign(this.txtHamCallsign.getText().toString());
-                myContact.setOtherCallsign(this.txtOtherCallsign.getText().toString());
+                String cleanCall = this.txtHamCallsign.getText().toString().replaceAll("[^a-zA-Z0-9\\/\\-]", "");
+                myContact.setHamCallsign(cleanCall);
+                cleanCall = this.txtOtherCallsign.getText().toString().replaceAll("[^a-zA-Z0-9\\/\\-]", "");
+                myContact.setOtherCallsign(cleanCall);
                 myContact.setMMSI(this.txtMMSI.getText().toString());
                 myContact.setMobilePhone(this.txtMobile.getText().toString());
                 myContact.setPhone(this.txtPhone.getText().toString());

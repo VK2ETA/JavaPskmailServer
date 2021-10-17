@@ -497,17 +497,12 @@ public class ServerMail {
     //Compresses an email message and provides the exchange initiation string (">FM:") to send to the client
     public static String readMailZip(Message mMessage) {
         String returnString = "";
-
-        //String downloaddir = Main.HomePath + Main.Dirprefix + "Downloads" + Main.Separator;
-
         String codedFile = "";
         String token = "";
         FileInputStream in = null;
 
         if (mMessage != null) {
-
             String Destination = Main.ttyCaller;
-
             String mysourcefile = Main.homePath + Main.dirPrefix + "tmpfile";
             try {
                 String emailBody = getBodyTextFromMessage(mMessage);
@@ -519,11 +514,8 @@ public class ServerMail {
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
             }
-
             GZIPOutputStream myzippedfile = null;
-
             String tmpfile = Main.homePath + Main.dirPrefix + "tmpfile.gz";
-
             try {
                 myzippedfile = new GZIPOutputStream(new FileOutputStream(tmpfile));
             } catch (FileNotFoundException ex) {
@@ -531,10 +523,8 @@ public class ServerMail {
             } catch (IOException ioe) {
                 Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ioe);
             }
-
             byte[] buffer = new byte[4096];
             int bytesRead;
-
             try {
                 while ((bytesRead = in.read(buffer)) != -1) {
                     myzippedfile.write(buffer, 0, bytesRead);
@@ -542,39 +532,32 @@ public class ServerMail {
             } catch (IOException ex) {
                 Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
             }
-
             try {
                 in.close();
                 myzippedfile.close();
             } catch (IOException ex) {
                 Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
             }
-
             Random r = new Random();
             //token = Long.toString(Math.abs(r.nextLong()), 12);
             token = Long.toString(Math.abs(r.nextLong()), 12);
             token = token.substring(token.length()-6);
             //Can't have a "/" in the filename as in vk2eta/pm
-            codedFile = Main.homePath + Main.dirPrefix + "Outbox" + Main.separator + Destination.replaceAll("\\/", "+") + "_-m-_" + token;
-
+            codedFile = Main.homePath + Main.dirPrefix + "Outpending" + Main.separator + Destination.replaceAll("\\/", "+") + "_-m-_" + token;
             Base64.encodeFileToFile(tmpfile, codedFile);
-
             File dlfile = new File(tmpfile);
             if (dlfile.exists()) {
                 dlfile.delete();
             }
-
             File mycodedFile = new File(codedFile);
             if (mycodedFile.isFile()) {
-                // >FM:PI4TUE:PA0R:Jynhgf:m: :496
-                //TrString = ">FM:" + a.callsign + ":" + Destination + ":"
-                //        + token + ":u:" + myfile
-                //        + ":" + Long.toString(mycodedFile.length()) + "\n";
                 returnString = ">FM:" + Main.configuration.getPreference("CALLSIGNASSERVER") + ":" + Destination + ":"
                         + token + ":m:" + " "
                         + ":" + Long.toString(mycodedFile.length()) + "\n";
+                String dataString = RMsgUtil.readFile(codedFile);
+                returnString += dataString + "\n-end-\n";
             }
-
+            /*
             File Transactions = new File(Main.transactions);
             FileWriter tr;
             try {
@@ -584,8 +567,7 @@ public class ServerMail {
             } catch (IOException ex) {
                 Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
             }
-            String dataString = RMsgUtil.readFile(codedFile);
-            returnString += dataString + "\n-end-\n";
+            */
         }
 
         return returnString;
@@ -812,7 +794,8 @@ public class ServerMail {
             token = token.substring(token.length()-6);
             //token = "tmp" + token
             //Can't have the "/" in vk2eta/pm
-            codedFile = Main.homePath + Main.dirPrefix + "Outbox" + Main.separator + Destination.replaceAll("\\/", "+") + "_-w-_" + token;
+            //codedFile = Main.homePath + Main.dirPrefix + "Outbox" + Main.separator + Destination.replaceAll("\\/", "+") + "_-w-_" + token;
+            codedFile = Main.homePath + Main.dirPrefix + "Outpending" + Main.separator + Destination.replaceAll("\\/", "+") + "_-w-_" + token;
             Base64.encodeFileToFile(tmpfile, codedFile);
             File dlfile = new File(tmpfile);
             if (dlfile.exists()) {
@@ -821,13 +804,12 @@ public class ServerMail {
             File mycodedFile = new File(codedFile);
             if (mycodedFile.isFile()) {
                 // >FM:PI4TUE:PA0R:Jynhgf:w: :496
-                //TrString = ">FM:" + a.callsign + ":" + Destination + ":"
-                //        + token + ":u:" + myfile
-                //        + ":" + Long.toString(mycodedFile.length()) + "\n";
                 returnString = ">FM:" + Main.configuration.getPreference("CALLSIGNASSERVER") + ":" + Destination + ":"
-                        + token + ":w:" + " "
-                        + ":" + Long.toString(mycodedFile.length()) + "\n";
+                        + token + ":w:" + " :" + Long.toString(mycodedFile.length()) + "\n";
+                String dataString = RMsgUtil.readFile(codedFile);
+                returnString += dataString + "\n-end-\n";
             }
+            /*
             File Transactions = new File(Main.transactions);
             FileWriter tr;
             try {
@@ -837,56 +819,9 @@ public class ServerMail {
             } catch (IOException ex) {
                 Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
             }
-            String dataString = RMsgUtil.readFile(codedFile);
-            returnString += dataString + "\n-end-\n";
+            */
         }
         return returnString;
-    }
-
-    
-    //Scan the Pending folders 
-    public static String getPendingList(String server, String caller) {
-        String returnList = "";
-
-        File[] filesOutbox;
-        // Get the list of files in the designated folder
-        File dir = new File(Main.homePath + Main.dirPrefix + "Outbox");
-        filesOutbox = dir.listFiles();
-        FileFilter fileFilter = new FileFilter() {
-            public boolean accept(File file) {
-                return file.isFile();
-            }
-        };
-        //Generates an array of strings containing the file names to resume downloading
-        filesOutbox = dir.listFiles(fileFilter);
-        for (int i = 0; i < filesOutbox.length; i++) {
-            String pendingCaller = "";
-            String pendingType = "";
-            String pendingToken = "";
-            String pendingFn = filesOutbox[i].getName();
-            if (pendingFn.contains("_-")) {
-                int firstSep = pendingFn.indexOf("_-");
-                int secondSep = pendingFn.indexOf("-_");
-                if (firstSep > 0 && secondSep > 0) {
-                    pendingCaller = pendingFn.substring(0, firstSep);
-                    pendingType = pendingFn.substring(firstSep + 2, secondSep);
-                    pendingToken = pendingFn.substring(secondSep + 2);
-                }
-                //Change back the "+" characters in file name into a "/" as in vk2eta/m
-                //if (pendingCaller.equals(caller)) {
-                if (pendingCaller.replaceAll("\\+", "/").equals(caller)) {
-                    //Add this file to the list of pending downloads
-                    //>FO5:PI4TUE:PA0R:JhyJkk:f:test.txt:496
-                    returnList += ">FO5:" + server + ":" + caller + ":" + pendingToken + ":" + pendingType + ": :" + filesOutbox[i].length() + "\n";
-                } 
-            }
-        }
-        //Now check the outpending directory
-        
-        
-        
-        
-        return returnList;
     }
     
 }

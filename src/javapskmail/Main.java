@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.0.0.0";
+    static String version = "3.0.0.1";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20211014";
+    static String versionDate = "202110xx";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -1322,7 +1322,7 @@ public class Main {
                                         String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
                                         //Main.TX_Text = "\nHi, this is the PSKmail Server of " + serverCall + "\nVersion is " + application + "\n\n";
                                         Main.txText = serverCall + " V" + version + ", Hi\n";
-                                        Main.txText += ServerMail.getPendingList(serverCall, ttyCaller);
+                                        Main.txText += sm.getPendingList(serverCall, ttyCaller);
                                         Main.txText += Motd + "\n";
                                         //We are now fully connected, stop TxIDs
                                         //q.send_txrsid_command("OFF");
