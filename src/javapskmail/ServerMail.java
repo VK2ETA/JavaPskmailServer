@@ -218,7 +218,11 @@ public class ServerMail {
                 //  Therefore in plain text mode, strip all non ASCII characters 
                 String subjectStr = messages[i].getSubject().replaceAll("\u2013", "-");
                 subjectStr = subjectStr.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
-                mailHeaders += " " + (i + 1) + " " + fromString + "  " + subjectStr + " " + messages[i].getSize() + "\n";
+                //JavaMail .getSize() is not accurate. Get body size and add to the header size
+                String emailBody = getBodyTextFromMessage(messages[i]);
+                int mSize = emailBody.length() + fromString.length() + subjectStr.length();
+                //VK2ETA: check if Perl server adds a space before the email number
+                mailHeaders += "" + (i + 1) + " " + fromString + "  " + subjectStr + " " + mSize + "\n";
             }
             //Provide lead and size
             mailHeaders = "Your mail: " + mailHeaders.length() + "\n" + mailHeaders + "-end-\n";
@@ -350,6 +354,7 @@ public class ServerMail {
         String emailHeader = "From: " + fromString + "\n"
                 + "Date: " + dateFormat.format(sentDate).replaceAll("\\.", "") + "\n"
                 + "Subject: " + message.getSubject() + "\n\n"; //Needs a blank line between header and body for proper decoding at client side
+        result = emailHeader;
         if (message.isMimeType("text/plain")) {
             return emailHeader + message.getContent().toString();
         } else if (message.isMimeType("multipart/*")) {
@@ -357,15 +362,66 @@ public class ServerMail {
             int count = mimeMultipart.getCount();
             for (int i = 0; i < count; i++) { //Limit at one attachment for now
                 BodyPart bodyPart = mimeMultipart.getBodyPart(i);
-                if (bodyPart.isMimeType("text/plain")) {
+                //String partType = bodyPart.getContentType();
+                //String partContent = bodyPart.getContent().toString();
+                //result += partType + " " + partContent;
+                if (bodyPart.isMimeType("multipart/*")) {
+                    //-----internal search - 2nd (and last) level
+                    MimeMultipart mimeMultipartIn = (MimeMultipart) bodyPart.getContent();
+                    int countIn = mimeMultipartIn.getCount();
+                    for (int j = 0; j < countIn; j++) {
+                        BodyPart bodyPartIn = mimeMultipartIn.getBodyPart(i);
+
+                        if (bodyPartIn.isMimeType("text/plain")) {
+                            if (!haveText) {
+                                result += bodyPartIn.getContent() + "\n";
+                                haveText = true;
+                            }
+                        } else if (bodyPartIn.isMimeType("text/html")) {
+                            if (!haveText) {
+                                String html = (String) bodyPartIn.getContent();
+                                result += Jsoup.parse(html).text() + "\n";
+                                haveText = true;
+                            }
+                        } else {
+                            String attachmentFileName = bodyPartIn.getFileName();
+                            if (Part.ATTACHMENT.equalsIgnoreCase(bodyPartIn.getDisposition())
+                                    && !bodyPartIn.getFileName().equals("")
+                                    && ++attachmentCount < 2) {
+                                result += "filename=\"" + attachmentFileName + "\"\n"
+                                        + "Content-Transfer-Encoding: base64\n\n";
+                                InputStream is = bodyPartIn.getInputStream();
+                                try {
+                                    String tempAttachFN = Main.homePath + Main.dirPrefix + "tempAttach";
+                                    File f = new File(tempAttachFN);
+                                    if (f.exists()) {
+                                        f.delete();
+                                    }
+                                    FileOutputStream fos = new FileOutputStream(f);
+                                    byte[] buf = new byte[4096];
+                                    int bytesRead;
+                                    while ((bytesRead = is.read(buf)) != -1) {
+                                        fos.write(buf, 0, bytesRead);
+                                    }
+                                    fos.close();
+                                    String encodedStr = Base64.encodeFromFile(tempAttachFN);
+                                    result += encodedStr + "\n--00000000000059725805933653d8--"; //any end format will do
+                                } catch (Exception e) {
+                                    Main.log.writelog("Error with attachment file(s).", e, false);
+                                }
+                            }
+                        }
+                    }
+                    //End internal search
+                } else if (bodyPart.isMimeType("text/plain")) {
                     if (!haveText) {
-                        result = emailHeader + result + bodyPart.getContent() + "\n" ;
+                        result += bodyPart.getContent() + "\n" ;
                         haveText = true;
                     }
                 } else if (bodyPart.isMimeType("text/html")) {
                     if (!haveText) {
                         String html = (String) bodyPart.getContent();
-                        result = emailHeader + Jsoup.parse(html).text() + "\n";
+                        result += Jsoup.parse(html).text() + "\n";
                         haveText = true;
                     }
                 } else {
@@ -445,7 +501,7 @@ public class ServerMail {
                 returnString = "Error, only " + folder.getMessageCount() + " mails.\n";
                 return returnString;
             }
-            //Get all messages - one at a time for now
+            //Get messages - one at a time for now
             //emailNumber--; //Adjust from email number to message array index
             message = folder.getMessage(emailNumber);
             String fromString = message.getFrom()[0].toString();

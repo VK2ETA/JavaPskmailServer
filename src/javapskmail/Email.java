@@ -68,17 +68,28 @@ public class Email {
                 String currentline="";
                 content="";
                 Boolean Contentstarted = false; // True if there is an empty line, add the rest to content then
-                
+                boolean haveFrom = false;
+                boolean haveDate = false;
+                boolean haveSub = false;
                 
                 while (myscan.hasNextLine()){
                     currentline = myscan.nextLine();
                     // use the currentline to set the local datafields
-                    if (currentline.startsWith("From:")) this.from = ConvertToUTF(currentline.substring(5));
+                    if (currentline.startsWith("From:") && !haveFrom) {
+                        this.from = ConvertToUTF(currentline.substring(5));
+                        haveFrom = true;
+                    }
                     if (currentline.startsWith("To:")) this.to = ConvertToUTF(currentline.substring(3));
                     if (currentline.startsWith("Reply-To:")) this.replyto = ConvertToUTF(currentline.substring(9));
                     if (currentline.startsWith("Cc:")) this.cc = ConvertToUTF(currentline.substring(3));
-                    if (currentline.startsWith("Date:")) this.datestr = currentline.substring(5);
-                    if (currentline.startsWith("Subject:")) this.subject = ConvertToUTF(currentline.substring(8));
+                    if (currentline.startsWith("Date:") && !haveDate) {
+                        this.datestr = currentline.substring(5);
+                        haveDate = true;
+                    }
+                    if (currentline.startsWith("Subject:") && !haveSub) {
+                        this.subject = ConvertToUTF(currentline.substring(8));
+                        haveSub = true;
+                    }
                     if (currentline.toLowerCase().contains(attB64)) HasAttachment=true;
                     if (Contentstarted) this.content += currentline +"\n"; // Add content if that has started
                     if (currentline.length()<1) Contentstarted = true;

@@ -370,8 +370,8 @@ public class Session {
                 //Look in the Outpending folder for partial upload to client. 
                 // Files are in the format VK2ETA_-w-_12345*****
                 //Delete specified transaction (the one in progress). Could be any type.
-                if (!partialFilesDelete("outPending", Main.ttyCaller, fileToken)) {
-                    partialFilesDelete("outPending", "", fileToken);
+                if (!partialFilesDelete("Outpending", Main.ttyCaller, fileToken)) {
+                    partialFilesDelete("Outpending", "", fileToken);
                 }
             }
             //Clear everything in the current session (as if we had just concluded the connection)
@@ -756,126 +756,121 @@ public class Session {
                 FileInputStream in = null;
 
                 File incp = new File(mypath);
-                File outcp = new File(Main.homePath + Main.dirPrefix + "tmpfile");
 
                 FileInputStream fis = null;
+                boolean fileFound = true;
                 try {
                     fis = new FileInputStream(incp);
                 } catch (FileNotFoundException ex) {
-                    Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
+                    fileFound = false;
+                    //Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                FileOutputStream fos = null;
-                try {
-                    fos = new FileOutputStream(outcp);
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                try {
-                    byte[] buf = new byte[1024];
-                    int i = 0;
-                    while ((i = fis.read(buf)) != -1) {
-                        fos.write(buf, 0, i);
+                if (fileFound) {
+                    File outcp = new File(Main.homePath + Main.dirPrefix + "tmpfile");
+                    FileOutputStream fos = null;
+                    try {
+                        fos = new FileOutputStream(outcp);
+                    } catch (FileNotFoundException ex) {
+                        Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                } catch (Exception e) {
-                    Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, e);
-                } finally {
-                    if (fis != null) {
-                        try {
-                            fis.close();
-                        } catch (IOException ex) {
-                            Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
+
+                    try {
+                        byte[] buf = new byte[1024];
+                        int i = 0;
+                        while ((i = fis.read(buf)) != -1) {
+                            fos.write(buf, 0, i);
+                        }
+                    } catch (Exception e) {
+                        Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, e);
+                    } finally {
+                        if (fis != null) {
+                            try {
+                                fis.close();
+                            } catch (IOException ex) {
+                                Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                        if (fos != null) {
+                            try {
+                                fos.close();
+                            } catch (IOException ex) {
+                                Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                         }
                     }
-                    if (fos != null) {
-                        try {
-                            fos.close();
-                        } catch (IOException ex) {
-                            Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
+
+                    String mysourcefile = Main.homePath + Main.dirPrefix + "tmpfile";
+
+                    try {
+                        in = new FileInputStream(mysourcefile);
+                    } catch (FileNotFoundException ex) {
+                        Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    GZIPOutputStream myzippedfile = null;
+
+                    String tmpfile = Main.homePath + Main.dirPrefix + "tmpfile.gz";
+
+                    try {
+                        myzippedfile = new GZIPOutputStream(new FileOutputStream(tmpfile));
+                    } catch (FileNotFoundException ex) {
+                        Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IOException ioe) {
+                        Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ioe);
+                    }
+
+                    byte[] buffer = new byte[4096];
+                    int bytesRead;
+
+                    try {
+                        while ((bytesRead = in.read(buffer)) != -1) {
+                            myzippedfile.write(buffer, 0, bytesRead);
+                        }
+                    } catch (IOException ex) {
+                        Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    try {
+                        in.close();
+                        myzippedfile.close();
+                    } catch (IOException ex) {
+                        Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    Random r = new Random();
+                    token = Long.toString(Math.abs(r.nextLong()), 12);
+                    token = "tmp" + token;
+
+                    //codedFile = Main.homePath + Main.dirPrefix + "Outpending" + Main.separator + token;
+                    codedFile = Main.homePath + Main.dirPrefix + "Outpending" + Main.separator
+                            + toCall.replaceAll("\\/", "+") + "_-u-_" + token + "_-" + myfile;
+                    Base64.encodeFileToFile(tmpfile, codedFile);
+                    File dlfile = new File(tmpfile);
+                    if (dlfile.exists()) {
+                        dlfile.delete();
+                    }
+                    String TrString = "";
+                    File mycodedFile = new File(codedFile);
+                    //if (mycodedFile.isFile()) {
+                    //    TrString = ">FM:" + fromCall + ":" + toCall + ":"
+                    //            + token + ":u:" + myfile
+                    //            + ":" + Long.toString(mycodedFile.length()) + "\n";
+                    //}
+
+                    if (Main.connected) {
+                        if (mycodedFile.isFile()) {
+                            //Client or server? (File transfers work both ways regarless of who initated the connection)
+                            Main.txText += ">FM:" + fromCall + ":" + toCall + ":"
+                                    + token + ":u:" + myfile
+                                    + ":" + Long.toString(mycodedFile.length()) + "\n";
+                            String dataString = RMsgUtil.readFile(codedFile);
+                            Main.txText += dataString + "\n-end-\n";
+                            //Main.filetype = "u"; //To use when we receive the ~FY command from the client
                         }
                     }
+                } else {
+                    Main.txText += "File " + myfile + " Not Found\n";
                 }
-
-                String mysourcefile = Main.homePath + Main.dirPrefix + "tmpfile";
-
-                try {
-                    in = new FileInputStream(mysourcefile);
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                GZIPOutputStream myzippedfile = null;
-
-                String tmpfile = Main.homePath + Main.dirPrefix + "tmpfile.gz";
-
-                try {
-                    myzippedfile = new GZIPOutputStream(new FileOutputStream(tmpfile));
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IOException ioe) {
-                    Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ioe);
-                }
-
-                byte[] buffer = new byte[4096];
-                int bytesRead;
-
-                try {
-                    while ((bytesRead = in.read(buffer)) != -1) {
-                        myzippedfile.write(buffer, 0, bytesRead);
-                    }
-                } catch (IOException ex) {
-                    Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                try {
-                    in.close();
-                    myzippedfile.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                Random r = new Random();
-                token = Long.toString(Math.abs(r.nextLong()), 12);
-                token = "tmp" + token;
-
-                //codedFile = Main.homePath + Main.dirPrefix + "Outpending" + Main.separator + token;
-                codedFile = Main.homePath + Main.dirPrefix + "Outpending" + Main.separator 
-                        + toCall.replaceAll("\\/", "+") + "_-u-_" + token + "_-" + myfile;
-                Base64.encodeFileToFile(tmpfile, codedFile);
-                File dlfile = new File(tmpfile);
-                if (dlfile.exists()) {
-                    dlfile.delete();
-                }
-                String TrString = "";
-                File mycodedFile = new File(codedFile);
-                //if (mycodedFile.isFile()) {
-                //    TrString = ">FM:" + fromCall + ":" + toCall + ":"
-                //            + token + ":u:" + myfile
-                //            + ":" + Long.toString(mycodedFile.length()) + "\n";
-                //}
-
-                if (Main.connected) {
-                    if (mycodedFile.isFile()) {
-                        //Client or server? (File transfers work both ways regarless of who initated the connection)
-                        Main.txText += ">FM:" + fromCall + ":" + toCall + ":"
-                                + token + ":u:" + myfile
-                                + ":" + Long.toString(mycodedFile.length()) + "\n";
-                        String dataString = RMsgUtil.readFile(codedFile);
-                        Main.txText += dataString + "\n-end-\n";
-                        //Main.filetype = "u"; //To use when we receive the ~FY command from the client
-                    }
-                }
-                /*
-                File Transactions = new File(Main.transactions);
-                FileWriter tr;
-                try {
-                    tr = new FileWriter(Transactions, true);
-                    tr.write(TrString);
-                    tr.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                */
             }
         }
 
@@ -1243,7 +1238,7 @@ public class Session {
             }
         }
 
-        //Partial Downloads (file, web page or imap email)
+        //Partial Downloads (file, web page or imap email) from server
         // >FO5:PI4TUE:PA0R:JhyJkk:f:test.txt:496
         Pattern ofr = Pattern.compile("\\s*>FO(\\d):([a-zA-Z0-9\\-\\/]+):([a-zA-Z0-9\\-\\/]+):([A-Za-z0-9_-]+):(\\w)");
         Matcher ofrm = ofr.matcher(str);
@@ -1272,10 +1267,10 @@ public class Session {
         }
 
         //Partial uploads
-        //~FO5:PI4TUE:PA0R:tmpasdkkdfj:u:test.txt:36
+        //~F05:PI4TUE:PA0R:tmpasdkkdfj:u:test.txt:36
         //~FO5:VK2ETA-5:VK2ETA-1:tmp578bbbaa04091a76:u:changes.txt:506
         //~FO5:PI4TUE:PA0R-1:a30a69:s: :847 //E-mail upload to this TTYserver
-        Pattern ofr2 = Pattern.compile("\\s*~FO(\\d):([a-zA-Z0-9\\-\\/]+):([a-zA-Z0-9\\-\\/]+):([A-Za-z0-9_-]+):(\\w).*");
+        Pattern ofr2 = Pattern.compile("\\s*~F0(\\d):([a-zA-Z0-9\\-\\/]+):([a-zA-Z0-9\\-\\/]+):([A-Za-z0-9_-]+):(\\w):(.*):(\\d+)");
         Matcher ofrm2 = ofr2.matcher(str);
         if (ofrm2.lookingAt()) {
             foundMatchingCommand = true;
@@ -1308,53 +1303,82 @@ public class Session {
             }
         }
 
-        // ~FY:tmpjGUytg:request partial email upload 
-        // ~FY:tmp578bbbaa04091a76:234
+
+        // ~FY:tmp578bbbaa04091a76:234    //partial email or file upload
         Pattern yfr = Pattern.compile("\\s*~FY:([A-Za-z0-9]+):(\\d+)");
         Matcher yfrm = yfr.matcher(str);
         if (yfrm.lookingAt()) {
+            String toCall = "";
+            String fromCall = "";
+            String result = "";
+            File[] pendingFilesList;
             foundMatchingCommand = true;
             String partialfile = yfrm.group(1);
             String startingbyte = yfrm.group(2);
-//                     System.out.println(partialfile);
+            //System.out.println(partialfile);
             int start = Integer.parseInt(startingbyte);
-            File penf = new File(Main.pendingDir + partialfile);
+            //File penf = new File(Main.outPendingDir + partialfile);
             //File foutpending = new File(Main.outPendingDir + Main.separator + partialfile);
-            File foutpending;
+            //ile foutpending;
             if (Main.ttyConnected.equals("Connected")) {
                 //I am server
-                foutpending = new File(Main.outPendingDir + Main.separator + Main.ttyCaller.replaceAll("\\/", "+") + "_-u-_" + partialfile);
+                toCall = Main.ttyCaller;
+                fromCall = Main.callsignAsServer;
+                //foutpending = new File(Main.outPendingDir + Main.separator + Main.ttyCaller.replaceAll("\\/", "+") + "_-u-_" + partialfile);
             } else {
                 //I am client
-                foutpending = new File(Main.outPendingDir + Main.separator + Main.sm.myserver.replaceAll("\\/", "+") + "_-u-_" + partialfile);            
+                toCall = myserver;
+                fromCall = Main.mycall;
+                //foutpending = new File(Main.outPendingDir + Main.separator + Main.sm.myserver.replaceAll("\\/", "+") + "_-u-_" + partialfile);            
             }
-            String filename = "";
-            if (penf.exists()) {
-                int i = 0;
-                try {
-                    FileInputStream fis = new FileInputStream(penf);
-                    char current;
-                    String callsign = Main.configuration.getPreference("CALL");
-                    callsign = callsign.trim();
-                    //String servercall = Main.configuration.getPreference("SERVER");
-                    String servercall = Main.q.getServer().trim();
-                    long flen = 0;
-                    flen = penf.length() - start;
-                    Main.txText += ">FM:" + callsign + ":" + servercall + ":" + partialfile + ":s: :" + Long.toString(flen) + "\n";
-                    while (fis.available() > 0) {
-                        current = (char) fis.read();
-                        i++;
-
-                        if (i > start) {
-                            Main.txText += current;
-                        }
-                    }
-                    Session.DataSize = Main.txText.length();
-                    fis.close();
-                } catch (IOException e) {
-                    //System.out.println("IO error on pending file");
+            //vk2eta+pm_-x-_tmp2b4662a0b27610b45a_-myfile.txt //for partial file uploads
+            //tmp2b4662a0b27610b45a //for partial email uploads 
+            //Pattern yfm = Pattern.compile("([a-zA-Z0-9\\+\\-]+)_-(\\w?)-_([a-zA-Z0-9]+)(_-(.+))?");
+            Pattern yfm = Pattern.compile("(([a-zA-Z0-9\\+\\-]+)_-(\\w?)-_)?([a-zA-Z0-9]+)(_-(.+))?");
+            Matcher yfmm;
+            File dir = new File(Main.outPendingDir);
+            FileFilter fileFilter = new FileFilter() {
+                public boolean accept(File file) {
+                    return file.isFile();
                 }
-            } else if (foutpending.exists()) {
+            };
+            //Generates an array of strings containing the file names
+            pendingFilesList = dir.listFiles(fileFilter);
+            for (int i = 0; i < pendingFilesList.length; i++) {
+                String pendingCaller = "";
+                String pendingType = "";
+                String pendingToken = "";
+                String pendingFileName = "";
+                String pendingFn = pendingFilesList[i].getName();
+                yfmm = yfm.matcher(pendingFn);
+                if (yfmm.lookingAt()) {
+                    if (yfmm.group(1) != null) {
+                        pendingCaller = yfmm.group(2).replaceAll("\\+", "/");
+                        pendingType = yfmm.group(3);
+                        pendingToken = yfmm.group(4);
+                        if (yfmm.group(6) != null) {
+                            pendingFileName = yfmm.group(6);
+                        }
+                    } else if (yfmm.group(4) != null) {
+                        pendingToken = yfmm.group(4);
+                        pendingType = "m";
+                    }
+                    if ((pendingCaller.length() == 0 || pendingCaller.equals(toCall)) 
+                            && pendingToken.equals(partialfile)) {
+                        //Found a match for callsign, add to list
+                        long flen = pendingFilesList[i].length() - start;
+                        String restOfFile = RMsgUtil.readFile(pendingFilesList[i].getAbsolutePath());
+                        restOfFile = restOfFile.substring(start);
+                        Main.txText += ">FM:" + fromCall + ":" + toCall + ":"
+                                + pendingToken + ":" + pendingType + ":" + pendingFileName
+                                + ":" + Long.toString(flen) + "\n" +
+                                restOfFile + "\n-end-\n";
+                    }
+                }
+            }
+            /*
+            String filename = "";
+            if (foutpending.exists()) {
                 int i = 0;
                 try {
                     FileInputStream fis = new FileInputStream(foutpending);
@@ -1366,16 +1390,16 @@ public class Session {
                     File ft = new File(Main.transactions);
                     String[] ss = null;
                     if (ft.exists()) {
-//                                    System.out.println("Transactons exists");
+                        //System.out.println("Transactons exists");
                         FileReader fr = new FileReader(Main.transactions);
                         BufferedReader br = new BufferedReader(fr);
                         String s;
                         while ((s = br.readLine()) != null) {
-//                                   System.out.println("s=:" + s);
+                            //System.out.println("s=:" + s);
                             ss = s.split(":");
-                            //                                  System.out.println(ss[5]);
+                            //System.out.println(ss[5]);
                             if (s.contains(partialfile)) {
-//                                    System.out.println(s);
+                                //System.out.println(s);
                                 filename = ss[5];
                             }
                         }
@@ -1395,69 +1419,14 @@ public class Session {
                     Main.txText += "\n-end-\n";
                     Session.DataSize = Integer.parseInt(ss[6]);
                 } catch (IOException e) {
-//                                                System.out.println("IO error on pending file");
-                }
-            } else if (Main.ttyConnected.equals("Connected")) {
-                //Look in the Outbox for partial upload to client. Files are in the format VK2ETA_-w-_12345
-                //Since we don't know the file type from the ~FY command (s,w,f etc...),
-                //  we scan the directory for a match
-                String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
-                String caller = Main.ttyCaller;
-                File[] filesOutbox;
-                // Get the list of files in the designated folder
-                File dir = new File(Main.homePath + Main.dirPrefix + "Outbox");
-                filesOutbox = dir.listFiles();
-                FileFilter fileFilter = new FileFilter() {
-                    public boolean accept(File file) {
-                        return file.isFile();
-                    }
-                };
-                //Generates an array of strings containing the file names to resume downloading
-                filesOutbox = dir.listFiles(fileFilter);
-                for (int i = 0; i < filesOutbox.length; i++) {
-                    String pendingCaller = "";
-                    String pendingType = "";
-                    String pendingToken = "";
-                    String pendingFn = filesOutbox[i].getName();
-                    if (pendingFn.contains("_-")) {
-                        int firstSep = pendingFn.indexOf("_-");
-                        int secondSep = pendingFn.indexOf("-_");
-                        if (firstSep > 0 && secondSep > 0) {
-                            pendingCaller = pendingFn.substring(0, firstSep);
-                            pendingType = pendingFn.substring(firstSep + 2, secondSep);
-                            pendingToken = pendingFn.substring(secondSep + 2);
-                        }
-                        if (pendingCaller.replaceAll("\\+", "/").equals(caller) && partialfile.equals(pendingToken)) {
-                            //Found a match, queue for TX at specified offset
-                            int j = 0;
-                            File penfOut = filesOutbox[i].getAbsoluteFile();
-                            try {
-                                FileInputStream fis = new FileInputStream(penfOut);
-                                char current;
-                                long flen = 0;
-                                flen = penfOut.length() - start;
-                                String mBuffer = ">FM:" + serverCall + ":" + caller + ":" + partialfile + ":" + pendingType + ": :" + Long.toString(flen) + "\n";
-                                while (fis.available() > 0) {
-                                    current = (char) fis.read();
-                                    j++;
-                                    //Skip data already received
-                                    if (j > start) {
-                                        mBuffer += current;
-                                    }
-                                }
-                                Main.txText += mBuffer + "\n-end-\n";
-                                Session.DataSize = Main.txText.length();
-                                fis.close();
-                            } catch (IOException e) {
-//                                                System.out.println("IO error on pending file");
-                            }
-                        }
-                    }
+                    System.out.println("IO error on pending file");
                 }
             }
-            Main.log("Sending file: " + filename);
+            */
+            Main.log("Resuming Partial dataset: " + partialfile);
         }
 
+        
         // ~FA:tmpjGUytg  
         // ~FA:tmp16a38514418197b776 
         //Delete output file in Outbox OR in Outpending
@@ -1475,50 +1444,34 @@ public class Session {
                 //  we scan the directory for a match
                 String caller = Main.ttyCaller;
                 //Outpending folder first
-                if (partialFilesDelete("outPending", caller, deleteToken)) {
+                if (partialFilesDelete("Outpending", caller, deleteToken)) {
                     Main.mainwindow += (Main.myTime() + " File Sent...\n");
                     Main.filesTextArea += " File Sent...\n";
-                } else if (partialFilesDelete("outPending", "", deleteToken)) {
-                    //Found a partial email upload, move from outbox to sent folder
-                    .....partialFilesDelete("Outbox", "", deleteToken);
+                }
+            } else { //I am a client, either uploading a file or an email
+                //Check for email uploads first
+                if (partialFilesDelete("Outpending", "", deleteToken)) {
+                    //Found an email upload, move from outbox to sent folder
+                    File df = new File(Main.homePath + Main.dirPrefix + "Outbox" + Main.separator + deleteToken);
+                    movefiletodir(df, Main.homePath + Main.dirPrefix + "Sent");
+                    try {
+                        df.delete();
+                    } catch (Exception e) {
+                        //Nothing
+                    }
                     Main.mainwindow += (Main.myTime() + " Email Sent...\n");
                     Main.filesTextArea += " Email Sent...\n";
-                }
-            } else {
-                /*
-                //We are a client, we store the file name without transaction information
-                try {
-                    File df = new File(Main.homePath + Main.dirPrefix + "Outbox" + Main.separator + deletefl);
-                    if (df.exists()) {
-                        // Move to Sent or delete
-                        if (!movefiletodir(df, Main.homePath + Main.dirPrefix + "Sent")) {
-                            df.delete();
-                        }
-                        Main.log("Mail sent to server/client...");
-                        // Update the outbox grid
-                        Main.mainui.refreshEmailGrid();
-                    }
-                    File outpenf = new File(Main.outPendingDir + Main.separator + deletefl);
-                    if (outpenf.exists()) {
-                        outpenf.delete();
-                        Main.mainwindow += (Main.myTime() + " File stored...\n");
-                        Main.filesTextArea += " File stored...\n";
-                    }
-                    File penf = new File(Main.pendingDir + deletefl);
-                    if (penf.exists()) {
-                        penf.delete();
-//                                                Main.mainwindow += "Mail sent on server...\n";
-//                                                Main.FilesTextArea += "Mail sent on server...\n";
-                    }
-                */
-                if (partialFilesDelete("Outbox", "", deleteToken)) { //No other party callsign
-                    // reset progress bar
-                    Session.DataSize = 0;
-                    Session.DataReceived = 0;
-                    Main.progress = 0;
+                } else if (partialFilesDelete("Outpending", myserver, deleteToken)) {
+                    //Found a file upload
                     Main.q.Message("Upload complete...", 10);
-                    str = "";
+                    Main.filesTextArea += "Upload complete...\n";
                 }
+                // reset progress bar
+                Session.DataSize = 0;
+                Session.DataReceived = 0;
+                Main.progress = 0;
+                Main.q.Message("Upload complete...", 10);
+                str = "";
             }
         }
         
@@ -1762,8 +1715,11 @@ public class Session {
                     // all local stuff
                     String s;
                     String From = null;
+                    boolean haveFrom = false;
                     String Date = null;
+                    boolean haveDate = false;
                     String Sub = null;
+                    boolean haveSub = false;
                     String outstr = "";
                     String attachment = "";
                     base64attachment = false;
@@ -1784,25 +1740,29 @@ public class Session {
                         Pattern pnm = Pattern.compile(".*(filename=)(.*)");
                         Matcher mnm = pnm.matcher(s);
                         if (mfrm.lookingAt()) {
-                            if (mfrm.group(1).equals("From:")) {
+                            if (mfrm.group(1).equals("From:") && !haveFrom) {
                                 From = mfrm.group(2);
+                                haveFrom = true;
                             }
                         } else if (mdate.lookingAt()) {
-                            if (mdate.group(1).equals("Date:")) {
+                            if (mdate.group(1).equals("Date:") && !haveDate) {
                                 Date = mdate.group(2) + " " + mdate.group(3) + " "
                                         + mdate.group(4) + " " + mdate.group(5) + " "
                                         + mdate.group(6);
+                                haveDate = true;
                             }
 
                         } else if (mdate2.lookingAt()) {
-                            if (mdate2.group(1).equals("Date:")) {
+                            if (mdate2.group(1).equals("Date:") && !haveDate) {
                                 Date = mdate2.group(2) + " " + mdate2.group(3) + " "
                                         + mdate2.group(4);
+                                haveDate = true;
                             }
 
                         } else if (msub.lookingAt()) {
-                            if (msub.group(1).equals("Subject:")) {
+                            if (msub.group(1).equals("Subject:") && !haveSub) {
                                 Sub = msub.group(2);
+                                haveSub = true;
                             }
 
                         } else if (m64.lookingAt()) {
@@ -1943,8 +1903,11 @@ public class Session {
                     // all local stuff
                     String s;
                     String From = null;
+                    boolean haveFrom = false;
                     String Date = null;
+                    boolean haveDate = false;
                     String Sub = null;
+                    boolean haveSub = false;
                     String outstr = "";
                     String attachment = "";
                     base64attachment = false;
@@ -1975,23 +1938,27 @@ public class Session {
                         Pattern nmx = Pattern.compile("name=");
                         Matcher mnmx = nmx.matcher(s);
                         if (mfrm.lookingAt()) {
-                            if (mfrm.group(1).equals("From:")) {
+                            if (mfrm.group(1).equals("From:") && !haveFrom) {
                                 From = mfrm.group(2);
+                                haveFrom = true;
                             }
                         } else if (mdate.lookingAt()) {
-                            if (mdate.group(1).equals("Date:")) {
+                            if (mdate.group(1).equals("Date:") && !haveDate) {
                                 Date = mdate.group(2) + " " + mdate.group(3) + " "
                                         + mdate.group(4) + " " + mdate.group(5) + " "
                                         + mdate.group(6);
+                                haveDate = true;
                             }
                         } else if (mdate2.lookingAt()) {
-                            if (mdate2.group(1).equals("Date:")) {
+                            if (mdate2.group(1).equals("Date:") && !haveDate) {
                                 Date = mdate2.group(2) + " " + mdate2.group(3) + " "
                                         + mdate2.group(4);
+                                haveDate = true;
                             }
                         } else if (msub.lookingAt()) {
-                            if (msub.group(1).equals("Subject:")) {
+                            if (msub.group(1).equals("Subject:") && !haveSub) {
                                 Sub = msub.group(2);
+                                haveSub = true;
                             }
                         } else if (m64.lookingAt()) {
                             if (m64.group(1).equals("content-transfer-encoding: base64")) {
@@ -2984,7 +2951,7 @@ public class Session {
  
     
     //Builds a resume command string for transmission taking into account if is a server or a client
-    private String partialFilesResume(String folder, String header, String fileType) {
+    public String partialFilesResume(String folder, String header) {
         String result = "";
         File[] pendingFilesList;
         String toCall = "";
@@ -3011,7 +2978,7 @@ public class Session {
             iAmServer = true;
         }
         //vk2eta+pm_-u-_tmp2b4662a0b27610b45a_-myfile.txt
-        Pattern fm = Pattern.compile("([a-zA-Z0-9\\+\\-]+)_-(\\w?)-_([a-zA-Z0-9]+)(_-(.+))");
+        Pattern fm = Pattern.compile("([a-zA-Z0-9\\+\\-]+)_-(\\w?)-_([a-zA-Z0-9]+)(_-(.+))?");
         Matcher fmm;
         //Generates an array of strings containing the file names
         pendingFilesList = dir.listFiles(fileFilter);
@@ -3029,23 +2996,20 @@ public class Session {
                 if (fmm.group(5) != null) {
                     pendingFileName = fmm.group(5);
                 }
-                if (pendingCaller.equals("")) {
-                //Found a match for callsign and token combination, add to list
-                result += header + fromCall + ":" + toCall + ":"
+                if (pendingCaller.equals(toCall)) {
+                    //Found a match for callsign, add to list
+                    result += header + fromCall + ":" + toCall + ":"
                             + pendingToken + ":" + pendingType + ":" + pendingFileName
                             + ":" + Long.toString(pendingFilesList[i].length()) + "\n";
                 }
-                //File penfOut = pendingFilesList[i].getAbsoluteFile();
-                //if (penfOut.exists()) {
-                //    penfOut.delete();
-                //}
             }
         }
         
         return result;
     }
     
-        
+      
+    /*
     //Scan the Pending folders 
     public static String getPendingList(String server, String caller) {
         String returnList = "";
@@ -3118,7 +3082,7 @@ public class Session {
 
         return returnList;
     }
-
+    */
     
     //Look into designated folder for a matching callsign and transaction. Returns true if found and deleted.
     private boolean partialFilesDelete(String folder, String caller, String token) {
@@ -3132,12 +3096,14 @@ public class Session {
                 return file.isFile();
             }
         };
+        Pattern fm;
         if (caller.length() == 0) { //No destination call sign, no upload type (E.g. email)
             //tmp2b4662a0b27610b45a
-            Pattern fm = Pattern.compile("([a-zA-Z0-9]+)");
+            fm = Pattern.compile("([a-zA-Z0-9]+)");
         } else  {
-            //vk2eta+pm_-u-_tmp2b4662a0b27610b45a_-myfile.txt
-            Pattern fm = Pattern.compile("([a-zA-Z0-9\\+\\-]+)_-(\\w?)-_([a-zA-Z0-9]+)(_-(.+))");
+            //vk2eta+pm_-u-_tmp2b4662a0b27610b45a_-myfile.txt //file download (should it be -f- ?)
+            //vk2eta+p_-w-_8b58a0 //web page
+            fm = Pattern.compile("([a-zA-Z0-9\\+\\-]+)_-(\\w?)-_([a-zA-Z0-9]+)(_-(.+))?");
         }
         Matcher fmm;
         //Generates an array of strings containing the file names

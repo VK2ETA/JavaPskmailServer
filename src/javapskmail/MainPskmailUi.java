@@ -5631,15 +5631,25 @@ private void FileSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GE
 //       System.out.println(mypath);
 
             if (mypath.length() > 0) {
+                //Get the destination callsign
+                String Destination;
+                if (Main.ttyConnected.equals("Connected")) {
+                    //I am server
+                    Destination = Main.ttyCaller;
+                } else {
+                    //I am client
+                    Destination = Main.sm.myserver;
+                }
 
+                /*
                 String Destination = Main.sm.myserver;
                 Destination = (String) JOptionPane.showInputDialog(
                         new JFrame(),
                         "File destination (CALL)",
                         "Destination", JOptionPane.INFORMATION_MESSAGE,
                         new ImageIcon("java2sLogo.GIF"), null, Destination);
-//    System.out.println("User's input: " + Destination);
-
+                //System.out.println("User's input: " + Destination);
+                */
                 FileInputStream in = null;
 
                 File incp = new File(mypath);
@@ -5725,7 +5735,9 @@ private void FileSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GE
                 token = Long.toString(Math.abs(r.nextLong()), 12);
                 token = "tmp" + token;
 
-                codedFile = Main.homePath + Main.dirPrefix + "Outpending" + Main.separator + token;
+                //codedFile = Main.homePath + Main.dirPrefix + "Outpending" + Main.separator + token;
+                codedFile = Main.homePath + Main.dirPrefix + "Outpending" + Main.separator
+                            + Destination.replaceAll("\\/", "+") + "_-u-_" + token + "_-" + myfile;
 
                 Base64.encodeFileToFile(tmpfile, codedFile);
 
@@ -5744,15 +5756,19 @@ private void FileSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GE
 
                 if (Main.connected) {
                     if (mycodedFile.isFile()) {
-                        Main.txText += "~FO5:" + Main.sm.mycall + ":" + Destination + ":"
+                        //Main.txText += "~FO5:" + Main.sm.mycall + ":" + Destination + ":"
+                        Main.txText += ">FM:" + Main.sm.mycall + ":" + Destination + ":"
                                 + token + ":u:" + myfile
                                 + ":" + Long.toString(mycodedFile.length()) + "\n";
+                        String dataString = RMsgUtil.readFile(codedFile);
+                        Main.txText += dataString + "\n-end-\n";
                         Main.q.Message(mainpskmailui.getString("Uploading_") + myfile, 5);
                         Main.filesTextArea += mainpskmailui.getString("Uploading_") + myfile + "\n";
                         Main.filetype = "u";
                     }
                 }
 
+                /*
                 File Transactions = new File(Main.transactions);
                 FileWriter tr;
                 try {
@@ -5762,6 +5778,7 @@ private void FileSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GE
                 } catch (IOException ex) {
                     Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                */
             }
         }
     }
@@ -6456,31 +6473,43 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
             FileReader b64in = new FileReader(codedfile);
             BufferedReader br = new BufferedReader(b64in);
 
-            FileWriter fstream = new FileWriter(Main.pendingDir + filename);
-            BufferedWriter pout = new BufferedWriter(fstream);
-
-            if (Main.protocol == 0) {
+            if (Main.protocol == 0) { //Old protocol
+                FileWriter fstream = new FileWriter(Main.pendingDir + filename);
+                BufferedWriter pout = new BufferedWriter(fstream);
                 Main.txText += "~CSEND\n";
+                String record = null;
+                while ((record = br.readLine()) != null) {
+                    Main.txText += record + "\n";
+                }
+                Main.txText += "-end-\n";
             } else {
+                //Current protocol with upload resumes
                 String callsign = Main.configuration.getPreference("CALL");
                 callsign = callsign.trim();
                 //String servercall = Main.configuration.getPreference("SERVER");
                 String servercall = Main.q.getServer().trim();
                 servercall = servercall.trim();
-                Main.txText += ">FM:" + callsign + ":" + servercall + ":" + filename + ":s: :" + lengthstr + "\n";
-            }
-            String record = null;
-            while ((record = br.readLine()) != null) {
-                Main.txText += record + "\n";
-                if (Main.protocol > 0) {
-                    pout.write(record + "\n");
+                //Have we tried to send it before?
+                File partialFile = new File(Main.outPendingDir + filename);
+                if (partialFile.exists()) {
+                    //Try an upload resume
+                    Main.txText += "~F05:" + callsign + ":" + servercall + ":" + filename + ":s: :" + lengthstr + "\n";
+                } else {
+                    FileWriter fstream = new FileWriter(Main.outPendingDir + filename);
+                    BufferedWriter pout = new BufferedWriter(fstream);
+                    //First send
+                    Main.txText += ">FM:" + callsign + ":" + servercall + ":" + filename + ":s: :" + lengthstr + "\n";
+                    String record = null;
+                    while ((record = br.readLine()) != null) {
+                        Main.txText += record + "\n";
+                        pout.write(record + "\n");
+                    }
+                    Main.txText += "-end-\n";
+                    //pout.write("-end-\n"); //compressed data without -end- statement
+                    pout.close();
                 }
             }
-            Main.txText += "-end-\n";
-            if (Main.protocol > 0) {
-                pout.write("-end-\n");
-                pout.close();
-            }
+
             Session.DataSize = Main.txText.length();
             boolean success;
             File f = new File(zippedfile);
@@ -6490,6 +6519,7 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
         } catch (Exception ex) {
             Main.log.writelog("Compressed mail send failed.", ex, true);
         }
+        //VK2ETA needs a finally here for closing the files
     }
 
     /*
@@ -7815,8 +7845,8 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
                 if (s.length() > 10) {
                     String[] mystrarr = new String[4];
                     Integer myA = s.indexOf(" ");
-                    if (myA < 2) {
-                        myA = 2;
+                    if (myA < 1) {
+                        myA = 1;
                     }
                     mystrarr[0] = s.substring(0, myA).trim();    //Number
                     //From
