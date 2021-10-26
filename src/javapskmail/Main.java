@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.0.0.2";
+    static String version = "3.0.0.3";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20211018";
+    static String versionDate = "20211027";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -1347,7 +1347,7 @@ public class Main {
                                 if (getcl.lookingAt()) {
                                     if (matchServerCallWith(getcl.group(2))) {
                                         String newCaller = getcl.group(1);
-                                        if (ttyConnected.equals("Connected") && !newCaller.toUpperCase(Locale.US).equals(ttyCaller)) {
+                                        if (ttyConnected.equals("Connected") && !newCaller.toUpperCase(Locale.US).equals(ttyCaller.toUpperCase(Locale.US))) {
                                             //I am already in a session and this request is not from the same client, ignore
                                             q.Message("Con. request from " + newCaller + ". Ignored...", 5);
                                         } else {
@@ -2457,10 +2457,21 @@ public class Main {
         return mMatch2;
     }
 
+    
+    //Check if we have a strict match between two call signs
+    public static boolean matchCallOneWithCallTwo(String call1, String call2) {
+
+        if (call1.trim().length() == 0 || call2.trim().length() == 0) {
+            return false;
+        }
+        boolean mMatch2 = call1.trim().toUpperCase(Locale.US).equals(call2.trim().toUpperCase(Locale.US));
+        return mMatch2;
+    }
+
+    
+    //Remove any ABCN/ prefixes like FR/ and any suffixes like /p or /mm and reject non-standard callsigns patterns
     public static String cleanCallForAprs(String call) {
         String cleanCall = "";
-
-        //Remove any ABCN/ prefixes like FR/ and any suffixes like -15 or /mm and reject non-standard callsigns patterns
         //Pattern pc = Pattern.compile(".*([a-z0-9]{1,3}[0-9]\\/)([a-z0-9]{1,3}[0-9][a-z0-9]{0,3}[a-zA-Z])(((\\/MM)|(\\/M)|(\\/PM)|(\\/P))|(\\-[a-z0-9]{1,2}))?.*", Pattern.CASE_INSENSITIVE);
         Pattern pc = Pattern.compile("([a-z0-9]{1,3}[0-9]\\/)?([a-z0-9]{1,3}[0-9][a-z0-9]{0,3}[a-z])(((\\/MM)|(\\/M)|(\\/PM)|(\\/P))|(\\-[a-z0-9]{1,2}))?", Pattern.CASE_INSENSITIVE);
         //System.out.println(Blockline);

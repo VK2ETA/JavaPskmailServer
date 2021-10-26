@@ -543,108 +543,122 @@ public class Session {
             if (Main.wantServer) {
                 if (AMm.group(2) != null) {
                     try {
-                    maxLines = Integer.parseInt(AMm.group(2).trim());
-                    if (maxLines < 1) maxLines = 1;
+                        maxLines = Integer.parseInt(AMm.group(2).trim());
+                        if (maxLines < 1) {
+                            maxLines = 1;
+                        }
                     } catch (Exception e) {
                         maxLines = 10;
                     }
                 }
-                String msgText = ServerMail.readWebPage("http://www.findu.com/cgi-bin/msg.cgi?call=" + Main.ttyCaller, "", false);
-                String msgCleanText = "Your messages:\nFrom       Date    Time         Message\n";
-                //"fromtotime&nbsp;message\n" +
-                //"VK2ETA-90  VK2ETA     09/21   07:21:52z Reply to message number 5"
-                Pattern psc = Pattern.compile("(^[a-zA-Z0-9\\-\\/]+)\\s+([a-zA-Z0-9\\-\\/]+)\\s+(\\S+)\\s+(\\S+)\\s+(Reply)\\s+(.*)$", Pattern.MULTILINE);
-                Matcher msc = psc.matcher(msgText);
-                boolean keepLooking = true;
-                String from;
-                String to;
-                String date;
-                String time;
-                String msg;
-                int lines = 0;
-                for (int start = 0; keepLooking;) {
-                    keepLooking = msc.find(start);
-                    if (keepLooking) {
-                        if (lines < maxLines && Main.matchClientCallWith(msc.group(2)) &&
-                                msc.group(6).trim().length() > 0) {
-                            //For me, NOT From me, and with a non blank message, max 10 entries
-                            to = RMsgUtil.padString(msc.group(2), 9);
-                            from = RMsgUtil.padString(msc.group(1), 9);
-                            date = msc.group(3);
-                            time = RMsgUtil.padString(msc.group(4), 10);
-                            msg = msc.group(6);
-                            msgCleanText += from + "  " + date + "  " + time + "  " + msg + "\n";
-                            lines++;
+                String cleanCall = Main.cleanCallForAprs(Main.ttyCaller);
+                if (cleanCall.length() > 0) {
+                    //We have a valid APRS callsign with possibly an APRS Id and all in upper case (e.g.VK2ETA-15)
+                    String msgText = ServerMail.readWebPage("http://www.findu.com/cgi-bin/msg.cgi?call=" + cleanCall, "", false);
+                    String msgCleanText = "Your messages:\nFrom       Date    Time         Message\n";
+                    //"fromtotime&nbsp;message\n" +
+                    //"VK2ETA-90  VK2ETA     09/21   07:21:52z Reply to message number 5"
+                    Pattern psc = Pattern.compile("(^[a-zA-Z0-9\\-\\/]+)\\s+([a-zA-Z0-9\\-\\/]+)\\s+(\\S+)\\s+(\\S+)\\s+(Reply)\\s+(.*)$", Pattern.MULTILINE);
+                    Matcher msc = psc.matcher(msgText);
+                    boolean keepLooking = true;
+                    String from;
+                    String to;
+                    String date;
+                    String time;
+                    String msg;
+                    int lines = 0;
+                    for (int start = 0; keepLooking;) {
+                        keepLooking = msc.find(start);
+                        if (keepLooking) {
+                            if (lines < maxLines && Main.matchCallOneWithCallTwo(cleanCall, msc.group(2))
+                                    && msc.group(6).trim().length() > 0) {
+                                //For me, NOT From me, and with a non blank message, max 10 entries
+                                to = RMsgUtil.padString(msc.group(2), 9);
+                                from = RMsgUtil.padString(msc.group(1), 9);
+                                date = msc.group(3);
+                                time = RMsgUtil.padString(msc.group(4), 10);
+                                msg = msc.group(6);
+                                msgCleanText += from + "  " + date + "  " + time + "  " + msg + "\n";
+                                lines++;
+                            }
+                            start = msc.end();
                         }
-                        start = msc.end();
                     }
-                }
-                if (lines > 0) {
-                    Main.txText += msgCleanText;
+                    if (lines > 0) {
+                        Main.txText += msgCleanText;
+                    } else {
+                        Main.txText += "No APRS Messages\n";
+                    }
                 } else {
-                    Main.txText += "No APRS Messages\n";
-                } 
+                    Main.txText += "Callsign not valid for APRS\n";
+                }
             } else {
                 Main.txText += "Sorry, Not enabled\n";
             }
         }
-        
+
         //~GETNEAR Get (15) APRS stations near me (using last reported position to APRS)
         Pattern GNp = Pattern.compile("^(\\s*~GETNEAR.*)");
         Matcher GNm = GNp.matcher(str);
         if (Main.ttyConnected.equals("Connected") & GNm.lookingAt()) {
             foundMatchingCommand = true;
             if (Main.wantServer) {
-                int maxLines = 15;
-                String msgText = ServerMail.readRawWebPage("http://www.findu.com/cgi-bin/near.cgi?last=24&n=15&call=" + Main.ttyCaller, "", false);
-                String msgCleanText = "Station     Latitude   Longitude  KMs   Bearing  Age\n";
-                /* Example of useful data lines:
-                <td> <a href="find.cgi?call=VK2XYZ B"><img src="../icon/S66.GIF" border="0"> VK2XYZ B</a> </td>
-                <td> -34.04417</td>
-                <td> 151.12567</td>
-                <td>8.0 </td>
-                <td>SE</td>
-                <td> 00:00:06:04 </td>
-                */
-                Pattern psc = Pattern.compile("^\\s+<td>.*>\\s*(\\S+)\\s*<\\/a>\\s*<\\/td>$|^\\s+<td>\\s*(\\S+)\\s*<\\/td>$", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
-                Matcher msc = psc.matcher(msgText);
-                boolean keepLooking = true;
-                String station = "";
-                String[] data = new String[5];
-                int lines = 0;
-                int index = -1;
-                for (int start = 0; keepLooking;) {
-                    keepLooking = msc.find(start);
-                    if (keepLooking) {
-                        if (lines < maxLines && msc.group(1) != null) {
-                            //We have a new station, prepare data gathering
-                            station = RMsgUtil.padString(msc.group(1), 9);
-                            index = 0;
-                        } else if (lines < maxLines && msc.group(2) != null) {
-                            //Store data in the array
-                            if (index >= 0 && index <= 4) {
-                                String thisData = msc.group(2); //Debug
-                                data[index++] = thisData;
-                                if (index >= 5) {
-                                    //We have a full datas set, add to reply
-                                    msgCleanText += station + "  "
-                                            + RMsgUtil.padString(data[0], 11)
-                                            + RMsgUtil.padString(data[1], 11)
-                                            + RMsgUtil.padString(data[2], 7)
-                                            + RMsgUtil.padString(data[3], 8)
-                                            + RMsgUtil.padString(data[4], 12) + "\n";
-                                    index = -1; //Disable further data collection until a new station found
-                                    lines++; //Entries counter
+                String cleanCall = Main.cleanCallForAprs(Main.ttyCaller);
+                if (cleanCall.length() > 0) {
+                    //We have a valid APRS callsign with possibly an APRS Id and all in upper case (e.g.VK2ETA-15)
+                    int maxLines = 15;
+                    String msgText = ServerMail.readRawWebPage("http://www.findu.com/cgi-bin/near.cgi?last=24&n=15&call=" + cleanCall, "", false);
+                    String msgCleanText = "Station     Latitude   Longitude  KMs   Bearing  Age\n";
+                    /* Example of useful data lines:
+                    <td> <a href="find.cgi?call=VK2XYZ B"><img src="../icon/S66.GIF" border="0"> VK2XYZ B</a> </td>
+                    <td> -34.04417</td>
+                    <td> 151.12567</td>
+                    <td>8.0 </td>
+                    <td>SE</td>
+                    <td> 00:00:06:04 </td>
+                     */
+                    Pattern psc = Pattern.compile("^\\s+<td>.*>\\s*(\\S+)\\s*<\\/a>\\s*<\\/td>$|^\\s+<td>\\s*(\\S+)\\s*<\\/td>$", Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+                    Matcher msc = psc.matcher(msgText);
+                    boolean keepLooking = true;
+                    String station = "";
+                    String[] data = new String[5];
+                    int lines = 0;
+                    int index = -1;
+                    for (int start = 0; keepLooking;) {
+                        keepLooking = msc.find(start);
+                        if (keepLooking) {
+                            if (lines < maxLines && msc.group(1) != null) {
+                                //We have a new station, prepare data gathering
+                                station = RMsgUtil.padString(msc.group(1), 9);
+                                index = 0;
+                            } else if (lines < maxLines && msc.group(2) != null) {
+                                //Store data in the array
+                                if (index >= 0 && index <= 4) {
+                                    String thisData = msc.group(2); //Debug
+                                    data[index++] = thisData;
+                                    if (index >= 5) {
+                                        //We have a full datas set, add to reply
+                                        msgCleanText += station + "  "
+                                                + RMsgUtil.padString(data[0], 11)
+                                                + RMsgUtil.padString(data[1], 11)
+                                                + RMsgUtil.padString(data[2], 7)
+                                                + RMsgUtil.padString(data[3], 8)
+                                                + RMsgUtil.padString(data[4], 12) + "\n";
+                                        index = -1; //Disable further data collection until a new station found
+                                        lines++; //Entries counter
+                                    }
                                 }
                             }
+                            start = msc.end();
                         }
-                        start = msc.end();
                     }
-                }
-                if (lines > 0) {
-                    Main.txText += msgCleanText;
+                    if (lines > 0) {
+                        Main.txText += msgCleanText;
+                    } else {
+                        Main.txText += "No stations nearby\n";
+                    }
                 } else {
-                    Main.txText += "No stations nearby\n";
+                    Main.txText += "Callsign not valid for APRS\n";
                 }
             } else {
                 Main.txText += "Sorry, Not enabled\n";
@@ -1267,10 +1281,10 @@ public class Session {
         }
 
         //Partial uploads
-        //~F05:PI4TUE:PA0R:tmpasdkkdfj:u:test.txt:36
+        //~FO5:PI4TUE:PA0R:tmpasdkkdfj:u:test.txt:36
         //~FO5:VK2ETA-5:VK2ETA-1:tmp578bbbaa04091a76:u:changes.txt:506
         //~FO5:PI4TUE:PA0R-1:a30a69:s: :847 //E-mail upload to this TTYserver
-        Pattern ofr2 = Pattern.compile("\\s*~F0(\\d):([a-zA-Z0-9\\-\\/]+):([a-zA-Z0-9\\-\\/]+):([A-Za-z0-9_-]+):(\\w):(.*):(\\d+)");
+        Pattern ofr2 = Pattern.compile("\\s*~FO(\\d):([a-zA-Z0-9\\-\\/]+):([a-zA-Z0-9\\-\\/]+):([A-Za-z0-9_-]+):(\\w):(.*):(\\d+)");
         Matcher ofrm2 = ofr2.matcher(str);
         if (ofrm2.lookingAt()) {
             foundMatchingCommand = true;
@@ -2999,8 +3013,8 @@ public class Session {
                 if (pendingCaller.equals(toCall)) {
                     //Found a match for callsign, add to list
                     result += header + fromCall + ":" + toCall + ":"
-                            + pendingToken + ":" + pendingType + ":" + pendingFileName
-                            + ":" + Long.toString(pendingFilesList[i].length()) + "\n";
+                            + pendingToken + ":" + pendingType; 
+                            //Not used + ":" + pendingFileName + ":" + Long.toString(pendingFilesList[i].length()) + "\n";
                 }
             }
         }

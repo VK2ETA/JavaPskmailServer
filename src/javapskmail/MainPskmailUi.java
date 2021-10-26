@@ -3287,7 +3287,6 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 bRMsgManageMsg.setForeground(new java.awt.Color(0, 102, 51));
                 bRMsgManageMsg.setText(bundle.getString("MainPskmailUi.bRMsgManageMsg.text")); // NOI18N
                 bRMsgManageMsg.setToolTipText(bundle.getString("MainPskmailUi.bRMsgManageMsg.toolTipText")); // NOI18N
-                bRMsgManageMsg.setEnabled(false);
                 bRMsgManageMsg.setMaximumSize(new java.awt.Dimension(110, 25));
                 bRMsgManageMsg.setMinimumSize(new java.awt.Dimension(80, 25));
                 bRMsgManageMsg.setPreferredSize(new java.awt.Dimension(100, 25));
@@ -6493,7 +6492,7 @@ private void EmailSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//G
                 File partialFile = new File(Main.outPendingDir + filename);
                 if (partialFile.exists()) {
                     //Try an upload resume
-                    Main.txText += "~F05:" + callsign + ":" + servercall + ":" + filename + ":s: :" + lengthstr + "\n";
+                    Main.txText += "~FO5:" + callsign + ":" + servercall + ":" + filename + ":s: :" + lengthstr + "\n";
                 } else {
                     FileWriter fstream = new FileWriter(Main.outPendingDir + filename);
                     BufferedWriter pout = new BufferedWriter(fstream);
@@ -7450,7 +7449,16 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     }//GEN-LAST:event_bRMsgResendLastActionPerformed
 
     private void bRMsgManageMsgActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgManageMsgActionPerformed
-        // TODO add your handling code here:
+
+        try {
+            RMsgManageMessages mManager;
+            mManager = new RMsgManageMessages();
+            mManager.setLocationRelativeTo(null);
+            mManager.setVisible(true);
+        } catch (Exception e) {
+            Main.log.writelog(mainpskmailui.getString("Error_when_handling_Radio_Messages_Manage_messages"), e, true);
+        }
+
     }//GEN-LAST:event_bRMsgManageMsgActionPerformed
 
     private void jComboRMsgToActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboRMsgToActionPerformed
@@ -7942,7 +7950,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
      * Get the users current position, either manually entered or gps fed
      *
      * @return longitude as decimal
-     */
+
     private float GetUsersLongitude() {
         try {
             String lonstring = "";
@@ -7966,11 +7974,10 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         }
     }
 
-    /**
-     * Get the users current position, either manually entered or gps fed
-     *
-     * @return latitude as float
-     */
+
+    // Get the users current position, either manually entered or gps fed
+    // @return latitude as float
+
     private float GetUsersLatitude() {
         try {
             String latstring = "";
@@ -7994,9 +8001,9 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         }
     }
 
-    /**
-     * Make the map center around the users current position
-     */
+    
+    // Make the map center around the users current position
+     
     private void CenterMapOnUser() {
         float mylat = 0;
         float mylon = 0;
@@ -8014,6 +8021,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         //       mymapcls.setlocalfileasmap("Images/freemap_world.png");
 
     }
+    */
     
     //Load the GUI table in the Radio Msg tab with the list of messages
     public void loadRadioMsg() {

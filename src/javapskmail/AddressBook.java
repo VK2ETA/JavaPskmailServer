@@ -22,7 +22,6 @@ package javapskmail;
 
 import java.awt.Graphics;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -31,12 +30,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.EventListener;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 /**
  *
@@ -52,7 +48,7 @@ public class AddressBook extends javax.swing.JFrame  {
 
     private java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("javapskmail/Bundle");  
       
-    /** Creates new form NewMailDialog */
+    /** Creates new form AddressBook */
     public AddressBook() {
         initComponents();
         contfilename = Main.homePath+Main.dirPrefix+"contacts.csv";
