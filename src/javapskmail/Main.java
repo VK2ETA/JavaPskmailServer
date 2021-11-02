@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.0.0.3";
+    static String version = "3.0.0.4";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20211027";
+    static String versionDate = "20211103";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -155,7 +155,7 @@ public class Main {
     static long Systime;
     static int DCDthrow;
     //RxDelay is the measured delay between the return to Rx of the server and the end of the RSID tx by the client
-    static final double initialRxDelay = 2.0f;//Initial 2 seconds delay of RX just in case
+    static final double initialRxDelay = 1.0f;//Initial 1 seconds delay of RX just in case
     static double rxDelay = initialRxDelay;
     static double rxDelayCount = initialRxDelay;
     static String connectsecond;
@@ -698,6 +698,10 @@ public class Main {
                                     } else {
                                         myRxStatus = sm.getTXStatus();
                                         q.send_status(myRxStatus);  // send our status
+                                    }
+                                    //Reset STOP command flag, provided the server has received our STOP command
+                                    if (sm.justSentStopCmd) {
+                                        sm.checkStopFlag();
                                     }
                                     Main.validBlock = true;
                                 } else if (rxb.type.equals("p")
@@ -1361,7 +1365,9 @@ public class Main {
                                                 status = "Listening";
                                                 connected = false;
                                                 mainui.enableMnuPreferences2();
-                                                ttyConnected = "";
+                                                //VK2ETA shorten initial exchange 
+                                                //ttyConnected = "";
+                                                ttyConnected = "Connecting";
                                                 //Reset RxDelay too
                                                 rxDelay = initialRxDelay;
                                                 //
@@ -1369,10 +1375,10 @@ public class Main {
                                                 txText = "";
                                                 totalBytes = 0;
                                                 sm.initSession();
-                                                for (int i = 0; i < 64; i++) {
-                                                    Session.txbuffer[i] = "";
-                                                }
-                                                //isDisconnected = true;
+                                                //VK2ETA: Already done in initSession()
+                                                //for (int i = 0; i < 64; i++) {
+                                                //    Session.txbuffer[i] = "";
+                                                //}
                                                 sm.FileDownload = false;
                                                 comp = false;
                                                 try {
@@ -1421,7 +1427,7 @@ public class Main {
                                     }
                                 }
                             }
-                            //Received an Abort, cleanup or a disconnect request
+                            //Received an Abort or a disconnect request, cleanup
                             if (ttyConnected.equals("Connected")
                                     & rxb.session.equals(session) & rxb.type.equals("a") | disconnect) {
                                 q.send_disconnect();
@@ -1434,10 +1440,11 @@ public class Main {
                                 txText = "";
                                 totalBytes = 0;
                                 sm.initSession();
-                                int i;
-                                for (i = 0; i < 64; i++) {
-                                    Session.txbuffer[i] = "";
-                                }
+                                //Already done in initsession
+                                //int i;
+                                //for (i = 0; i < 64; i++) {
+                                //    Session.txbuffer[i] = "";
+                                //}
                                 isDisconnected = true;
                                 sm.FileDownload = false;
                                 comp = false;
@@ -1559,14 +1566,19 @@ public class Main {
                                     //DEBUG 
                                     | (m.BlockActive && m.receivingStatusBlock && (idlesecs > (blocktime * (0.3) + m.firstCharDelay + rxDelay))) //Data block is status block
                                     //DEBUG                           
-                                    | (!m.BlockActive && (idlesecs > blocktime * (0.5) + m.firstCharDelay + rxDelay)) // No data block received
+                                    | (!m.BlockActive && (idlesecs > (blocktime * (0.1) + m.firstCharDelay + rxDelay))) // No data block received at all
                                     ) {
+                                //Debug
+                                if (!m.BlockActive && (idlesecs > (blocktime * (0.1) + m.firstCharDelay + rxDelay))) {
+                                    oldtime = Systime; //Redundant but need a breakpoint
+                                }
                                 oldtime = Systime;
-                                Main.timeoutPolls += 1;
+                                timeoutPolls += 1;
                                 // Check if we need to downgrade modes
-                                if (Main.timeoutPolls > 1) {
+                                if (timeoutPolls > 1) {
                                     DowngradeOneMode();
-                                    timeoutPolls = 0;
+                                    //If we have already missed two polls, only try once in each mode
+                                    timeoutPolls = 1;
                                 }
                                 if (ttyConnected.equals("Connecting") & !statusRcved & numberOfAcks > 0) {
                                     // repeat sending ack...

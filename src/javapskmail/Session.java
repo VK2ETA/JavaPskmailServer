@@ -1,5 +1,5 @@
 /*
- * Main.java
+ * Session.java
  * 
  * Copyright (C) 2008 Pär Crusefalk and Rein Couperus
  * Copyright (C) 2018-2021 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
@@ -69,7 +69,7 @@ public class Session {
     private static String rx_lastreceived;   // Last block I received
     public static String rx_missing; //List of repeat requests I need to send to other side
     private static boolean rx_lastBlock; // Flag for end of frame
-
+    public static boolean justSentStopCmd = false;
     private static String[] rxbuffer = new String[64];
     //private static int beginblock;
     private static int goodblock;
@@ -213,8 +213,28 @@ public class Session {
         if (Missedblocks > 8) {
             rx_missing = rx_missing.substring(0, 8);
         }
+        //We just sent a STOP command, clear receive data
+        if (justSentStopCmd) {
+            rx_ok = rx_lastreceived = tx_lastsent;
+            rx_missing = "";
+            lastdisplayed = lastblock;
+            lastgoodblock_received = lastblock;
+            for (int j = 0; j < 64; j++) {
+                rxbuffer[j] = "";
+            }
+        }
         String outstr = rx_lastsent + rx_ok + rx_lastreceived + rx_missing;
         return outstr;
+    }
+  
+    //Reset STOP command flag provided the server has received our STOP command
+    public void checkStopFlag() {
+        if (tx_ok.equals(rx_lastsent)) {
+            //Reset flag
+            justSentStopCmd = false;
+            //Abort all receiving transactions
+            abortAllRxTransactions();
+        }
     }
 
     public String getRXmissing() {
@@ -375,21 +395,26 @@ public class Session {
                 }
             }
             //Clear everything in the current session (as if we had just concluded the connection)
+            //VK2ETA, ONLY the TX side as we may also be receiving data from client + review 
+            //   logic when we have missing blocks at the time of the issuance of the STOP command as it
+            //   leads the client to keep asking for missing blocks over and over
+            tx_lastreceived = tx_ok = rx_lastsent;
             //tx_lastsent = " ";
-            tx_lastreceived = tx_lastsent;
+            //tx_lastreceived = tx_lastsent;
             //tx_ok = " ";
-            tx_missing = "";
+            //tx_missing = "";
             //rx_lastsent = " ";
-            rx_ok = " ";
-            rx_lastreceived = rx_lastsent;
-            rx_missing = "";
+            //rx_ok = " ";
+            //rx_lastreceived = rx_lastsent;
+            //rx_missing = "";
             Blocklength = 6;
             Main.txText = "";
-            //VK2ETA should we clear the buffers too?
             for (int i = 0; i < 64; i++) {
-                rxbuffer[i] = "";
+                //rxbuffer[i] = "";
                 txbuffer[i] = "";
             }
+            //Prepare client for next transaction
+            Main.txText += "-end-\n";
         }
         // ~QUIT for TTY session...
         Pattern TTYm = Pattern.compile("^\\s*~QUIT");
@@ -585,7 +610,7 @@ public class Session {
                         }
                     }
                     if (lines > 0) {
-                        Main.txText += msgCleanText;
+                        Main.txText += msgCleanText + "-end-\n";
                     } else {
                         Main.txText += "No APRS Messages\n";
                     }
@@ -653,7 +678,7 @@ public class Session {
                         }
                     }
                     if (lines > 0) {
-                        Main.txText += msgCleanText;
+                        Main.txText += msgCleanText + "-end-\n";
                     } else {
                         Main.txText += "No stations nearby\n";
                     }
@@ -717,7 +742,7 @@ public class Session {
                     }
                 }
                 if (lines > 0) {
-                    Main.txText += msgCleanText;
+                    Main.txText += msgCleanText + "-end-\n";
                 } else {
                     Main.txText += "No Tide stations nearby\n";
                 }
@@ -1893,6 +1918,11 @@ public class Session {
                             Main.q.Message("Email Sent...", 10);
                         }
                     }
+                    //VK2ETA: in any case delete the transaction file
+                    File tmp = new File(Main.homePath + Main.dirPrefix + "Pending" + Main.separator + Transaction);
+                    if (tmp.exists()) {
+                        tmp.delete();
+                    }
                     Main.progress = 0;
                 }
 
@@ -2201,112 +2231,7 @@ public class Session {
 
             } else if (me.group(1).equals("-abort-")) {
                 foundMatchingCommand = true;
-                if (Headers) {
-                    Headers = false;
-                    DataReceived = 0;
-                    Main.dataSize = Integer.toString(0);
-                    try {
-                        this.headers.close();
-                        Main.mainui.refreshEmailGrid();
-                    } catch (IOException ex) {
-                        Main.log.writelog("Error when trying to close the headers file.", ex, true);
-                    }
-                }
-                if (FileList) {
-                    FileList = false;
-                }
-                if (FileDownload) {
-                    FileDownload = false;
-                    Main.comp = false;
-                    try {
-                        this.dlFile.close();
-                        File df = new File(Main.homePath + Main.dirPrefix + "TempFile");
-                        if (df.exists()) {
-                            boolean scs = df.delete();
-                        }
-                    } catch (IOException ex) {
-                        Main.log.writelog("Error when trying to close the download file.", ex, true);
-                    }
-                    try {
-                        File tmp = new File(Main.homePath + Main.dirPrefix + "Pending" + Main.separator + Transaction);
-                        if (tmp.exists()) {
-                            tmp.delete();
-                        }
-                        Main.txText += "~FA:" + Transaction + "\n";
-                        Main.progress = 0;
-                    } catch (Exception exc) {
-                        Main.log.writelog("Error when trying to decode the downoad file.", exc, true);
-                    } catch (NoClassDefFoundError exp) {
-                        Main.q.Message("problem decoding B64 file", 10);
-                    }
-                    File tmp = new File(Main.homePath + Main.dirPrefix + "TempFile");
-                    boolean success = tmp.delete();
-                    try {
-                        if (pFile != null) {
-                            pFile.close();
-                            Trfile.delete();
-                        }
-                    } catch (IOException ex) {
-                        Main.log.writelog("Error when trying to close the pending file.", ex, true);
-                    }
-                    Main.progress = 0;
-                    //                                                    Main.log(ThisFile + " received");
-                }
-                // messages  download      - append tmpmessage to Inbox in mbox format
-                if (MsgDownload) {
-                    MsgDownload = false;
-                    this.tmpmessage.close();
-                    // append to Inbox file
-                    FileReader fr = new FileReader(Main.homePath + Main.dirPrefix + "tmpmessage");
-                    File fl = new File(Main.homePath + Main.dirPrefix + "tmpmessage");
-                    if (fl.exists()) {
-                        fl.delete();
-                    }
-                }
-                // compressed messages  download or compressed Email upload
-                if (CMsgDownload | CompressedEmailUpload) {
-                    CMsgDownload = false;
-                    CompressedEmailUpload = false;
-                    Main.comp = false;
-                    tmpmessage.close();
-                    // append to Inbox file
-                    File fl = new File(Main.homePath + Main.dirPrefix + "tmpmessage");
-                    if (fl.exists()) {
-                        fl.delete();
-                    }
-                    File pending = new File(Main.homePath + Main.dirPrefix + "Pending" + Main.separator + Transaction);
-                    if (pending.exists()) {
-                        pending.delete();
-                    }
-                }
-                // compressed web pages download
-                if (CwwwDownload) {
-                    CwwwDownload = false;
-                    Main.comp = false;
-                    try {
-                        this.dlFile.close();
-                    } catch (IOException ex) {
-                        Main.log.writelog("Error when trying to close the download file.", ex, true);
-                    }
-                    File tmp = new File(Main.homePath + Main.dirPrefix + "TempFile");
-                    boolean success = tmp.delete();
-                    try {
-                        if (pFile != null) {
-                            pFile.close();
-                            Trfile.delete();
-                        }
-                    } catch (IOException ex) {
-                        Main.log.writelog("Error when trying to close the pending file.", ex, true);
-                    }
-                    Main.progress = 0;
-                }
-                // web pages   download
-                if (WWWDownload) {
-                    WWWDownload = false;
-                }
-                Main.q.Message("done...", 10);
-                Main.progress = 0;
-                Transaction = "";
+                abortAllRxTransactions();
             }
         }
         // NNNN 
@@ -3154,6 +3079,124 @@ public class Session {
         return result;
     }
     
+    //Resets all receiving transactions (we received and -abort- OR we issued a STOP command as a client)
+    public void abortAllRxTransactions() {
+        if (Headers) {
+            Headers = false;
+            DataReceived = 0;
+            Main.dataSize = Integer.toString(0);
+            try {
+                this.headers.close();
+                Main.mainui.refreshEmailGrid();
+            } catch (IOException ex) {
+                Main.log.writelog("Error when trying to close the headers file.", ex, true);
+            }
+        }
+        if (FileList) {
+            FileList = false;
+        }
+        if (FileDownload) {
+            FileDownload = false;
+            Main.comp = false;
+            try {
+                this.dlFile.close();
+                File df = new File(Main.homePath + Main.dirPrefix + "TempFile");
+                if (df.exists()) {
+                    boolean scs = df.delete();
+                }
+            } catch (IOException ex) {
+                Main.log.writelog("Error when trying to close the download file.", ex, true);
+            }
+            try {
+                File tmp = new File(Main.homePath + Main.dirPrefix + "Pending" + Main.separator + Transaction);
+                if (tmp.exists()) {
+                //No, keep    tmp.delete();
+                }
+                //No, don't request deletion Main.txText += "~FA:" + Transaction + "\n";
+                Main.progress = 0;
+            } catch (Exception exc) {
+                Main.log.writelog("Error when trying to decode the downoad file.", exc, true);
+            } catch (NoClassDefFoundError exp) {
+                Main.q.Message("problem decoding B64 file", 10);
+            }
+            File tmp = new File(Main.homePath + Main.dirPrefix + "TempFile");
+            boolean success = tmp.delete();
+            try {
+                if (pFile != null) {
+                    pFile.close();
+                    Trfile.delete();
+                }
+            } catch (IOException ex) {
+                Main.log.writelog("Error when trying to close the pending file.", ex, true);
+            }
+            Main.progress = 0;
+            //                                                    Main.log(ThisFile + " received");
+        }
+        // messages  download      - append tmpmessage to Inbox in mbox format
+        if (MsgDownload) {
+            MsgDownload = false;
+            try {
+                this.tmpmessage.close();
+                // append to Inbox file
+                FileReader fr = new FileReader(Main.homePath + Main.dirPrefix + "tmpmessage");
+                File fl = new File(Main.homePath + Main.dirPrefix + "tmpmessage");
+                if (fl.exists()) {
+                    fl.delete();
+                }
+            } catch (IOException ex) {
+                Main.log.writelog("Error when trying to close the tmpmessage file.", ex, true);
+            }
+        }
+        // compressed messages  download or compressed Email upload
+        if (CMsgDownload | CompressedEmailUpload) {
+            CMsgDownload = false;
+            CompressedEmailUpload = false;
+            Main.comp = false;
+            try {
+                tmpmessage.close();
+                // append to Inbox file
+                File fl = new File(Main.homePath + Main.dirPrefix + "tmpmessage");
+                if (fl.exists()) {
+                    fl.delete();
+                }
+                File pending = new File(Main.homePath + Main.dirPrefix + "Pending" + Main.separator + Transaction);
+                if (pending.exists()) {
+                //No, keep    pending.delete();
+                }
+            } catch (IOException ex) {
+                Main.log.writelog("Error when trying to close the pending file.", ex, true);
+            }
+        }
+        // compressed web pages download
+        if (CwwwDownload) {
+            CwwwDownload = false;
+            Main.comp = false;
+            try {
+                this.dlFile.close();
+            } catch (IOException ex) {
+                Main.log.writelog("Error when trying to close the download file.", ex, true);
+            }
+            File tmp = new File(Main.homePath + Main.dirPrefix + "TempFile");
+            boolean success = tmp.delete();
+            try {
+                if (pFile != null) {
+                    pFile.close();
+                    //No, keep: Trfile.delete();
+                }
+            } catch (IOException ex) {
+                Main.log.writelog("Error when trying to close the pending file.", ex, true);
+            }
+            Main.progress = 0;
+        }
+        // web pages   download
+        if (WWWDownload) {
+            WWWDownload = false;
+        }
+        Main.q.Message("done...", 10);
+        Main.progress = 0;
+        Transaction = "";
+
+    }
 
 } // end of class
 

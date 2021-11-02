@@ -1512,6 +1512,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
         mnuOutboxDeleteMsg = new javax.swing.JMenuItem();
         mnuHeaders = new javax.swing.JPopupMenu();
         mnuHeadersFetch = new javax.swing.JMenuItem();
+        aprsscanmonitorgroup = new javax.swing.ButtonGroup();
         modemnubuttons = new javax.swing.ButtonGroup();
         buttonGroupAlias = new javax.swing.ButtonGroup();
         buttonGroupPartialDownloads = new javax.swing.ButtonGroup();
@@ -1693,6 +1694,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
         mnuMode2 = new javax.swing.JMenu();
         mnuMailAPRS2 = new javax.swing.JRadioButtonMenuItem();
         mnuMailScanning = new javax.swing.JRadioButtonMenuItem();
+        jSeparator6 = new javax.swing.JPopupMenu.Separator();
         mnuMonitor = new javax.swing.JRadioButtonMenuItem();
         jSeparator4 = new javax.swing.JSeparator();
         mnuModeQSY2 = new javax.swing.JMenuItem();
@@ -3690,6 +3692,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 mnuMode2.setText(bundle.getString("MainPskmailUi.mnuMode2.text")); // NOI18N
                 modemnubuttons.add(mnuMode2);
 
+                aprsscanmonitorgroup.add(mnuMailAPRS2);
                 mnuMailAPRS2.setSelected(true);
                 mnuMailAPRS2.setText(bundle.getString("MainPskmailUi.mnuMailAPRS2.text")); // NOI18N
                 mnuMailAPRS2.addActionListener(new java.awt.event.ActionListener() {
@@ -3699,6 +3702,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 });
                 mnuMode2.add(mnuMailAPRS2);
 
+                aprsscanmonitorgroup.add(mnuMailScanning);
                 mnuMailScanning.setText(bundle.getString("MainPskmailUi.mnuMailScanning.text")); // NOI18N
                 mnuMailScanning.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -3706,6 +3710,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                     }
                 });
                 mnuMode2.add(mnuMailScanning);
+                mnuMode2.add(jSeparator6);
 
                 mnuMonitor.setText(bundle.getString("MainPskmailUi.mnuMonitor.text_1")); // NOI18N
                 mnuMonitor.addActionListener(new java.awt.event.ActionListener() {
@@ -4842,6 +4847,9 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             } catch (InterruptedException ex) {
                 Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
             }
+            //VK2ETA: Close and reset all Rx transactions
+            Main.sm.abortAllRxTransactions();
+            //Old processing, maybe redundant now
             try {
                 if (Main.sm.pFile != null) {
                     Main.sm.pFile.close();
@@ -4856,16 +4864,16 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             } catch (IOException e) {
                 Main.q.Message("Cannot close pending file", 10);
             }
-
         } else if (Main.ttyConnected.equals("Connected")) {
             try {
                 Main.q.send_abort();
+                //VK2ETA: Close and reset all Rx transactions
+                Main.sm.abortAllRxTransactions();
             } catch (InterruptedException ex) {
                 Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             try {
-//                        Main.Connected = true;
                 enableMnuPreferences2();
                 disableMboxMenu();
                 Main.q.send_abort();
@@ -6864,6 +6872,8 @@ private void jMenuQualityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
 private void Stoptransaction_mnuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Stoptransaction_mnuActionPerformed
     // TODO add your handling code here:
     Main.txText += "~STOP:" + Main.sm.Transaction + "\n";
+    //Must clear the receive session blocks otherwise we can have permanently missing blocks
+    Main.sm.justSentStopCmd = true;
 }//GEN-LAST:event_Stoptransaction_mnuActionPerformed
 
     /**
@@ -8364,6 +8374,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JButton UpdateButton;
     private javax.swing.JMenuItem Update_server;
     private javax.swing.JMenuItem WWV_menu_item;
+    private javax.swing.ButtonGroup aprsscanmonitorgroup;
     private javax.swing.JButton bConnect;
     private javax.swing.JButton bContacts;
     private javax.swing.JButton bContacts1;
@@ -8422,6 +8433,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JPopupMenu.Separator jSeparator5;
+    private javax.swing.JPopupMenu.Separator jSeparator6;
     private javax.swing.JSeparator jSeparator7;
     private javax.swing.JPopupMenu.Separator jSeparator8;
     private javax.swing.JPopupMenu.Separator jSeparator9;

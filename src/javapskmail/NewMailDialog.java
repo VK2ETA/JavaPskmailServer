@@ -151,10 +151,10 @@ public class NewMailDialog extends javax.swing.JFrame {
         NewTxtArea.setColumns(20);
         NewTxtArea.setFont(new java.awt.Font("DejaVu Sans Mono", 0, 12)); // NOI18N
         NewTxtArea.setLineWrap(true);
-        NewTxtArea.setRows(5);
+        NewTxtArea.setRows(20);
         NewTxtArea.setWrapStyleWord(true);
-        NewTxtArea.setMinimumSize(new java.awt.Dimension(200, 200));
-        NewTxtArea.setPreferredSize(new java.awt.Dimension(400, 300));
+        NewTxtArea.setMinimumSize(new java.awt.Dimension(400, 200));
+        NewTxtArea.setPreferredSize(null);
         jScrollPane1.setViewportView(NewTxtArea);
 
         gridBagConstraints = new java.awt.GridBagConstraints();

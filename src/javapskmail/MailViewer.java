@@ -325,11 +325,12 @@ public class MailViewer extends javax.swing.JFrame {
         pnlContent.setLayout(new java.awt.BorderLayout());
 
         jScrollPane1.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        jScrollPane1.setAutoscrolls(true);
         jScrollPane1.setMinimumSize(new java.awt.Dimension(400, 100));
         jScrollPane1.setPreferredSize(new java.awt.Dimension(515, 120));
 
-        txtContent.setColumns(10);
         txtContent.setEditable(false);
+        txtContent.setColumns(10);
         txtContent.setLineWrap(true);
         txtContent.setRows(20);
         txtContent.setWrapStyleWord(true);

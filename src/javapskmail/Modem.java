@@ -834,7 +834,8 @@ public class Modem implements Runnable {
         double cps = 2;
         double myblocktime = 0;
 
-        firstCharDelay = 4; //Must account for Client's TX delay, RSID and silences, FEC/interleaver delay, decoding delay
+        //VK2ETA: some delays now calculated at connect time firstCharDelay = 4; //Must account for Client's TX delay, RSID and silences, FEC/interleaver delay, decoding delay
+        firstCharDelay = 2; //Must account for FEC/interleaver delay and decoding delay
         try {
             switch (mode) {
                 case PSK63:
@@ -1259,9 +1260,9 @@ public class Modem implements Runnable {
                         if (DC2_rcvd) {
                             notifier += inChar;
                             //Not found char(62) yet, check length
-                            if (notifier.length() > 35){
+                            if (notifier.length() > 35) {
                                 //Too long, false positive
-                                DC2_rcvd = false; 
+                                DC2_rcvd = false;
                                 notifier = "";
                             }
                             if (inChar == 62) { // ">" character
