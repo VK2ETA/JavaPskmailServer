@@ -414,7 +414,7 @@ public class Session {
                 txbuffer[i] = "";
             }
             //Prepare client for next transaction
-            Main.txText += "-end-\n";
+            Main.txText += "\n-end-\n";
         }
         // ~QUIT for TTY session...
         Pattern TTYm = Pattern.compile("^\\s*~QUIT");
@@ -1654,7 +1654,7 @@ public class Session {
                                 from = mLine.substring(5);
                             } else {
                                 //Body
-                                body += mLine;
+                                body += mLine + "\n";
                             }
                         }
                     } catch (IOException ex) {
@@ -1898,7 +1898,7 @@ public class Session {
                                 from = mLine.substring(5);
                             } else if (!mLine.equals(".") && !mLine.startsWith("~SEND")){
                                 //Body
-                                body += mLine;
+                                body += mLine + "\n";
                             }
                         }
                     } catch (IOException ex) {

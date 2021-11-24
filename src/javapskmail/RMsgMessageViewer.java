@@ -56,7 +56,7 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
 
             // First check the object!!!!!
             if (mDisplayItem != null) {
-                this.txtRMsgViewerSms.setText(mDisplayItem.mMessage.sms); //No tracking
+                this.txtRMsgViewerSms.setText(RMsgMisc.unescape(mDisplayItem.mMessage.sms)); //No tracking
                 this.lblRmsgViewerFn.setText(mDisplayItem.mMessage.fileName);
                 this.lblRmsgViewerFrom.setText(mDisplayItem.mMessage.from);
                 this.lblRmsgViewerTo.setText(mDisplayItem.mMessage.to.equals("*") ? 
@@ -417,7 +417,7 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
 
         String intext = txtRMsgViewerEntry.getText();
         if (intext.trim().length() > 0) {
-            RMsgTxList.addMessageToList(mDisplayItem.mMessage.from, mDisplayItem.mMessage.relay, intext,
+            RMsgTxList.addMessageToList(mDisplayItem.mMessage.from, mDisplayItem.mMessage.via, intext,
                     false, null, 0L, null);
         } else {
             Main.q.Message(bundle.getString("RMsgMessageViewer.TypeAReplyFirst"), 5);
@@ -428,7 +428,13 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
 
         RMsgObject fwRMsg = mDisplayItem.mMessage;
         fwRMsg.to = Main.mainui.selectedTo; //As selected in the Main UI
-        fwRMsg.via = fwRMsg.relay; //Use the same route in reverse
+        //Nope, use the selected via
+        //fwRMsg.via = fwRMsg.relay; //Use the same route in reverse
+        fwRMsg.via = Main.mainui.selectedVia;
+        fwRMsg.msgHasPosition = mDisplayItem.mMessage.msgHasPosition;
+        fwRMsg.position = mDisplayItem.mMessage.position;
+        fwRMsg.rxMode = mDisplayItem.mMessage.rxMode;
+        fwRMsg.sent = mDisplayItem.mMessage.sent;
         RMsgTxList.addMessageToList(fwRMsg);
 
     }//GEN-LAST:event_bForwardActionPerformed

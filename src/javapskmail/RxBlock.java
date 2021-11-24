@@ -84,11 +84,11 @@ public class RxBlock{
     //First line: <SOH>fromCallSign:toDestination\n with toDestination being "*" for ALL OR a callsign/id OR an email address OR a phone number in the formats +CCCPPPPPPPPP or PPPPPPPPPP
     //public static Pattern rmh = Pattern.compile("^<SOH>" + "([.\\+\\-\\w]{1,20}|[\\w.-]{1,30}@\\w{1,20}\\.[\\w.-]{1,15}):([\\+?.\\-\\*\\w]{1,30}|[\\w.-]{1,30}@\\w{1,20}\\.[\\w.-]{1,15})");
     //Added alias format
-    public static Pattern validRMsgHeader = Pattern.compile("^<SOH>([.\\+\\-\\=\\w]{1,30}|[\\w.-]{1,30}@\\w{1,20}\\.[\\w.-]{1,15}):([\\w.\\-\\=]{1,30}@[\\w\\-]{1,20}\\.[\\w.-]{1,15}|[\\+?.\\-\\=\\*\\w]{1,30})");
+    public static Pattern validRMsgHeader = Pattern.compile("^<SOH>([.\\+\\-\\=\\/\\w]{1,30}|[\\w.-]{1,30}@\\w{1,20}\\.[\\w.-]{1,15}):([\\w.\\-\\=]{1,30}@[\\w\\-]{1,20}\\.[\\w.-]{1,15}|[\\+?.\\-\\=\\/\\*\\w]{1,30})");
     //Last line: abcd<EOT> with abcd is CRC16 with characters shifted from 0-9A-F to a-p and CRC is seeded with 0xFFFF instead of 0x0000
     public static Pattern rmcrc = Pattern.compile("\\n[a-p]{4}<EOT>$");
     //Added <> for <SOH> and <EOT> as string not as char
-    public static Pattern invalidCharsInHeaderPattern = Pattern.compile("[^<>.\\-=\\*\\+@:a-zA-Z_0-9]");
+    public static Pattern invalidCharsInHeaderPattern = Pattern.compile("[^<>.\\-=\\/\\*\\+@:a-zA-Z_0-9]");
 
 
     RxBlock(String inBlock) {

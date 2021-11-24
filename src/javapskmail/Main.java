@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.0.0.4";
+    static String version = "3.0.0.7";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20211103";
+    static String versionDate = "20211122";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -436,14 +436,20 @@ public class Main {
                 //Wait for return to Rx if we are transmitting
                 while (TxActive) {
                     Thread.sleep(50);
+                    //Check if we are stuck on transmit (jPskmail or Fldigi or interface issue)
+                    if (m.expectedReturnToRxTime > 0L && System.currentTimeMillis() > m.expectedReturnToRxTime) {
+                        //Reset loop by killing and re-launching fldigi (brute force for now until the root cause is identified)
+                        m.expectedReturnToRxTime = 0L; //Consume event
+                        m.killFldigi(false);
+                        //Main.log.writelog("Locked in TX for too long, restarting Fldigi.", null, true);
+                        System.out.println("Locked in TX for too long, restarting Fldigi.");
+                    }
                 }
-
                 // Send a command to the modem ?
                 //VK2ETA not through SendCommand anymore (Mutex)
                 m.Sendln(sendCommand);
                 Thread.sleep(50);
                 sendCommand = "";
-
                 //Handle RadioMsg messages only when fully idle
                 if (sendLine.length() == 0 & !TxActive
                         & !connected & !Connecting & !aborting
@@ -473,10 +479,8 @@ public class Main {
                     }
                 }
                 //Always reset the radioMsgWorking flag regardless (allows for change of frequency/mode)
-                radioMsgWorking = false;
-
-                // if (Sendline.length() > 0) {System.out.println("MAIN:" + Sendline);   }        
-                // see if tx active and DCD is off and we have exhausted the extra reception delay
+                radioMsgWorking = false;     
+                // See if tx active and DCD is off and we have exhausted the extra reception delay
                 if (sendLine.length() > 0 & !TxActive & DCD == 0 & rxDelayCount < 0.1f) {
                     //System.out.println("MAIN2:" + Sendline);
                     //VK2ETA DCDthrow not used 
@@ -496,10 +500,10 @@ public class Main {
                     //      System.out.println("MAIN3:" + Sendline); 
                     String Sendline_cp = sendLine;
                     try {
-//       System.out.println("MAIN4:" + Sendline_cp);                   
+                        //       System.out.println("MAIN4:" + Sendline_cp);                   
                         int TxDelay = 0;
                         String TxDelayStr = configuration.getPreference("TXDELAY", "0");
-//System.out.println("TXDELAY:" + TxDelayStr);  
+                        //System.out.println("TXDELAY:" + TxDelayStr);  
                         if (TxDelayStr.length() > 0) {
                             TxDelay = Integer.parseInt(TxDelayStr);
                         }
@@ -542,7 +546,6 @@ public class Main {
                     //}
                 }
                 // receive block
-
                 try {
                     if (m.checkBlock()) {
 
@@ -659,7 +662,7 @@ public class Main {
                                             if (currentmodeindex < ttyModes.length() - 1) { //List in decreasing order of speed
                                                 Main.rxModem = getClientMode(currentmodeindex + 1);
                                                 Main.rxModemString = m.getModemString(Main.rxModem);
-                                                blocktime = m.getBlockTime(Main.rxModem);
+                                                blocktime = m.getBlockTimeAndDelay(Main.rxModem);
                                                 justDowngradedRx = true; // Make TX mode downgrade first (if necessary)
                                             }
                                             //Reset link quality indicators
@@ -672,7 +675,7 @@ public class Main {
                                                 if (currentmodeindex > 0) { //List in decreasing order of speed
                                                     Main.rxModem = getClientMode(currentmodeindex - 1);
                                                     Main.rxModemString = m.getModemString(Main.rxModem);
-                                                    blocktime = m.getBlockTime(Main.rxModem);
+                                                    blocktime = m.getBlockTimeAndDelay(Main.rxModem);
                                                     justDowngradedRx = false; // Make RX mode downgrade first (if necessary)
                                                 }
                                                 Main.myS2n = 50; //Reset to mid-range
@@ -1412,7 +1415,7 @@ public class Main {
                                                 timeoutPolls = 0;
                                                 if (Blockline.length() > 8) {
                                                     charval = (int) (blockval / (Blockline.length() - 4)); // msec
-                                                    blocktime = m.getBlockTime(Main.rxModem); //Use pre-calculated value
+                                                    blocktime = m.getBlockTimeAndDelay(Main.rxModem); //Use pre-calculated value
                                                     //blocktime = (charval * 64 / 1000) + 4;
                                                 }
                                                 log("Connect request from " + ttyCaller);
@@ -2247,7 +2250,7 @@ public class Main {
             if (currentmodeindex < ttyModes.length() - 1) { //List in decreasing order of speed
                 Main.rxModem = getClientMode(currentmodeindex + 1);
                 Main.rxModemString = m.getModemString(Main.rxModem);
-                blocktime = m.getBlockTime(Main.rxModem);
+                blocktime = m.getBlockTimeAndDelay(Main.rxModem);
                 String TxMode = m.getTXModemString(Main.txModem);
                 //String SendMode = "<cmd><mode>" + TXmd + "</mode></cmd>";
                 //m.Sendln(SendMode);

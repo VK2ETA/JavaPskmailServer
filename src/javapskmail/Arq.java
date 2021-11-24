@@ -535,9 +535,6 @@ public class Arq {
         outstring += make_block(info) + FrameEnd;
         Main.TxActive = false; // force transmit
         sendit(outstring);
-//        } catch (InterruptedException ex) {
-//            Logger.getLogger(arq.class.getName()).log(Level.SEVERE, null, ex);
-//        }
         return true;
     }
 

@@ -17,7 +17,6 @@ package javapskmail;
 
 import java.io.*;
 import java.io.InputStream;
-//import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Calendar;
 import java.util.Locale;
@@ -27,9 +26,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import static javapskmail.ModemModesEnum.CTSTIA;
-import static javapskmail.ModemModesEnum.PSK125RC4;
-import static javapskmail.ModemModesEnum.DOMINOEX5;
 import javax.swing.SwingUtilities;
 
 /**
@@ -125,7 +121,7 @@ public class Modem implements Runnable {
     private boolean exitingSoon = false;
     private boolean warnedOnce = false;
     public RMsgObject txMessage = null;
-//   
+    public long expectedReturnToRxTime = 0L;  
 
     //RadioMsg stuff
     //Picture transfer conversion of speed to SPP (Samples Per Pixel) and vice-versa
@@ -618,6 +614,11 @@ public class Modem implements Runnable {
                         //Must be a data block, reset receive marker of RSID for next RX
                         //VK2ETA: TO-DO: check if logic (and place of decision) is consistent with RadioMsg
                         Main.justReceivedRSID = false;
+                        //Calculate the expected return time to Rx (to prevent TX lockups). Add 50% margin.
+                        //expectedReturnToRxTime = System.currentTimeMillis() + (3000 * (long) (getTxTimeEstimate(Main.txModem, outLine.length()))) / 2;
+                        long txTime = (3000 * (long)(getTxTimeEstimate(Main.txModem, outLine.length())))/2;
+                        System.out.println("txTime: " + txTime);
+                        expectedReturnToRxTime = System.currentTimeMillis() + txTime;
                     }
                 }
             } catch (Exception ex) {
@@ -642,6 +643,7 @@ public class Modem implements Runnable {
                             Logger.getLogger(Modem.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
+                    //Set Tx RSID base on previous request OR current send command (priority)
                     if (!TxRsidString.equals("") || !nextTxRsidCommand.equals("")) {
                         String txRdis = TxRsidString.equals("") ? nextTxRsidCommand : TxRsidString;
                         pout.println(txIDstart + txRdis + txIDend);
@@ -657,6 +659,11 @@ public class Modem implements Runnable {
                             //Must be a data block, reset receive marker of RSID for next RX
                             //VK2ETA: TO-DO: check if logic (and place of decision) is consistent with RadioMsg
                             Main.justReceivedRSID = false;
+                            ModemModesEnum txMode = Main.convmodem(modemString);
+                            //Calculate the expected return time to Rx (to prevent TX lockups). Add 50% margin.
+                            long txTime = (3000 * (long)(getTxTimeEstimate(txMode, outLine.length())))/2;
+                            System.out.println("txTime: " + txTime);
+                            expectedReturnToRxTime = System.currentTimeMillis() + txTime;
                         }
                     }
                 }
@@ -829,8 +836,20 @@ public class Modem implements Runnable {
         return 0;
     }
 
+    public int getTxTimeEstimate(ModemModesEnum mode, int dataLength) {
+        int savedFirstCharDelay = firstCharDelay;
+        
+        //Get block time for a block size of 64 characters
+        int txTime = getBlockTimeAndDelay(Main.txModem);
+        //Adjust for the length of the data to be transmitted
+        txTime = firstCharDelay + (txTime * dataLength) / 64; //Include FEC delay
+        //Restore global value (was calculated based on Rx mode not Tx mode, and is needed for Rx timeouts)
+        firstCharDelay = savedFirstCharDelay;
+        return txTime + 3; //3 Seconds safety margin
+    }
+    
     //Returns the theoretical blocktime so that timings are correct when we change RX modes
-    public int getBlockTime(ModemModesEnum mode) {
+    public int getBlockTimeAndDelay(ModemModesEnum mode) {
         double cps = 2;
         double myblocktime = 0;
 
@@ -1193,6 +1212,8 @@ public class Modem implements Runnable {
                         break;
                     case 6:
                         //Returning from TX
+                        expectedReturnToRxTime = 0L; //Consume event
+                        System.out.println("Returned from Tx (Char 6 received)");
                         //Start timeout count for TTY server mode (but update only once)
                         if (Main.TxActive) {
                             Main.oldtime = System.currentTimeMillis();
@@ -1204,12 +1225,14 @@ public class Modem implements Runnable {
                         //Main.TXActive = false;
                         if (Main.summoning) {
                             Main.summoning = false;
+                            System.out.println("Summoning, change freq");
                             Main.setFreq(Main.freqStore);
                         }
                         //String myrxmodem = Main.RxModemString;
                         //VK2ETA review need for config value usage here (legacy?)
                         //  if (!myrxmodem.equals("") & !Main.configuration.getBlocklength().equals("0")) {
                         //Sendln("<cmd><mode>" + myrxmodem + "</mode></cmd>\n");
+                        System.out.println("Sending mode: " + Main.rxModemString.trim());
                         Sendln("", Main.rxModemString.trim(), "");
                         //Reset Rx timeout counter
                         Main.lastCharacterTime = System.currentTimeMillis();
