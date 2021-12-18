@@ -290,7 +290,9 @@ public class OptionsDialog extends javax.swing.JDialog {
         initComponents();
 
         try {
-//
+           //Hide Callsign as Server section for now. May delete later on
+            jPanel4.setVisible(false);
+            
             String storemodem = Main.defaultTxModem;
             //Slows start of dialog
             // = new Session();
@@ -618,8 +620,7 @@ public class OptionsDialog extends javax.swing.JDialog {
             }
             spinnerHoursToKeepLink.setValue(GetSpinValue("HOURSTOKEEPLINK", 24));
             
-
-        } catch (Exception ex) {
+         } catch (Exception ex) {
             Main.log.writelog(optionsdialog.getString("ERROR WHEN FETCHING SETTINGS!"), ex, true);
         }
     }
@@ -866,9 +867,11 @@ public class OptionsDialog extends javax.swing.JDialog {
         test3.setName(""); // NOI18N
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Server/iGate/Relay information"));
+        jPanel4.setEnabled(false);
 
         txtCallsignAsServer.setToolTipText(optionsdialog.getString("SERVER CALLSIGN")); // NOI18N
         txtCallsignAsServer.setAlignmentX(22.0F);
+        txtCallsignAsServer.setEnabled(false);
         txtCallsignAsServer.setMinimumSize(new java.awt.Dimension(100, 27));
         txtCallsignAsServer.setPreferredSize(new java.awt.Dimension(150, 27));
         txtCallsignAsServer.addActionListener(new java.awt.event.ActionListener() {
@@ -878,6 +881,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         });
 
         jLabel22.setText("Callsign as Server");
+        jLabel22.setEnabled(false);
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -900,11 +904,11 @@ public class OptionsDialog extends javax.swing.JDialog {
                 .addGap(0, 0, 0))
         );
 
-        jPanel8.setBorder(javax.swing.BorderFactory.createTitledBorder("Client Configuration"));
+        jPanel8.setBorder(javax.swing.BorderFactory.createTitledBorder(optionsdialog.getString("STATIONCONFIGURATIONPANEL"))); // NOI18N
 
         lblCallsign.setText(optionsdialog.getString("CALLSIGN")); // NOI18N
 
-        txtCallsign.setToolTipText(optionsdialog.getString("PLEASE USE CAPITALS FOR YOUR CALL, AND DON'T USE ADDITIONS LIKE ZL/ OR /M")); // NOI18N
+        txtCallsign.setToolTipText(optionsdialog.getString("STATION CALLSIGN")); // NOI18N
         txtCallsign.setMinimumSize(new java.awt.Dimension(150, 27));
         txtCallsign.setPreferredSize(new java.awt.Dimension(150, 27));
         txtCallsign.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -2403,6 +2407,11 @@ public class OptionsDialog extends javax.swing.JDialog {
                     callsign = cleanCall;
                     Main.mycall = callsign;
                     cf.setPreference("CALL", cleanCall);
+                    //Merge with callsign as server
+                    cf.setPreference("CALLSIGNASSERVER", cleanCall);
+                    Main.callsignAsServer = cleanCall;
+                    Igate.aprsCall = Main.cleanCallForAprs(cleanCall);
+                    Main.aprsCall = Igate.aprsCall;
                 }
             }
 
@@ -2599,16 +2608,17 @@ public class OptionsDialog extends javax.swing.JDialog {
             }
 
             //Pskmail Server preferences
-            String callAsServer = txtCallsignAsServer.getText();
-            if (callAsServer.length() > 0) {
-                callAsServer = callAsServer.replaceAll("[^a-zA-Z0-9\\/\\-\\s]", "");
-                if (callAsServer.length() > 0) {
-                    cf.setPreference("CALLSIGNASSERVER", callAsServer);
-                    Main.callsignAsServer = callAsServer;
-                    Igate.aprsCall = Main.cleanCallForAprs(callAsServer);
-                    Main.aprsCall = Igate.aprsCall;
-                }
-            }
+            //String callAsServer = txtCallsignAsServer.getText();
+            //if (callAsServer.length() > 0) {
+            //    callAsServer = callAsServer.replaceAll("[^a-zA-Z0-9\\/\\-\\s]", "");
+            //    if (callAsServer.length() > 0) {
+            //        cf.setPreference("CALLSIGNASSERVER", callAsServer);
+            //        Main.callsignAsServer = callAsServer;
+            //        Igate.aprsCall = Main.cleanCallForAprs(callAsServer);
+            //        Main.aprsCall = Igate.aprsCall;
+            //    }
+            //}
+            
             //cf.setPreference("ACCESSPASSWORD", txtAccessPassword.getPassword().toString().trim());
             //Main.accessPassword = txtAccessPassword.getPassword().toString().trim();
             //Always save in case it gets blanked out

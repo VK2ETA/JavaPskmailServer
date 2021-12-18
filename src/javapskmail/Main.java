@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.0.0.7";
+    static String version = "3.0.0";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20211122";
+    static String versionDate = "20211216";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -1539,6 +1539,8 @@ public class Main {
                                     m.setRxRsid("ON");
                                     // send disconnect packet to caller...
                                     q.send_disconnect();
+                                    //Clean session
+                                    sm.initSession();
                                 }
                             }
                             //Check timeouts on status replies

@@ -822,7 +822,8 @@ public class MainPskmailUi extends javax.swing.JFrame {
                     } else if (Main.connected) {
                         setTitle(Main.application + " - Client:" + Main.mycall + " - " + ClientFreqTxtfield.getText());
                     } else {
-                        setTitle(Main.application + " - Client:" + Main.mycall + ", Server:" + Main.callsignAsServer + " - " + ClientFreqTxtfield.getText());
+                        //setTitle(Main.application + " - Client:" + Main.mycall + ", Server:" + Main.callsignAsServer + " - " + ClientFreqTxtfield.getText());
+                        setTitle(Main.application + " - Callsign:" + Main.mycall + " - " + ClientFreqTxtfield.getText());
                     }
                     // minute timer
                     if (Minute != oldminute) {

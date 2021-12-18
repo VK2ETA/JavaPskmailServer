@@ -167,6 +167,7 @@
                         <TitledBorder title="Server/iGate/Relay information"/>
                       </Border>
                     </Property>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
 
                   <Layout>
@@ -201,6 +202,7 @@
                           <ResourceString bundle="javapskmail/optionsdialog.properties" key="SERVER CALLSIGN" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
                         </Property>
                         <Property name="alignmentX" type="float" value="22.0"/>
+                        <Property name="enabled" type="boolean" value="false"/>
                         <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                           <Dimension value="[100, 27]"/>
                         </Property>
@@ -215,6 +217,7 @@
                     <Component class="javax.swing.JLabel" name="jLabel22">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Callsign as Server"/>
+                        <Property name="enabled" type="boolean" value="false"/>
                       </Properties>
                     </Component>
                   </SubComponents>
@@ -223,7 +226,9 @@
                   <Properties>
                     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                       <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-                        <TitledBorder title="Client Configuration"/>
+                        <TitledBorder title="Station Configuration">
+                          <ResourceString PropertyName="titleX" bundle="javapskmail/optionsdialog.properties" key="STATIONCONFIGURATIONPANEL" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
+                        </TitledBorder>
                       </Border>
                     </Property>
                   </Properties>
@@ -323,7 +328,7 @@
                     <Component class="javax.swing.JTextField" name="txtCallsign">
                       <Properties>
                         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                          <ResourceString bundle="javapskmail/optionsdialog.properties" key="PLEASE USE CAPITALS FOR YOUR CALL, AND DON&apos;T USE ADDITIONS LIKE ZL/ OR /M" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
+                          <ResourceString bundle="javapskmail/optionsdialog.properties" key="STATION CALLSIGN" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
                         </Property>
                         <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                           <Dimension value="[150, 27]"/>

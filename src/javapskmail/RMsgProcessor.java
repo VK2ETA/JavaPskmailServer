@@ -905,7 +905,7 @@ public class RMsgProcessor {
     }
 
     //Builds the list of messages to send to the qtc request. Specific to email requests.
-    private static ArrayList<RMsgObject> buildEmailResendList(RMsgObject mMessage, int numberOf, boolean fullSize, boolean forAll) {
+    private static ArrayList<RMsgObject> buildEmailResendList(RMsgObject mMessage, int numberOf, Long forLast, boolean fullSize, boolean forAll) {
 
         //Get list of messages to send
         int listCount = Main.mainui.msgDisplayList.getLength();
@@ -917,7 +917,7 @@ public class RMsgProcessor {
         //Date dateNow = localCalendar.getTime();
         Date recMsgDate = null;
         //If requested since last QTC, find the previous one first and extract the time filter
-        if (numberOf == -1) {
+        if (numberOf == -1 && forLast == 0L) {
             //Iterate from the 2nd last message received, backwards (back in time), skipping just received "*qtc?" message
             for (int i = listCount - 2; i >= 0; i--) {
                 recMessage = Main.mainui.msgDisplayList.getItemMessage(i);
@@ -933,10 +933,14 @@ public class RMsgProcessor {
                     break; //No point in looking any further
                 }
             }
-            //No previous matching "*qtc?" message found, return an empty list
-            if (recMsgDate == null) {
+            //No previous matching "*qtc?" message found AND we wanted to find one, return an empty list
+            if (!((numberOf == -1 && forLast == 0L && recMsgDate != null)
+                    || numberOf != -1 || forLast != 0L)) {
                 return resendList;
             }
+        } else if (forLast != 0L) {
+            //We have a time based request
+            recMsgDate = new Date(System.currentTimeMillis() - forLast);
         }
         //Request emails from server
         IMAPFolder folder = null;
@@ -1047,8 +1051,7 @@ public class RMsgProcessor {
                             if (!smsSubject.contains("Radio Message from ")
                                     && !smsSubject.contains("SMS received from ")
                                     && !smsSubject.trim().equals("")) {
-                                smsString = "Subject: " + smsSubject
-                                        + "\n" + smsString;
+                                smsString = "Subj: " + smsSubject + "\n" + smsString;
                             }
                         }
                         //Debug
@@ -1581,7 +1584,7 @@ public class RMsgProcessor {
                                     RMsgUtil.replyWithText(mMessage, replyString);
                                 }
                             }
-                        } else if (mMessage.sms.startsWith("*qtc?")) {
+                            } else if (mMessage.sms.startsWith("*qtc?")) {
                             //Simplified QTC processing:
                             //By default resends the last of any message (sent directly, heard as relay, email, sms). 
                             //Filtered by selected relaying flags in preferences (E.g. will not check for emails if email relaying is not enabled)
@@ -1692,10 +1695,9 @@ public class RMsgProcessor {
                                         // & (Main.WantRelayEmails | Main.WantRelaySMSs | Main.WantRelayOverRadio)
                                         ArrayList<RMsgObject> emailList;
                                         if ((Main.wantRelayEmails || Main.wantRelaySMSs) && !positionsOnly && !radioWaveOnly) {
-                                            emailList = buildEmailResendList(mMessage, numberOf, extractedStr.endsWith("f"), forAll);
+                                            emailList = buildEmailResendList(mMessage, numberOf, forLast, extractedStr.endsWith("f"), forAll);
                                             resendList.addAll(emailList);
                                         }
-                                        //We are just repeating messages sent directly (no Via), excluding already re-sent ones
                                         //Do not add if we ask for emails/sms only
                                         if (!emailRequest) {
                                             ArrayList<RMsgObject> TxList;
