@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.0.1";
+    static String version = "3.0.2.1";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20211218";
+    static String versionDate = "20220119";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -218,6 +218,7 @@ public class Main {
     // GPS handles
     static GpsSerialPort gpsPort;    // Serial port object
     static NmeaParser gpsData;    // Parser for nmea data
+    static public boolean isCwFrame = false; //Denotes a CW beacon or email frame (special QSL)
     // gpsd data
     static boolean haveGPSD = false;
     static boolean wantGpsd = false;
@@ -2271,6 +2272,8 @@ public class Main {
 
         if (mymodem.equals("THOR8")) {
             mode = ModemModesEnum.THOR8;
+        } else if (mymodem.equals("THOR4")) {
+            mode = ModemModesEnum.THOR4;
         } else if (mymodem.equals("MFSK16")) {
             mode = ModemModesEnum.MFSK16;
         } else if (mymodem.equals("THOR22")) {

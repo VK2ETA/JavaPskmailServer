@@ -49,7 +49,6 @@ public class Modem implements Runnable {
     static final int MAXQUEUE = 8;
     private Vector<String> messages = new Vector<String>();
     private String BlockString;
-    private boolean opened = false; // Use this to suppress errors when the port is closed
     private String rxIDstart = "<cmd><rsid>";
     private String rxIDend = "</rsid></cmd>";
     private String txIDstart = "<cmd><txrsid>";
@@ -63,7 +62,8 @@ public class Modem implements Runnable {
     private double validPskmailRxDelay = 0.0f;
     public boolean receivingStatusBlock = false;
     public  boolean BlockActive = false;
-    private char b = 0;
+    public boolean possibleCwFrame = false;
+    private StringBuilder cwStringBuilder = new StringBuilder(100);
     //private int stxcount = 0;
     static String[] fldigimodes = {"unknown", "THOR 8>", "MFSK-16>", "THOR 22>", "MFSK-32>",
         "PSK-250R>", "PSK-500R>", "BPSK-500>", "BPSK-250>", "BPSK-125>",
@@ -114,14 +114,17 @@ public class Modem implements Runnable {
     private static Process fldigiProc = null;
     private String fldigiHost;
     private int fldigiPort;
-    private BufferedReader reader = null;
+    private BufferedReader procErrReader = null;
     //private Socket sock = null;
     private boolean fldigiRunning = false;
     private boolean cantLaunchFldigi = false;
     private boolean exitingSoon = false;
     private boolean warnedOnce = false;
+    private Thread myOutputStreamThread = null;
+    public boolean commToFldigiOpened = false; // Use this to suppress errors when the port is closed
     public RMsgObject txMessage = null;
     public long expectedReturnToRxTime = 0L;  
+
 
     //RadioMsg stuff
     //Picture transfer conversion of speed to SPP (Samples Per Pixel) and vice-versa
@@ -159,7 +162,7 @@ public class Modem implements Runnable {
         int launchResult = 0;
         int launchCount = 0;
 
-        while (!opened && launchCount++ < 1) {
+        while (!commToFldigiOpened && launchCount++ < 1) {
             try {
                 launchResult = connectToFldigi();
                 //Prevent premature killing of Fldigi. Start timeout at modem launch
@@ -181,7 +184,7 @@ public class Modem implements Runnable {
                 //c = new config(Main.HomePath + Main.Dirprefix);
                 //System.out.println("Modem initialized.");       
             } catch (IOException e) { //exception thrown by connectToFldigi() above
-                opened = false;
+                commToFldigiOpened = false;
                 System.out.println("Error connecting to host.");
                 //We launch Fldigi automatically if path is provided
                 if (launchResult == -1) {
@@ -234,12 +237,12 @@ public class Modem implements Runnable {
                 OutputStream out = sock.getOutputStream();
                 in = sock.getInputStream();
                 pout = new PrintWriter(out, true);
-                opened = true;
+                commToFldigiOpened = true;
                 //fldigiRunning = true;
                 //Reset mode as server
                 Sendln("<cmd>server</cmd>");
             } catch (IOException e) {
-                opened = false;
+                commToFldigiOpened = false;
             }
         }
         if (Main.configuration.getPreference("FLDIGIAPPLICATIONPATH", "").trim().length() > 0
@@ -254,13 +257,32 @@ public class Modem implements Runnable {
     private int killAndLaunchFldigi() {
         int result = -1;
       
+        /*
+        //Must first close the previous monitoring thread
+        //Close stream now if it was open
+        try {
+            if (procErrReader != null) {
+                procErrReader.close();
+                procErrReader = null;
+                Thread.sleep(500);
+                System.out.println("Closed error stream, interrupted console thread in K&L Fldigi");
+                if (myOutputStreamThread != null) {
+                    myOutputStreamThread.interrupt();
+                }
+                Thread.sleep(500);
+            }
+            
+        } catch (IOException e) {
+        } catch (InterruptedException e) {
+        }
+        */
         //New listening thread looking for error stream data (e.g. we can't launch Fldigi)
-        final Thread myOutputStreamThread = new Thread() {
+        myOutputStreamThread = new Thread() {
             @Override
             public void run() {
                 cantLaunchFldigi = false;
                 String outProcLine2 = "";
-                Boolean readerOpen = false;
+                //Boolean readerOpen = false;
                 String fldigiPath = Main.configuration.getPreference("FLDIGIAPPLICATIONPATH", "fldigi");
                 //Remove parameters
                 Pattern ppc = Pattern.compile("\\s*(\\S+)\\s*");
@@ -269,21 +291,24 @@ public class Modem implements Runnable {
                     fldigiPath = mpc.group(1);
                 }
                 //Wait until we start reading data from error (input?) buffer
-                while (readerOpen == false) {
+                //VK2ETA debug while (!readerOpen && !commToFldigiOpened) {
+                while (!commToFldigiOpened) {
                     try {
                         Thread.sleep(100);
-                        if (reader != null) {
-                            outProcLine2 = reader.readLine();
+                        if (procErrReader != null) {
+                            outProcLine2 = procErrReader.readLine();
                             if (outProcLine2 != null) { 
                                 //System.out.println("0AA - Read line: " + outProcLine2);
-                                readerOpen = true;
-                                if (outProcLine2.contains(fldigiPath) && outProcLine2.toLowerCase(Locale.US).contains(" no such file")) {
+                                //VK2ETA debug readerOpen = true;
+                                if (outProcLine2.contains(fldigiPath) 
+                                        && outProcLine2.toLowerCase(Locale.US).contains(" no such file")) {
                                     cantLaunchFldigi = true;
-                                    System.out.println("No such file - 0B");
+                                    System.out.println("No such file - 0B: " + fldigiPath);
                                 }
                             }
                         }
                     } catch (IOException e) {
+                        //Expected until the process if really launched (can be several seconds)
                         //e.printStackTrace();
                     } catch (InterruptedException e) {
                     } catch (Exception e) {
@@ -309,24 +334,34 @@ public class Modem implements Runnable {
                             //Main.log.writelog("Problem with task kill: " + er, true);
                         }
                         //Wait until the socket is closed
-                        while ((reader.readLine()) != null) {
+                        System.out.println("Sent Kill Signal - waiting end of err stream - 1E.2");
+                        while (procErrReader != null && (procErrReader.readLine()) != null) {
                             Thread.sleep(100);
                         };
                     }
                 } catch (IOException e) {
                     //We have a closed stream due to the process terminating
-                    //Expect to get one hit at the start of the launch process
+                    //Expect to get one hit at the end of the launch process
+                    try {
+                        if (procErrReader != null) {
+                            System.out.println("IO Exception in Err stream - Closing ");
+                            procErrReader.close();
+                            procErrReader = null;
+                        }
+                    } catch (IOException ee) {
+                    }
                     //e.printStackTrace();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                /*
                 //Close stream now if it was open
                 try {
-                    if (reader != null) {
-                        reader.close();
-                        reader = null;
+                    if (procErrReader != null) {
+                        procErrReader.close();
+                        procErrReader = null;
                     }
                 } catch (IOException e) {
                 }
@@ -334,18 +369,21 @@ public class Modem implements Runnable {
                 if (myOutputStreamThread != null && myOutputStreamThread.isAlive()) {
                     try {
                         //Close output stream first
-                        if (reader != null) {
-                            reader.close();
-                            reader = null;
+                        if (procErrReader != null) {
+                            procErrReader.close();
+                            procErrReader = null;
                         }
+                        Thread.sleep(1000);
+                        System.out.println("Closed error stream, interrupting Console thread - 1E.3");
                         myOutputStreamThread.interrupt();
-                        Thread.sleep(2000);
+                        Thread.sleep(1000);
                     } catch (IOException e1) {
                         System.out.println("IOException while closing errorstream - 1EA");
                     } catch (InterruptedException e) {
                         //
                     }
                 }
+                */
                 //Now (re-)launch Fldigi
                 fldigiProc = null;
                 fldigiRunning = false;
@@ -362,7 +400,7 @@ public class Modem implements Runnable {
                         fldigiProc = processBuilder.start();
                     }
                     //fldigiProc = Runtime.getRuntime().exec("fldigi");
-                    reader = new BufferedReader(new InputStreamReader(fldigiProc.getErrorStream()));
+                    procErrReader = new BufferedReader(new InputStreamReader(fldigiProc.getErrorStream()));
                 } catch (IOException e) {
                     cantLaunchFldigi = true;
                     e.printStackTrace();
@@ -377,11 +415,10 @@ public class Modem implements Runnable {
         fldigiLaunchThread.setName("FldigiLaunch");
         //Wait up to 60 seconds for launch
         int waitCount = 0;
-        opened = false;
+        commToFldigiOpened = false;
         cantLaunchFldigi = false; //debug added to ensure proper processing of loop below
-        //System.out.println("Launched Fldigi Threads - 2A");
-        while (!cantLaunchFldigi && !opened && waitCount < 60) {
-            waitCount++;
+        System.out.println("Launched Fldigi Threads - 2A");
+        while (!cantLaunchFldigi && !commToFldigiOpened && ++waitCount < 90) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -393,25 +430,31 @@ public class Modem implements Runnable {
                 OutputStream out = sock.getOutputStream();
                 in = sock.getInputStream();
                 pout = new PrintWriter(out, true);
-                opened = true;
+                commToFldigiOpened = true;
                 fldigiRunning = true;
             } catch (IOException e) {
-                opened = false;
+                //System.out.println("Failed to open sockets to Fldigi. WaitCount: " + waitCount);
+                commToFldigiOpened = false;
             }
         }
-        if (waitCount >= 60) {
+        //System.out.println("After loop WaitCount: " + waitCount);
+        if (waitCount >= 90) {
             //Timeout. Fldigi didn't launch within 60 seconds
+            System.out.println("Fldigi didn't launch within 90 seconds.");
             result = 0;
         }
         if (cantLaunchFldigi) {
             result = +1;
         }
         //Kill stream listening thread if not already exited (no use now)
+        //System.out.println("Stopping myOutputStreamThread");
         myOutputStreamThread.interrupt();
         //debug
+        //System.out.println("Stopping fldigiLaunchThread");
         fldigiLaunchThread.interrupt();
         //Reset transmit flag so that we return to Rx strait away
         Main.TxActive = false;
+        System.out.println("Returning Launch code: " + result);
         return result;
     }
  
@@ -424,6 +467,11 @@ public class Modem implements Runnable {
         //Kill
         try {
             if (fldigiProc != null) {
+                //Re-open the process error stream it it was closed before
+                if (procErrReader == null) {
+                    procErrReader = new BufferedReader(new InputStreamReader(fldigiProc.getErrorStream()));
+                }
+                System.out.println("Re-opened process error stream, killing process");
                 try {
                     fldigiProc.destroyForcibly();
                 } catch (NoSuchMethodError er) {
@@ -434,22 +482,10 @@ public class Modem implements Runnable {
                 }
                 //System.out.println("Wait until the socket is closed");
                 //Wait until the socket is closed
-                while ((outProcLine = reader.readLine()) != null) {
+                while (procErrReader != null && (outProcLine = procErrReader.readLine()) != null) {
                     Thread.sleep(100);
                 };
-                //System.out.println("Socket has closed");
-                //Close stream now if it was open
-                try {
-                    if (reader != null) {
-                        System.out.println("Closing streams");
-                        reader.close();
-                        //fldigiInputStreamReader.close();
-                        //fldigiErrorStream.close();
-                        reader = null;
-                    }
-                } catch (IOException e) {
-                    //System.out.println("IO exception closing streams");
-                }
+                System.out.println("Process has shut down");
             }
         } catch (IOException e) {
             //We have a closed stream due to the process terminating
@@ -458,12 +494,26 @@ public class Modem implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        //Now (re-)launch Fldigi
+        /*
+        //Close stream now if it was open
+        try {
+            if (procErrReader != null) {
+                System.out.println("Closing streams");
+                procErrReader.close();
+                //fldigiInputStreamReader.close();
+                //fldigiErrorStream.close();
+                procErrReader = null;
+            }
+        } catch (IOException e) {
+            //System.out.println("IO exception closing streams");
+        }
+        */
+        //Mark Fldigi as not running
         fldigiProc = null;
         fldigiRunning = false;
         return result;
     }
-   
+
     public String getTXModemString(ModemModesEnum mode) {
         try {
             String Txmodemstring = "";
@@ -545,6 +595,9 @@ public class Modem implements Runnable {
                 case THOR8:
                     modeset = "THOR8";
                     break;
+                case THOR4:
+                    modeset = "THOR4";
+                    break;
                 case DOMINOEX5:
                     modeset = "DOMINOEX5";
                     break;
@@ -600,7 +653,7 @@ public class Modem implements Runnable {
 
         synchronized (sendMutex) {
             try {
-                if (opened & outLine.length() > 0) {
+                if (commToFldigiOpened & outLine.length() > 0) {
                     //            System.out.println(outLine);
                     pout.println(outLine);
                     if (outLine.contains("<cmd><mode>")) {
@@ -633,7 +686,7 @@ public class Modem implements Runnable {
         synchronized (sendMutex) {
             try {
                 //if (opened & outLine.length() > 0) {
-                if (opened) {
+                if (commToFldigiOpened) {
                     //System.out.println(outLine);
                     if (!modemString.equals("")) {
                         pout.println(modeIDstart + modemString + modeIDend);
@@ -767,6 +820,8 @@ public class Modem implements Runnable {
 
         if (mymodem.equals("THOR8")) {
             mode = ModemModesEnum.THOR8;
+        } else if (mymodem.equals("THOR4")) {
+            mode = ModemModesEnum.THOR4;
         } else if (mymodem.equals("MFSK16")) {
             mode = ModemModesEnum.MFSK16;
         } else if (mymodem.equals("THOR22")) {
@@ -893,6 +948,10 @@ public class Modem implements Runnable {
                     firstCharDelay = 6;
                     cps = 22;
                     break;
+                case THOR4:
+                    firstCharDelay = 22;
+                    cps = 1;
+                    break;
                 case THOR8:
                     firstCharDelay = 11;
                     cps = 2;
@@ -968,6 +1027,11 @@ public class Modem implements Runnable {
         
         //Exiting, return 0
         if (exitingSoon) {
+            try {
+                Thread.sleep(200);
+            } catch (Exception e1) {
+                //Nothing
+            }
             return '\0';
         }
         //Normal run, read a byte
@@ -985,7 +1049,7 @@ public class Modem implements Runnable {
                     } else {
                         //Prevent fast processing of null character
                         try {
-                            Thread.sleep(100);
+                            Thread.sleep(1000);
                         } catch (Exception e1) {
                             //Nothing
                         }
@@ -1351,6 +1415,105 @@ public class Modem implements Runnable {
                                     Logger.getLogger(Modem.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                             }
+                            //Build sequence for CW APRS messages
+                            if (possibleCwFrame) {
+                                //Continue building the sequence and reject if does not conform to expected format
+                                cwStringBuilder.append(inChar);
+                                if (cwStringBuilder.length() > 68) { //Around 50 characters max for status or message
+                                    //Too long, erase and reset flag
+                                    cwStringBuilder.setLength(0);
+                                    possibleCwFrame = false;
+                                } else if (cwStringBuilder.length() > 5 
+                                        && cwStringBuilder.toString().contains("VVV--")) {
+                                    //Align start at last discovery of header start (in the case of 
+                                    //  a send error, the opertor can ignore the rest of the message and 
+                                    //  restart a new hearder "VVV--" strait away)
+                                    int lastStart = cwStringBuilder.lastIndexOf("VVV--");
+                                    if (lastStart > 0) {
+                                        cwStringBuilder.delete(0, lastStart);
+                                    }
+                                    //Check if we have a complete APRS beacon sequence
+                                    Pattern cwBeaconPattern = Pattern.compile("VVV--([a-zA-Z0-9]{1,3}[0123456789][a-zA-Z0-9]{0,3}[a-zA-Z])\\/([a-rA-R]{2}[0-9]{2}[a-xA-X]{2})\\/([^\\/]{1,40})\\/([0-9]{1,2})([A-Z]{1})");
+                                    Matcher cwBeaconMatcher = cwBeaconPattern.matcher(cwStringBuilder.toString());
+                                    if (cwBeaconMatcher.lookingAt()) {
+                                        //Check the data length against the sent value
+                                        int sentDataLen;
+                                        try {
+                                            sentDataLen = Integer.parseInt(cwBeaconMatcher.group(4));
+                                        } catch (NumberFormatException e) {
+                                            sentDataLen = 0;
+                                        }
+                                        int dataLen = (cwBeaconMatcher.group(1) + "/" 
+                                                + cwBeaconMatcher.group(2) + "/"
+                                                + cwBeaconMatcher.group(3) + "/").length();
+                                        //Check the conversion to GPS coordinates
+                                        String gpsLatLon = NmeaParser.grid6UpperToGps(cwBeaconMatcher.group(2));
+                                        String scall = Main.cleanCallForAprs(cwBeaconMatcher.group(1));
+                                        if (sentDataLen == dataLen && gpsLatLon.length() > 0
+                                                && scall.length() > 0) {
+                                            //Build the new block with the received information
+                                            //<SOH>00uVK2ETA:26 !2700.00S/13300.00E.Test 1FDF9<EOT>
+                                            BlockString = "00u" + scall
+                                                    + ":26 !" + gpsLatLon + cwBeaconMatcher.group(5)
+                                                    + cwBeaconMatcher.group(3);
+                                                    String check = Main.q.checksum(BlockString);
+                                                    BlockString = "<SOH>" + BlockString + check + "<EOT>";
+                                                    possibleCwFrame = false; //Reset flag
+                                                    Main.isCwFrame = true;
+                                                    putMessage(BlockString);
+                                                    BlockString = "";
+                                        } else {
+                                            //Send NACK
+                                            Main.isCwFrame = true;
+                                            Main.q.send_NACK_reply();
+                                        }
+                                        //Consume data
+                                        cwStringBuilder.setLength(0);
+                                    }
+                                    //Same for short email message
+                                    Pattern cwAprsMsgPattern = Pattern.compile("VVV--([a-zA-Z0-9]{1,3}[0123456789][a-zA-Z0-9]{0,3}[a-zA-Z])\\/25\\/([a-zA-Z0-9\\-\\_\\.]{1,30})\\/([a-zA-Z0-9\\.]{1,30})\\/([a-zA-Z0-9\\.]{1,30})\\/([^\\/]{1,40})\\/([0-9]{1,2})NNNN");
+                                    Matcher cwAprsMsgMatcher = cwAprsMsgPattern.matcher(cwStringBuilder.toString());
+                                    if (cwAprsMsgMatcher.lookingAt()) {
+                                        //Check the data length against the sent value
+                                        int sentDataLen;
+                                        try {
+                                            sentDataLen = Integer.parseInt(cwAprsMsgMatcher.group(6));
+                                        } catch (NumberFormatException e) {
+                                            sentDataLen = 0;
+                                        }       
+                                        int dataLen = (cwAprsMsgMatcher.group(1) + "/25/" 
+                                                + cwAprsMsgMatcher.group(2) + "/"
+                                                + cwAprsMsgMatcher.group(3) + "/"
+                                                + cwAprsMsgMatcher.group(4) + "/"
+                                                + cwAprsMsgMatcher.group(5) + "/").length();
+                                        String scall = Main.cleanCallForAprs(cwAprsMsgMatcher.group(1));
+                                        if (sentDataLen == dataLen && scall.length() > 0) {
+                                            //Build the new block with the received information
+                                            //"00u" + scall + ":25" + spaces1 + email + spaces2 + body + "\n";
+                                            BlockString = "00u" + scall
+                                                    + ":25 " + cwAprsMsgMatcher.group(2) + "@" 
+                                                    + cwAprsMsgMatcher.group(3) + "."
+                                                    + cwAprsMsgMatcher.group(4) + " "
+                                                    + cwAprsMsgMatcher.group(5) + "\n";
+                                                    String check = Main.q.checksum(BlockString);
+                                                    BlockString = "<SOH>" + BlockString + check + "<EOT>";
+                                                    possibleCwFrame = false; //Reset flag
+                                                    Main.isCwFrame = true;
+                                                    putMessage(BlockString);
+                                                    BlockString = "";
+                                        } else {
+                                            //Send NACK
+                                            Main.isCwFrame = true;
+                                            Main.q.send_NACK_reply();
+                                        }
+                                        //Consume data
+                                        cwStringBuilder.setLength(0);
+                                    }                                    
+                                }
+                            } else if (inChar == 'V') {
+                                possibleCwFrame = true;
+                                cwStringBuilder.append(inChar);
+                            } 
                             WriteToMonitor(inChar);
                         }
                         if (BlockActive) {

@@ -255,9 +255,11 @@ public class RMsgProcessor {
 
         String smtpServer = Main.configuration.getPreference("SERVERSMTPHOST");//"smtp.gmail.com";
         String socketFactoryPort = "465";
+        //String socketFactoryPort = "587";
         String socketFactoryClass = "javax.net.ssl.SSLSocketFactory";
         String smtpAuth = "true";
         String smtpPort = "465";
+        //String smtpPort = "587";
         final String fromAddress = Main.configuration.getPreference("SERVEREMAILADDRESS");
         final String userName = Main.configuration.getPreference("SERVERUSERNAME");
         final String password = Main.configuration.getPreference("SERVERPASSWORD");

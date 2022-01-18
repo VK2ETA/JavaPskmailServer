@@ -15,9 +15,13 @@
 
 package javapskmail;
 
+import java.io.UnsupportedEncodingException;
+import static java.lang.Math.abs;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
 /**
  *
  * @author per
@@ -454,4 +458,53 @@ public class NmeaParser {
         float tmp = Math.round(Rval);
         return (float)tmp/p;
     }
+    
+    
+    //Converts a 6 characters Grid Square, with all characters in uppercase, to a latitude and 
+    //  longiture string in the format <Degrees><DecimalMinutes>, with E/W and N/S lagging characters 
+    //E.g. 2700.00S/13300.00E
+    public static String grid6UpperToGps(String gridSquare) {
+        String latLon = "";
+        byte[] gsb = null;
+        
+        if (gridSquare.length() != 6) {
+            return latLon;
+        }
+        try {
+            gsb = gridSquare.getBytes("US-ASCII");
+        } catch (UnsupportedEncodingException e) {
+            return latLon;
+        }
+        //Double lat = (Asc(Mid(m, 2, 1)) - 65) * 10 + Val(Mid(m, 4, 1)) + (Asc(Mid(m, 6, 1)) - 97) / 24 + 1 / 48 - 90;
+        double lat = (((double)gsb[1] - 65) * 10) + ((double)gsb[3] - 48) + (((double)gsb[5] - 65) / 24) + (1/48) - 90;
+        //double lon = (Asc(Mid(m, 1, 1)) - 65) * 20 + Val(Mid(m, 3, 1)) * 2 + (Asc(Mid(m, 5, 1)) - 97) / 12 + 1 / 24 - 180;
+        double lon = (((double)gsb[0] - 65) * 20) + (((double)gsb[2] -48) * 2) + (((double)gsb[4] - 65) / 12) + (1/24) - 180;
+        String NS = "N";
+        if (lat < 0) {
+            NS = "S";
+        }
+        lat = abs(lat);
+        String EW = "E";
+        if (lon < 0) {
+            EW = "W";
+        }
+        lon = abs(lon);
+        //Format the decimal degrees
+        int latDeg = (int)(lat);
+        int lonDeg = (int)lon;
+        double latMin = (lat - latDeg) * 60;
+        double lonMin = (lon - lonDeg) * 60;
+        //Make sure we use a dot and not a comma as decimal separator
+        DecimalFormat decimalFormat = (DecimalFormat)NumberFormat.getNumberInstance(new Locale("en", "US"));
+        decimalFormat.applyPattern("00.00");
+        String latMinStr = decimalFormat.format(latMin);
+        String lonMinStr = decimalFormat.format(lonMin);
+        decimalFormat.applyPattern("00");
+        String latDegStr = decimalFormat.format(latDeg);
+        decimalFormat.applyPattern("000");
+        String lonDegStr = decimalFormat.format(lonDeg);
+        latLon = latDegStr + latMinStr + NS + "/" + lonDegStr + lonMinStr + EW;
+        return latLon;
+    }
+    
 }

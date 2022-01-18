@@ -104,5 +104,9 @@ public enum TxStatus {
      */
     TXTraffic,
 //    
-    TXCQ
+    TXCQ,
+//    
+    TXCWACK,
+//    
+    TXCWNACK
 }

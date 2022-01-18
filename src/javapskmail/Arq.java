@@ -644,6 +644,18 @@ public class Arq {
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
+            case TXCWACK:
+                Main.m.requestTxRsid("ON");
+                //    System.out.println("RR Reply");
+                Lastblockinframe = 1;
+                outstring = Main.configuration.getPreference("CALLSIGNASSERVER") + " RR    ";
+                break;
+            case TXCWNACK:
+                Main.m.requestTxRsid("ON");
+                //    System.out.println("NN Reply");
+                Lastblockinframe = 1;
+                outstring = Main.configuration.getPreference("CALLSIGNASSERVER") + " NN    ";
+                break;
             case TXCQ:
                 Main.m.requestTxRsid("ON");
                 info = cqblock();
@@ -793,7 +805,22 @@ public class Arq {
      * Send a QSL reply
      */
     public void send_QSL_reply() throws InterruptedException {
-        this.txserverstatus = TxStatus.TXQSLReply;
+        if (Main.isCwFrame) {
+            this.txserverstatus = TxStatus.TXCWACK;
+            //Reset CW frame flag 
+            Main.isCwFrame = false;
+        } else {
+            this.txserverstatus = TxStatus.TXQSLReply;
+        }
+        send_frame("");
+    }
+
+    /**
+     * /
+     * Send a QSL reply
+     */
+    public void send_NACK_reply() throws InterruptedException {
+        this.txserverstatus = TxStatus.TXCWNACK;
         send_frame("");
     }
 

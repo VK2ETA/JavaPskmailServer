@@ -450,13 +450,14 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 // 5 x  200 = 1000 msec timer
                 if (timercnt < 5) {
                     timercnt++;
-                } else { //Second loop
+                } else { //Loop run every SECOND
                     //Check last character receipt from Fldigi
                     //More than timeout, set test mode = Squelch fully open
                     //If more than 30 seconds in test mode, then kill fldigi and let the 
                     //  modem getbyte() restart it and re-init Rigctl
                     if (!Main.TxActive 
-                            && (System.currentTimeMillis() - Main.lastModemCharTime > 55000)) { // = 55 seconds
+                            && (System.currentTimeMillis() - Main.lastModemCharTime > 55000) // = 55 seconds
+                            && Main.m.commToFldigiOpened) { //We had an opened connection to the Modem
                         if (!Main.modemTestMode) {
                             //Enter test mode for next iteration
                             Main.modemTestMode = true;
@@ -466,7 +467,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                             if (System.currentTimeMillis() - Main.lastModemCharTime > 115000) {// = 1 minutes + 55 seconds
                                 //We have a hang modem, request an Flgdigi restart
                                 //NO, just kill it
-                                System.out.println("Modem test period exausted, Killing modem process");
+                                System.out.println("Modem test period exhausted, Killing modem process");
                                 Main.m.killFldigi(false); //We are going to restart the modem. not final task kill
                                 //Main.requestModemRestart = true;
                                 //System.out.println("Modem test period exausted, requesting modem restart");
@@ -825,7 +826,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                         //setTitle(Main.application + " - Client:" + Main.mycall + ", Server:" + Main.callsignAsServer + " - " + ClientFreqTxtfield.getText());
                         setTitle(Main.application + " - Callsign:" + Main.mycall + " - " + ClientFreqTxtfield.getText());
                     }
-                    // minute timer
+                    //Loop run every MINUTE
                     if (Minute != oldminute) {
                         //Check if we have RadioMsg activity
                         boolean radioMsgActive = false;
@@ -851,7 +852,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                             //Already preset
                         }
                         if (!clientActive && !serverActive && !radioMsgActive
-                                && Main.modemAutoRestartDelay > everyXHours * 60) {
+                                && Main.modemAutoRestartDelay > everyXHours * 60) { //* 1  Every x minutes vk2eta debug
                             Main.requestModemRestart = true;
                             System.out.println("Periodic restart of Fldigi requested");
                         } else { 
@@ -1138,8 +1139,8 @@ public class MainPskmailUi extends javax.swing.JFrame {
                                 }
                             }//if not bulletin, not connected, not IAC mode
                         }//modem auto restart end
-                    }//minute timer end
-                }//second timer end
+                    }//minute loop end
+                }//second loop end
             }//End override (200ms)
         });
         //Vk2eta debug: done after main window is set visible 

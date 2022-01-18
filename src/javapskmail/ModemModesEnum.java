@@ -36,7 +36,7 @@ public enum ModemModesEnum {
     MFSK32,
     MFSK64,
     DOMINOEX5,
-    THOR5,
+    THOR4,
     THOR8,
     THOR11,
     THOR16,
