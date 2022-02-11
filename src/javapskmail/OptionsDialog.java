@@ -458,7 +458,15 @@ public class OptionsDialog extends javax.swing.JDialog {
                     modemarray[i] = "DOMINOEX5";
                 }
                 //VK2ETA: Bug? when opening options when connected to server, messes up the modelist or 
-                //   the Main.mode string of character coded modes? 
+                //   the Main.mode string of character coded modes. 
+                //   Solution: prevent access to preferences when connected.
+
+                if (Main.configuration.getPreference("LISTENINCWMODE").equals("yes")) {
+                    CB_ListenInCwMode.setSelected(true);
+                } else {
+                    CB_ListenInCwMode.setSelected(false);
+                }
+
                 Main.currentModes = modemarray;
 
                 cboModes.removeAllItems();
@@ -548,7 +556,7 @@ public class OptionsDialog extends javax.swing.JDialog {
                     }
                     //cboModes.addItem(Md);
                 }
-                //VK2ETA: speed up display of options
+                //VK2ETA: speeds up display of options
                 String [] values = MdStringList.split(",");
                 //cboModes = new javax.swing.JComboBox(values);
                 //DefaultComboBoxModel<Object> model = new DefaultComboBoxModel<String>(values);
@@ -805,6 +813,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         jLabel15 = new javax.swing.JLabel();
         CB_DOMEX22 = new javax.swing.JCheckBox();
         CB_DOMEX11 = new javax.swing.JCheckBox();
+        CB_ListenInCwMode = new javax.swing.JCheckBox();
         pnlModem = new javax.swing.JPanel();
         lblModemIPAddress = new javax.swing.JLabel();
         txtModemIPAddress = new javax.swing.JTextField();
@@ -2138,6 +2147,14 @@ public class OptionsDialog extends javax.swing.JDialog {
             }
         });
 
+        CB_ListenInCwMode.setText(optionsdialog.getString("LISTEN IN CW MODE")); // NOI18N
+        CB_ListenInCwMode.setToolTipText(optionsdialog.getString("TIP FOR LISTEN IN CW MODE")); // NOI18N
+        CB_ListenInCwMode.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                CB_ListenInCwModeActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -2174,7 +2191,10 @@ public class OptionsDialog extends javax.swing.JDialog {
                         .addGap(82, 82, 82)
                         .addComponent(jLabel13)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cboModes, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(cboModes, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(CB_ListenInCwMode)))
                 .addGap(76, 76, 76))
         );
         jPanel2Layout.setVerticalGroup(
@@ -2208,7 +2228,10 @@ public class OptionsDialog extends javax.swing.JDialog {
                     .addComponent(jLabel15)
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(cboModes, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel13))))
+                        .addComponent(jLabel13)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 36, Short.MAX_VALUE)
+                .addComponent(CB_ListenInCwMode)
+                .addGap(40, 40, 40))
         );
 
         tabOptions.addTab("Modes", jPanel2);
@@ -2583,6 +2606,11 @@ public class OptionsDialog extends javax.swing.JDialog {
             cf.setPreference("EVERYXHOURS", myobject.toString());
 
 //System.out.println(cboModes.getSelectedItem());
+            if (CB_ListenInCwMode.isSelected()) {
+                cf.setPreference("LISTENINCWMODE", "yes");
+            } else {
+                cf.setPreference("LISTENINCWMODE", "no");
+            }
             Main.defaultTxModem = cboModes.getSelectedItem().toString();
             cf.setPreference("DEFAULTMODE", Main.defaultTxModem);
 
@@ -3063,6 +3091,10 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
         // TODO add your handling code here:
     }//GEN-LAST:event_txtModemIPPortActionPerformed
 
+    private void CB_ListenInCwModeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CB_ListenInCwModeActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_CB_ListenInCwModeActionPerformed
+
     /**
      * A mode is checked/unchecked so the mode list should be refilled
      */
@@ -3286,6 +3318,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JCheckBox CB_DOMEX11;
     private javax.swing.JCheckBox CB_DOMEX22;
     private javax.swing.JCheckBox CB_DOMEX5;
+    private javax.swing.JCheckBox CB_ListenInCwMode;
     private javax.swing.JCheckBox CB_MFSK16;
     private javax.swing.JCheckBox CB_MFSK32;
     private javax.swing.JCheckBox CB_PSK125R;

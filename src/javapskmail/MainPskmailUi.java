@@ -468,7 +468,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                                 //We have a hang modem, request an Flgdigi restart
                                 //NO, just kill it
                                 System.out.println("Modem test period exhausted, Killing modem process");
-                                Main.m.killFldigi(false); //We are going to restart the modem. not final task kill
+                                Main.m.killFldigi(); //We are going to restart the modem. not final task kill
                                 //Main.requestModemRestart = true;
                                 //System.out.println("Modem test period exausted, requesting modem restart");
                                 //Reset test flag
@@ -875,7 +875,11 @@ public class MainPskmailUi extends javax.swing.JFrame {
                                     | (!Main.connected & !Main.Connecting & !Main.monitorMode
                                     & !Main.bulletinMode & !radioMsgActive & !serverActive
                                     & !Main.TxActive & !Main.modemTestMode)) {
-                                Main.m.setModemModeNow(Main.defaultmode);
+                                if (Main.configuration.getPreference("LISTENINCWMODE").equals("yes")) {
+                                    Main.m.setModemModeNow(ModemModesEnum.CW);
+                                } else {
+                                    Main.m.setModemModeNow(Main.defaultmode);
+                                }
                                 Main.txModem = Main.defaultmode;
                                 Main.rxModem = Main.defaultmode;
                                 String rxstring = Main.m.getTXModemString(Main.defaultmode);
@@ -4135,7 +4139,8 @@ public class MainPskmailUi extends javax.swing.JFrame {
 private void mnuQuitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuQuitActionPerformed
     Main.m.Sendln("<cmd>normal</cmd>\n");
 
-    Main.m.killFldigi(true); //We are exiting
+    Main.exitingSoon = true;
+    Main.m.killFldigi();
 
     try {
         if (Main.m.pout != null) {
@@ -5842,8 +5847,9 @@ private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:even
 
     if (Main.m != null) {
         Main.m.Sendln("<cmd>normal</cmd>\n");
-
-        Main.m.killFldigi(true); //We are exiting
+        
+        Main.exitingSoon = true;
+        Main.m.killFldigi();
 
         try {
             if (Main.m.pout != null) {

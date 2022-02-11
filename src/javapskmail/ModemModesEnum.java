@@ -48,5 +48,6 @@ public enum ModemModesEnum {
     PSK125RC4,
     CTSTIA,
     DOMINOEX22,
-    DOMINOEX11
+    DOMINOEX11,
+    CW
 }

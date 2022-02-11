@@ -70,9 +70,8 @@ public class ServerMail {
     .
     */
     public static String sendMail(String fromStr, String toStr, String subjectStr, 
-            String bodyStr, String attachementFileName) {
+        String bodyStr, String attachementFileName) {
         String result = "";
-        
         
         //Properties for gmail
         String smtpServer = Main.configuration.getPreference("SERVERSMTPHOST");//"smtp.gmail.com";
@@ -80,6 +79,7 @@ public class ServerMail {
         String socketFactoryClass = "javax.net.ssl.SSLSocketFactory";
         String smtpAuth = "true";
         String smtpPort = "465";
+        //String smtpPort = "587";
         final String fromAddress = Main.configuration.getPreference("SERVEREMAILADDRESS");
         final String userName = Main.configuration.getPreference("SERVERUSERNAME");
         final String password = Main.configuration.getPreference("SERVERPASSWORD");
@@ -155,7 +155,7 @@ public class ServerMail {
             result = "\nMessage sent...\n";
         } catch (Exception ex) {
             //Save in log for debugging
-            Main.log.writelog("Error sending Mail: " + ex.getMessage() + "\n", false);
+            Main.log("Error sending Email: " + ex.getMessage() + "\n");
             result = "Error sending Email: " + ex.toString();
         }
         return result;
@@ -227,11 +227,11 @@ public class ServerMail {
             mailHeaders = "Your mail: " + mailHeaders.length() + "\n" + mailHeaders + "-end-\n";
         } catch (Error err) {
             //err.printStackTrace();
-            Main.log.writelog("Error accessing Folder: " + err.getMessage() + "\n", false);
+            Main.log("Error accessing Folder: " + err.getMessage() + "\n");
             mailHeaders = "Error accessing Folder: " + err.getMessage() + "\n";
             //throw (err);
         } catch (Exception e) {
-            Main.log.writelog("Error accessing emails: " + e.getMessage() + "\n", false);
+            Main.log("Error accessing emails: " + e.getMessage() + "\n");
             mailHeaders = "Error accessing emails: " + e.getMessage() + "\n";
         } finally {
             try {
@@ -528,11 +528,13 @@ public class ServerMail {
             }
         } catch (Error err) {
             err.printStackTrace();
-            Main.log.writelog("Error accessing Folder: " + err.getMessage() + "\n", false);
+            Main.log("Error accessing Folder: " + err.getMessage() + "\n");
+            returnString = "Error accessing Folder: " + err.getMessage() + "\n";
             //throw (err);
         } catch (Exception e) {
             Exception e1 = e;
-            Main.log.writelog("Error accessing emails: " + e1.getMessage() + "\n", false);
+            Main.log("Error accessing emails: " + e1.getMessage() + "\n");
+            returnString = "Error accessing Folder: " + e1.getMessage() + "\n";
         } finally {
             try {
                 if (folder != null && folder.isOpen()) {
@@ -673,11 +675,13 @@ public class ServerMail {
             }
         } catch (Error err) {
             err.printStackTrace();
-            Main.log.writelog("Error accessing Folder: " + err.getMessage() + "\n", false);
+            Main.log("Error accessing Folder: " + err.getMessage() + "\n");
+            returnString = "Error accessing Folder: " + err.getMessage() + "\n";
             //throw (err);
         } catch (Exception e) {
             Exception e1 = e;
-            Main.log.writelog("Error accessing emails: " + e1.getMessage() + "\n", false);
+            Main.log("Error accessing emails: " + e1.getMessage() + "\n");
+            returnString = "Error accessing emails: " + e1.getMessage() + "\n";
         } finally {
             try {
                 if (folder != null && folder.isOpen()) {
@@ -795,7 +799,7 @@ public class ServerMail {
 
     }
     
-    //Compresses an email message and provides the exchange initiation string (">FM:") to send to the client.
+    //Compresses a web page data and provides the exchange initiation string (">FM:") to send to the client.
     // Text content only.
     public static String tgetZip(String webPage) {
         String returnString = "";

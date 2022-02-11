@@ -118,7 +118,6 @@ public class Modem implements Runnable {
     //private Socket sock = null;
     private boolean fldigiRunning = false;
     private boolean cantLaunchFldigi = false;
-    private boolean exitingSoon = false;
     private boolean warnedOnce = false;
     private Thread myOutputStreamThread = null;
     public boolean commToFldigiOpened = false; // Use this to suppress errors when the port is closed
@@ -458,10 +457,8 @@ public class Modem implements Runnable {
         return result;
     }
  
-    public int killFldigi(boolean killToExit) {
+    public int killFldigi() {
         int result = -1;
-        //Set flag to prevent unecessary error messages
-        exitingSoon = killToExit;
 
         String outProcLine;
         //Kill
@@ -624,6 +621,9 @@ public class Modem implements Runnable {
                     break;
                 case DOMINOEX11:
                     modeset = "DOMINOEX11";
+                    break;
+                case CW:
+                    modeset = "CW";
                     break;
             }
         } catch (NullPointerException npe) {
@@ -1024,9 +1024,9 @@ public class Modem implements Runnable {
 
     private char GetByte() {
         char myChar;
-        
+
         //Exiting, return 0
-        if (exitingSoon) {
+        if (Main.exitingSoon) {
             try {
                 Thread.sleep(200);
             } catch (Exception e1) {
@@ -1040,56 +1040,59 @@ public class Modem implements Runnable {
             //Changed to int to prevent 255(char) to be read as -1(byte)
             //byte back = (byte) in.read();
             back = in.read();
-            //Broken socket?
-            if (back == -1 || Main.requestModemRestart) {
-                if (back == -1) {
-                    if (fldigiRunning) {
-                        //We launched Fldigi automatically
-                        System.out.println("Error reading from modem (socket closed -1), restarting Fldigi");
-                    } else {
-                        //Prevent fast processing of null character
-                        try {
-                            Thread.sleep(1000);
-                        } catch (Exception e1) {
-                            //Nothing
+            if (!Main.exitingSoon) {
+
+                //Broken socket?
+                if (back == -1 || Main.requestModemRestart) {
+                    if (back == -1) {
+                        if (fldigiRunning) {
+                            //We launched Fldigi automatically
+                            System.out.println("Error reading from modem (socket closed -1), restarting Fldigi");
+                        } else {
+                            //Prevent fast processing of null character
+                            try {
+                                Thread.sleep(1000);
+                            } catch (Exception e1) {
+                                //Nothing
+                            }
                         }
+                    } else {
+                        System.out.println("Received request to restart Fldigi");
+                    }
+                    Main.modemAutoRestartDelay = 0; //Clear auto-restart timer, no point in doubling up
+                    Main.requestModemRestart = false; //Clear restart flag
+                    try {
+                        connectToFldigi();
+                        //Reset mode as server
+                        Sendln("<cmd>server</cmd>");
+                        //And reset RxRsid to ON
+                        setRxRsid("ON");
+                        //Clear flags again in case they were reset in-between
+                        Main.modemAutoRestartDelay = 0; //Clear auto-restart timer, no point in doubling up
+                        Main.requestModemRestart = false; //Clear restart flag
+                        back = in.read();
+//                    System.out.println("Test, 2nd read returns: " + (char) back);
+                    } catch (IOException e1) {
+                        //Tried but fail, stop trying
+                        //e1.printStackTrace();
+                        Main.modemAutoRestartDelay = 0; //Clear auto-restart timer, no point in doubling up
+                        Main.requestModemRestart = false; //Clear restart flag
                     }
                 } else {
-                    System.out.println("Received request to restart Fldigi");
+                    if (back != 0) {
+                        Main.lastModemCharTime = System.currentTimeMillis();
+                    }
                 }
-                Main.modemAutoRestartDelay = 0; //Clear auto-restart timer, no point in doubling up
-                Main.requestModemRestart = false; //Clear restart flag
-                try {
-                    connectToFldigi();
-                    //Reset mode as server
-                    Sendln("<cmd>server</cmd>");
-                    //And reset RxRsid to ON
-                    setRxRsid("ON");
-                    //Clear flags again in case they were reset in-between
-                    Main.modemAutoRestartDelay = 0; //Clear auto-restart timer, no point in doubling up
-                    Main.requestModemRestart = false; //Clear restart flag
-                    back = in.read();
-//                    System.out.println("Test, 2nd read returns: " + (char) back);
-                } catch (IOException e1) {
-                    //Tried but fail, stop trying
-                    //e1.printStackTrace();
-                    Main.modemAutoRestartDelay = 0; //Clear auto-restart timer, no point in doubling up
-                    Main.requestModemRestart = false; //Clear restart flag
-                }
-            } else {
-                if (back != 0) {
-                    Main.lastModemCharTime = System.currentTimeMillis();
-                }
+                myChar = (char) back;
+                //if (myChar == 2) {
+                //    Main.stxflag = false;
+                //}
+                //         System.out.println( back);
+                //         System.out.println( myChar);
+                return myChar;
             }
-            myChar = (char) back;
-            //if (myChar == 2) {
-            //    Main.stxflag = false;
-            //}
-            //         System.out.println( back);
-            //         System.out.println( myChar);
-            return myChar;
         } catch (IOException e) {
-            if (!exitingSoon) {
+            if (!Main.exitingSoon) {
                 try {
                     System.out.println("Error reading from modem (IOException), restarting Fldigi: " + e);
                     connectToFldigi();
@@ -1120,8 +1123,9 @@ public class Modem implements Runnable {
             }
             return '\0';  // should not happen.
         }
+        return '\0';  // should not happen.
     }
-    
+   
     //Takes the raw RSID <Mode:abcd> string from Fldigi and returns the modem string used to set the mode in Fldigi
     private String rawRsidToModeString(String rawRsidStr) {
         String modeStr = "";

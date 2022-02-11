@@ -33,9 +33,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.0.2.1";
+    static String version = "3.0.3";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20220119";
+    static String versionDate = "20220211";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -211,6 +211,7 @@ public class Main {
     static int sql = 30;
     static final int SQL_FLOOR = 1;
     static String statusText = "";
+    public static boolean exitingSoon = false;
     //static boolean stxflag = false;
 
     // Positions
@@ -441,7 +442,7 @@ public class Main {
                     if (m.expectedReturnToRxTime > 0L && System.currentTimeMillis() > m.expectedReturnToRxTime) {
                         //Reset loop by killing and re-launching fldigi (brute force for now until the root cause is identified)
                         m.expectedReturnToRxTime = 0L; //Consume event
-                        m.killFldigi(false);
+                        m.killFldigi();
                         //Main.log.writelog("Locked in TX for too long, restarting Fldigi.", null, true);
                         System.out.println("Locked in TX for too long, restarting Fldigi.");
                     }
@@ -524,6 +525,9 @@ public class Main {
                         //  block as Fldigi needs to re-initialize the modem at each mode change
                         //String SendMode = "<cmd><mode>" + m.getTXModemString(TxModem) + "</mode></cmd>";
                         String SendMode = m.getTXModemString(txModem);
+                        if (q.txserverstatus == TxStatus.TXCWACK || q.txserverstatus == TxStatus.TXCWNACK) {
+                            SendMode = ModemModesEnum.CW.toString();
+                        }
                         //System.out.println("TXMODEM for connect:" + m.getTXModemString(TxModem));
                         //       System.out.println("MAIN6:" + Sendline_cp);
                         //m.Sendln(SendMode);
@@ -1003,10 +1007,13 @@ public class Main {
                                         //Changed back to always open
                                         if (check.equals(pCheck)) {
                                             String subject = "Short email from " + scall;
-                                            String resultStr = ServerMail.sendMail(scall, email, subject, body, ""); //last param is attachementFileName
+                                            String resultStr = ServerMail.sendMail("", email, subject, body, ""); //last param is attachementFileName
                                             //If I run as server, send QSL
                                             if (resultStr.contains("Message sent")) {
                                                 q.send_QSL_reply();
+                                            } else {
+                                                //Alert Server and Client
+                                                Main.txText += resultStr;
                                             }
                                         }
                                     }
