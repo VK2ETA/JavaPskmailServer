@@ -1,7 +1,7 @@
 /*
  * RMsgObject.java  
  *   
- * Copyright (C) 2017-2021 John Douyere (VK2ETA)  
+ * Copyright (C) 2017-2022 John Douyere (VK2ETA)  
  * 
  * This program is distributed in the hope that it will be useful,  
  * but WITHOUT ANY WARRANTY; without even the implied warranty of  
@@ -17,12 +17,18 @@ package javapskmail;
 import java.io.File;
 import java.io.FileFilter;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Locale;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class RMsgObject {
 
@@ -49,6 +55,8 @@ public class RMsgObject {
     String accessPasswordUsed;
     String timeId;
     Boolean sent;
+    Calendar receiveDate;
+    
 
     //Blank object constructor
     public RMsgObject() {
@@ -76,6 +84,7 @@ public class RMsgObject {
         this.accessPasswordUsed = "";
         this.timeId = "";
         this.sent = false;
+        this.receiveDate = null;
     }
 
 
@@ -103,6 +112,7 @@ public class RMsgObject {
         this.accessPasswordUsed = "";
         this.timeId = "";
         this.sent = false;
+        this.receiveDate = null;
     }
 
 
@@ -219,12 +229,37 @@ public class RMsgObject {
         if (!this.via.equals("")) {
             formattedString += ", Via: " + this.via;
         }
-        if (this.fileName != null && this.fileName.indexOf(".txt") != -1) { //Error in file name (crashes in Hazmat device)
-            formattedString += " @ " + this.fileName.substring(0, this.fileName.indexOf(".txt"));
+        if (this.receiveDate != null 
+                && (this.from.contains("=") || RMsgProcessor.isEmail(this.from) || RMsgProcessor.isCellular(this.from))) {
+            //We have an email/SMS message with a received date/time in UTC, convert to local time zone
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd' at 'HH:mm:ss");
+            dateFormat.setTimeZone(TimeZone.getDefault());
+            String strDate = dateFormat.format(this.receiveDate.getTime());
+            formattedString += ", On " + strDate;
         } else {
-            formattedString += " @ " + this.fileName;
+            //All other cases, display the sent time instead of the received time
+            if (this.fileName != null && this.fileName.indexOf(".txt") != -1) { //Error in file name (crashes in Hazmat device)
+                //Normally formed file name, convert UTC to local time zone
+                String dateStamp = this.fileName.substring(0, this.fileName.indexOf(".txt"));
+                //We have a full date/time in UTC timezone for the receipt of this message (Msg stored on disk)
+                //Example = "2017-10-25_113958";
+                try {                    
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HHmmss", Locale.US);
+                    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                    cal.setTime(sdf.parse(dateStamp));
+                    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd' at 'HH:mm:ss");
+                    dateFormat.setTimeZone(TimeZone.getDefault());
+                    String strDate = dateFormat.format(cal.getTime());
+                    formattedString += ", On " + strDate;
+                } catch (ParseException e) {
+                    //Debug
+                    e.printStackTrace();
+                }
+            } else {
+                formattedString += " On " + this.fileName;
+            }
         }
-
         return formattedString;
     }
 
@@ -428,14 +463,14 @@ public class RMsgObject {
     //Takes a message object and returns a formatted string rebuilt with matching received CRC
     public String formatForRx(boolean withAccessPassword) {
 
-        String txBuffer = createBufferNoCRC(false, false); //No conversion to lowercase, not for storage
+        String rxBuffer = createBufferNoCRC(false, true); //No conversion to lowercase, for storage
 
         //Add enclosing new lines and crc
         String accessPassword = Main.accessPassword;
-        String chksumString = RMsgCheckSum.Crc16(txBuffer + (withAccessPassword ? accessPassword : ""));
-        txBuffer = txBuffer + chksumString + Character.toString((char)4);
+        String chksumString = RMsgCheckSum.Crc16(rxBuffer + (withAccessPassword ? accessPassword : ""));
+        rxBuffer = rxBuffer + chksumString + Character.toString((char)4);
 
-        return txBuffer;
+        return rxBuffer;
     }
 
 
@@ -465,7 +500,7 @@ public class RMsgObject {
     }
 
 
-    //Takes a message object and returns a formatted string ready for Txing via Radio Modems
+    //Takes a message object and returns a formatted string
     public String createBufferNoCRC(boolean allCharsToLowerCase, boolean forStorage) {
 
         String txBuffer;
@@ -497,6 +532,23 @@ public class RMsgObject {
         }
         if (!this.timeId.equals("")) {
             txBuffer += "id:" + this.timeId + "\n";
+        }
+        if (this.receiveDate != null) {
+            if (forStorage) {
+                //Keep the received date as a full date (not an offset to Now)
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'_'HHmmss");
+                dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                String strDate = dateFormat.format(this.receiveDate.getTime());
+                txBuffer += "rd:" + strDate + "\n";
+            } else {
+                //We Tx an offset to the current UTC time in seconds (most of the time way shorter than sending a full date)
+                Long nowInMillis = System.currentTimeMillis();
+                Long recDateInMillis = this.receiveDate.getTimeInMillis();
+                Long secs = nowInMillis - recDateInMillis;
+                secs = secs / 1000;
+                String strRo = secs.toString();
+                txBuffer += "ro:" + strRo + "\n";
+            }
         }
         if (allCharsToLowerCase) {
             txBuffer = txBuffer.toLowerCase(Locale.US);
@@ -540,6 +592,32 @@ public class RMsgObject {
                         mMessage.sms = group2;
                     } else if (group1.equals("id")) {
                         mMessage.timeId = group2;
+                    } else if (group1.equals("rd")) {
+                        //We have a full date/time in UTC timezone for the receipt of this message (Msg stored on disk)
+                        String rtStr = group2;
+                        try {
+                            //Example = "2017-10-25_113958";
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HHmmss", Locale.US);
+                            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                            mMessage.receiveDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                            mMessage.receiveDate.setTime(sdf.parse(rtStr));
+                        } catch (ParseException e) {
+                            //Debug
+                            e.printStackTrace();
+                        }
+                    } else if (group1.equals("ro")) {
+                        //We have an offset to current UTC time in seconds (Rxed message)
+                        Long deltaSecs = 0L;
+                        try {
+                            deltaSecs = Long.parseLong(group2);
+                            //Example = "3662" as a receipt time, typically for an email, that was received 1 hour, 1 minute and 2 seconds ago
+                            Date recDate = new Date(System.currentTimeMillis() - (deltaSecs * 1000));
+                            mMessage.receiveDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                            mMessage.receiveDate.setTime(recDate);
+                        } catch (NumberFormatException e) {
+                            //Debug
+                            e.printStackTrace();
+                        }
                     } else if (group1.equals("pos")) {
                         //format is either
                         // pos:XXXXYYYYSSS,NNN\n compressed position like in APRS
@@ -648,7 +726,7 @@ public class RMsgObject {
                             mMessage.picture = Bitmap.decodeFile(filePath + pictureFn);
                         }
                     }
-
+                    //CRC
                 } else if (group3 != null) {
                     mMessage.crcValid = false;
                     mMessage.crcValidWithPW = false;

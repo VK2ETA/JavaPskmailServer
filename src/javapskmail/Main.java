@@ -2,7 +2,7 @@
  * Main.java
  * 
  * Copyright (C) 2008 Pär Crusefalk and Rein Couperus
- * Copyright (C) 2018-2021 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
+ * Copyright (C) 2018-2022 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.UIManager;
 import java.util.Random;
+import java.util.TimeZone;
 import javax.swing.JFrame;
 
 /**
@@ -33,9 +34,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.0.3";
+    static String version = "3.0.4";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20220211";
+    static String versionDate = "20220307";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -209,7 +210,8 @@ public class Main {
     static int freqOffset = 1000;
     static int quality = 0;
     static int sql = 30;
-    static final int SQL_FLOOR = 1;
+    //VK2ETA static final int SQL_FLOOR = 1;
+    static final int SQL_FLOOR = 0;
     static String statusText = "";
     public static boolean exitingSoon = false;
     //static boolean stxflag = false;
@@ -472,6 +474,13 @@ public class Main {
                         //Send message
                         //Sendline = "\n\n" + m.txMessage.formatForTx(false) + "\n"; //No CCIR modes for now
                         String toSend = "\n\n" + m.txMessage.formatForTx(false) + "\n"; //No CCIR modes for now
+                        //Save date-time of start of sending in UTC timezone
+                        Calendar c1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                        RMsgProcessor.FileNameString = String.format(Locale.US, "%04d", c1.get(Calendar.YEAR)) + "-"
+                                + String.format(Locale.US, "%02d", c1.get(Calendar.MONTH) + 1) + "-"
+                                + String.format(Locale.US, "%02d", c1.get(Calendar.DAY_OF_MONTH)) + "_"
+                                + String.format(Locale.US, "%02d%02d%02d", c1.get(Calendar.HOUR_OF_DAY),
+                                        c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND)) + ".txt";
                         m.Sendln(toSend, m.txMessage.rxMode, "ON"); //Tx Rsid ON
                         //Log in monitor screen
                         Main.monitorText += "\n*TX*  " + "<SOH>"
@@ -794,7 +803,7 @@ public class Main {
                                 if (Blockline.contains("QSL") & Blockline.contains(" de ")) {
                                     String pCheck = "";
                                     //Pattern psc = Pattern.compile(".*de ([A-Z0-9\\-]+)\\s(?:(\\d*)|((\\d+)\\s+(\\d+))\\s)([0123456789ABCDEF]{4}).*");
-                                    Pattern psc = Pattern.compile(".*QSL(\\s[A-Za-z0-9\\-\\/]+)? de ([A-Za-z0-9\\-\\/]+)\\s*(((\\d+\\s)(\\d+\\s))|(\\d+\\s))?([0123456789ABCDEF]{4}).*");
+                                    Pattern psc = Pattern.compile(".*QSL(\\s[A-Za-z0-9\\-\\/]+)? de ([A-Za-z0-9\\-\\/]+)\\s*(((\\d+\\s)([\\-0-9]+\\s))|(\\d+\\s))?([0123456789ABCDEF]{4}).*");
                                     Matcher msc = psc.matcher(Blockline);
                                     String scall = "";
                                     rxSnr = "";
@@ -1346,12 +1355,12 @@ public class Main {
                                         q.send_status(myRxStatus);  // send our status
                                     }
                                 } else if (rxb.radioMsgBlock) {//process RadioMsg message
-                                    if (wantRelayOverRadio | wantRelaySMSs | wantRelayEmails) {
-                                        radioMsgWorking = true;//Use either last RSID modem used if any or the default mode
-                                        RMsgProcessor.processBlock(Blockline, RMsgProcessor.FileNameString,
-                                                Main.lastRsidReceived.length() > 0 ? Main.lastRsidReceived : Main.rxModemString);
-                                        Main.lastRsidReceived = ""; //Reset for next RSID.
-                                    }
+                                    //if (wantRelayOverRadio | wantRelaySMSs | wantRelayEmails) {
+                                    radioMsgWorking = true;//Use either last RSID modem used if any or the default mode
+                                    RMsgProcessor.processBlock(Blockline, RMsgProcessor.FileNameString,
+                                            Main.lastRsidReceived.length() > 0 ? Main.lastRsidReceived : Main.rxModemString);
+                                    Main.lastRsidReceived = ""; //Reset for next RSID.
+                                    //}
                                 }
                             } //End of if NOT Connected
                             if (rxb.type.equals("c")) {
@@ -1386,6 +1395,7 @@ public class Main {
                                                 txText = "";
                                                 totalBytes = 0;
                                                 sm.initSession();
+                                                //more restting necessary here xxxx
                                                 //VK2ETA: Already done in initSession()
                                                 //for (int i = 0; i < 64; i++) {
                                                 //    Session.txbuffer[i] = "";

@@ -1,7 +1,7 @@
 /*
  * RMsgDisplayItem.java
  *
- * Copyright (C) 2017-2021 John Douyere (VK2ETA) 
+ * Copyright (C) 2017-2022 John Douyere (VK2ETA) 
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -15,7 +15,13 @@
 
 package javapskmail;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -318,13 +324,21 @@ public class RMsgDisplayList {
     }
 
 
-    //Detects duplicate messages when a message is ent via a relay, the receiving end
+    //Detects duplicate messages in two cases:
+    //1. when a message is sent via a relay, the receiving end
     // can receive the message directly and via the relay moments later.
-    // Uses the message id information send with the relayed message which consist of the three
+    // We use the message id information sent with the relayed message which consist of the three
     // least significant digits of the minutes and seconds (E.g: 752 for minute 7 and 52 seconds)
-    // of the end of RX time at the relay. Since both the relay and receiving station
+    // end of RX time at the relay. Since both the relay and receiving station
     // would have received the original message at the same time, the allowed time difference
     // is 10 seconds to account for time drifts and different CPU speeds at both stations
+    //
+    //2. When re request messages to be resent (they can be radio messages or relayed message or emails/SMSs messages)
+    //   The "ro" field is received with the offset in seconds since this message was received by the sender
+    //   This can be the receive time of a radio message or the email receive time at the email provider.
+    //   A duplicate is a message whose content (text, positions, etc...) is identical to an already 
+    //     received message AND has a calculated received time within 60 seconds of each other (we
+    //     need to account for the RSID and FEC/Interleaver delay).
     synchronized public boolean isDuplicate(RMsgObject mMessage) {
         boolean isDuplicate = false;
         int listLength = displayList.size();
@@ -332,24 +346,60 @@ public class RMsgDisplayList {
         RMsgDisplayItem recDisplayItem = null;
         if (listLength > 0) {
             //Iterate through the last 3 received items in the list
-            int trialCount = 0;
+            //int trialCount = 0;
             for (int ii = listLength - 1; ii >= 0; ii--) {
+                //Need to check until the end or until a duplicate is found
+                if (isDuplicate) break;
                 recDisplayItem = displayList.get(ii);
                 //Only received messages
                 if (!recDisplayItem.myOwn) {
                     //No need to check past the three previous messages
-                    if (++trialCount > 3) break;
+                    //Not true anymore, need to check until the end or until a duplicate is found
+                    //if (++trialCount > 3) break;
                     recMessage = recDisplayItem.mMessage;
                     //Looks like the same message was received direct and via a relay?
                     if (recMessage.from.equals(mMessage.from)
-                            && recMessage.via.equals(mMessage.relay)
+                            //&& recMessage.via.equals(mMessage.relay)
                             && recMessage.sms.equals(mMessage.sms)
                             && recMessage.msgHasPosition == mMessage.msgHasPosition) {
                         if (!recMessage.msgHasPosition ||
                                 (recMessage.position != null && mMessage.position != null
-                                        && recMessage.position == mMessage.position)) {
+                                        //Check position accuracy within 1.1 metre
+                                        && (Math.abs(recMessage.position.getLatitude() - mMessage.position.getLatitude()) < 0.00001)
+                                        && (Math.abs(recMessage.position.getLongitude() - mMessage.position.getLongitude()) < 0.00001))) {
                             //Check the time difference
-                            if (mMessage.timeId.trim().length() == 3) {
+                            if (mMessage.receiveDate != null) {
+                                if (recMessage.receiveDate != null) {
+                                    //We have two look alike messages, both with a received date, check delta time
+                                    Long previousDateInMillis = recMessage.receiveDate.getTimeInMillis();
+                                    Long recDateInMillis = mMessage.receiveDate.getTimeInMillis();
+                                    Long deltaTime = Math.abs(recDateInMillis - previousDateInMillis) / 1000;
+                                    if (deltaTime < 61L) {
+                                        //60 seconds leeway
+                                        isDuplicate = true;
+                                    }
+                                } else {
+                                    //We have two look alike messages, the latest with a 
+                                    // received date, the old one not, use its file name as a timestamp
+                                                            //Example = "2017-10-25_113958";
+                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'_'HHmmss", Locale.US);
+                                    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                                    try {
+                                        Date recDate = sdf.parse(recMessage.fileName.replaceAll(".txt", ""));
+                                        Long previousDateInMillis = recDate.getTime();
+                                        Long recDateInMillis = mMessage.receiveDate.getTimeInMillis();
+                                        Long deltaTime = Math.abs(recDateInMillis - previousDateInMillis) / 1000;
+                                        if (deltaTime < 61L) {
+                                            //60 seconds leeway
+                                            isDuplicate = true;
+                                        }
+                                    } catch (ParseException e) {
+                                        //Nothing, bad Juju if the filename is not good
+                                    }
+                                }
+                            } else if (mMessage.timeId.trim().length() == 3
+                                    && recMessage.via.equals(mMessage.relay)) {
+                                //We have a radio message sent by the relay, check if it was already received directly
                                 try {
                                     int thisTimeIdMin = Integer.parseInt(mMessage.timeId.substring(0, 1));
                                     int thisTimeIdSec = Integer.parseInt(mMessage.timeId.substring(1));
@@ -370,7 +420,9 @@ public class RMsgDisplayList {
                                         deltaTime = 600 - deltaTime;
                                     }
                                     if (deltaTime < 11) {
-                                        //10 seconds leeway
+                                        //10 seconds leeway for local clock differences. Since the two messages were received
+                                        // using the same mode, the receive delays are the same (ignoring the processing
+                                        // speed difference of the two devices)
                                         isDuplicate = true;
                                     }
                                 } catch (Exception e) {
@@ -378,7 +430,6 @@ public class RMsgDisplayList {
                                 }
                             }
                         }
-
                     }
                 }
             }

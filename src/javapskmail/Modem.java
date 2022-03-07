@@ -2,7 +2,7 @@
  * Modem.java
  *
  * Copyright (C) 2008 Pär Crusefalk and Rein Couperus
- * Copyright (C) 2018-2021 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
+ * Copyright (C) 2018-2022 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -895,7 +895,8 @@ public class Modem implements Runnable {
         int savedFirstCharDelay = firstCharDelay;
         
         //Get block time for a block size of 64 characters
-        int txTime = getBlockTimeAndDelay(Main.txModem);
+        //int txTime = getBlockTimeAndDelay(Main.txModem);
+        int txTime = getBlockTimeAndDelay(mode);
         //Adjust for the length of the data to be transmitted
         txTime = firstCharDelay + (txTime * dataLength) / 64; //Include FEC delay
         //Restore global value (was calculated based on Rx mode not Tx mode, and is needed for Rx timeouts)
@@ -1221,8 +1222,8 @@ public class Modem implements Runnable {
                         if (Main.possibleRadioMsg > 0L) {
                             Main.possibleRadioMsg = blockstart;
                         }
-                        //Create filename in case we have a radio message
-                        Calendar c1 = Calendar.getInstance();
+                        //Create filename (with UTC time zone) in case we have a radio message
+                        Calendar c1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                         RMsgProcessor.FileNameString = String.format(Locale.US, "%04d", c1.get(Calendar.YEAR)) + "-"
                                 + String.format(Locale.US, "%02d", c1.get(Calendar.MONTH) + 1) + "-"
                                 + String.format(Locale.US, "%02d", c1.get(Calendar.DAY_OF_MONTH)) + "_"
@@ -1375,7 +1376,7 @@ public class Modem implements Runnable {
                                 } else { //We must have received an RSID                         
                                     Main.possibleRadioMsg = System.currentTimeMillis();
                                     //Open squelch...a frame may be coming
-                                    RigCtrl.SetSql(Main.SQL_FLOOR);
+                                    RigCtrl.SetSqlLevel(Main.SQL_FLOOR);
                                     //Reset receiving radio message as we are getting a new message in all logic and the RSID would have resetted the modem anyway
                                     Main.receivingRadioMsg = false;
                                     Main.haveSOH = false;
@@ -1529,6 +1530,12 @@ public class Modem implements Runnable {
                                 //String blockType = BlockString.substring(7, 8);
                                 receivingStatusBlock = BlockString.substring(7, 8).equals("s");
                             }
+                            //Put limit to block size (256 chars plus expansion of multiple <SOH>/<EOT> from
+                            //  single character to "<SOH>" or "<EOT>" string (Fldigi specific)
+                            if (BlockString.length() > 280) {
+                                BlockActive = false;
+                                BlockString = "";                               
+                            }
                         }
                         break;
                 } // end switch
@@ -1673,15 +1680,16 @@ public class Modem implements Runnable {
         RMsgObject txedMessage = RMsgTxList.getOldestSent(); //Has to be the one just sent
         //Save message into Sent folder if tx is not aborted and is not selcall
         if (txedMessage != null  && !txedMessage.rxMode.equals("CCIR493")) {
-            Calendar c1 = Calendar.getInstance(TimeZone.getDefault());
+            //Calendar c1 = Calendar.getInstance(TimeZone.getDefault());
             //Adjust time so that is is accurate if using GPS time
             //Not on laptops
             //c1.add(Calendar.SECOND, RadioMSG.DeviceToGPSTimeCorrection);
-            String sentFileNameString = String.format(Locale.US, "%04d", c1.get(Calendar.YEAR)) + "-"
-                    + String.format(Locale.US, "%02d", c1.get(Calendar.MONTH) + 1) + "-"
-                    + String.format(Locale.US, "%02d", c1.get(Calendar.DAY_OF_MONTH)) + "_"
-                    + String.format(Locale.US, "%02d%02d%02d", c1.get(Calendar.HOUR_OF_DAY),
-                            c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND)) + ".txt";
+            //String sentFileNameString = String.format(Locale.US, "%04d", c1.get(Calendar.YEAR)) + "-"
+            //        + String.format(Locale.US, "%02d", c1.get(Calendar.MONTH) + 1) + "-"
+            //        + String.format(Locale.US, "%02d", c1.get(Calendar.DAY_OF_MONTH)) + "_"
+            //        + String.format(Locale.US, "%02d%02d%02d", c1.get(Calendar.HOUR_OF_DAY),
+            //                c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND)) + ".txt";
+            String sentFileNameString = RMsgProcessor.FileNameString;
             //Save the text part of the message
             String sentFolderPath = Main.homePath
                     + Main.dirPrefix + Main.dirSent + Main.separator;

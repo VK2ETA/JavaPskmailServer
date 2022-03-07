@@ -33,7 +33,7 @@ public class MessageHeaderViewTableModel extends AbstractTableModel{
      public static final int SIZE_INDEX = 3;
 
     protected String[] columnNames;
-     protected Vector dataVector;
+    protected Vector dataVector;
 
      public MessageHeaderViewTableModel(String[] columnNames) {
          this.columnNames = columnNames;
@@ -63,6 +63,7 @@ public class MessageHeaderViewTableModel extends AbstractTableModel{
          }
      }
 
+     @Override
      public Object getValueAt(int row, int column) {
          String[] mymail = (String[]) dataVector.get(row);
          switch (column) {
@@ -85,10 +86,12 @@ public class MessageHeaderViewTableModel extends AbstractTableModel{
          fireTableCellUpdated(row, column);
      }
 
+     @Override
      public int getRowCount() {
          return dataVector.size();
      }
 
+     @Override
      public int getColumnCount() {
          return columnNames.length;
      }

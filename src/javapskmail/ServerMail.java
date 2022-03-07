@@ -1,7 +1,7 @@
 /*
  * serverMail.java
  *
- * Copyright (C) 2018-2021 John Douyere (VK2ETA)
+ * Copyright (C) 2018-2022 John Douyere (VK2ETA)
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -156,7 +156,11 @@ public class ServerMail {
         } catch (Exception ex) {
             //Save in log for debugging
             Main.log("Error sending Email: " + ex.getMessage() + "\n");
-            result = "Error sending Email: " + ex.toString();
+            String errorMessage = ex.getMessage();
+            if (errorMessage.indexOf("http") > 0) {
+                errorMessage = errorMessage.substring(0, errorMessage.indexOf("http")) + "...";
+            }
+            result = "Error sending Email: " + errorMessage;
         }
         return result;
     }
@@ -680,8 +684,8 @@ public class ServerMail {
             //throw (err);
         } catch (Exception e) {
             Exception e1 = e;
-            Main.log("Error accessing emails: " + e1.getMessage() + "\n");
-            returnString = "Error accessing emails: " + e1.getMessage() + "\n";
+            Main.log("Error deleting emails: " + e1.getMessage() + "\n");
+            returnString = "Error deleting emails: " + e1.getMessage() + "\n";
         } finally {
             try {
                 if (folder != null && folder.isOpen()) {

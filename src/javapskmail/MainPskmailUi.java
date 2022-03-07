@@ -4,7 +4,7 @@
  * Created on den 25 november 2008, 21:55
  *
  * Copyright (C) 2008 Pär Crusefalk (SM0RWO)
- * Copyright (C) 2018-2021 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
+ * Copyright (C) 2018-2022 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -606,7 +606,9 @@ public class MainPskmailUi extends javax.swing.JFrame {
                                 }
                             } else if (Main.quality < Qavg) {
                                 Qlow = ((Qlow * 4) + Main.quality) / 5;
-                                if (Qhi > 15) {
+                                //VK2ETA - squelch never goes below 5
+                                //if (Qhi > 15) {
+                                if (Qhi > 3) {
                                     Qhi -= 1;
                                 }
                             }
@@ -614,14 +616,17 @@ public class MainPskmailUi extends javax.swing.JFrame {
                             Main.sql = Qlow + ((Qhi - Qlow) / 3);
 
                             Main.progress = Main.quality;
-//                                System.out.println(Main.sql);
+                            //System.out.println(Main.sql);
                             //Squelch fully open when actively listening
                             if (Main.connected || Main.m.BlockActive
                                     || Main.receivingRadioMsg || Main.possibleRadioMsg != 0L 
                                     || Main.modemTestMode) {
                                 Main.sql = Main.SQL_FLOOR;
+                                RigCtrl.setSquelchOn(false); //OFF
+                            } else {
+                                RigCtrl.setSquelchOn(true); //ON
+                                RigCtrl.SetSqlLevel(Main.sql);
                             }
-                            RigCtrl.SetSql(Main.sql);
                         }
 
                     } catch (NullPointerException np) {
@@ -890,10 +895,10 @@ public class MainPskmailUi extends javax.swing.JFrame {
                             }
 // check if the squelch is on, and switch on as necessary....
                             try {
-                                boolean SQL = RigCtrl.GetSQL();
+                                boolean SQL = RigCtrl.GetSquelch();
 
                                 if (!SQL) {
-                                    RigCtrl.SetSQL();
+                                    RigCtrl.ToggleSquelch();
                                 }
                             } catch (NullPointerException np) {
                                 System.out.println("SQL is broken");;
@@ -7932,6 +7937,9 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
                 break;
             case HEADERS:
                 LoadHeaders();
+                break;
+            case SENT:
+                LoadSent();
                 break;
         }
     }

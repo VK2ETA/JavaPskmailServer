@@ -1,7 +1,7 @@
 /*
  * RMsgAddToDialog.java
  *
- * Copyright (C) 2018-2021 John Douyere (VK2ETA) 
+ * Copyright (C) 2018-2022 John Douyere (VK2ETA) 
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -33,7 +33,7 @@ public class RMsgResendDialog extends javax.swing.JDialog {
         jRadioButtonHM3.setActionCommand("3");
         jRadioButtonHM5.setActionCommand("5");
         jRadioButtonHM7.setActionCommand("7");
-        jRadioButtonWhatAnyType.setActionCommand("a");
+        jRadioButtonWhatAnyType.setActionCommand("");
         jRadioButtonWhatLastDays.setActionCommand("d");
         jRadioButtonWhatLastHours.setActionCommand("h");
         jRadioButtonWhatLastMinutes.setActionCommand("m");
@@ -315,7 +315,7 @@ public class RMsgResendDialog extends javax.swing.JDialog {
             //Remove To if we use a via data as we never relay *qtc? messages
             // RMsgTxList.addMessageToList("*", selectedVia, "*qtc?" + resendString, false, null, 0, null);
             String toStr = (Main.mainui.selectedVia.equals("") || forceRelayingQTC) ? Main.mainui.selectedTo : "*";
-            RMsgTxList.addMessageToList(toStr, Main.mainui.selectedVia, "*qtc?" + resendString, false, null, 0, null);
+            RMsgTxList.addMessageToList(toStr, Main.mainui.selectedVia, "*qtc?" + resendString.trim(), false, null, 0, null);
         }
         //Done
         this.setVisible(false);

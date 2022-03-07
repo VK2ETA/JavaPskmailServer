@@ -101,11 +101,13 @@ public class RigCtrl {
         return "0";
     }
 
-    public static String SetSql(int Sql) {
+    public static String SetSqlLevel(int Sql) {
 
         double d;
 
-        if (function_ok & Sql != 0) {
+        //VK2ETA try squelch of zero
+        //if (function_ok & Sql != 0) {
+        if (function_ok & Sql >= 0) {
 
             d = Double.parseDouble(Integer.toString(Sql));
             Object[] params = new Object[]{new Double(d)};
@@ -196,7 +198,7 @@ public class RigCtrl {
 
     }
 
-    public static boolean GetSQL() {
+    public static boolean GetSquelch() {
 
         Object[] params = null;
 
@@ -226,7 +228,7 @@ public class RigCtrl {
 
     }
 
-    public static String SetSQL() {
+    public static String ToggleSquelch() {
 
         if (function_ok) {
 
@@ -234,6 +236,23 @@ public class RigCtrl {
 
             try {
                 Object result = client.execute("main.toggle_squelch", params);
+
+            } catch (XmlRpcException ex) {
+                //Main.log.writelog("Problem with xmlrpc set SQL: " + ex, true);
+                function_ok = false;
+            }
+        } else Rigctl(); //Try to re-connect
+        return "0";
+    }
+
+    public static String setSquelchOn(Boolean on) { //false = Off
+        if (function_ok) {
+
+            Object[] params = new Object[]{new Boolean(on)};
+            Object result = null;
+
+            try {
+                result = client.execute("main.set_squelch", params);
 
             } catch (XmlRpcException ex) {
                 //Main.log.writelog("Problem with xmlrpc set SQL: " + ex, true);

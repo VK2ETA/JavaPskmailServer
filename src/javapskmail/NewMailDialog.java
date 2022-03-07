@@ -88,9 +88,9 @@ public class NewMailDialog extends javax.swing.JFrame {
         bOK.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("javapskmail/Bundle"); // NOI18N
         bOK.setText(bundle.getString("NewMailDialog.bOK.text")); // NOI18N
-        bOK.setMaximumSize(new java.awt.Dimension(80, 30));
-        bOK.setMinimumSize(new java.awt.Dimension(80, 25));
-        bOK.setPreferredSize(new java.awt.Dimension(80, 25));
+        bOK.setMaximumSize(new java.awt.Dimension(110, 30));
+        bOK.setMinimumSize(new java.awt.Dimension(110, 25));
+        bOK.setPreferredSize(new java.awt.Dimension(110, 25));
         bOK.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 bOKActionPerformed(evt);

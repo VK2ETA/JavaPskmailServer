@@ -31,7 +31,7 @@ public class GPXWriter {
                 //2021-02-15_173632.txt
                 dateStr = msg.fileName.substring(0, msg.fileName.indexOf("."));
                 try {
-                    gpsDate = new SimpleDateFormat("yyyy-MM-dd_HHmmss").parse(dateStr);
+                    gpsDate = new SimpleDateFormat("yyyy-MM-dd'_'HHmmss").parse(dateStr);
                 } catch (Exception e) {
                    gpsDate = new Date();
                 }

@@ -1,7 +1,7 @@
 /*
  * RMsgMessageViewer.java
  *
- * Copyright (C) 2021 John Douyere (VK2ETA)
+ * Copyright (C) 2021-2022 John Douyere (VK2ETA)
  * Based on Pär Crusefalk (SM0RWO) code.
  *
  * This program is distributed in the hope that it will be useful,
@@ -19,6 +19,11 @@ import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.TimeZone;
 
 
 public class RMsgMessageViewer extends javax.swing.JFrame {
@@ -481,8 +486,22 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
     private void bTxAgainActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bTxAgainActionPerformed
 
         if (RMsgProcessor.matchMyCallWith(mDisplayItem.mMessage.from, false)) {
-            //From me, therefore send as is
-            RMsgTxList.addMessageToList(mDisplayItem.mMessage);
+            //From me. Build a copy.
+            RMsgObject sendAgain = RMsgObject.extractMsgObjectFromFile(Main.dirSent, mDisplayItem.mMessage.fileName, false);
+            if (sendAgain.fileName != null && sendAgain.receiveDate == null) {
+                //Get the receivedDate for the "ro:" information to be sent at TX time
+                try {
+                    //Example = "2017-10-25_113958";
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'_'HHmmss", Locale.US);
+                    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    sendAgain.receiveDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                    sendAgain.receiveDate.setTime(sdf.parse(sendAgain.fileName.replaceAll(".txt", "")));
+                } catch (ParseException e) {
+                    //Debug
+                    //e.printStackTrace();
+                }
+                RMsgTxList.addMessageToList(sendAgain);
+            }
         } else {
             //Not mine, warn to use forward instead
             Main.q.Message(bundle.getString("RMsgMessageViewer.NotSentByYouUseForwardInstead"), 5);

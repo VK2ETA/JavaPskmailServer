@@ -1,7 +1,7 @@
 /*
  * RMsgProcessor.java
  *
- * Copyright (C) 2011-2021 John Douyere (VK2ETA)
+ * Copyright (C) 2011-2022 John Douyere (VK2ETA)
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -386,6 +386,7 @@ public class RMsgProcessor {
                                     for (int i = messages.length; i > 0; i--) {
                                         String senderAddress = "";
                                         String smsString = "";
+                                        Calendar c1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                                         try {
                                             Message msg = messages[i - 1];
                                             //From email address
@@ -399,7 +400,7 @@ public class RMsgProcessor {
                                                 }
                                             }
                                             //Save message time for making filenames later on
-                                            Calendar c1 = Calendar.getInstance(TimeZone.getDefault());
+                                            //Calendar c1 = Calendar.getInstance(TimeZone.getDefault());
                                             Date msgDateTime = msg.getReceivedDate();
                                             c1.setTime(msgDateTime);
                                             //Body
@@ -444,6 +445,8 @@ public class RMsgProcessor {
                                                 radioEmailMessage.relay = Main.configuration.getPreference("CALLSIGNASSERVER", "");
                                                 radioEmailMessage.sms = smsString;
                                                 radioEmailMessage.via = ""; //only direct send
+                                                radioEmailMessage.receiveDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                                                radioEmailMessage.receiveDate.setTime(c1.getTime());
                                                 //String smsGatewayDomain = Main.configuration.getPreference("SMSEMAILGATEWAY", "").trim();
                                                 //Are we still asked to send immediately? Treat SMSs and emails individually. 
                                                 if (Main.configuration.getPreference("RELAYSMSSIMMEDIATELY", "").equals("yes")
@@ -459,47 +462,46 @@ public class RMsgProcessor {
                                                     radioEmailMessage.from = Main.mainui.msgDisplayList.getAliasFromOrigin(senderAddress, toString);
                                                     RMsgTxList.addMessageToList(radioEmailMessage);
                                                 }
-
                                                 /* We do not save the messages received from the internet in the incoming list as we (re)fetch them at each request
-                                            FileWriter out = null;
-                                            //Create a file name for this received cellular SMS
-                                            Calendar c1 = Calendar.getInstance(TimeZone.getDefault());
-                                            radioEmailMessage.fileName = String.format(Locale.US, "%04d", c1.get(Calendar.YEAR)) + "-" +
-                                                    String.format(Locale.US, "%02d", c1.get(Calendar.MONTH) + 1) + "-" +
-                                                    String.format(Locale.US, "%02d", c1.get(Calendar.DAY_OF_MONTH)) + "_" +
-                                                    String.format(Locale.US, "%02d%02d%02d", c1.get(Calendar.HOUR_OF_DAY),
-                                                            c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND)) + ".txt";
-                                            //Save message in file
-                                            boolean isCCIRMode = Modem.isCCIR476();
-                                            String resultString = radioEmailMessage.formatForTx(isCCIRMode);
-                                            String inboxFolderPath = Processor.HomePath +
-                                                    Processor.Dirprefix + Processor.DirInbox + Processor.Separator;
-                                            try {
+                                                FileWriter out = null;
+                                                //Create a file name for this received cellular SMS
+                                                Calendar c1 = Calendar.getInstance(TimeZone.getDefault());
+                                                radioEmailMessage.fileName = String.format(Locale.US, "%04d", c1.get(Calendar.YEAR)) + "-" +
+                                                        String.format(Locale.US, "%02d", c1.get(Calendar.MONTH) + 1) + "-" +
+                                                        String.format(Locale.US, "%02d", c1.get(Calendar.DAY_OF_MONTH)) + "_" +
+                                                        String.format(Locale.US, "%02d%02d%02d", c1.get(Calendar.HOUR_OF_DAY),
+                                                                c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND)) + ".txt";
+                                                //Save message in file
+                                                boolean isCCIRMode = Modem.isCCIR476();
+                                                String resultString = radioEmailMessage.formatForTx(isCCIRMode);
+                                                String inboxFolderPath = Processor.HomePath +
+                                                        Processor.Dirprefix + Processor.DirInbox + Processor.Separator;
+                                                try {
 
-                                                File msgReceivedFile = new File(inboxFolderPath + radioEmailMessage.fileName);
-                                                if (msgReceivedFile.exists()) {
-                                                    msgReceivedFile.delete();
+                                                    File msgReceivedFile = new File(inboxFolderPath + radioEmailMessage.fileName);
+                                                    if (msgReceivedFile.exists()) {
+                                                        msgReceivedFile.delete();
+                                                    }
+                                                    out = new FileWriter(msgReceivedFile, true);
+                                                    out.write(resultString);
+                                                    out.close();
+                                                } catch (Exception e) {
+                                                    loggingclass.writelog("Exception Error in 'OnReceive Email Message' " + e.getMessage(), null, true);
                                                 }
-                                                out = new FileWriter(msgReceivedFile, true);
-                                                out.write(resultString);
-                                                out.close();
-                                            } catch (Exception e) {
-                                                loggingclass.writelog("Exception Error in 'OnReceive Email Message' " + e.getMessage(), null, true);
-                                            }
-                                            //Add to listadapter
-                                            final MsgObject finalMessage = radioEmailMessage;
-                                            RadioMSG.myInstance.runOnUiThread(new Runnable() {
-                                                public void run() {
-                                                    msgArrayAdapter.addNewItem(finalMessage, false); //Is NOT my own message
-                                                }
-                                            });
-                                            //update the list if we are on that screen
-                                            RadioMSG.mHandler.post(RadioMSG.updateList);
-                                            Processor.PostToTerminal("\nSaved File: " + radioEmailMessage.fileName);
-                                            Messaging.addEntryToLog("Received Email " + radioEmailMessage.fileName);
-                                            //Perform notification on speaker/lights/vibrate of new message
-                                            RadioMSG.middleToastText("Email Received: " + radioEmailMessage.fileName);
-                                            //Need to forward it over Radio too?
+                                                //Add to listadapter
+                                                final MsgObject finalMessage = radioEmailMessage;
+                                                RadioMSG.myInstance.runOnUiThread(new Runnable() {
+                                                    public void run() {
+                                                        msgArrayAdapter.addNewItem(finalMessage, false); //Is NOT my own message
+                                                    }
+                                                });
+                                                //update the list if we are on that screen
+                                                RadioMSG.mHandler.post(RadioMSG.updateList);
+                                                Processor.PostToTerminal("\nSaved File: " + radioEmailMessage.fileName);
+                                                Messaging.addEntryToLog("Received Email " + radioEmailMessage.fileName);
+                                                //Perform notification on speaker/lights/vibrate of new message
+                                                RadioMSG.middleToastText("Email Received: " + radioEmailMessage.fileName);
+                                                //Need to forward it over Radio too?
                                                  */
                                                 //Sleep 1 second to ensure all SMSes have a different file name (1 second resolution)
                                                 //try {
@@ -548,7 +550,7 @@ public class RMsgProcessor {
                             //We have lost the connection with the server, restart the NewMailMonitor processing
                             keepInLoop = true;
                             if (!alreadyWarned) {
-                                Main.q.Message("Can't connect to Imap server", 5);
+                                Main.q.Message("Can't connect to Imap server", 8);
                                 alreadyWarned = true;
                             }
                             try {
@@ -661,8 +663,14 @@ public class RMsgProcessor {
 
         //Create text part of message and see if we need to wait for other data like a picture
         RMsgObject mMessage = RMsgObject.extractMsgObjectFromString(blockLine, false, fileName, rxMode);//Only text information
-        //Now, replace alias only with alias=destination if necessary
-        mMessage.to = Main.mainui.msgDisplayList.getReceivedAliasAndDestination(mMessage.to, mMessage.from);
+        if (mMessage.to.contains("=")) {
+            //Replace alias only with alias=destination. If we received an alias with a phone number convert to E164 international format
+            mMessage.to = Main.mainui.msgDisplayList.getReceivedAliasAndDestination(mMessage.to, mMessage.from);
+        }
+        if (mMessage.from.contains("=")) {
+            //Replace alias only with alias=destination
+            mMessage.from = Main.mainui.msgDisplayList.getSentDestinationFromAlias(mMessage.from);
+        }
         //If is a phone number (sms message)  gateway, convert the phone number to the international format
         String mDestination = RMsgUtil.extractDestination(mMessage.to);
         if (isCellular(mDestination)) {
@@ -827,8 +835,9 @@ public class RMsgProcessor {
         int listCount = Main.mainui.msgDisplayList.getLength();
         ArrayList<RMsgObject> resendList = new ArrayList<RMsgObject>();
         RMsgDisplayItem recDisplayItem;
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
-        Calendar localCalendar = Calendar.getInstance(TimeZone.getDefault());
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'_'HHmmss");
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Calendar localCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         Date dateNow = localCalendar.getTime();
         Boolean foundPreviousQtc = false;
         int reSentCount = 0;
@@ -838,7 +847,7 @@ public class RMsgProcessor {
             recDisplayItem = Main.mainui.msgDisplayList.getItem(i);
             //      Must be a received message
             if (matchThisCallWith(mMessage.from, recDisplayItem.mMessage.from, false)
-                    && recDisplayItem.mMessage.sms.startsWith("*qtc?")) {
+                    && recDisplayItem.mMessage.sms.startsWith("*qtc? ")) { //Ignore simple qtc requests "*qtc?"
                 foundPreviousQtc = true;
             }
             if ((!recDisplayItem.myOwn && !matchMyCallWith(recDisplayItem.mMessage.from, false)) //Not my own message
@@ -848,14 +857,14 @@ public class RMsgProcessor {
                     && (!matchThisCallWith(mMessage.from, recDisplayItem.mMessage.from, false))
                     //AND be only a position message if requested so
                     && (!positionsOnly || recDisplayItem.mMessage.msgHasPosition)
-                    //AND must not be a command message
+                    //AND must not be a command, position request, QTC or "No messages" message
                     && (!recDisplayItem.mMessage.sms.startsWith("*cmd"))
-                    //AND must not be an already re-sent message
-                    && (!recDisplayItem.mMessage.sms.startsWith("Re-Sending "))
                     && (!recDisplayItem.mMessage.sms.startsWith("*pos?"))
-                    && (!recDisplayItem.mMessage.sms.startsWith("No Messages"))
-                    //AND must not be a qtc? request
-                    && (!recDisplayItem.mMessage.sms.startsWith("*qtc?"))) {
+                    && (!recDisplayItem.mMessage.sms.startsWith("*qtc?"))
+                    && (!recDisplayItem.mMessage.sms.equals("No Messages"))
+                    //AND must not be an already re-sent message
+                    && (!recDisplayItem.mMessage.sms.startsWith("Re-Sending ")) //old method
+                    && (recDisplayItem.mMessage.receiveDate == null)) { //New method
                 if (forLast > 0L) { //We have a time-based request
                     Date recMsgDate;
                     try {
@@ -895,8 +904,20 @@ public class RMsgProcessor {
                     //Re-send/relay in the same mode we received in
                     fullMessage.rxMode = mMessage.rxMode;
                     //Add text to specify it was received not relayed
-                    fullMessage.sms = "Re-Sending " + recDisplayItem.mMessage.fileName.replaceAll(".txt", "")
-                            + ": " + fullMessage.sms;
+                    //Not needed anymore as we send the ro: field
+                    //fullMessage.sms = "Re-Sending " + recDisplayItem.mMessage.fileName.replaceAll(".txt", "")
+                    //        + ": " + fullMessage.sms;
+                    //Set the receivedDate for the "ro:" information to be sent at TX time
+                    try {
+                        //Example = "2017-10-25_113958";
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'_'HHmmss", Locale.US);
+                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        fullMessage.receiveDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                        fullMessage.receiveDate.setTime(sdf.parse(fullMessage.fileName.replaceAll(".txt", "")));
+                    } catch (ParseException e) {
+                        //Debug
+                        e.printStackTrace();
+                    }
                     //Then send save Message in list for sorting and limiting the number
                     resendList.add(fullMessage);
                 }
@@ -914,7 +935,8 @@ public class RMsgProcessor {
         ArrayList<RMsgObject> resendList = new ArrayList<RMsgObject>();
         //MsgObject recDisplayItem;
         RMsgObject recMessage;
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'_'HHmmss");
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         //Calendar localCalendar = Calendar.getInstance(TimeZone.getDefault());
         //Date dateNow = localCalendar.getTime();
         Date recMsgDate = null;
@@ -925,7 +947,7 @@ public class RMsgProcessor {
                 recMessage = Main.mainui.msgDisplayList.getItemMessage(i);
                 //      Must be a received message
                 if (matchThisCallWith(mMessage.from, recMessage.from, false)
-                        && recMessage.sms.startsWith("*qtc?")) {
+                        && recMessage.sms.startsWith("*qtc? ")) { //Ignore simple qtc requests "*qtc?"
                     //Extract time to use as filter on the imap email list
                     try {
                         recMsgDate = formatter.parse(recMessage.fileName.replaceAll(".txt", ""));
@@ -948,8 +970,8 @@ public class RMsgProcessor {
         IMAPFolder folder = null;
         Store store = null;
         int charLimit = fullSize ? 400 : 150;
-        //Store current time. To be used with increments of 1 seconds to differentiate the messages
-        Calendar c1 = Calendar.getInstance(TimeZone.getDefault());
+        //Store current UTC time. To be used with increments of 1 seconds to differentiate the messages
+        Calendar c1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         try {
             Properties props = System.getProperties();
             props.setProperty("mail.store.protocol", "imaps");
@@ -999,7 +1021,6 @@ public class RMsgProcessor {
                 //Save message time for making filenames later on
                 Date msgDateTime = msg.getReceivedDate();
                 c1.setTime(msgDateTime);
-
                 //Check reply messages count
                 if (++msgCount > 20 //Hard stop
                         || (numberOf > 0 && msgCount > numberOf)) {
@@ -1075,12 +1096,17 @@ public class RMsgProcessor {
                             //Other email addresses
                             fullMessage.from = Main.mainui.msgDisplayList.getAliasFromOrigin(fromString, tos[j]);
                         }
-                        //Then save Message in list for sorting and limiting the number
+                        //Save received date for incoming message
+                        //Date recDate = c1.getTime();
+                        fullMessage.receiveDate =  Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                        fullMessage.receiveDate.setTime(c1.getTime()); //= c1;
+                        //Then save Message date/time in list for sorting (and limit the number of messages)
                         fullMessage.fileName = String.format(Locale.US, "%04d", c1.get(Calendar.YEAR)) + "-"
                                 + String.format(Locale.US, "%02d", c1.get(Calendar.MONTH) + 1) + "-"
                                 + String.format(Locale.US, "%02d", c1.get(Calendar.DAY_OF_MONTH)) + "_"
                                 + String.format(Locale.US, "%02d%02d%02d", c1.get(Calendar.HOUR_OF_DAY),
                                         c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND)) + ".txt";
+                        //No need ????, only used for comparison, not for storage (storage time stamp is Tx time related)
                         c1.add(Calendar.SECOND, 1);
                         resendList.add(fullMessage);
                         break; //No more messages for this email as they would be redundant
@@ -1124,8 +1150,9 @@ public class RMsgProcessor {
         int listCount = Main.mainui.msgDisplayList.getLength();
         ArrayList<RMsgObject> resendList = new ArrayList<RMsgObject>();
         RMsgDisplayItem recDisplayItem;
-        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
-        Calendar localCalendar = Calendar.getInstance(TimeZone.getDefault());
+        DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'_'HHmmss");
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Calendar localCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         Date dateNow = localCalendar.getTime();
         Boolean foundPreviousQtc = false;
         int reSentCount = 0;
@@ -1133,9 +1160,10 @@ public class RMsgProcessor {
         for (int i = listCount - 2; i >= 0; i--) {//Skip just received qtc? message
             goodToResend = false;
             recDisplayItem = Main.mainui.msgDisplayList.getItem(i);
-            //      Must be a received message
+            //Must be a received message
             if (matchThisCallWith(mMessage.from, recDisplayItem.mMessage.from, false)
-                    && recDisplayItem.mMessage.sms.startsWith("*qtc?")) {
+                    //Changed to complex QTC request, ignoring simple resend requests
+                    && recDisplayItem.mMessage.sms.startsWith("*qtc? ")) {
                 foundPreviousQtc = true;
             }
             if (recDisplayItem.myOwn //My own message (a Sent message)
@@ -1150,7 +1178,8 @@ public class RMsgProcessor {
                     && (!recDisplayItem.mMessage.sms.startsWith("*cmd"))
                     && (!recDisplayItem.mMessage.sms.startsWith("*pos?"))
                     && (!recDisplayItem.mMessage.sms.startsWith("No messages"))
-                    && (!recDisplayItem.mMessage.sms.startsWith("Re-Sending "))) {
+                    && (!recDisplayItem.mMessage.sms.startsWith("Re-Sending "))
+                    && (recDisplayItem.mMessage.receiveDate == null)){
                 if (forLast > 0L) { //We have a time-based request
                     Date recMsgDate;
                     try {
@@ -1200,8 +1229,21 @@ public class RMsgProcessor {
                     //Re-send/relay in the same mode we received in
                     fullMessage.rxMode = mMessage.rxMode;
                     //Add text to specify it was received not relayed
-                    fullMessage.sms = "Re-Sending " + recDisplayItem.mMessage.fileName.replaceAll(".txt", "")
-                            + ": " + fullMessage.sms;
+                    //Not needed anymore as we now send the ro: field
+                    //fullMessage.sms = "Re-Sending " + recDisplayItem.mMessage.fileName.replaceAll(".txt", "")
+                    //        + ": " + fullMessage.sms;
+                    //Set the receivedDate for the "ro:" information to be sent at TX time
+                    try {
+                        //Example = "2017-10-25_113958";
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'_'HHmmss", Locale.US);
+                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        fullMessage.receiveDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                        fullMessage.receiveDate.setTime(sdf.parse(fullMessage.fileName.replaceAll(".txt", "")));
+                        //Log.i(TAG, "time = " + cal.getTimeInMillis()); 
+                    } catch (ParseException e) {
+                        //Debug
+                        e.printStackTrace();
+                    }
                     //Then send save Message in list for sorting and limiting the number
                     resendList.add(fullMessage);
                 }
@@ -1209,6 +1251,51 @@ public class RMsgProcessor {
         }
 
         return resendList;
+    }
+
+
+    //Returns the last Txed message (any type) in response a strait "*qtc?" request
+    private static RMsgObject getLastTxed(RMsgObject mMessage) {
+
+        //Get list of messages to send
+        int listCount = Main.mainui.msgDisplayList.getLength();
+        RMsgDisplayItem recDisplayItem;
+        RMsgObject fullMessage = null;
+        for (int i = listCount - 2; i >= 0; i--) {//Skip just received *qtc? message
+            recDisplayItem = Main.mainui.msgDisplayList.getItem(i);
+            if (recDisplayItem.myOwn) { //My own message (a Sent message)
+                //Enqueue message for sorting. Get full message with binary data.
+                fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirSent, recDisplayItem.mMessage.fileName, true);
+                //Coming from this relay station
+                if (fullMessage.from.equals(Main.callsignAsServer.toLowerCase(Locale.US).trim())) {
+                    fullMessage.relay = "";
+                } else {
+                    fullMessage.relay = Main.callsignAsServer.toLowerCase(Locale.US).trim();
+                }
+                //Remove via information to make sure it is not forwarded
+                fullMessage.via = "";
+                //Re-send/relay in the same mode we received in
+                fullMessage.rxMode = mMessage.rxMode;
+                if (fullMessage.receiveDate == null) {
+                    //Get the receivedDate for the "ro:" information to be sent at TX time
+                    try {
+                        //Example = "2017-10-25_113958";
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'_'HHmmss", Locale.US);
+                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        fullMessage.receiveDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                        fullMessage.receiveDate.setTime(sdf.parse(fullMessage.fileName.replaceAll(".txt", "")));
+                        //Log.i(TAG, "time = " + cal.getTimeInMillis()); 
+                    } catch (ParseException e) {
+                        //Debug
+                        e.printStackTrace();
+                    }
+                }
+                //Then send save Message in list for sorting and limiting the number
+                return fullMessage;
+            }
+        }
+        
+        return fullMessage;
     }
 
     //Extract the first part's body and return a plain text string
@@ -1347,7 +1434,7 @@ public class RMsgProcessor {
     }
      */
     //Is the string representative of an email
-    private static boolean isEmail(String destination) {
+    public static boolean isEmail(String destination) {
 
         return destination.matches("^[\\w.-]+@\\w+\\.[\\w.-]+");
     }
@@ -1420,11 +1507,13 @@ public class RMsgProcessor {
                 || matchMyCallWith(mMessage.via, false))
                 && !matchMyCallWith(mMessage.from, false)) {
             saveAndDisplay = true;
-            //Check if this is a duplicate (E.g. We received the message direct and now via a relay)
-            if (!mMessage.relay.equals("") && !mMessage.timeId.equals("")) {
+            //Check if this is a duplicate. E.g. We received the message direct and now via a relay OR
+            // the email/SMS message was already received
+            if (!mMessage.timeId.equals("") || (mMessage.receiveDate != null)) {
                 //Relayed and with timeId, check if it is a duplicate
                 if (Main.mainui.msgDisplayList.isDuplicate(mMessage)) {
                     saveAndDisplay = false;
+                    Main.q.Message("Duplicate Message. Ignoring.", 8);
                 }
             }
             //To-Do: Add check for messages that are resent as the sms field contains the sender's filename
@@ -1603,6 +1692,7 @@ public class RMsgProcessor {
                                 //Only properly received (and secured) messages
                                 if (messageAuthorized) {
                                     RMsgUtil.sendBeeps(true);
+                                    Boolean resendLast = false;
                                     //Read request (last X minutes or last N messages). Default is last ONE message if nothing is sent.
                                     int numberOf = 1;
                                     if (mMessage.sms.length() > 6 && mMessage.sms.substring(5, 6).equals(" ")) {
@@ -1614,6 +1704,8 @@ public class RMsgProcessor {
                                         } catch (NumberFormatException e) {
                                             numberOf = 1;
                                         }
+                                    } else if (mMessage.sms.toLowerCase(Locale.US).trim().equals("*qtc?")) {
+                                        resendLast = true;
                                     }
                                     //Make sure we have at least 1
                                     numberOf = numberOf == 0 ? 1 : numberOf;
@@ -1689,24 +1781,32 @@ public class RMsgProcessor {
                                         //We are resending from this relay (default). Create blank list
                                         ArrayList<RMsgObject> resendList = new ArrayList<RMsgObject>();
                                         //What type of qtc did we receive?
-                                        //process email request
-                                        if (Main.wantRelayOverRadio && !emailRequest) {
-                                            resendList = buildNonEmailResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
+                                        if (resendLast) {
+                                            //We only want the last transmission (one messages only)
+                                            RMsgObject lastOne = getLastTxed(mMessage);
+                                            if (lastOne != null) {
+                                                resendList.add(lastOne);
+                                            }
+                                        } else {
+                                            //More complex request, start by processing non-email request
+                                            if (Main.wantRelayOverRadio && !emailRequest) {
+                                                resendList = buildNonEmailResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
+                                            }
+                                            //We are repeating existing received messages
+                                            // & (Main.WantRelayEmails | Main.WantRelaySMSs | Main.WantRelayOverRadio)
+                                            ArrayList<RMsgObject> emailList;
+                                            if ((Main.wantRelayEmails || Main.wantRelaySMSs) && !positionsOnly && !radioWaveOnly) {
+                                                emailList = buildEmailResendList(mMessage, numberOf, forLast, extractedStr.endsWith("f"), forAll);
+                                                resendList.addAll(emailList);
+                                            }
+                                            //Do not add if we ask for emails/sms only
+                                            if (!emailRequest) {
+                                                ArrayList<RMsgObject> TxList;
+                                                TxList = buildTXedResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
+                                                resendList.addAll(TxList);
+                                            }
                                         }
-                                        //We are repeating existing received messages
-                                        // & (Main.WantRelayEmails | Main.WantRelaySMSs | Main.WantRelayOverRadio)
-                                        ArrayList<RMsgObject> emailList;
-                                        if ((Main.wantRelayEmails || Main.wantRelaySMSs) && !positionsOnly && !radioWaveOnly) {
-                                            emailList = buildEmailResendList(mMessage, numberOf, forLast, extractedStr.endsWith("f"), forAll);
-                                            resendList.addAll(emailList);
-                                        }
-                                        //Do not add if we ask for emails/sms only
-                                        if (!emailRequest) {
-                                            ArrayList<RMsgObject> TxList;
-                                            TxList = buildTXedResendList(mMessage, numberOf, forLast, forAll, positionsOnly);
-                                            resendList.addAll(TxList);
-                                        }
-                                        //Now sort the list if not zero length
+                                        //Now sort and send the list if it contains at least one element
                                         if (resendList.size() > 0) {
                                             Collections.sort(resendList, new Comparator() {
                                                 public int compare(Object o1, Object o2) {

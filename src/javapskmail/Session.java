@@ -2,7 +2,7 @@
  * Session.java
  * 
  * Copyright (C) 2008 Pär Crusefalk and Rein Couperus
- * Copyright (C) 2018-2021 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
+ * Copyright (C) 2018-2022 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -275,6 +275,8 @@ public class Session {
         rx_ok = " ";
         rx_lastreceived = " ";
         rx_missing = "";
+        //Needed when receive a re-connect request from client
+        Main.myRxStatus = "   ";
         rx_lastBlock = false;
         //beginblock = 0;
         goodblock = 0;
@@ -1511,9 +1513,15 @@ public class Session {
                 Main.progress = 0;
                 Main.q.Message("Upload complete...", 10);
                 str = "";
+                //Update grids on UI thread in case we send some emails
+                java.awt.EventQueue.invokeLater(new Runnable() {
+                    public void run() {
+                        Main.mainui.refreshEmailGrid();
+                    }
+                });
             }
         }
-        
+
         // message receive
         Pattern pmsg = Pattern.compile("^\\s*(Your\\smsg:)\\s(\\d+)");
         Matcher mmsg = pmsg.matcher(str);
@@ -1689,7 +1697,12 @@ public class Session {
                     Main.dataSize = Integer.toString(0);
                     try {
                         this.headers.close();
-                        Main.mainui.refreshEmailGrid();
+                        //Must run on UI thread otherwise we get index out of bound errors
+                        java.awt.EventQueue.invokeLater(new Runnable() {
+                            public void run() {
+                                Main.mainui.refreshEmailGrid();
+                            }
+                        });
                     } catch (IOException ex) {
                         Main.log.writelog("Error when trying to close the headers file.", ex, true);
                     }
@@ -1854,8 +1867,12 @@ public class Session {
                     }
                     inbox.flush();
                     inbox.close();
-                    Main.mainui.refreshEmailGrid();
-
+                    //Must run on UI thread otherwise we get index out of bound errors
+                    java.awt.EventQueue.invokeLater(new Runnable() {
+                        public void run() {
+                            Main.mainui.refreshEmailGrid();
+                        }
+                    });
                     File fl = new File(Main.homePath + Main.dirPrefix + "tmpmessage");
                     if (fl.exists()) {
                         fl.delete();
@@ -1916,6 +1933,8 @@ public class Session {
                                 Main.txText += resultStr;
                             }
                             Main.q.Message("Email Sent...", 10);
+                        } else { //Must be an error
+                            Main.txText += resultStr;
                         }
                     }
                     //VK2ETA: in any case delete the transaction file
@@ -2146,8 +2165,12 @@ public class Session {
                     }
                     inbox.flush();
                     inbox.close();
-                    Main.mainui.refreshInbox();
-
+                    //Must run on UI thread otherwise we get index out of bound errors
+                    java.awt.EventQueue.invokeLater(new Runnable() {
+                        public void run() {
+                            Main.mainui.refreshInbox();
+                        }
+                    });
                     File fl = new File(Main.homePath + Main.dirPrefix + "tmpmessage");
                     if (fl.exists()) {
                         fl.delete();
@@ -3087,7 +3110,12 @@ public class Session {
             Main.dataSize = Integer.toString(0);
             try {
                 this.headers.close();
-                Main.mainui.refreshEmailGrid();
+                //Must run on UI thread otherwise we get index out of bound errors
+                java.awt.EventQueue.invokeLater(new Runnable() {
+                    public void run() {
+                        Main.mainui.refreshEmailGrid();
+                    }
+                });
             } catch (IOException ex) {
                 Main.log.writelog("Error when trying to close the headers file.", ex, true);
             }
