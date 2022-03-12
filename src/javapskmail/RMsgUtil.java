@@ -329,7 +329,6 @@ public class RMsgUtil {
     }
 
 
-    
     //Queues a message with a reply text
     public static void replyWithText(RMsgObject mMessage, String replyText) {
 
@@ -342,6 +341,21 @@ public class RMsgUtil {
         replyMessage.via = mMessage.via;
         RMsgTxList.addMessageToList(replyMessage);
     }
+
+    
+    //Queues a message with this device's time reference
+    public static void replyWithTime(RMsgObject mMessage) {
+
+        RMsgObject replyMessage = new RMsgObject();
+        //Reply in the same mode as the request
+        replyMessage.rxMode = mMessage.rxMode;
+        replyMessage.from = Main.callsignAsServer.trim();
+        replyMessage.to = mMessage.from;
+        replyMessage.via = "";
+        replyMessage.sendMyTime = true;
+        RMsgTxList.addMessageToList(replyMessage);
+    }
+
 
     //Extract the destination from an "alias=destination" To address field
     public static String extractDestination(String toAliasAndDestination) {

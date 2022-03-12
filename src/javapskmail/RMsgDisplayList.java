@@ -339,10 +339,10 @@ public class RMsgDisplayList {
     //   A duplicate is a message whose content (text, positions, etc...) is identical to an already 
     //     received message AND has a calculated received time within 60 seconds of each other (we
     //     need to account for the RSID and FEC/Interleaver delay).
-    synchronized public boolean isDuplicate(RMsgObject mMessage) {
+    synchronized public boolean isDuplicate(RMsgObject newMessage) {
         boolean isDuplicate = false;
         int listLength = displayList.size();
-        RMsgObject recMessage = null;
+        RMsgObject oldMessage = null;
         RMsgDisplayItem recDisplayItem = null;
         if (listLength > 0) {
             //Iterate through the last 3 received items in the list
@@ -356,23 +356,23 @@ public class RMsgDisplayList {
                     //No need to check past the three previous messages
                     //Not true anymore, need to check until the end or until a duplicate is found
                     //if (++trialCount > 3) break;
-                    recMessage = recDisplayItem.mMessage;
+                    oldMessage = recDisplayItem.mMessage;
                     //Looks like the same message was received direct and via a relay?
-                    if (recMessage.from.equals(mMessage.from)
+                    if (oldMessage.from.equals(newMessage.from)
                             //&& recMessage.via.equals(mMessage.relay)
-                            && recMessage.sms.equals(mMessage.sms)
-                            && recMessage.msgHasPosition == mMessage.msgHasPosition) {
-                        if (!recMessage.msgHasPosition ||
-                                (recMessage.position != null && mMessage.position != null
+                            && oldMessage.sms.equals(newMessage.sms)
+                            && oldMessage.msgHasPosition == newMessage.msgHasPosition) {
+                        if (!oldMessage.msgHasPosition ||
+                                (oldMessage.position != null && newMessage.position != null
                                         //Check position accuracy within 1.1 metre
-                                        && (Math.abs(recMessage.position.getLatitude() - mMessage.position.getLatitude()) < 0.00001)
-                                        && (Math.abs(recMessage.position.getLongitude() - mMessage.position.getLongitude()) < 0.00001))) {
+                                        && (Math.abs(oldMessage.position.getLatitude() - newMessage.position.getLatitude()) < 0.00001)
+                                        && (Math.abs(oldMessage.position.getLongitude() - newMessage.position.getLongitude()) < 0.00001))) {
                             //Check the time difference
-                            if (mMessage.receiveDate != null) {
-                                if (recMessage.receiveDate != null) {
+                            if (newMessage.receiveDate != null) {
+                                if (oldMessage.receiveDate != null) {
                                     //We have two look alike messages, both with a received date, check delta time
-                                    Long previousDateInMillis = recMessage.receiveDate.getTimeInMillis();
-                                    Long recDateInMillis = mMessage.receiveDate.getTimeInMillis();
+                                    Long previousDateInMillis = oldMessage.receiveDate.getTimeInMillis();
+                                    Long recDateInMillis = newMessage.receiveDate.getTimeInMillis();
                                     Long deltaTime = Math.abs(recDateInMillis - previousDateInMillis) / 1000;
                                     if (deltaTime < 61L) {
                                         //60 seconds leeway
@@ -385,9 +385,9 @@ public class RMsgDisplayList {
                                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'_'HHmmss", Locale.US);
                                     sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                                     try {
-                                        Date recDate = sdf.parse(recMessage.fileName.replaceAll(".txt", ""));
+                                        Date recDate = sdf.parse(oldMessage.fileName.replaceAll(".txt", ""));
                                         Long previousDateInMillis = recDate.getTime();
-                                        Long recDateInMillis = mMessage.receiveDate.getTimeInMillis();
+                                        Long recDateInMillis = newMessage.receiveDate.getTimeInMillis();
                                         Long deltaTime = Math.abs(recDateInMillis - previousDateInMillis) / 1000;
                                         if (deltaTime < 61L) {
                                             //60 seconds leeway
@@ -397,33 +397,46 @@ public class RMsgDisplayList {
                                         //Nothing, bad Juju if the filename is not good
                                     }
                                 }
-                            } else if (mMessage.timeId.trim().length() == 3
-                                    && recMessage.via.equals(mMessage.relay)) {
+                            } else if (newMessage.timeId.trim().length() == 3
+                                    && oldMessage.via.equals(newMessage.relay)) {
                                 //We have a radio message sent by the relay, check if it was already received directly
                                 try {
-                                    int thisTimeIdMin = Integer.parseInt(mMessage.timeId.substring(0, 1));
-                                    int thisTimeIdSec = Integer.parseInt(mMessage.timeId.substring(1));
-                                    int thisTimeId = thisTimeIdMin * 60 + thisTimeIdSec;
-                                    int strLen = recMessage.fileName.length();
-                                    //Extract the value of the last 3 digits in the filename = units of minutes and seconds
-                                    int recTimeIdMin = Integer.parseInt(recMessage.fileName.substring(strLen - 7, strLen - 6));
-                                    int recTimeIdSec = Integer.parseInt(recMessage.fileName.substring(strLen - 6, strLen - 4));
-                                    int recTimeId = recTimeIdMin * 60 + recTimeIdSec;
-                                    int deltaTime = 0;
-                                    if (recTimeId > thisTimeId) {
-                                        deltaTime = recTimeId - thisTimeId;
-                                    } else {
-                                        deltaTime = thisTimeId - recTimeId;
-                                    }
-                                    //Wrap around when getting past 9 Minutes 59 Seconds
-                                    if (deltaTime > 59) {
-                                        deltaTime = 600 - deltaTime;
-                                    }
-                                    if (deltaTime < 11) {
-                                        //10 seconds leeway for local clock differences. Since the two messages were received
-                                        // using the same mode, the receive delays are the same (ignoring the processing
-                                        // speed difference of the two devices)
-                                        isDuplicate = true;
+                                    int newTimeIdMin = Integer.parseInt(newMessage.timeId.substring(0, 1));
+                                    int newTimeIdSec = Integer.parseInt(newMessage.timeId.substring(1));
+                                    int newTimeId = newTimeIdMin * 60 + newTimeIdSec;
+                                    //Obtain the old message date from the filename
+                                    try {
+                                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'_'HHmmss", Locale.US);
+                                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                                        //Date oldDate = new Date(sdf.parse(oldMessage.fileName.replaceAll(".txt", "")).getTime() + (1000 * Main.deviceToGPSTimeCorrection.intValue()));
+                                        Calendar c1 = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                                        c1.setTime(sdf.parse(oldMessage.fileName.replaceAll(".txt", "")));
+                                        //Adjust for a received time reference (e.g. from this remote station)
+                                        c1.add(Calendar.SECOND, Main.deviceToRefTimeCorrection.intValue());
+                                        //Rebuild the corrected time Id of the old (stored) message
+                                        int oldMinutes = c1.get(Calendar.MINUTE) % 10; //Keep least digit only
+                                        int oldSeconds = c1.get(Calendar.SECOND);
+                                        int oldTimeId = oldMinutes * 60 + oldSeconds;
+                                        //Calculate difference
+                                        int deltaTime = 0;
+                                        if (newTimeId > oldTimeId) {
+                                            deltaTime = newTimeId - oldTimeId;
+                                        } else {
+                                            deltaTime = oldTimeId - newTimeId;
+                                        }
+                                        //Wrap around when getting past 9 Minutes 59 Seconds
+                                        if (deltaTime > 59) {
+                                            deltaTime = 600 - deltaTime;
+                                        }
+                                        if (deltaTime < 11) {
+                                            //10 seconds leeway for local clock differences. Since the two messages were received
+                                            // using the same mode, the receive delays are the same (ignoring the processing
+                                            // speed difference of the two devices, plus taking into account the time differences
+                                            // between the two devices when using the Time Sync function)
+                                            isDuplicate = true;
+                                        }
+                                    } catch (ParseException e) {
+                                        //nothing for now
                                     }
                                 } catch (Exception e) {
                                     //nothing we can do as we have bad information

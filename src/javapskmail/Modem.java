@@ -1374,7 +1374,7 @@ public class Modem implements Runnable {
                                         }
                                     }
                                 } else { //We must have received an RSID                         
-                                    Main.possibleRadioMsg = System.currentTimeMillis();
+                                    Main.lastRsidTime = Main.possibleRadioMsg = System.currentTimeMillis();
                                     //Open squelch...a frame may be coming
                                     RigCtrl.SetSqlLevel(Main.SQL_FLOOR);
                                     //Reset receiving radio message as we are getting a new message in all logic and the RSID would have resetted the modem anyway

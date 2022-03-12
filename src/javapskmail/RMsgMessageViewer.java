@@ -431,7 +431,8 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
 
     private void bForwardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bForwardActionPerformed
 
-        RMsgObject fwRMsg = mDisplayItem.mMessage;
+        String dir = mDisplayItem.myOwn ? Main.dirSent : Main.dirInbox;
+        RMsgObject fwRMsg = RMsgObject.extractMsgObjectFromFile(dir, mDisplayItem.mMessage.fileName, false);
         fwRMsg.to = Main.mainui.selectedTo; //As selected in the Main UI
         //Nope, use the selected via
         //fwRMsg.via = fwRMsg.relay; //Use the same route in reverse
@@ -439,7 +440,24 @@ public class RMsgMessageViewer extends javax.swing.JFrame {
         fwRMsg.msgHasPosition = mDisplayItem.mMessage.msgHasPosition;
         fwRMsg.position = mDisplayItem.mMessage.position;
         fwRMsg.rxMode = mDisplayItem.mMessage.rxMode;
-        fwRMsg.sent = mDisplayItem.mMessage.sent;
+        //Check if I was the original creator of this message, if not add myself as relay
+        if (!RMsgProcessor.matchMyCallWith(mDisplayItem.mMessage.from, false)) {
+            fwRMsg.relay = Main.callsignAsServer;
+        }
+        //Build the ro field to allow detection of duplicates
+        if (fwRMsg.fileName != null && fwRMsg.receiveDate == null) {
+            //Get the receivedDate for the "ro:" information to be sent at TX time
+            try {
+                //Example = "2017-10-25_113958";
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'_'HHmmss", Locale.US);
+                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                fwRMsg.receiveDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                fwRMsg.receiveDate.setTime(sdf.parse(fwRMsg.fileName.replaceAll(".txt", "")));
+            } catch (ParseException e) {
+                //Nothing
+            }
+        }
+        //fwRMsg.sent = mDisplayItem.mMessage.sent;
         RMsgTxList.addMessageToList(fwRMsg);
 
     }//GEN-LAST:event_bForwardActionPerformed

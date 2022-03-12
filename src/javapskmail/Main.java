@@ -34,9 +34,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.0.4";
+    static String version = "3.0.5";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20220307";
+    static String versionDate = "20220310";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -92,6 +92,7 @@ public class Main {
     static String pass = "";
     static int DCD = 0;
     static int MAXDCD = 3;
+    static boolean bypassDCD = false;
     //static int Persistence = 4;
     //static boolean BlockActive = false;
     static boolean EotRcved = false;
@@ -295,8 +296,11 @@ public class Main {
 
     //Radio Messages variables
     static public boolean receivingRadioMsg = false;
-    static public long possibleRadioMsg = 0L; //Time at which we just an RSID, a Radio message is possible.
+    static public long possibleRadioMsg = 0L; //Time at which we just an RSID, or an SOH, a Radio message is possible.
     static public String lastRsidReceived = ""; //Last RSID received from modem (string)
+    static public long lastRsidTime = 0L;//Time of last RSID received from Modem (for time sync)
+    static public Long deviceToRefTimeCorrection = 0L; //The number of seconds this device's clock is late compared to reference time (server or GPS)
+    static public String refTimeSource = ""; //Where is the time reference coming from: remote station call sign or "GPS"
     static public boolean radioMsgWorking = false; //Radiomsg processing emails or web pages - do not scan
     static public String fileNameString = "";
     static public long lastCharacterTime = 0L;//Time of last character received from Modem
@@ -492,7 +496,9 @@ public class Main {
                 //Always reset the radioMsgWorking flag regardless (allows for change of frequency/mode)
                 radioMsgWorking = false;     
                 // See if tx active and DCD is off and we have exhausted the extra reception delay
-                if (sendLine.length() > 0 & !TxActive & DCD == 0 & rxDelayCount < 0.1f) {
+                if (sendLine.length() > 0 & !TxActive & (DCD == 0 || bypassDCD) & rxDelayCount < 0.1f) {
+                    //Reset DCD bypass (on-demand usage)
+                    bypassDCD = false;
                     //System.out.println("MAIN2:" + Sendline);
                     //VK2ETA DCDthrow not used 
                     //DCDthrow = generator.nextInt(Persistence);
@@ -880,6 +886,46 @@ public class Main {
                                     } else {
 //                                        System.out.println("check not ok.\n");
                                     }
+                                } else if (Blockline.contains(":91 ")) {
+                                    //We have a time sync response from a server?
+                                    Pattern psc = Pattern.compile(".*00u(\\S+)\\s(\\S+):91\\s(\\d{6})\\s([0-9A-F]{4}).*");
+                                    Matcher msc = psc.matcher(Blockline);
+                                    String scall = "";
+                                    String toCall = "";
+                                    String pCheck = "";
+                                    String timeRefStr = "";
+                                    if (Main.lastRsidTime > 0L && msc.lookingAt()) {
+                                        scall = msc.group(1);
+                                        toCall = msc.group(2);
+                                        timeRefStr = msc.group(3);
+                                        pCheck = msc.group(4);
+                                        // fill the servers drop down list
+                                        String checkstring = "";
+                                        checkstring = "00u" + scall + " " + toCall + ":91 " + timeRefStr + " ";
+                                        //                                       System.out.println("RX_SNR:" + rx_snr);
+                                        String check = q.checksum(checkstring);
+                                        String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
+                                        if (check.equals(pCheck) && scall.length() > 1 && toCall.length() > 1 
+                                                && toCall.toUpperCase(Locale.US).equals(serverCall.toUpperCase(Locale.US))) {
+                                            //All good, update local time
+                                            Long timeRef = Long.parseLong(timeRefStr);
+                                            Long timeHere = Main.lastRsidTime / 1000 - ((Long) (Main.lastRsidTime / 1000000000L) * 1000000L); //Keep the last 6 digits representing seconds
+                                            Long deltaTime = timeRef - timeHere;
+                                            //Wrap around if we passed a 100000 seconds threshold
+                                            if (Math.abs(deltaTime) > 99998L) {
+                                                deltaTime = deltaTime < 0L ? deltaTime + 1000000L : deltaTime - 1000000L;
+                                            }
+                                            if (deltaTime == 0) {
+                                                mainui.appendMainWindow("This device clock is the same as " + scall + "'s clock\n");
+                                            } else if (deltaTime < 0) {
+                                                mainui.appendMainWindow("This device clock is " + (-deltaTime) + " seconds in front of " + scall + "'s clock\n");
+                                            } else {
+                                                mainui.appendMainWindow("This device clock is " + deltaTime + " seconds behind " + scall + "'s clock\n");
+                                            }
+                                            //System.out.println("server: " + timeRefStr + ", Client: " + timeHere);
+                                            //System.out.println("Server - client in Secs: " + deltaTime);
+                                        }
+                                    }
                                 } else if (Blockline.contains(":26 ")) {
                                     // System.out.println(Blockline);
                                     //Uncompressed APRS Beacon or APRS message
@@ -1165,6 +1211,33 @@ public class Main {
                                             q.set_txstatus(TxStatus.TXInqReply);
                                             q.setReqCallsign(reqcall);
                                             q.send_inquire_reply();
+                                        }
+                                    }
+                                } else if (Blockline.contains(":9 ")) {
+                                    //Time Sync request
+                                    //<SOH>00uVK2ETA:9 VK2ETA-1 1830<EOT>
+                                    Pattern cbsc = Pattern.compile(".*00u(\\S+):9\\s(\\S+)\\s([0-9A-F]{4}).*");
+                                    Matcher cbmsc = cbsc.matcher(Blockline);
+                                    String scall = "";
+                                    String reqcall = "";
+                                    if (cbmsc.lookingAt()) {
+                                        reqcall = cbmsc.group(1);
+                                        scall = cbmsc.group(2).toUpperCase(Locale.US);
+                                        String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
+                                        if (scall.length() > 1 && reqcall.length() > 1
+                                                && scall.toUpperCase(Locale.US).equals(serverCall.toUpperCase(Locale.US))) {
+                                            if (scall.length() > 1) {
+                                                //Some callsign present, reply with time in seconds within +/- 24
+                                                String uiMsg = "Time Sync request from " + scall;
+                                                q.Message(uiMsg, 10);
+                                                try {
+                                                    Thread.sleep(10);
+                                                } catch (Exception e) {
+                                                    //Nothing
+                                                }
+                                                q.set_txstatus(TxStatus.TXTimeSyncReply);
+                                                q.send_TimeSync_reply(reqcall);
+                                            }
                                         }
                                     }
                                 }

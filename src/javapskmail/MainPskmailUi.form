@@ -773,6 +773,19 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="menuInquireActionPerformed"/>
               </Events>
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="TimeSyncMenuItem">
+              <Properties>
+                <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
+                  <KeyStroke key="Ctrl+T"/>
+                </Property>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="javapskmail/mainpskmailui.properties" key="MainPskmailUi.TimeSync.MenuItem.text" replaceFormat="mainpskmailui.getString(&quot;{key}&quot;)"/>
+                </Property>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="TimeSyncMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="jMenuQuality">
               <Properties>
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
@@ -3795,6 +3808,19 @@
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="bRMsgResendActionPerformed"/>
                   </Events>
                 </Component>
+                <Component class="javax.swing.JButton" name="reqtime">
+                  <Properties>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                      <Font name="Ubuntu" size="12" style="1"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="javapskmail/mainpskmailui.properties" key="MainPskmailUi.reqtime.text" replaceFormat="mainpskmailui.getString(&quot;{key}&quot;)"/>
+                    </Property>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="reqtimeActionPerformed"/>
+                  </Events>
+                </Component>
                 <Component class="javax.swing.JButton" name="bRMsgManageMsg">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
@@ -3917,6 +3943,7 @@
           <AuxValues>
             <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
             <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
+            <AuxValue name="JavaCodeGenerator_allCodePost" type="java.lang.String" value="cboServer.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {&#xa;    @Override&#xa;    public void keyReleased(KeyEvent event) {&#xa;        cboServerProcessKeyReleased(event);&#xa;    }&#xa;});"/>
           </AuxValues>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">

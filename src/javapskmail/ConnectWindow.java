@@ -32,6 +32,7 @@ public class ConnectWindow extends javax.swing.JDialog {
     ModemModesEnum RXm;
     private boolean addingItems = false;
     private java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("javapskmail/Bundle");
+    private boolean updatingServerList = true;
 
     /**
      * Creates new form Connectwindow
@@ -49,8 +50,15 @@ public class ConnectWindow extends javax.swing.JDialog {
                 cboServerConnect.addItem(Main.serversArray[i]);
             }
         }
-        this.cboServerConnect.setSelectedItem(Main.mainui.cboServer.getSelectedItem());
-
+        //VK2ETA issue here, we always preset, and may contain server:password 
+        //this.cboServerConnect.setSelectedItem(Main.mainui.cboServer.getSelectedItem());
+        String ms = Main.q.getServer();
+        this.cboServerConnect.setSelectedItem(ms);
+        String mp = Main.q.getPassword();
+        this.txtConnectPassword.setText(mp);
+        //It's ok now to process events on the combo box
+        updatingServerList = false;
+        
         //set modems
         this.jComboBoxTXModem.removeAllItems();
         this.jComboBoxRXModem.removeAllItems();
@@ -386,14 +394,21 @@ public class ConnectWindow extends javax.swing.JDialog {
         Main.txModem = TXm;
         Main.rxModem = RXm;
         Main.rxModemString = RXmodemstr;
-        String myServer = cboServerConnect.getSelectedItem().toString();
+        String myServer = ""; //cboServerConnect.getSelectedItem().toString();
+        int index = cboServerConnect.getSelectedIndex();
+        if (index == -1) {
+            //We have typed a new server call, read the current combo box value
+            myServer = cboServerConnect.getSelectedItem().toString();
+        } else {
+            //We selected an existing server
+            if (index < Main.serversArray.length) {
+                myServer = Main.serversArray[index];
+            }
+        }
         //String myServerPassword = txtConnectPassword.getPassword().toString();
         char[] passwordArray = txtConnectPassword.getPassword();
         String myServerPassword = new String(passwordArray);
-        //Main.mainui.myarq.setServerAndPassword(myServer);
-        //Main.mainui.myarq.setPassword(myServerPassword);
-        //VK2ETA add main.q
-        Main.q.setServerAndPassword(myServer);
+        Main.q.setServer(myServer);
         //Override the default password with the one here in case we typed a new one
         Main.q.setPassword(myServerPassword);
         //Not on the fly
@@ -407,19 +422,18 @@ public class ConnectWindow extends javax.swing.JDialog {
     }//GEN-LAST:event_ServerConnectCancelActionPerformed
 
     private void cboServerConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboServerConnectActionPerformed
-        String myServer = cboServerConnect.getSelectedItem().toString();
-        boolean foundServer = false;
-        String tempPassword = "";
-        for (int i =0; i < Main.serversArray.length; i++) {
-            if (myServer.toLowerCase().equals(Main.serversArray[i].toLowerCase())) {
-                foundServer = true;
-                tempPassword = Main.serversPasswordArray[i];
-                break;
+
+        int index = cboServerConnect.getSelectedIndex();
+        if (!updatingServerList && index != -1) {
+            //We have a valid selection event, not an Enter key event after typing a new server's call
+            //Get the server from the preferences array (we may have two entries with the same server but different passwords for example)
+            if (index < Main.serversArray.length) {
+                Main.q.setServer(Main.serversArray[index]);
+                Main.q.setPassword(Main.serversPasswordArray[index]);
+                //Preset the password field too
+                txtConnectPassword.setText(Main.serversPasswordArray[index]);
             }
         }
-        txtConnectPassword.setText(tempPassword);
-        Main.q.setPassword(tempPassword);
-        //Main.mainui.myarq.setPassword(tempPassword);
     }//GEN-LAST:event_cboServerConnectActionPerformed
 
     /**

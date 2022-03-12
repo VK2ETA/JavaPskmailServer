@@ -1263,7 +1263,8 @@ public class RMsgProcessor {
         RMsgObject fullMessage = null;
         for (int i = listCount - 2; i >= 0; i--) {//Skip just received *qtc? message
             recDisplayItem = Main.mainui.msgDisplayList.getItem(i);
-            if (recDisplayItem.myOwn) { //My own message (a Sent message)
+            //My own message (a Sent message) and is for the requester or for ALL
+            if (recDisplayItem.myOwn && matchThisCallWith(mMessage.from, recDisplayItem.mMessage.to, true)) { 
                 //Enqueue message for sorting. Get full message with binary data.
                 fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirSent, recDisplayItem.mMessage.fileName, true);
                 //Coming from this relay station
@@ -1924,6 +1925,28 @@ public class RMsgProcessor {
                                     //Reply to ALL and may need to reply via relay station
                                     RMsgUtil.replyWithPosition("*", mMessage.relay, mMessage.rxMode);
                                 }
+                            }
+                        } else if (mMessage.sms.startsWith("*tim?")) {
+                            //Time Sync request
+                            if (matchMyCallWith(mMessage.to, false)
+                                    || (matchMyCallWith(mMessage.via, false) && mMessage.to.equals("*"))) {
+                                RMsgUtil.sendBeeps(true);
+                                //Reply to the requesting station only
+                                RMsgUtil.replyWithTime(mMessage);
+                            }
+                        } else if (mMessage.sms.toLowerCase(Locale.US).equals("*time reference received*")) {
+                            //Time Sync data received, notify
+                            if (matchMyCallWith(mMessage.to, false) && Main.refTimeSource.length() > 0) {
+                                RMsgUtil.sendBeeps(true);
+                                if (Main.deviceToRefTimeCorrection == 0) {
+                                    Main.mainui.appendMainWindow("This device clock is the same as " + Main.refTimeSource + "'s clock\n");
+                                } else if (Main.deviceToRefTimeCorrection < 0) {
+                                    Main.mainui.appendMainWindow("This device clock is " + (-Main.deviceToRefTimeCorrection) + " seconds in front of " + Main.refTimeSource + "'s clock\n");
+                                } else {
+                                    Main.mainui.appendMainWindow("This device clock is " + Main.deviceToRefTimeCorrection + " seconds behind " + Main.refTimeSource + "'s clock\n");
+                                }
+                                //Reset source to mean "processed"
+                                Main.refTimeSource = "";
                             }
                         } else {
                             //Not an action message, send ack as appropriate if directed to me ONLY

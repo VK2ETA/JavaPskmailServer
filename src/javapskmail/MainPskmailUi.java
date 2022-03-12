@@ -18,6 +18,7 @@
 package javapskmail;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -26,6 +27,8 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -546,6 +549,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                     //Reset time since last RSID if we don't see a radio message header within 30 seconds
                     if (!Main.receivingRadioMsg && Main.possibleRadioMsg > 0 && System.currentTimeMillis() - Main.possibleRadioMsg >= 30000) {
                         Main.possibleRadioMsg = 0L;
+                        Main.lastRsidTime = 0L; //Also reset the last RSID time
                     }
 
                     // Status Line messages
@@ -1660,6 +1664,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
         bRMsgReqPos = new javax.swing.JButton();
         bRMsgResendLast = new javax.swing.JButton();
         bRMsgResend = new javax.swing.JButton();
+        reqtime = new javax.swing.JButton();
         bRMsgManageMsg = new javax.swing.JButton();
         pnlStatus = new javax.swing.JPanel();
         snLabel = new javax.swing.JLabel();
@@ -1747,6 +1752,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
         mnuLink = new javax.swing.JMenu();
         Ping_menu_item = new javax.swing.JMenuItem();
         menuInquire = new javax.swing.JMenuItem();
+        TimeSyncMenuItem = new javax.swing.JMenuItem();
         jMenuQuality = new javax.swing.JMenuItem();
         Link_menu_item = new javax.swing.JMenuItem();
         Beacon_menu_item = new javax.swing.JMenuItem();
@@ -3296,6 +3302,15 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 });
                 pnlRMSgButtons.add(bRMsgResend);
 
+                reqtime.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+                reqtime.setText(mainpskmailui.getString("MainPskmailUi.reqtime.text")); // NOI18N
+                reqtime.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        reqtimeActionPerformed(evt);
+                    }
+                });
+                pnlRMSgButtons.add(reqtime);
+
                 bRMsgManageMsg.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
                 bRMsgManageMsg.setForeground(new java.awt.Color(0, 102, 51));
                 bRMsgManageMsg.setText(bundle.getString("MainPskmailUi.bRMsgManageMsg.text")); // NOI18N
@@ -3373,6 +3388,12 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
                 gridBagConstraints.insets = new java.awt.Insets(2, 9, 4, 1);
                 pnlStatus.add(cboServer, gridBagConstraints);
+                cboServer.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
+                    @Override
+                    public void keyReleased(KeyEvent event) {
+                        cboServerProcessKeyReleased(event);
+                    }
+                });
 
                 spnMinute.setModel(new SpinnerNumberModel(0,0,4,1));
                 spnMinute.setFont(new java.awt.Font("DejaVu Sans Mono", 0, 12)); // NOI18N
@@ -4018,6 +4039,15 @@ public class MainPskmailUi extends javax.swing.JFrame {
                     }
                 });
                 mnuLink.add(menuInquire);
+
+                TimeSyncMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, java.awt.event.InputEvent.CTRL_MASK));
+                TimeSyncMenuItem.setText(mainpskmailui.getString("MainPskmailUi.TimeSync.MenuItem.text")); // NOI18N
+                TimeSyncMenuItem.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        TimeSyncMenuItemActionPerformed(evt);
+                    }
+                });
+                mnuLink.add(TimeSyncMenuItem);
 
                 jMenuQuality.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
                 jMenuQuality.setText(bundle.getString("MainPskmailUi.jMenuQuality.text")); // NOI18N
@@ -5068,6 +5098,9 @@ private void spnMinuteStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIR
 
 private void cboServerFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_cboServerFocusLost
     try {
+        //Read the text window (may contain either a selected item OR a typed in server[:password]
+        //getcboServer();
+        /*
         String myServer = cboServer.getSelectedItem().toString();
         String OldServer = Main.q.getServer();
         if (myServer.length() > 1 && !myServer.equals(OldServer)) {
@@ -5078,9 +5111,11 @@ private void cboServerFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:even
             Main.q.setServerAndPassword(myServer);
             //serverInput(myServer);
         }
+        */
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Had_trouble_setting_the_server_to_link_to."), ex, true);
     }
+       
 }//GEN-LAST:event_cboServerFocusLost
 
     /**
@@ -5090,22 +5125,8 @@ private void cboServerFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:even
      */
 private void cboServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboServerActionPerformed
     try {
-        //Only if we don't have an empty list
-        if (cboServer.getItemCount() > 0) {
-            String myServer = cboServer.getSelectedItem().toString();
-            String OldServer = Main.q.getServer();
-            // Is it a a new and not empty thing?
-            if (myServer.length() > 1 && !myServer.equals(OldServer)) {
-                Main.q.setServerAndPassword(myServer);
-                RigCtrl.Loadfreqs(myServer);
-                //VK2ETA: Not done here anymore, done in preferences
-                //Main.configuration.setServer(myServer);
-                // Update the server array and add item to drop down
-                //Main.AddServerToArray(myServer);
-                //Also save in Main.q for blocks processing
-                Main.q.setServerAndPassword(myServer);
-            }
-        }
+        //Read the text window (may contain either a selected item OR a typed in server[:password]
+        getcboServer();
     } catch (Exception ex) {
         Main.log.writelog(mainpskmailui.getString("Had_trouble_setting_the_server_to_link_to."), ex, true);
     }
@@ -5113,7 +5134,7 @@ private void cboServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIR
 }//GEN-LAST:event_cboServerActionPerformed
 
 private void Ping_menu_itemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Ping_menu_itemActionPerformed
-    // TODO add your handling code here:
+    
     if (!Main.connected & !Main.Connecting & !Main.bulletinMode & !Main.iacMode) {
         try {
             Main.q.Message(mainpskmailui.getString("send_ping"), 5);
@@ -7570,6 +7591,33 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         // TODO add your handling code here:
     }//GEN-LAST:event_jRadioButtonAcceptActionPerformed
 
+    private void TimeSyncMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TimeSyncMenuItemActionPerformed
+        //Request a time synchronization from the selected server
+        if (!Main.connected & !Main.Connecting & !Main.bulletinMode & !Main.iacMode) {
+            try {
+                Main.q.Message(mainpskmailui.getString("send_timesync"), 5);
+                Main.q.set_txstatus(TxStatus.TXTimeSync);
+                Main.q.send_TimeSync();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
+            }
+    }
+
+    }//GEN-LAST:event_TimeSyncMenuItemActionPerformed
+
+    private void reqtimeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reqtimeActionPerformed
+        if (selectedTo == "*") {
+            //middleToastText("CAN'T Request Time Sync from \"ALL\"\n\nSelect a single TO destination above");
+            Main.q.Message(mainpskmailui.getString("you_must_select_to"), 5);
+        } else if (RMsgProcessor.matchMyCallWith(selectedTo, false)) {
+            //middleToastText("CAN'T Request Positions from \"YOURSELF\"\n\nSelect another TO destination above");
+        } else {
+            RMsgTxList.addMessageToList(selectedTo, "", "*tim?", //Via always blank
+                    false, null, 0,
+                    null);
+        }
+    }//GEN-LAST:event_reqtimeActionPerformed
+
     /**
      * Simple message dialog with yes and no button
      *
@@ -7798,9 +7846,61 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         }
     }
 
-    public String getcboServer() {
-        String server = cboServer.getSelectedItem().toString();
-        return server;
+    //Key input processing for custom code of cboServer (server's combo box)
+    private void cboServerProcessKeyReleased(KeyEvent event) {
+
+        String server = ((JTextComponent) ((JComboBox) ((Component) event
+                .getSource()).getParent()).getEditor()
+                .getEditorComponent()).getText();
+
+        //Extract server and possibly password too
+        if (server.contains(":")) {
+            //We have a typed in server:password combination
+            String[] serverArray = server.split(":");
+            if (serverArray.length == 2) {
+                //Extract both data points and save
+                server = serverArray[0];
+                //Apply the same format contraints as in the preferences
+                server = server.replaceAll("[^a-zA-Z0-9\\/\\-]", "");
+                if (server.length() > 0) {
+                    Main.q.setServer(server);
+                    Main.q.setPassword(serverArray[1]);
+                    RigCtrl.Loadfreqs(server);
+                }
+            } else if (serverArray.length == 1) {
+                //We have ":" but no password, set it to blank
+                server = serverArray[0];
+                //Apply the same format contraints as in the preferences
+                server = server.replaceAll("[^a-zA-Z0-9\\/\\-]", "");
+                if (server.length() > 0) {
+                    Main.q.setServer(server);
+                    Main.q.setPassword("");
+                    RigCtrl.Loadfreqs(server);
+                }
+            }
+        } else {
+            //Server callsign only, no ":", no password
+            //Apply the same format contraints as in the preferences
+            server = server.replaceAll("[^a-zA-Z0-9\\/\\-]", "");
+            if (server.length() > 0) {
+                Main.q.setServer(server);
+                Main.q.setPassword("");
+                RigCtrl.Loadfreqs(server);
+            }
+        }
+    }
+ 
+    public void getcboServer() {
+        //We selected an Item OR pressed enter on the combi box after typing data. Check which is which first?
+        int index = cboServer.getSelectedIndex();
+        if (index != -1) {
+            //We have a valid selection event, not an Enter key event after typing a new server's call
+            //Get the server from the preferences array (we may have two entries with the same server but different passwords for example)
+            if (index < Main.serversArray.length) {
+                Main.q.setServer(Main.serversArray[index]);
+                Main.q.setPassword(Main.serversPasswordArray[index]);
+            }
+        }
     }
 
     public void ForwardMail(String subject, String content) {
@@ -8382,6 +8482,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     public javax.swing.JLabel StatusLabel;
     private javax.swing.JMenuItem Stoptransaction_mnu;
     private javax.swing.JTextField Throughput;
+    private javax.swing.JMenuItem TimeSyncMenuItem;
     private javax.swing.JTextField Totalbytes;
     private javax.swing.JMenuItem Twitter_send;
     private javax.swing.JProgressBar TxmodeQuality;
@@ -8553,6 +8654,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JPanel pnlStatusIndicator;
     private javax.swing.JPanel pnlSummoning;
     private javax.swing.JPanel pnlTerminalButtons;
+    private javax.swing.JButton reqtime;
     private javax.swing.JLabel rigctlactivelbl;
     private javax.swing.JScrollPane scrEmailLeft;
     private javax.swing.JScrollPane scrEmailRight;

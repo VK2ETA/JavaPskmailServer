@@ -58,7 +58,6 @@ public class Arq {
     private String serverPassword = ""; //Default to blank (= no password)
     public String statustxt = cf.getStatus();
     public String backoff = cf.getBlocklength();
-    static private Modem m;
     private String summonsfreq = "0";
     private String reqCallSign = ""; //Requester's call sign, typically a client making an inquiry
 
@@ -83,22 +82,22 @@ public class Arq {
         this.reqCallSign = reqCallSign;
     }
 
+    
     /**
      *
-     * @param server
-     */
-    public void setServerAndPassword(String server) {
+     * @param server String
+     */ 
+    public void setServer(String server) {
         this.servercall = server;
-        boolean foundCall = false;
-        for (int i = 0; i <  Main.MAXNEWSERVERS; i++) {
-            if (Main.serversArray[i].toLowerCase().equals(this.servercall.toLowerCase())) {
-                foundCall = true;
-                serverPassword = Main.serversPasswordArray[i];
-            }
-        }
-        if (!foundCall) {
-            serverPassword = "";
-        }
+    }
+
+    /**
+     *
+     * @param password String
+     */
+    public void setPassword(String password) {
+
+        this.serverPassword = password;      
     }
 
     /**
@@ -113,11 +112,6 @@ public class Arq {
     //Get the current server's password if any
     public String getPassword() {
         return serverPassword;
-    }
-
-    //Set the current server's password
-    public void setPassword(String password) {
-        this.serverPassword = password;
     }
 
     /**
@@ -239,7 +233,38 @@ public class Arq {
         String returnframe = "";
         // Fix stream id, this is wrong
         callsign = Main.configuration.getPreference("CALL");
-        returnframe = "00" + Unproto + callsign + ":8 " + Main.mainui.getcboServer() + " ";
+        returnframe = "00" + Unproto + callsign + ":8 " + Main.q.servercall + " ";
+        return returnframe;
+    }
+
+    //Send a Time Sync Request block
+    private String timesyncblock() {
+        String returnframe = "";
+        // Fix stream id, this is wrong
+        callsign = Main.configuration.getPreference("CALL");
+        returnframe = "00" + Unproto + callsign + ":9 "+ Main.q.servercall + " ";
+        return returnframe;
+    }
+
+    //Reply to a Time Sync block
+    private String replyTimeSyncblock() {
+        String returnframe = "";
+        String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
+        Long myTime = System.currentTimeMillis() / 1000;
+        myTime = myTime - ((Long) (myTime / 1000000L) * 1000000L); //Keep the last 6 digits representing seconds
+        int TxDelay = 0;
+        String TxDelayStr = Main.configuration.getPreference("TXDELAY", "0");
+        //int dcdSecs = Integer.parseInt(Main.configuration.getPreference("DCD", "0"));
+        if (TxDelayStr.length() > 0) {
+            TxDelay = Integer.parseInt(TxDelayStr);
+        }
+        myTime += (3 + TxDelay); // dcdSecs is disregarded when sending these time reference frames
+        String myTimeStr = ("0000000" + myTime.toString());
+        myTimeStr = myTimeStr.substring(myTimeStr.length() - 6);
+        returnframe = "00" + Unproto + serverCall + " " + reqCallSign + ":91 " + myTimeStr + " ";
+        //Set flag to bypass DCD as it introduces a variable delay in the Tx of the time reference.
+        //  Since the timre reference is pre-calsulated to match the Rx of the RSID, the DCD creates issues
+        Main.bypassDCD = true;
         return returnframe;
     }
 
@@ -630,6 +655,20 @@ public class Arq {
                 Lastblockinframe = 1;
                 outstring = make_block(info) + FrameEnd;
                 break;
+            case TXTimeSync:
+                Main.m.requestTxRsid("ON");
+                //    System.out.println("Sync");
+                info = timesyncblock();
+                Lastblockinframe = 1;
+                outstring = make_block(info) + FrameEnd;
+                break;
+            case TXTimeSyncReply:
+                Main.m.requestTxRsid("ON");
+                //    System.out.println("Sync");
+                info = replyTimeSyncblock();
+                Lastblockinframe = 1;
+                outstring = make_block(info) + FrameEnd;
+                break;
             case TXInqReply:
                 Main.m.requestTxRsid("ON");
                 //    System.out.println("INQ Reply");
@@ -797,6 +836,26 @@ public class Arq {
      */
     public void send_inquire_reply() throws InterruptedException {
         this.txserverstatus = TxStatus.TXInqReply;
+        send_frame("");
+    }
+
+    
+    /**
+     * /
+     * Send a Time Synchronization request, using port 9
+     */
+    public void send_TimeSync() throws InterruptedException {
+        this.txserverstatus = TxStatus.TXTimeSync;
+        send_frame("");
+    }
+
+    /**
+     * /
+     * Send a reply to a Time Synchronization request
+     */
+    public void send_TimeSync_reply(String reqCallSign) throws InterruptedException {
+        this.reqCallSign = reqCallSign;
+        this.txserverstatus = TxStatus.TXTimeSyncReply;
         send_frame("");
     }
 

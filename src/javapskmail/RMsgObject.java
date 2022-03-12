@@ -56,6 +56,7 @@ public class RMsgObject {
     String timeId;
     Boolean sent;
     Calendar receiveDate;
+    boolean sendMyTime;
     
 
     //Blank object constructor
@@ -85,6 +86,7 @@ public class RMsgObject {
         this.timeId = "";
         this.sent = false;
         this.receiveDate = null;
+        this.sendMyTime = false;
     }
 
 
@@ -113,6 +115,7 @@ public class RMsgObject {
         this.timeId = "";
         this.sent = false;
         this.receiveDate = null;
+        this.sendMyTime = false;
     }
 
 
@@ -550,6 +553,22 @@ public class RMsgObject {
                 txBuffer += "ro:" + strRo + "\n";
             }
         }
+        if (this.sendMyTime) {
+            //Time data to be sent must be generated just before sending the message to minimise Tx timing errors as messages
+            // can stay in the Tx queue for a while (multiple messages, busy with a message reception, etc...)
+            Long myTime = System.currentTimeMillis() / 1000; //UTC time by definition
+            myTime = myTime - ((Long) (myTime / 1000000L) * 1000000L); //Keep the last 6 digits representing seconds
+            //int TxDelay = 0;
+            //String TxDelayStr = Main.configuration.getPreference("TXDELAY", "0");
+            //int dcdSecs = Integer.parseInt(Main.configuration.getPreference("DCD", "0"));
+            //if (TxDelayStr.length() > 0) {
+            //    TxDelay = Integer.parseInt(TxDelayStr);
+            //}
+            myTime += (3); //DCD and TxDelay not used for RadioMsg
+            String myTimeStr = ("0000000" + myTime.toString());
+            myTimeStr = myTimeStr.substring(myTimeStr.length() - 6);
+            txBuffer += "tim:" + myTimeStr + "\n";
+        }
         if (allCharsToLowerCase) {
             txBuffer = txBuffer.toLowerCase(Locale.US);
         }
@@ -616,7 +635,7 @@ public class RMsgObject {
                             mMessage.receiveDate.setTime(recDate);
                         } catch (NumberFormatException e) {
                             //Debug
-                            e.printStackTrace();
+                            //e.printStackTrace();
                         }
                     } else if (group1.equals("pos")) {
                         //format is either
@@ -725,9 +744,37 @@ public class RMsgObject {
                                     + "RadioMsgImages" + Main.separator;
                             mMessage.picture = Bitmap.decodeFile(filePath + pictureFn);
                         }
+                    } else if (group1.equals("tim")) {
+                        //We have a time synchronisation data, store it
+                        if (group2.length() == 6) { //6 digits?
+                            boolean formatOk = true;
+                            for (int i = 0; i < 6; i++) {
+                                if (group2.charAt(i) < '0' || group2.charAt(i) > '9') {
+                                    formatOk = false;
+                                    break; //end of exercise
+                                }
+                            }
+                            if (formatOk) {
+                                //Process information
+                                if (Main.lastRsidTime > 0L) {
+                                    //We have a recent RSID received time, store the delta time and
+                                    // the provisional time server call sign for later processing
+                                    Long timeRef = Long.parseLong(group2);
+                                    Long timeHere = Main.lastRsidTime / 1000 - ((Long) (Main.lastRsidTime / 1000000000L) * 1000000L); //Keep the last 6 digits representing seconds
+                                    Long deltaTime = timeRef - timeHere;
+                                    //Wrap around if we passed a 100000 seconds threshold
+                                    if (Math.abs(deltaTime) > 99998L) {
+                                        deltaTime = deltaTime < 0L ? deltaTime + 1000000L : deltaTime - 1000000L;
+                                    }
+                                    Main.deviceToRefTimeCorrection = deltaTime;
+                                    Main.refTimeSource = mMessage.from;
+                                    mMessage.sms = "*Time Reference Received*";
+                                }
+                            }
+                        }
                     }
-                    //CRC
                 } else if (group3 != null) {
+                    //CRC
                     mMessage.crcValid = false;
                     mMessage.crcValidWithPW = false;
                     //CRC and EOT

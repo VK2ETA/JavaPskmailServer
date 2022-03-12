@@ -108,5 +108,9 @@ public enum TxStatus {
 //    
     TXCWACK,
 //    
-    TXCWNACK
+    TXCWNACK,
+//
+    TXTimeSync,
+//
+    TXTimeSyncReply
 }
