@@ -37,6 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.text.*;
@@ -169,7 +170,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
         //System.out.println("Entering mainpskmailui");
 
         initComponents();
-        ButtonGroup RB = new ButtonGroup();
+        //ButtonGroup RB = new ButtonGroup();
         //myarq = new arq();
         //String path = Main.HomePath + Main.Dirprefix;
         //myconfig = new config(path);
@@ -1664,7 +1665,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
         bRMsgReqPos = new javax.swing.JButton();
         bRMsgResendLast = new javax.swing.JButton();
         bRMsgResend = new javax.swing.JButton();
-        reqtime = new javax.swing.JButton();
+        serverControl = new javax.swing.JButton();
         bRMsgManageMsg = new javax.swing.JButton();
         pnlStatus = new javax.swing.JPanel();
         snLabel = new javax.swing.JLabel();
@@ -1752,7 +1753,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
         mnuLink = new javax.swing.JMenu();
         Ping_menu_item = new javax.swing.JMenuItem();
         menuInquire = new javax.swing.JMenuItem();
-        TimeSyncMenuItem = new javax.swing.JMenuItem();
+        timeSyncMenuItem = new javax.swing.JMenuItem();
         jMenuQuality = new javax.swing.JMenuItem();
         Link_menu_item = new javax.swing.JMenuItem();
         Beacon_menu_item = new javax.swing.JMenuItem();
@@ -1830,6 +1831,11 @@ public class MainPskmailUi extends javax.swing.JFrame {
         tabMain.setMaximumSize(new java.awt.Dimension(1400, 1024));
         tabMain.setMinimumSize(new java.awt.Dimension(725, 290));
         tabMain.setPreferredSize(new java.awt.Dimension(725, 290));
+        tabMain.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                tabMainStateChanged(evt);
+            }
+        });
 
         tabTerminal.setMaximumSize(new java.awt.Dimension(1024, 1024));
         tabTerminal.setMinimumSize(new java.awt.Dimension(708, 306));
@@ -3302,14 +3308,15 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 });
                 pnlRMSgButtons.add(bRMsgResend);
 
-                reqtime.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
-                reqtime.setText(mainpskmailui.getString("MainPskmailUi.reqtime.text")); // NOI18N
-                reqtime.addActionListener(new java.awt.event.ActionListener() {
+                serverControl.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+                serverControl.setForeground(new java.awt.Color(12, 134, 40));
+                serverControl.setText(mainpskmailui.getString("MainPskmailUi.serverControl.text")); // NOI18N
+                serverControl.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        reqtimeActionPerformed(evt);
+                        serverControlActionPerformed(evt);
                     }
                 });
-                pnlRMSgButtons.add(reqtime);
+                pnlRMSgButtons.add(serverControl);
 
                 bRMsgManageMsg.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
                 bRMsgManageMsg.setForeground(new java.awt.Color(0, 102, 51));
@@ -3329,11 +3336,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
 
                 tabMain.addTab(mainpskmailui.getString("MainPskmailUi.tabRadioMsg.TabConstraints.tabTitle"), tabRadioMsg); // NOI18N
 
-                gridBagConstraints = new java.awt.GridBagConstraints();
-                gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-                gridBagConstraints.weightx = 0.5;
-                gridBagConstraints.weighty = 0.5;
-                getContentPane().add(tabMain, gridBagConstraints);
+                getContentPane().add(tabMain, new java.awt.GridBagConstraints());
                 tabMain.setEnabledAt(7, true);
 
                 pnlStatus.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
@@ -4040,14 +4043,14 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 });
                 mnuLink.add(menuInquire);
 
-                TimeSyncMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, java.awt.event.InputEvent.CTRL_MASK));
-                TimeSyncMenuItem.setText(mainpskmailui.getString("MainPskmailUi.TimeSync.MenuItem.text")); // NOI18N
-                TimeSyncMenuItem.addActionListener(new java.awt.event.ActionListener() {
+                timeSyncMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_T, java.awt.event.InputEvent.CTRL_MASK));
+                timeSyncMenuItem.setText(mainpskmailui.getString("MainPskmailUi.TimeSync.MenuItem.text")); // NOI18N
+                timeSyncMenuItem.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        TimeSyncMenuItemActionPerformed(evt);
+                        timeSyncMenuItemActionPerformed(evt);
                     }
                 });
-                mnuLink.add(TimeSyncMenuItem);
+                mnuLink.add(timeSyncMenuItem);
 
                 jMenuQuality.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.event.InputEvent.CTRL_MASK));
                 jMenuQuality.setText(bundle.getString("MainPskmailUi.jMenuQuality.text")); // NOI18N
@@ -7591,7 +7594,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         // TODO add your handling code here:
     }//GEN-LAST:event_jRadioButtonAcceptActionPerformed
 
-    private void TimeSyncMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TimeSyncMenuItemActionPerformed
+    private void timeSyncMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_timeSyncMenuItemActionPerformed
         //Request a time synchronization from the selected server
         if (!Main.connected & !Main.Connecting & !Main.bulletinMode & !Main.iacMode) {
             try {
@@ -7601,22 +7604,29 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             } catch (InterruptedException ex) {
                 Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
             }
-    }
-
-    }//GEN-LAST:event_TimeSyncMenuItemActionPerformed
-
-    private void reqtimeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reqtimeActionPerformed
-        if (selectedTo == "*") {
-            //middleToastText("CAN'T Request Time Sync from \"ALL\"\n\nSelect a single TO destination above");
-            Main.q.Message(mainpskmailui.getString("you_must_select_to"), 5);
-        } else if (RMsgProcessor.matchMyCallWith(selectedTo, false)) {
-            //middleToastText("CAN'T Request Positions from \"YOURSELF\"\n\nSelect another TO destination above");
-        } else {
-            RMsgTxList.addMessageToList(selectedTo, "", "*tim?", //Via always blank
-                    false, null, 0,
-                    null);
         }
-    }//GEN-LAST:event_reqtimeActionPerformed
+    }//GEN-LAST:event_timeSyncMenuItemActionPerformed
+
+    private void serverControlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverControlActionPerformed
+        if (selectedTo.equals("*")) {
+            //middleToastText("CAN'T send commands to all servers. Select a single TO destination above"
+            Main.q.Message(mainpskmailui.getString("you_must_select_to"), 5);
+        } else {
+            ServerControlWindow scw = new ServerControlWindow(this, true);
+            scw.setLocationRelativeTo(this);
+            scw.setVisible(true);
+       }
+    }//GEN-LAST:event_serverControlActionPerformed
+
+    private void tabMainStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabMainStateChanged
+        //If in RadioMsg tab, grey out the server drop down at the bottom of the screen to avoid confusion
+        int index = tabMain.getSelectedIndex();
+        if (index == 7) {
+            cboServer.setEnabled(false); 
+        } else {
+            cboServer.setEnabled(true);
+        }
+    }//GEN-LAST:event_tabMainStateChanged
 
     /**
      * Simple message dialog with yes and no button
@@ -8482,7 +8492,6 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     public javax.swing.JLabel StatusLabel;
     private javax.swing.JMenuItem Stoptransaction_mnu;
     private javax.swing.JTextField Throughput;
-    private javax.swing.JMenuItem TimeSyncMenuItem;
     private javax.swing.JTextField Totalbytes;
     private javax.swing.JMenuItem Twitter_send;
     private javax.swing.JProgressBar TxmodeQuality;
@@ -8654,12 +8663,12 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JPanel pnlStatusIndicator;
     private javax.swing.JPanel pnlSummoning;
     private javax.swing.JPanel pnlTerminalButtons;
-    private javax.swing.JButton reqtime;
     private javax.swing.JLabel rigctlactivelbl;
     private javax.swing.JScrollPane scrEmailLeft;
     private javax.swing.JScrollPane scrEmailRight;
     private javax.swing.JScrollPane scrInMsgs;
     private javax.swing.JScrollPane scrRadioMessages;
+    private javax.swing.JButton serverControl;
     private javax.swing.JTextArea serverlist;
     private javax.swing.JLabel snLabel;
     private javax.swing.JSpinner spnMinute;
@@ -8675,6 +8684,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JPanel tabTerminal;
     private javax.swing.JTable tblInbox;
     private javax.swing.JTable tblRadioMsgs;
+    private javax.swing.JMenuItem timeSyncMenuItem;
     private javax.swing.JTextField txtCourse;
     private javax.swing.JTextField txtFixTakenAt;
     private javax.swing.JTextArea txtInMsgs;

@@ -250,6 +250,76 @@ public class RMsgProcessor {
         }
     }
 
+    
+    //Called when a client asked a callsign to be unlinked from am email or SMS
+    public static boolean removeFilterEntries(String address, String from) {
+        
+        //In case the address is an Alias, find also the full address
+        String fullAddress = Main.mainui.msgDisplayList.
+                getReceivedAliasAndDestination(address + "=", from);
+        if (fullAddress.contains("=")) {
+            //extract the destination only (it can be an email or a cellular number
+            fullAddress = RMsgUtil.extractDestination(fullAddress);
+        }
+        //First on Email filter
+            String[] filterList = Main.configuration.getPreference("EMAILLISTENINGFILTER", "").split("\\|");
+        //String[] filterList = {"*,*,0"}; //tbf config.getPreferenceS("EMAILLISTENINGFILTER", "*,*,0").split("\\|");
+        boolean haveMatch = false;
+        String newFilter = "";
+        //Iterate through list of entries
+        for (int i = 0; i < filterList.length; i++) {
+            //Match on time, then on incoming phone number
+            String[] thisFilter = filterList[i].split(",");
+            //Only properly formed filters
+            if (thisFilter.length == 3) {
+                String fromFilter = thisFilter[1].trim();
+                String emailFilter = thisFilter[0].trim();
+                if (fromFilter.toLowerCase(Locale.US).equals(from.toLowerCase(Locale.US))
+                        && (emailFilter.toLowerCase(Locale.US).equals(address.toLowerCase(Locale.US)) 
+                        || emailFilter.toLowerCase(Locale.US).equals(fullAddress.toLowerCase(Locale.US)))) {
+                    //Match, we delete by skipping it
+                    haveMatch = true;
+                } else {
+                    //No match, store that entry
+                    newFilter = newFilter + filterList[i] + "|";
+                }
+            }
+        }
+        //Store updated filter
+        newFilter = newFilter.replace("||", "|");
+        Main.configuration.setPreference("EMAILLISTENINGFILTER", newFilter);
+        
+        //Second on SMS filter
+        filterList = Main.configuration.getPreference("SMSLISTENINGFILTER", "").split("\\|");
+        //String[] filterList = {"*,*,0"}; //tbf config.getPreferenceS("EMAILLISTENINGFILTER", "*,*,0").split("\\|");
+        newFilter = "";
+        //Iterate through list of entries
+        for (int i = 0; i < filterList.length; i++) {
+            //Match on time, then on incoming phone number
+            String[] thisFilter = filterList[i].split(",");
+            //Only properly formed filters
+            if (thisFilter.length == 3) {
+                String fromFilter = thisFilter[1].trim();
+                String smsFilter = thisFilter[0].trim();
+                if (fromFilter.toLowerCase(Locale.US).equals(from.toLowerCase(Locale.US))
+                        && (smsFilter.toLowerCase(Locale.US).equals(address.toLowerCase(Locale.US))   
+                        || smsFilter.toLowerCase(Locale.US).equals(fullAddress.toLowerCase(Locale.US)))) {
+                    //Match, we delete by skipping it
+                    haveMatch = true;
+                } else {
+                    //No match, store that entry
+                    newFilter = newFilter + filterList[i] + "|";
+                }
+            }
+        }
+        //Store updated filter
+        newFilter = newFilter.replace("||", "|");
+        Main.configuration.setPreference("SMSLISTENINGFILTER", newFilter);
+        
+        return haveMatch;
+    }
+
+    
     //Forward message as email message
     private static void sendMailMsg(RMsgObject mMessage, String sendTo, String filterTo) {
 
@@ -1600,7 +1670,8 @@ public class RMsgProcessor {
                                 || (Main.accessPassword.length() > 0 && mMessage.crcValidWithPW));
                         //Command message?
                         if (mMessage.sms.startsWith("*cmd")) {
-                            if (matchMyCallWith(mMessage.via, false)) {
+                            if (matchMyCallWith(mMessage.via, false) || (mMessage.via.length() == 0 && 
+                                    matchMyCallWith(mMessage.to, false))) {
                                 //A scan on/off command? e.g. "*cmd s off 30 m" or "*cmd s on"
                                 //Scan off can also have a duration after which it restarts automatically. E.g. "s off 3h"
                                 boolean cmdOk = false;
@@ -1639,7 +1710,7 @@ public class RMsgProcessor {
                                             if (cmdOk) {
                                                 Main.restartScanAtEpoch = System.currentTimeMillis() + (finalDurationToRestart * 60000);
                                                 Main.wantScanner = false;
-                                                replyString = "Scan Off " + durationToRestart + " " + units;
+                                                replyString = "Scan Off " + numberOff + " " + units;
                                             }
                                         } catch (Exception e) {
                                             //Bad syntax, re-enable scanning
@@ -1669,6 +1740,24 @@ public class RMsgProcessor {
                                         cmdOk = true;
                                     }
                                     replyString = muteUnmute + "d"; //muted/unmuted
+                                }
+                                //An "unlink" command to unsubscibe this callsign / address combination.
+                                // Stops any auto-forwarding or received emails or SMSs for this callsign.
+                                // Received emails/SMSs can still be accessed with a QTC request.
+                                //E.g. "*cmd unlink vk2eta-2 joemail" OR "*cmd unlink vk2eta-2 joesemailaddress@hisprovider.com"
+                                psc = Pattern.compile("^\\*cmd\\sunlink\\s(\\S+)\\s(\\S+)$");
+                                String callToUnlink = "";
+                                String addressToUnlink = "";
+                                msc = psc.matcher(mMessage.sms);
+                                if (messageAuthorized && msc.find()) {
+                                    callToUnlink = msc.group(1);
+                                    addressToUnlink = msc.group(2);
+                                    cmdOk = true;
+                                    if (removeFilterEntries(addressToUnlink, callToUnlink)) {
+                                        replyString = "Unsubscribed for " + addressToUnlink;
+                                    } else {
+                                        replyString = "Address/Number/Alias not in subscriptions";
+                                    }
                                 }
                                 RMsgUtil.sendBeeps(cmdOk);
                                 //Reply with acknowledgment message

@@ -195,7 +195,7 @@ public class RMsgDisplayList {
     // an alias=destination format which is then stored in that message (for potentially being used
     // as a match later on). Each From callsign have their own alias=destination combination.
     //In addition, when a full alias=phonenumber is passed, it is returned with the phone number converted
-    //  to international format for consistency
+    // to international format for consistency
     synchronized public String getReceivedAliasAndDestination(String toAlias, String fromStr) {
         String mToAlias = toAlias;
         Pattern psc = Pattern.compile("^\\s*(.+)\\s*=(.*)\\s*$");
