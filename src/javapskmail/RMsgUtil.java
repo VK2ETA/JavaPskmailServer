@@ -356,6 +356,18 @@ public class RMsgUtil {
         RMsgTxList.addMessageToList(replyMessage);
     }
 
+    //Queues a message with this device's received SNR (Equivalent to Pskmail Inquire function)
+    public static void replyWithSNR(RMsgObject mMessage) {
+
+        RMsgObject replyMessage = new RMsgObject();
+        //Reply in the same mode as the request
+        replyMessage.rxMode = mMessage.rxMode;
+        replyMessage.from = Main.callsignAsServer.trim();
+        replyMessage.to = mMessage.from;
+        replyMessage.via = "";
+        replyMessage.sms = (int)Main.snr + "%";
+        RMsgTxList.addMessageToList(replyMessage);
+    }
 
     //Extract the destination from an "alias=destination" To address field
     public static String extractDestination(String toAliasAndDestination) {

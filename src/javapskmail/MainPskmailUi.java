@@ -834,7 +834,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                         setTitle(Main.application + " - Client:" + Main.mycall + " - " + ClientFreqTxtfield.getText());
                     } else {
                         //setTitle(Main.application + " - Client:" + Main.mycall + ", Server:" + Main.callsignAsServer + " - " + ClientFreqTxtfield.getText());
-                        setTitle(Main.application + " - Callsign:" + Main.mycall + " - " + ClientFreqTxtfield.getText());
+                        setTitle(Main.application + " - Callsign: " + Main.mycall + " - " + ClientFreqTxtfield.getText());
                     }
                     //Loop run every MINUTE
                     if (Minute != oldminute) {
@@ -1661,6 +1661,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
         tblRadioMsgs = new javax.swing.JTable();
         pnlRMSgButtons = new javax.swing.JPanel();
         bRMsgSendSMS = new javax.swing.JButton();
+        bRMsgSendInquire = new javax.swing.JButton();
         bRMsgSendPos = new javax.swing.JButton();
         bRMsgReqPos = new javax.swing.JButton();
         bRMsgResendLast = new javax.swing.JButton();
@@ -3242,9 +3243,10 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 bRMsgSendSMS.setForeground(new java.awt.Color(0, 102, 51));
                 bRMsgSendSMS.setText(bundle.getString("MainPskmailUi.bRMsgSendSMS.text")); // NOI18N
                 bRMsgSendSMS.setToolTipText(bundle.getString("MainPskmailUi.bRMsgSendSMS.toolTipText")); // NOI18N
+                bRMsgSendSMS.setMargin(new java.awt.Insets(2, 2, 2, 2));
                 bRMsgSendSMS.setMaximumSize(new java.awt.Dimension(110, 25));
-                bRMsgSendSMS.setMinimumSize(new java.awt.Dimension(80, 25));
-                bRMsgSendSMS.setPreferredSize(new java.awt.Dimension(100, 25));
+                bRMsgSendSMS.setMinimumSize(new java.awt.Dimension(75, 25));
+                bRMsgSendSMS.setPreferredSize(new java.awt.Dimension(75, 25));
                 bRMsgSendSMS.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
                         bRMsgSendSMSActionPerformed(evt);
@@ -3252,13 +3254,29 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 });
                 pnlRMSgButtons.add(bRMsgSendSMS);
 
+                bRMsgSendInquire.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
+                bRMsgSendInquire.setForeground(new java.awt.Color(0, 102, 51));
+                bRMsgSendInquire.setText(bundle.getString("MainPskmailUi.bRMsgSendInquire.text")); // NOI18N
+                bRMsgSendInquire.setToolTipText(bundle.getString("MainPskmailUi.bRMsgSendInquire.toolTipText")); // NOI18N
+                bRMsgSendInquire.setMargin(new java.awt.Insets(2, 2, 2, 2));
+                bRMsgSendInquire.setMaximumSize(new java.awt.Dimension(110, 25));
+                bRMsgSendInquire.setMinimumSize(new java.awt.Dimension(75, 25));
+                bRMsgSendInquire.setPreferredSize(new java.awt.Dimension(75, 25));
+                bRMsgSendInquire.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        bRMsgSendInquireActionPerformed(evt);
+                    }
+                });
+                pnlRMSgButtons.add(bRMsgSendInquire);
+
                 bRMsgSendPos.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
                 bRMsgSendPos.setForeground(new java.awt.Color(0, 102, 51));
                 bRMsgSendPos.setText(bundle.getString("MainPskmailUi.bRMsgSendPos.text")); // NOI18N
                 bRMsgSendPos.setToolTipText(mainpskmailui.getString("MainPskmailUi.bRMsgSendPos.toolTipText")); // NOI18N
-                bRMsgSendPos.setMaximumSize(new java.awt.Dimension(110, 27));
-                bRMsgSendPos.setMinimumSize(new java.awt.Dimension(80, 27));
-                bRMsgSendPos.setPreferredSize(new java.awt.Dimension(100, 27));
+                bRMsgSendPos.setMargin(new java.awt.Insets(2, 2, 2, 2));
+                bRMsgSendPos.setMaximumSize(new java.awt.Dimension(110, 25));
+                bRMsgSendPos.setMinimumSize(new java.awt.Dimension(75, 25));
+                bRMsgSendPos.setPreferredSize(new java.awt.Dimension(75, 25));
                 bRMsgSendPos.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
                         bRMsgSendPosActionPerformed(evt);
@@ -3270,9 +3288,10 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 bRMsgReqPos.setForeground(new java.awt.Color(0, 102, 51));
                 bRMsgReqPos.setText(bundle.getString("MainPskmailUi.bRMsgReqPos.text")); // NOI18N
                 bRMsgReqPos.setToolTipText(bundle.getString("MainPskmailUi.bRMsgReqPos.toolTipText")); // NOI18N
+                bRMsgReqPos.setMargin(new java.awt.Insets(2, 2, 2, 2));
                 bRMsgReqPos.setMaximumSize(new java.awt.Dimension(110, 25));
-                bRMsgReqPos.setMinimumSize(new java.awt.Dimension(80, 25));
-                bRMsgReqPos.setPreferredSize(new java.awt.Dimension(100, 25));
+                bRMsgReqPos.setMinimumSize(new java.awt.Dimension(75, 25));
+                bRMsgReqPos.setPreferredSize(new java.awt.Dimension(75, 25));
                 bRMsgReqPos.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
                         bRMsgReqPosActionPerformed(evt);
@@ -3284,9 +3303,10 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 bRMsgResendLast.setForeground(new java.awt.Color(12, 134, 40));
                 bRMsgResendLast.setText(bundle.getString("MainPskmailUi.bRMsgResendLast.text")); // NOI18N
                 bRMsgResendLast.setToolTipText(mainpskmailui.getString("MainPskmailUi.bRMsgResendLast.toolTipText")); // NOI18N
+                bRMsgResendLast.setMargin(new java.awt.Insets(2, 2, 2, 2));
                 bRMsgResendLast.setMaximumSize(new java.awt.Dimension(110, 25));
-                bRMsgResendLast.setMinimumSize(new java.awt.Dimension(80, 25));
-                bRMsgResendLast.setPreferredSize(new java.awt.Dimension(100, 25));
+                bRMsgResendLast.setMinimumSize(new java.awt.Dimension(75, 25));
+                bRMsgResendLast.setPreferredSize(new java.awt.Dimension(75, 25));
                 bRMsgResendLast.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
                         bRMsgResendLastActionPerformed(evt);
@@ -3298,9 +3318,10 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 bRMsgResend.setForeground(new java.awt.Color(12, 134, 40));
                 bRMsgResend.setText(bundle.getString("MainPskmailUi.bRMsgResend.text")); // NOI18N
                 bRMsgResend.setToolTipText(mainpskmailui.getString("mainpskmailui.bRMsgResendDialog.toolTipText")); // NOI18N
+                bRMsgResend.setMargin(new java.awt.Insets(2, 2, 2, 2));
                 bRMsgResend.setMaximumSize(new java.awt.Dimension(110, 25));
-                bRMsgResend.setMinimumSize(new java.awt.Dimension(80, 25));
-                bRMsgResend.setPreferredSize(new java.awt.Dimension(100, 25));
+                bRMsgResend.setMinimumSize(new java.awt.Dimension(75, 25));
+                bRMsgResend.setPreferredSize(new java.awt.Dimension(75, 25));
                 bRMsgResend.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
                         bRMsgResendActionPerformed(evt);
@@ -3311,6 +3332,11 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 serverControl.setFont(new java.awt.Font("Ubuntu", 1, 12)); // NOI18N
                 serverControl.setForeground(new java.awt.Color(12, 134, 40));
                 serverControl.setText(mainpskmailui.getString("MainPskmailUi.serverControl.text")); // NOI18N
+                serverControl.setToolTipText(mainpskmailui.getString("MainPskmailUi.serverControl.tooltip")); // NOI18N
+                serverControl.setMargin(new java.awt.Insets(2, 2, 2, 2));
+                serverControl.setMaximumSize(new java.awt.Dimension(110, 25));
+                serverControl.setMinimumSize(new java.awt.Dimension(75, 25));
+                serverControl.setPreferredSize(new java.awt.Dimension(75, 25));
                 serverControl.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
                         serverControlActionPerformed(evt);
@@ -3322,9 +3348,10 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 bRMsgManageMsg.setForeground(new java.awt.Color(0, 102, 51));
                 bRMsgManageMsg.setText(bundle.getString("MainPskmailUi.bRMsgManageMsg.text")); // NOI18N
                 bRMsgManageMsg.setToolTipText(bundle.getString("MainPskmailUi.bRMsgManageMsg.toolTipText")); // NOI18N
+                bRMsgManageMsg.setMargin(new java.awt.Insets(2, 2, 2, 2));
                 bRMsgManageMsg.setMaximumSize(new java.awt.Dimension(110, 25));
-                bRMsgManageMsg.setMinimumSize(new java.awt.Dimension(80, 25));
-                bRMsgManageMsg.setPreferredSize(new java.awt.Dimension(100, 25));
+                bRMsgManageMsg.setMinimumSize(new java.awt.Dimension(75, 25));
+                bRMsgManageMsg.setPreferredSize(new java.awt.Dimension(75, 25));
                 bRMsgManageMsg.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
                         bRMsgManageMsgActionPerformed(evt);
@@ -7477,18 +7504,15 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
 
     private void bRMsgResendLastActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgResendLastActionPerformed
         if (selectedTo.equals("*") && selectedVia.equals("")) {
-            Main.q.Message(mainpskmailui.getString("you_must_select_to"), 5);
-            //middleToastText("CAN'T Request Positions from \"ALL\"\n\nSelect a single TO destination above");
-        //} else if (RMsgProcessor.matchMyCallWith(selectedTo, false)) {
-            //middleToastText("CAN'T Request Positions from \"YOURSELF\"\n\nSelect another TO destination above");
+            Main.q.Message(mainpskmailui.getString("you_must_select_to_or_via"), 5);
         } else {
             String intext = txtMainEntry.getText();
             if (intext.trim().length() > 0) {
                 //Only add a blank if there is a string to send
                 intext = " " + intext;
             }
-            String toStr = selectedVia.equals("") ? selectedTo : "*";
-            RMsgTxList.addMessageToList(toStr, selectedVia, "*qtc?" + intext,
+            String toStr = selectedVia.equals("") ? selectedTo : selectedVia;
+            RMsgTxList.addMessageToList(toStr, "", "*qtc?" + intext,
                     false, null, 0,
                     null);
             txtMainEntry.setText("");
@@ -7627,6 +7651,20 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             cboServer.setEnabled(true);
         }
     }//GEN-LAST:event_tabMainStateChanged
+
+    private void bRMsgSendInquireActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bRMsgSendInquireActionPerformed
+        if (selectedTo.equals("*") && selectedVia.equals("")) {
+            Main.q.Message(mainpskmailui.getString("you_must_select_to_or_via"), 5);
+            //middleToastText("CAN'T Request Positions from \"ALL\"\n\nSelect a single TO destination above");
+        //} else if (RMsgProcessor.matchMyCallWith(selectedTo, false)) {
+            //middleToastText("CAN'T Request Positions from \"YOURSELF\"\n\nSelect another TO destination above");
+        } else {
+            String toStr = selectedVia.equals("") ? selectedTo : selectedVia;
+            //Send Inquire request (of My SNR) to remote station
+            RMsgTxList.addMessageToList(toStr, "", "*snr?",
+                        false, null, 0, null);
+        }
+    }//GEN-LAST:event_bRMsgSendInquireActionPerformed
 
     /**
      * Simple message dialog with yes and no button
@@ -8432,6 +8470,17 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         //});
 
     }
+    
+    //To set/reset the scan checkbox in the RigCtl tab
+    public void setScannerCheckbox(final boolean value) {
+        
+        //Make sure we execute on the UI thread
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                ScannerCheckbox.setSelected(value);
+            }
+        });
+    }
 
     /**
      * @param args the command line arguments
@@ -8511,6 +8560,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JButton bRMsgReqPos;
     private javax.swing.JButton bRMsgResend;
     private javax.swing.JButton bRMsgResendLast;
+    private javax.swing.JButton bRMsgSendInquire;
     private javax.swing.JButton bRMsgSendPos;
     private javax.swing.JButton bRMsgSendSMS;
     private javax.swing.JButton bSummon;

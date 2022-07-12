@@ -11,7 +11,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package javapskmail;
 
 import java.text.DateFormat;
@@ -77,7 +76,7 @@ public class RMsgProcessor {
 
     // Error handling and logging object
     static LoggingClass log;
-    
+
     static boolean alreadyWarned = false;
 
     public static void processor() {
@@ -250,10 +249,9 @@ public class RMsgProcessor {
         }
     }
 
-    
     //Called when a client asked a callsign to be unlinked from am email or SMS
     public static boolean removeFilterEntries(String address, String from) {
-        
+
         //In case the address is an Alias, find also the full address
         String fullAddress = Main.mainui.msgDisplayList.
                 getReceivedAliasAndDestination(address + "=", from);
@@ -262,7 +260,7 @@ public class RMsgProcessor {
             fullAddress = RMsgUtil.extractDestination(fullAddress);
         }
         //First on Email filter
-            String[] filterList = Main.configuration.getPreference("EMAILLISTENINGFILTER", "").split("\\|");
+        String[] filterList = Main.configuration.getPreference("EMAILLISTENINGFILTER", "").split("\\|");
         //String[] filterList = {"*,*,0"}; //tbf config.getPreferenceS("EMAILLISTENINGFILTER", "*,*,0").split("\\|");
         boolean haveMatch = false;
         String newFilter = "";
@@ -275,7 +273,7 @@ public class RMsgProcessor {
                 String fromFilter = thisFilter[1].trim();
                 String emailFilter = thisFilter[0].trim();
                 if (fromFilter.toLowerCase(Locale.US).equals(from.toLowerCase(Locale.US))
-                        && (emailFilter.toLowerCase(Locale.US).equals(address.toLowerCase(Locale.US)) 
+                        && (emailFilter.toLowerCase(Locale.US).equals(address.toLowerCase(Locale.US))
                         || emailFilter.toLowerCase(Locale.US).equals(fullAddress.toLowerCase(Locale.US)))) {
                     //Match, we delete by skipping it
                     haveMatch = true;
@@ -288,7 +286,7 @@ public class RMsgProcessor {
         //Store updated filter
         newFilter = newFilter.replace("||", "|");
         Main.configuration.setPreference("EMAILLISTENINGFILTER", newFilter);
-        
+
         //Second on SMS filter
         filterList = Main.configuration.getPreference("SMSLISTENINGFILTER", "").split("\\|");
         //String[] filterList = {"*,*,0"}; //tbf config.getPreferenceS("EMAILLISTENINGFILTER", "*,*,0").split("\\|");
@@ -302,7 +300,7 @@ public class RMsgProcessor {
                 String fromFilter = thisFilter[1].trim();
                 String smsFilter = thisFilter[0].trim();
                 if (fromFilter.toLowerCase(Locale.US).equals(from.toLowerCase(Locale.US))
-                        && (smsFilter.toLowerCase(Locale.US).equals(address.toLowerCase(Locale.US))   
+                        && (smsFilter.toLowerCase(Locale.US).equals(address.toLowerCase(Locale.US))
                         || smsFilter.toLowerCase(Locale.US).equals(fullAddress.toLowerCase(Locale.US)))) {
                     //Match, we delete by skipping it
                     haveMatch = true;
@@ -315,11 +313,10 @@ public class RMsgProcessor {
         //Store updated filter
         newFilter = newFilter.replace("||", "|");
         Main.configuration.setPreference("SMSLISTENINGFILTER", newFilter);
-        
+
         return haveMatch;
     }
 
-    
     //Forward message as email message
     private static void sendMailMsg(RMsgObject mMessage, String sendTo, String filterTo) {
 
@@ -657,17 +654,17 @@ public class RMsgProcessor {
             RMsgObject mailMessage = mMessage;
             String resultNum = mailMessage.to;
             //Need to send in local phone format?
-            if ( Main.configuration.getPreference("SENDUSINGLOCALNUMBER", "no").equals("yes")) {
+            if (Main.configuration.getPreference("SENDUSINGLOCALNUMBER", "no").equals("yes")) {
                 PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
                 try {
                     String countryCode = Main.configuration.getPreference("GATEWAYISOCOUNTRYCODE").trim();
-                    if (countryCode.length()  == 0) {
+                    if (countryCode.length() == 0) {
                         //Try via the Locale set on this computer as a last resort
                         Locale currentLocale = Locale.getDefault();
                         countryCode = currentLocale.getCountry();
                     }
-                PhoneNumber mPhoneNum = phoneUtil.parse(mailMessage.to, countryCode);
-                resultNum = phoneUtil.format(mPhoneNum, PhoneNumberFormat.NATIONAL).replace(" ", "");
+                    PhoneNumber mPhoneNum = phoneUtil.parse(mailMessage.to, countryCode);
+                    resultNum = phoneUtil.format(mPhoneNum, PhoneNumberFormat.NATIONAL).replace(" ", "");
                 } catch (NumberParseException e) {
                     System.err.println("NumberParseException was thrown: " + e.toString());
                 }
@@ -1128,10 +1125,10 @@ public class RMsgProcessor {
                     //Only if the filter matches the requesting callsign
                     if (tos[j] != null && (tos[j].equals("*") || mMessage.from.toLowerCase(Locale.US).equals(tos[j].toLowerCase(Locale.US)))) {
                         String smsString = getBodyTextFromMessage(msg);
-                        if (smsString.startsWith("\n")){
+                        if (smsString.startsWith("\n")) {
                             smsString = smsString.substring(1);
                         }
-                        if (smsString.endsWith("\r\n\r\n")){
+                        if (smsString.endsWith("\r\n\r\n")) {
                             smsString = smsString.substring(0, smsString.length() - 4);
                         }
                         if (smsString.length() > charLimit) {
@@ -1168,7 +1165,7 @@ public class RMsgProcessor {
                         }
                         //Save received date for incoming message
                         //Date recDate = c1.getTime();
-                        fullMessage.receiveDate =  Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                        fullMessage.receiveDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                         fullMessage.receiveDate.setTime(c1.getTime()); //= c1;
                         //Then save Message date/time in list for sorting (and limit the number of messages)
                         fullMessage.fileName = String.format(Locale.US, "%04d", c1.get(Calendar.YEAR)) + "-"
@@ -1249,7 +1246,7 @@ public class RMsgProcessor {
                     && (!recDisplayItem.mMessage.sms.startsWith("*pos?"))
                     && (!recDisplayItem.mMessage.sms.startsWith("No messages"))
                     && (!recDisplayItem.mMessage.sms.startsWith("Re-Sending "))
-                    && (recDisplayItem.mMessage.receiveDate == null)){
+                    && (recDisplayItem.mMessage.receiveDate == null)) {
                 if (forLast > 0L) { //We have a time-based request
                     Date recMsgDate;
                     try {
@@ -1323,7 +1320,6 @@ public class RMsgProcessor {
         return resendList;
     }
 
-
     //Returns the last Txed message (any type) in response a strait "*qtc?" request
     private static RMsgObject getLastTxed(RMsgObject mMessage) {
 
@@ -1334,7 +1330,7 @@ public class RMsgProcessor {
         for (int i = listCount - 2; i >= 0; i--) {//Skip just received *qtc? message
             recDisplayItem = Main.mainui.msgDisplayList.getItem(i);
             //My own message (a Sent message) and is for the requester or for ALL
-            if (recDisplayItem.myOwn && matchThisCallWith(mMessage.from, recDisplayItem.mMessage.to, true)) { 
+            if (recDisplayItem.myOwn && matchThisCallWith(mMessage.from, recDisplayItem.mMessage.to, true)) {
                 //Enqueue message for sorting. Get full message with binary data.
                 fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirSent, recDisplayItem.mMessage.fileName, true);
                 //Coming from this relay station
@@ -1365,7 +1361,7 @@ public class RMsgProcessor {
                 return fullMessage;
             }
         }
-        
+
         return fullMessage;
     }
 
@@ -1524,7 +1520,7 @@ public class RMsgProcessor {
         //if (!txMessage.via.equals("") &&
         //        (txMessage.sms.contains("*qtc?") || txMessage.sms.contains("*cmd") || isCellular(txMessage.to)
         //                || isEmail(txMessage.to) || txMessage.to.matches(".+=.*"))) {
-        if (!txMessage.via.equals("")) {            
+        if (!txMessage.via.equals("")) {
             for (int i = 0; i < Main.mainui.viaArray.length; i++) {
                 if (Main.mainui.viaArray[i].equals("via " + txMessage.via)) {
                     accessPw = Main.mainui.viaPasswordArray[i];
@@ -1545,7 +1541,7 @@ public class RMsgProcessor {
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
         try {
             String countryCode = Main.configuration.getPreference("GATEWAYISOCOUNTRYCODE");
-            if (countryCode.length()  == 0) {
+            if (countryCode.length() == 0) {
                 //Try via the Locale set on this computer as a last resort
                 Locale currentLocale = Locale.getDefault();
                 countryCode = currentLocale.getCountry();
@@ -1557,7 +1553,7 @@ public class RMsgProcessor {
         }
         return resultNum;
     }
-    
+
     //Process the message now that it is complete (may have had to wait for the picture component)
     @SuppressWarnings("unchecked")
     public static void processTextMessage(final RMsgObject mMessage) {
@@ -1670,8 +1666,8 @@ public class RMsgProcessor {
                                 || (Main.accessPassword.length() > 0 && mMessage.crcValidWithPW));
                         //Command message?
                         if (mMessage.sms.startsWith("*cmd")) {
-                            if (matchMyCallWith(mMessage.via, false) || (mMessage.via.length() == 0 && 
-                                    matchMyCallWith(mMessage.to, false))) {
+                            if (matchMyCallWith(mMessage.via, false) || (mMessage.via.length() == 0
+                                    && matchMyCallWith(mMessage.to, false))) {
                                 //A scan on/off command? e.g. "*cmd s off 30 m" or "*cmd s on"
                                 //Scan off can also have a duration after which it restarts automatically. E.g. "s off 3h"
                                 boolean cmdOk = false;
@@ -1691,8 +1687,10 @@ public class RMsgProcessor {
                                     if (onOff.equals("s on")) {
                                         Main.wantScanner = true;
                                         Main.restartScanAtEpoch = 0L;
+                                        //Set checkbox on GUI
+                                        Main.mainui.setScannerCheckbox(true);
                                         cmdOk = true;
-                                        replyString = "Scan On";
+                                        replyString = "Scan is On";
                                     } else if (onOff.equals("s off") && !numberOff.equals("") && !units.equals("")) {
                                         cmdOk = true;
                                         try {
@@ -1710,7 +1708,9 @@ public class RMsgProcessor {
                                             if (cmdOk) {
                                                 Main.restartScanAtEpoch = System.currentTimeMillis() + (finalDurationToRestart * 60000);
                                                 Main.wantScanner = false;
-                                                replyString = "Scan Off " + numberOff + " " + units;
+                                                //Set checkbox on GUI
+                                                Main.mainui.setScannerCheckbox(false);
+                                                replyString = "Scan is Off for " + numberOff + " " + units;
                                             }
                                         } catch (Exception e) {
                                             //Bad syntax, re-enable scanning
@@ -1765,7 +1765,51 @@ public class RMsgProcessor {
                                     RMsgUtil.replyWithText(mMessage, replyString);
                                 }
                             }
-                            } else if (mMessage.sms.startsWith("*qtc?")) {
+                        } else if (mMessage.sms.contains("*pos?")) { //Position request?
+                            //For me, and ONLY for me? (positions requests from ALL are not allowed)
+                            if (matchMyCallWith(mMessage.to, false)) {
+                                if (mMessage.via.length() == 0) {
+                                    //NO VIA information, sent direct or received via relay, reply ASAP
+                                    //Otherwise I may send my reply as the relay station forwards this 
+                                    // request to me (and obviously I heard it direct but I have to wait for the relay)
+                                    RMsgUtil.sendBeeps(true);
+                                    //Wait for the ack to pass first
+                                    Thread.sleep(500);
+                                    //Reply to ALL and may need to reply via relay station
+                                    RMsgUtil.replyWithPosition("*", mMessage.relay, mMessage.rxMode);
+                                }
+                            }
+                        //Time Sync request
+                        } else if (mMessage.sms.startsWith("*tim?")) {
+                            if (matchMyCallWith(mMessage.to, false)
+                                    || (matchMyCallWith(mMessage.via, false) && mMessage.to.equals("*"))) {
+                                RMsgUtil.sendBeeps(true);
+                                //Reply to the requesting station only
+                                RMsgUtil.replyWithTime(mMessage);
+                            }
+                        //Remote station SNR request (for last message)
+                        } else if (mMessage.sms.startsWith("*snr?")) {
+                            if (matchMyCallWith(mMessage.to, false)
+                                    || (matchMyCallWith(mMessage.via, false) && mMessage.to.equals("*"))) {
+                                RMsgUtil.sendBeeps(true);
+                                //Reply to the requesting station only
+                                RMsgUtil.replyWithSNR(mMessage);
+                            }
+                        //Time Sync data received, notify
+                        } else if (mMessage.sms.toLowerCase(Locale.US).equals("*time reference received*")) {
+                            if (matchMyCallWith(mMessage.to, false) && Main.refTimeSource.length() > 0) {
+                                RMsgUtil.sendBeeps(true);
+                                if (Main.deviceToRefTimeCorrection == 0) {
+                                    Main.mainui.appendMainWindow("This device clock is the same as " + Main.refTimeSource + "'s clock\n");
+                                } else if (Main.deviceToRefTimeCorrection < 0) {
+                                    Main.mainui.appendMainWindow("This device clock is " + (-Main.deviceToRefTimeCorrection) + " seconds in front of " + Main.refTimeSource + "'s clock\n");
+                                } else {
+                                    Main.mainui.appendMainWindow("This device clock is " + Main.deviceToRefTimeCorrection + " seconds behind " + Main.refTimeSource + "'s clock\n");
+                                }
+                                //Reset source to mean "processed"
+                                Main.refTimeSource = "";
+                            }
+                        } else if (mMessage.sms.startsWith("*qtc?")) {
                             //Simplified QTC processing:
                             //By default resends the last of any message (sent directly, heard as relay, email, sms). 
                             //Filtered by selected relaying flags in preferences (E.g. will not check for emails if email relaying is not enabled)
@@ -1777,8 +1821,8 @@ public class RMsgProcessor {
                             //          - "*qtc? le" = resend all email/SMSs messages since the last resend request
                             //          - "*qtc? 2 h" = resend all messages in the last 2 hours
                             //Resend limit is hard coded to 20 messages to be resent
-                            if (matchMyCallWith(mMessage.via, false) ||
-                                    (matchMyCallWith(mMessage.to, false) && mMessage.via.equals(""))) {
+                            if (matchMyCallWith(mMessage.via, false)
+                                    || (matchMyCallWith(mMessage.to, false) && mMessage.via.equals(""))) {
                                 //Only properly received (and secured) messages
                                 if (messageAuthorized) {
                                     RMsgUtil.sendBeeps(true);
@@ -1847,7 +1891,7 @@ public class RMsgProcessor {
                                         }
                                     }
                                     //Are we asked to relay that QTC message to it's destination?
-                                    if (Main.wantRelayOverRadio && forceRelaying && !matchMyCallWith(mMessage.to, false) 
+                                    if (Main.wantRelayOverRadio && forceRelaying && !matchMyCallWith(mMessage.to, false)
                                             && matchMyCallWith(mMessage.via, false)) {
                                         //Remove the "r" from the string and forward the rest of the QTC request as is
                                         extractedStr = mMessage.sms.substring(6).replaceAll("r", "");
@@ -2001,42 +2045,7 @@ public class RMsgProcessor {
                             }
                             //When re-sent pos request may not be in the beginning of the text
                             // } else if (mMessage.sms.startsWith("*pos?")) { //Position request?
-                        } else if (mMessage.sms.contains("*pos?")) { //Position request?
-                            //For me, and ONLY for me? (positions requests from ALL are not allowed)
-                            if (matchMyCallWith(mMessage.to, false)) {
-                                if (mMessage.via.length() == 0) {
-                                    //NO VIA information, sent direct or received via relay, reply ASAP
-                                    //Otherwise I may send my reply as the relay station forwards this 
-                                    // request to me (and obviously I heard it direct but I have to wait for the relay)
-                                    RMsgUtil.sendBeeps(true);
-                                    //Wait for the ack to pass first
-                                    Thread.sleep(500);
-                                    //Reply to ALL and may need to reply via relay station
-                                    RMsgUtil.replyWithPosition("*", mMessage.relay, mMessage.rxMode);
-                                }
-                            }
-                        } else if (mMessage.sms.startsWith("*tim?")) {
-                            //Time Sync request
-                            if (matchMyCallWith(mMessage.to, false)
-                                    || (matchMyCallWith(mMessage.via, false) && mMessage.to.equals("*"))) {
-                                RMsgUtil.sendBeeps(true);
-                                //Reply to the requesting station only
-                                RMsgUtil.replyWithTime(mMessage);
-                            }
-                        } else if (mMessage.sms.toLowerCase(Locale.US).equals("*time reference received*")) {
-                            //Time Sync data received, notify
-                            if (matchMyCallWith(mMessage.to, false) && Main.refTimeSource.length() > 0) {
-                                RMsgUtil.sendBeeps(true);
-                                if (Main.deviceToRefTimeCorrection == 0) {
-                                    Main.mainui.appendMainWindow("This device clock is the same as " + Main.refTimeSource + "'s clock\n");
-                                } else if (Main.deviceToRefTimeCorrection < 0) {
-                                    Main.mainui.appendMainWindow("This device clock is " + (-Main.deviceToRefTimeCorrection) + " seconds in front of " + Main.refTimeSource + "'s clock\n");
-                                } else {
-                                    Main.mainui.appendMainWindow("This device clock is " + Main.deviceToRefTimeCorrection + " seconds behind " + Main.refTimeSource + "'s clock\n");
-                                }
-                                //Reset source to mean "processed"
-                                Main.refTimeSource = "";
-                            }
+
                         } else {
                             //Not an action message, send ack as appropriate if directed to me ONLY
                             if (matchMyCallWith(mMessage.to, true)) {
