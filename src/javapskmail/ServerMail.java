@@ -18,6 +18,7 @@ import javax.mail.Message;
 import javax.mail.Store;
 import java.util.Properties;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.smtp.SMTPTransport;
 import com.sun.mail.util.MailSSLSocketFactory;
 import java.io.File;
 import java.io.FileInputStream;
@@ -70,45 +71,50 @@ public class ServerMail {
     .
     */
     public static String sendMail(String fromStr, String toStr, String subjectStr, 
-        String bodyStr, String attachementFileName) {
-        String result = "";
+            String bodyStr, String attachementFileName) {
         
-        //Properties for gmail
-        String smtpServer = Main.configuration.getPreference("SERVERSMTPHOST");//"smtp.gmail.com";
-        String socketFactoryPort = "465";
+        String result = "";
+        String smtpServer = Main.configuration.getPreference("SERVERSMTPHOST");
+        //String socketFactoryPort = "465";
+        String socketFactoryPort = "587";
         String socketFactoryClass = "javax.net.ssl.SSLSocketFactory";
         String smtpAuth = "true";
-        String smtpPort = "465";
-        //String smtpPort = "587";
+        //String smtpPort = "465";
+        String smtpPort = "587";
         final String fromAddress = Main.configuration.getPreference("SERVEREMAILADDRESS");
         final String userName = Main.configuration.getPreference("SERVERUSERNAME");
         final String password = Main.configuration.getPreference("SERVERPASSWORD");
 
         try {
             Properties props = System.getProperties();
+            props.put("mail.debug", "true");
             props.put("mail.smtp.host", smtpServer);
             props.put("mail.smtp.socketFactory.port", socketFactoryPort);
             props.put("mail.smtp.socketFactory.class", socketFactoryClass);
             props.put("mail.smtp.auth", smtpAuth);
             props.put("mail.smtp.port", smtpPort);
-            props.put("mail.smtp.from", fromAddress);
+            //props.put("mail.smtp.from", fromAddress);
             if (!fromStr.equals("")) {
                 props.put("mail.smtp.from", fromStr);
             } else {
                 props.put("mail.smtp.from", fromAddress);
             }
             props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.socketFactory.fallback", "false");
+            //Startls OR ssl but not both?
+            //props.put("mail.smtp.ssl.enable", "true");
+            props.put("mail.smtp.ssl.trust", smtpServer);
+            // Accept only TLS 1.1 and 1.2
+            //props.setProperty("mail.smtp.ssl.protocols", "TLSv1.1 TLSv1.2");
+            //props.put("mail.smtp.socketFactory.fallback", "false");
             //Get a new instance each time as default instance conflicts with the email read section
             //Session session = Session.getDefaultInstance(props, null);
             javax.mail.Session session = javax.mail.Session.getInstance(props, new Authenticator() {
-
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
                     return new PasswordAuthentication(userName, password);
                 }
-
             });
+            session.setDebug(true);
             // -- Create a new message --
             Message msg = new MimeMessage(session);
             // -- Set the FROM and TO fields --
@@ -151,7 +157,13 @@ public class ServerMail {
             // sets the multi-part as e-mail's content
             msg.setContent(multipart);
             // -- Send the message --
-            Transport.send(msg);
+            //Transport.send(msg);
+            // Create an SMTP transport from the session
+            SMTPTransport t = (SMTPTransport) session.getTransport("smtp");
+            // Connect to the server using credentials
+            t.connect(smtpServer, userName, password);
+            // Send the message
+            t.sendMessage(msg, msg.getAllRecipients());
             result = "\nMessage sent...\n";
         } catch (Exception ex) {
             //Save in log for debugging

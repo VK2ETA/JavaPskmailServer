@@ -512,10 +512,7 @@
                               <EmptySpace min="-2" pref="21" max="-2" attributes="0"/>
                               <Component id="lblPassword" min="-2" max="-2" attributes="0"/>
                               <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="ServerUpdateButton" min="-2" max="-2" attributes="0"/>
-                                  <Component id="jPasswordField1" min="-2" pref="150" max="-2" attributes="0"/>
-                              </Group>
+                              <Component id="jPasswordField1" min="-2" pref="150" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace max="32767" attributes="0"/>
@@ -558,9 +555,7 @@
                           </Group>
                           <Component id="jPasswordField1" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="ServerUpdateButton" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="32767" attributes="0"/>
+                      <EmptySpace pref="41" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -649,19 +644,6 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtReplytoActionPerformed"/>
-              </Events>
-            </Component>
-            <Component class="javax.swing.JButton" name="ServerUpdateButton">
-              <Properties>
-                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="javapskmail/optionsdialog.properties" key="UPDATE SERVER" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
-                </Property>
-                <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="javapskmail/optionsdialog.properties" key="PRESS HERE TO UPLOAD THESE DETAILS TO A SERVER DURING CONNECTED SESSION" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
-                </Property>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="ServerUpdateButtonActionPerformed"/>
               </Events>
             </Component>
             <Component class="javax.swing.JLabel" name="lblEmailHeader">

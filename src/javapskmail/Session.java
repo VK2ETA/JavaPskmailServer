@@ -1908,11 +1908,11 @@ public class Session {
                         String mLine;
                         while ((mLine = br.readLine()) != null) {
                             if (mLine.startsWith("To:")) {
-                                to = mLine.substring(3);
+                                to = RMsgMisc.ltrim(mLine.substring(3));
                             } else if (mLine.startsWith("Subject:")) {
-                                subject = mLine.substring(8);
+                                subject = RMsgMisc.ltrim(mLine.substring(8));
                             } else if (mLine.startsWith("From:")) {
-                                from = mLine.substring(5);
+                                from = RMsgMisc.ltrim(mLine.substring(5));
                             } else if (!mLine.equals(".") && !mLine.startsWith("~SEND")){
                                 //Body
                                 body += mLine + "\n";

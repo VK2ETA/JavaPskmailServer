@@ -5301,12 +5301,12 @@ private void chkAutoLinkStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-F
 
 private void Update_serverActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Update_serverActionPerformed
     // TODO add your handling code here:
-    //if (Main.Connected) {
-    Main.sm.sendUpdate();
-    Main.q.Message("Sending record to server", 5);
-    //   } else {
-    //       Main.q.Message("You need to connect first...", 5);
-    //   }
+    if (Main.connected) {
+        Main.sm.sendUpdate();
+        Main.q.Message("Sending record to server", 5);
+    } else {
+        Main.q.Message("You need to connect first...", 5);
+    }
 }//GEN-LAST:event_Update_serverActionPerformed
 
 private void mnuPSK500ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuPSK500ActionPerformed

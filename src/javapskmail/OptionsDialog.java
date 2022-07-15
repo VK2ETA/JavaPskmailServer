@@ -708,7 +708,6 @@ public class OptionsDialog extends javax.swing.JDialog {
         txtPophost = new javax.swing.JTextField();
         txtPopUser = new javax.swing.JTextField();
         txtReplyto = new javax.swing.JTextField();
-        ServerUpdateButton = new javax.swing.JButton();
         lblEmailHeader = new javax.swing.JLabel();
         jLabel21 = new javax.swing.JLabel();
         jLabel17 = new javax.swing.JLabel();
@@ -1110,14 +1109,6 @@ public class OptionsDialog extends javax.swing.JDialog {
             }
         });
 
-        ServerUpdateButton.setText(optionsdialog.getString("UPDATE SERVER")); // NOI18N
-        ServerUpdateButton.setToolTipText(optionsdialog.getString("PRESS HERE TO UPLOAD THESE DETAILS TO A SERVER DURING CONNECTED SESSION")); // NOI18N
-        ServerUpdateButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ServerUpdateButtonActionPerformed(evt);
-            }
-        });
-
         lblEmailHeader.setText(optionsdialog.getString("POP SERVER TO FETCH EMAIL FROM")); // NOI18N
 
         jLabel21.setText("pop Host");
@@ -1167,9 +1158,7 @@ public class OptionsDialog extends javax.swing.JDialog {
                         .addGap(21, 21, 21)
                         .addComponent(lblPassword)
                         .addGap(18, 18, 18)
-                        .addGroup(pnlEmailLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(ServerUpdateButton)
-                            .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         pnlEmailLayout.setVerticalGroup(
@@ -1202,9 +1191,7 @@ public class OptionsDialog extends javax.swing.JDialog {
                         .addGap(7, 7, 7)
                         .addComponent(lblPassword))
                     .addComponent(jPasswordField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(ServerUpdateButton)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(41, Short.MAX_VALUE))
         );
 
         tabOptions.addTab("Email settings", pnlEmail);
@@ -2948,17 +2935,6 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
         }
     }//GEN-LAST:event_CompressedActionPerformed
 
-    private void ServerUpdateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ServerUpdateButtonActionPerformed
-        // TODO add your handling code here:
-        if (Main.connected) {
-            sendUpdate();
-        } else {
-            this.setVisible(false);
-            //myarq.Message(optionsdialog.getString("YOU NEED TO CONNECT FIRST..."), 5);
-            Main.q.Message(optionsdialog.getString("YOU NEED TO CONNECT FIRST..."), 5);
-        }
-    }//GEN-LAST:event_ServerUpdateButtonActionPerformed
-
     private void checkboxRelayOverRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkboxRelayOverRadioActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_checkboxRelayOverRadioActionPerformed
@@ -3339,7 +3315,6 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JPanel RadioMsgPanel;
     private javax.swing.JCheckBox ScannerCheckbox;
     private javax.swing.JPanel ServerPanel;
-    private javax.swing.JButton ServerUpdateButton;
     private javax.swing.JButton bCancel;
     private javax.swing.JButton bGetSerPorts;
     private javax.swing.JButton bOK;

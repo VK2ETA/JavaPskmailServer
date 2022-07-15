@@ -42,6 +42,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.google.i18n.phonenumbers.NumberParseException;
+import com.sun.mail.smtp.SMTPTransport;
 import javax.swing.SwingUtilities;
 
 public class RMsgProcessor {
@@ -318,21 +319,23 @@ public class RMsgProcessor {
     }
 
     //Forward message as email message
-    private static void sendMailMsg(RMsgObject mMessage, String sendTo, String filterTo) {
+    private static String sendMailMsg(RMsgObject mMessage, String sendTo, String filterTo) {
 
-        String smtpServer = Main.configuration.getPreference("SERVERSMTPHOST");//"smtp.gmail.com";
-        String socketFactoryPort = "465";
-        //String socketFactoryPort = "587";
+        String result = "";
+        String smtpServer = Main.configuration.getPreference("SERVERSMTPHOST");
+        //String socketFactoryPort = "465";
+        String socketFactoryPort = "587";
         String socketFactoryClass = "javax.net.ssl.SSLSocketFactory";
         String smtpAuth = "true";
-        String smtpPort = "465";
-        //String smtpPort = "587";
+        //String smtpPort = "465";
+        String smtpPort = "587";
         final String fromAddress = Main.configuration.getPreference("SERVEREMAILADDRESS");
         final String userName = Main.configuration.getPreference("SERVERUSERNAME");
         final String password = Main.configuration.getPreference("SERVERPASSWORD");
 
         try {
             Properties props = System.getProperties();
+            props.put("mail.debug", "true");
             props.put("mail.smtp.host", smtpServer);
             props.put("mail.smtp.socketFactory.port", socketFactoryPort);
             props.put("mail.smtp.socketFactory.class", socketFactoryClass);
@@ -340,17 +343,21 @@ public class RMsgProcessor {
             props.put("mail.smtp.port", smtpPort);
             props.put("mail.smtp.from", fromAddress);
             props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.socketFactory.fallback", "false");
+            //Startls OR ssl but not both?
+            //props.put("mail.smtp.ssl.enable", "true");
+            props.put("mail.smtp.ssl.trust", smtpServer);
+            // Accept only TLS 1.1 and 1.2
+            //props.setProperty("mail.smtp.ssl.protocols", "TLSv1.1 TLSv1.2");
+            //props.put("mail.smtp.socketFactory.fallback", "false");
             //Get a new instance each time as default instance conflicts with the email read section
             //Session session = Session.getDefaultInstance(props, null);
             Session session = Session.getInstance(props, new Authenticator() {
-
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
                     return new PasswordAuthentication(userName, password);
                 }
-
             });
+            session.setDebug(true);
             // -- Create a new message --
             Message msg = new MimeMessage(session);
             // -- Set the FROM and TO fields --
@@ -390,7 +397,13 @@ public class RMsgProcessor {
             // sets the multi-part as e-mail's content
             msg.setContent(multipart);
             // -- Send the message --
-            Transport.send(msg);
+            //Transport.send(msg);
+            // Create an SMTP transport from the session
+            SMTPTransport t = (SMTPTransport) session.getTransport("smtp");
+            // Connect to the server using credentials
+            t.connect(smtpServer, userName, password);
+            // Send the message
+            t.sendMessage(msg, msg.getAllRecipients());
             //System.out.println("Messaging sent OK.");
             //Update filter
             updateEmailFilter(filterTo, mMessage.from);
@@ -398,8 +411,13 @@ public class RMsgProcessor {
             //RadioMSG.middleToastText("Error relaying message as Email: " + ex.toString());
             //Save in log for debugging
             RMsgUtil.addEntryToLog("Error relaying message as Email: \n" + ex.toString());
+            String errorMessage = ex.getMessage();
+            if (errorMessage.indexOf("http") > 0) {
+                errorMessage = errorMessage.substring(0, errorMessage.indexOf("http")) + "...";
+            }
+            result = errorMessage;
         }
-
+        return result;
     }
 
     //Starts a new thread and register's with the email provider to alert of new 
@@ -671,8 +689,13 @@ public class RMsgProcessor {
             }
             String sendTo = resultNum + "@" + email2SmsGateway;
             //Send via the email to SMS gateway
-            sendMailMsg(mailMessage, sendTo, mailMessage.to);
-            //Redundant, done in sendMailMsg. updateSMSFilter(mailMessage.to, mailMessage.from);
+            String result = sendMailMsg(mailMessage, sendTo, mailMessage.to);
+            //Error message comingback, advise client
+            if (!result.equals("")) {
+                RMsgUtil.replyWithText(mMessage, "Error sending SMS: " + result);
+            }
+            //Redundant, done in sendMailMsg. 
+            //updateSMSFilter(mailMessage.to, mailMessage.from);
         }
     }
 
@@ -720,7 +743,7 @@ public class RMsgProcessor {
     //[pos:[-]ll.lllllll,[-]LLL.LLLLLL,DDD,SSS]\n] with ll = latitude, LLL = longitude in decimal degrees, DDD = delay in acquiring GPS fix in seconds, SSS = speed in Km/h
     //[pos:PPPPPPPPDDD,SSS\n] with PPPPPPPP = compressed position as per APRS format, DDD = delay in acquiring GPS fix in seconds, SSS = speed in Km/h
     //[pic:WWWxHHH,B&W|Col,NX,MMMMM\n] Picture size in pixels, Greyscale or Colour, N = speed to transfer, MMMMM = mode used
-    //NNNN<EOT> with NNNN = crc16 remapped to lowercase characters ONLY as they transmit faster via varicode
+    //NNNN<EOT> with NNNN = crc16 remapped to lowercase characters ONLY ('a' to 'p') as they transmit faster via varicode
     public static void processBlock(String blockLine, String fileName, String rxMode) {
 
         //For the java version we need to convert the Strings <SOH> and <EOT> as received from FLdigi to '
@@ -1988,7 +2011,11 @@ public class RMsgProcessor {
                                         //remove alias prefix 
                                         fullMessage.to = RMsgUtil.extractDestination(fullMessage.to);
                                         //Only forward properly received (and secured) messages
-                                        sendMailMsg(fullMessage, fullMessage.to, fullMessage.to);
+                                        String result = sendMailMsg(fullMessage, fullMessage.to, fullMessage.to);
+                                        //Error message comingback, advise client
+                                        if (!result.equals("")) {
+                                            RMsgUtil.replyWithText(mMessage, "Error sending Email: " + result);
+                                        }
                                     } else {
                                         RMsgUtil.sendBeeps(false);
                                         //We have an access password missing
