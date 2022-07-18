@@ -288,7 +288,9 @@ public class OptionsDialog extends javax.swing.JDialog {
     public OptionsDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-
+        //Hide PERL server options for now. Keep code for possible future use
+        tabOptions.remove(1);
+        //
         try {
            //Hide Callsign as Server section for now. May delete later on
             jPanel4.setVisible(false);

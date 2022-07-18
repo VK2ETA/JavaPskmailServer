@@ -976,7 +976,7 @@ public class Session {
                 try {
                     this.headers = new FileWriter(Main.homePath + Main.dirPrefix + "headers", true);
                 } catch (Exception e) {
-                    Main.log.writelog("Error when trying to open the headers file.", e, true);
+                    Main.log.writelog("Error when trying to open the headers file.", e, false);
                 }
             }
         }
@@ -1032,7 +1032,7 @@ public class Session {
                     tmp.delete();
                     this.tempEmailFile = new FileWriter(new File(Main.homePath + Main.dirPrefix + "tempEmail"), true);
                 } catch (Exception e) {
-                    Main.log.writelog("Error when trying to open the mail file.", e, true);
+                    Main.log.writelog("Error when trying to open the mail file.", e, false);
                 }
             }
         }
@@ -1056,7 +1056,7 @@ public class Session {
                     tmp.delete();
                     this.dlFile = new FileWriter(new File(Main.homePath + Main.dirPrefix + "TempFile"), true);
                 } catch (Exception e) {
-                    Main.log.writelog("Error when trying to open the download file.", e, true);
+                    Main.log.writelog("Error when trying to open the download file.", e, false);
                 }
             }
         }
@@ -1097,14 +1097,14 @@ public class Session {
                         in.close();
                     }
                 } catch (Exception e) {
-                    Main.log.writelog("Error when trying to open the download file.", e, true);
+                    Main.log.writelog("Error when trying to open the download file.", e, false);
                 }
                 try {
                     Trfile = new File(Main.pendingStr + Transaction);
                     // open pending file (now called pFile) for write
                     this.pFile = new FileWriter(Trfile, true);
                 } catch (Exception e) {
-                    Main.log.writelog("Error when trying to open the pending file.", e, true);
+                    Main.log.writelog("Error when trying to open the pending file.", e, false);
                 }
             } else if (fmm.group(4).equals("u")) {
                 FileDownload = true;
@@ -1138,14 +1138,14 @@ public class Session {
                         in.close();
                     }
                 } catch (Exception e) {
-                    Main.log.writelog("Error when trying to open the download file.", e, true);
+                    Main.log.writelog("Error when trying to open the download file.", e, false);
                 }
                 try {
                     Trfile = new File(Main.pendingStr + Transaction);
                     // open pending file (now called pFile) for write
                     this.pFile = new FileWriter(Trfile, true);
                 } catch (Exception e) {
-                    Main.log.writelog("Error when trying to open the pending file.", e, true);
+                    Main.log.writelog("Error when trying to open the pending file.", e, false);
                 }
             // compressed web page open...
             } else if (fmm.group(4).equals("w")) {
@@ -1181,13 +1181,13 @@ public class Session {
 //                                                    pending.delete();
                     }
                 } catch (Exception e) {
-                    Main.log.writelog("Error when trying to open the download file.", e, true);
+                    Main.log.writelog("Error when trying to open the download file.", e, false);
                 }
                 try {
                     Trfile = new File(Main.pendingStr + Transaction);
                     this.pFile = new FileWriter(Trfile, true);
                 } catch (Exception e) {
-                    Main.log.writelog("Error when trying to open the pending file.", e, true);
+                    Main.log.writelog("Error when trying to open the pending file.", e, false);
                 }
 
                 // compressed mail download
@@ -1208,7 +1208,7 @@ public class Session {
                     }
                     tmpmessage = new FileWriter(Main.homePath + Main.dirPrefix + "tmpmessage", true);
                 } catch (Exception e) {
-                    Main.log.writelog("Error when trying to open the headers file.", e, true);
+                    Main.log.writelog("Error when trying to open the headers file.", e, false);
                 }
                 // set progress indicator here...
                 ThisFileLength = fmm.group(6);
@@ -1232,7 +1232,7 @@ public class Session {
                     Trfile = new File(Main.pendingStr + Transaction);
                     pFile = new FileWriter(Trfile, true);
                 } catch (Exception e) {
-                    Main.log.writelog("Error when trying to open the pending file.", e, true);
+                    Main.log.writelog("Error when trying to open the pending file.", e, false);
                 }
             // compressed mail upload (I am a server)
             } else if (fmm.group(4).equals("s")) {
@@ -1251,7 +1251,7 @@ public class Session {
                     }
                     tmpmessage = new FileWriter(Main.homePath + Main.dirPrefix + "tmpmessage", true);
                 } catch (Exception e) {
-                    Main.log.writelog("Error when trying to upload email (in TTYServer mode)", e, true);
+                    Main.log.writelog("Error when trying to upload email (in TTYServer mode)", e, false);
                 }
                 // set progress indicator here...
                 ThisFileLength = fmm.group(6);
@@ -1274,7 +1274,7 @@ public class Session {
                     Trfile = new File(Main.pendingStr + Transaction);
                     pFile = new FileWriter(Trfile, true);
                 } catch (Exception e) {
-                    Main.log.writelog("Error when trying to open the pending file.", e, true);
+                    Main.log.writelog("Error when trying to open the pending file.", e, false);
                 }
             }
         }
@@ -1302,7 +1302,6 @@ public class Session {
                     if (pending.exists()) {
                         pending.delete();
                     }
-
                 }
             }
         }
@@ -1533,7 +1532,7 @@ public class Session {
                 try {
                     this.tmpmessage = new FileWriter(Main.homePath + Main.dirPrefix + "tmpmessage", true);
                 } catch (Exception e) {
-                    Main.log.writelog("Error when trying to open the headers file.", e, true);
+                    Main.log.writelog("Error when trying to open the headers file.", e, false);
                 }
                 // set progress indicator here...
                 ThisFileLength = mmsg.group(2);
@@ -1559,7 +1558,7 @@ public class Session {
                     F2.delete();
                     this.tmpmessage = new FileWriter(Main.homePath + Main.dirPrefix + "tmpmessage", true);
                 } catch (Exception e) {
-                    Main.log.writelog("Error when trying to open the headers file.", e, true);
+                    Main.log.writelog("Error when trying to open the headers file.", e, false);
                 }
                 // set progress indicator here...
                 ThisFileLength = cmmsg.group(2);
@@ -1605,7 +1604,7 @@ public class Session {
                     }
                     this.tmpmessage = new FileWriter(Main.homePath + Main.dirPrefix + "tmpmessage", true);
                 } catch (Exception e) {
-                    Main.log.writelog("Error when trying to open the temp file.", e, true);
+                    Main.log.writelog("Error when trying to open the temp file.", e, false);
                 }
                 // set progress indicator here...
                 ThisFileLength = tgmmsg.group(2);
@@ -1628,7 +1627,7 @@ public class Session {
                         fd.delete();
                     }
                 } catch (Exception e) {
-                    Main.log.writelog("Error moving sent mail file.", e, true);
+                    Main.log.writelog("Error moving sent mail file.", e, false);
                 }
             }
         }
@@ -1666,7 +1665,7 @@ public class Session {
                             }
                         }
                     } catch (IOException ex) {
-                        Main.log.writelog("Error when trying to handle the email upload file.", ex, true);
+                        Main.log.writelog("Error when trying to handle the email upload file.", ex, false);
                     }
                     //Make sure we have something to send
                     if (!to.equals("") & (!subject.equals("") | !body.equals(""))) {
@@ -1704,7 +1703,7 @@ public class Session {
                             }
                         });
                     } catch (IOException ex) {
-                        Main.log.writelog("Error when trying to close the headers file.", ex, true);
+                        Main.log.writelog("Error when trying to close the headers file.", ex, false);
                     }
                 }
                 if (FileList) {
@@ -1717,9 +1716,8 @@ public class Session {
                     try {
                         this.dlFile.close();
                     } catch (IOException ex) {
-                        Main.log.writelog("Error when trying to close the download file.", ex, true);
+                        Main.log.writelog("Error when trying to close the download file.", ex, false);
                     }
-
                     try {
                         Base64.decodeFileToFile(Main.homePath + Main.dirPrefix + "TempFile", Main.homePath + Main.dirPrefix + "Downloads" + Main.separator + ThisFile);
 
@@ -1729,15 +1727,11 @@ public class Session {
                         if (tmp.exists()) {
                             tmp.delete();
                         }
-
                         Main.txText += "~FA:" + Transaction + "\n";
-
                         Main.progress = 0;
-
                     } catch (IOException e) {
-                        ;
                     } catch (Exception exc) {
-                        Main.log.writelog("Error when trying to decode the downoad file.", exc, true);
+                        Main.log.writelog("Error when trying to decode the downoad file.", exc, false);
                     } catch (NoClassDefFoundError exp) {
                         Main.q.Message("problem decoding B64 file", 10);
                     }
@@ -1750,7 +1744,7 @@ public class Session {
                             Trfile.delete();
                         }
                     } catch (IOException ex) {
-                        Main.log.writelog("Error when trying to close the pending file.", ex, true);
+                        Main.log.writelog("Error when trying to close the pending file.", ex, false);
                     }
                     Main.progress = 0;
 
@@ -1919,7 +1913,7 @@ public class Session {
                             }
                         }
                     } catch (IOException ex) {
-                        Main.log.writelog("Error when trying to handle the email upload file.", ex, true);
+                        Main.log.writelog("Error when trying to handle the email upload file.", ex, false);
                     }
                     //Make sure we have something to send
                     if (!to.equals("") && (!subject.equals("") | !body.equals(""))) {
@@ -1937,6 +1931,15 @@ public class Session {
                             Main.txText += resultStr;
                         }
                     }
+                    //Pending File Close                    
+                    try {
+                        if (pFile != null) {
+                            pFile.close();
+                            Trfile.delete();
+                        }
+                    } catch (IOException ex) {
+                        Main.log.writelog("Error when trying to close the pending file.", ex, false);
+                    }
                     //VK2ETA: in any case delete the transaction file
                     File tmp = new File(Main.homePath + Main.dirPrefix + "Pending" + Main.separator + Transaction);
                     if (tmp.exists()) {
@@ -1945,7 +1948,7 @@ public class Session {
                     Main.progress = 0;
                 }
 
-                // compressed messages  download      - append tmpmessage to Inbox in mbox format                          
+                // compressed email messages  download - append tmpmessage to Inbox in mbox format                          
                 if (CMsgDownload) {
                     CMsgDownload = false;
                     Main.comp = false;
@@ -2175,6 +2178,15 @@ public class Session {
                     if (fl.exists()) {
                         fl.delete();
                     }
+                    //Pending File Close                    
+                    try {
+                        if (pFile != null) {
+                            pFile.close();
+                            Trfile.delete();
+                        }
+                    } catch (IOException ex) {
+                        Main.log.writelog("Error when trying to close the pending file.", ex, false);
+                    }
                     File pending = new File(Main.homePath + Main.dirPrefix + "Pending" + Main.separator + Transaction);
                     if (pending.exists()) {
                         pending.delete();
@@ -2192,18 +2204,18 @@ public class Session {
                     try {
                         this.dlFile.close();
                     } catch (IOException ex) {
-                        Main.log.writelog("Error when trying to close the download file.", ex, true);
+                        Main.log.writelog("Error when trying to close the download file.", ex, false);
                     }
                     try {
                         try {
                             Base64.decodeFileToFile(Main.homePath + Main.dirPrefix + "TempFile", Main.homePath + Main.dirPrefix + "TMP.gz");
                         } catch (Exception ex) {
-                            Main.log.writelog("Error when trying to B64-decode the download file.", ex, true);
+                            Main.log.writelog("Error when trying to B64-decode the download file.", ex, false);
                         }
                         try {
                             Unzip.Unzip(Main.homePath + Main.dirPrefix + "TMP.gz");
                         } catch (Exception exz) {
-                            Main.log.writelog("Error when trying to unzip the download file.", exz, true);
+                            Main.log.writelog("Error when trying to unzip the download file.", exz, false);
                         }
                         try {
                             BufferedReader in = new BufferedReader(new FileReader(Main.homePath + Main.dirPrefix + "TMP"));
@@ -2219,6 +2231,15 @@ public class Session {
                         if (tmp1.exists()) {
                             tmp1.delete();
                         }
+                        //Pending File Close                    
+                        try {
+                            if (pFile != null) {
+                                pFile.close();
+                                Trfile.delete();
+                            }
+                        } catch (IOException ex) {
+                            Main.log.writelog("Error when trying to close the pending file.", ex, false);
+                        }
                         File tmp = new File(Main.homePath + Main.dirPrefix + "Pending" + Main.separator + Transaction);
                         if (tmp.exists()) {
                             tmp.delete();
@@ -2228,7 +2249,7 @@ public class Session {
                         }
                         Main.progress = 0;
                     } catch (Exception exc) {
-                        Main.log.writelog("Error handling the download file.", exc, true);
+                        Main.log.writelog("Error handling the download file.", exc, false);
                     } catch (NoClassDefFoundError exp) {
                         Main.q.Message("problem decoding B64 file", 10);
                     }
@@ -2240,7 +2261,7 @@ public class Session {
                             Trfile.delete();
                         }
                     } catch (IOException ex) {
-                        Main.log.writelog("Error when trying to close the pending file.", ex, true);
+                        Main.log.writelog("Error when trying to close the pending file.", ex, false);
                     }
                     Main.progress = 0;
                 }
@@ -2270,7 +2291,7 @@ public class Session {
                     try {
                         iacout.close();
                     } catch (Exception e) {
-                        Main.log.writelog("Error closing the iac file.", e, true);
+                        Main.log.writelog("Error closing the iac file.", e, false);
                     }
                     f.fastfec2(Main.homePath + Main.dirPrefix + "iactemp", "");
                     deleteFile("iactemp");
@@ -2303,7 +2324,7 @@ public class Session {
                 try {
                     this.headers.write(str + "\n");
                 } catch (IOException ex) {
-                    Main.log.writelog("Error when trying to write to headers file.", ex, true);
+                    Main.log.writelog("Error when trying to write to headers file.", ex, false);
                 }
             }
         }
@@ -2327,12 +2348,12 @@ public class Session {
                     pFile.flush();
                 }
             } catch (IOException ex) {
-//                                                Main.log.writelog("Error when trying to write to pending file.", ex, true);
+                Main.log.writelog("Error when trying to write to pending file.", ex, false);
             }
             try {
                 this.dlFile.write(str + "\n");
             } catch (IOException ex) {
-//                                                Main.log.writelog("Error when trying to write to download file.", ex, true);
+                Main.log.writelog("Error when trying to write to download file.", ex, false);
             }
         }
 // messages                                    
@@ -2355,14 +2376,14 @@ public class Session {
                     pFile.flush();
                 }
             } catch (IOException ex) {
-                //Main.log.writelog("Error when trying to write to pending file.", ex, true);
+                Main.log.writelog("Error when trying to write to pending file.", ex, false);
                 Main.q.Message("Error writing pending file.", 1);
             }
             try {
                 tmpmessage.write(str + "\n");
                 tmpmessage.flush();
             } catch (IOException ex) {
-                Main.log.writelog("Error when trying to write to tmpmessage file.", ex, true);
+                Main.log.writelog("Error when trying to write to tmpmessage file.", ex, false);
             }
         }
         // compressed www pages
@@ -2408,7 +2429,7 @@ public class Session {
                 iacout.flush();
                 Main.mainwindow += str + "\n";
             } catch (IOException exc) {
-                Main.log.writelog("Error when trying to write to download file.", exc, true);
+                Main.log.writelog("Error when trying to write to download file.", exc, false);
             }
         }
         //Do we have an unknown command?
@@ -2440,7 +2461,7 @@ public class Session {
 
             return res;
         } catch (Exception e) {
-            Main.log.writelog("Could not move file.", e, true);
+            Main.log.writelog("Could not move file.", e, false);
             return false;
         }
     }
@@ -2621,7 +2642,7 @@ public class Session {
         try {
             boolean success = fl.createNewFile();
         } catch (IOException e) {
-            Main.log.writelog("Error creating headers file:", e, true);
+            Main.log.writelog("Error creating headers file:", e, false);
         }
     }
 
@@ -2658,7 +2679,7 @@ public class Session {
                 throw new IllegalArgumentException("Delete: deletion failed");
             }
         } catch (IllegalArgumentException e) {
-            Main.log.writelog("Error deleting headers file:", e, true);
+            Main.log.writelog("Error deleting headers file:", e, false);
         }
 
     }
@@ -2721,7 +2742,7 @@ public class Session {
                 }
             }
         } catch (Exception e) {
-            Main.log.writelog("Had trouble saving the attachment. " + e.getMessage().toString(), e, true);
+            Main.log.writelog("Had trouble saving the attachment. " + e.getMessage().toString(), e, false);
             Main.q.Message("Problem with decoding, " + e, 10);
         }
     }
@@ -2759,7 +2780,7 @@ public class Session {
             }
             br.close();
         } catch (IOException e) {
-            Main.log.writelog("Error when trying to read the headers file.", e, true);
+            Main.log.writelog("Error when trying to read the headers file.", e, false);
         }
         return Countstr;
     }
@@ -2865,7 +2886,7 @@ public class Session {
             return returnframe;
             //           }
         } catch (Exception ex) {
-            Main.log.writelog("Error when creating beaconblock", ex, true);
+            Main.log.writelog("Error when creating beaconblock", ex, false);
         }
 
         return returnframe;
@@ -2902,11 +2923,11 @@ public class Session {
             // Move file to new directory
             boolean success = thefile.renameTo(new File(dir, thefile.getName()));
             if (!success) {
-                Main.log.writelog("File was not successfully moved.", true);
+                Main.log.writelog("File was not successfully moved.", false);
             }
             return success;
         } catch (Exception e) {
-            Main.log.writelog("Error when trying to move a file.", e, true);
+            Main.log.writelog("Error when trying to move a file.", e, false);
             return false;
         }
     }
@@ -3117,7 +3138,7 @@ public class Session {
                     }
                 });
             } catch (IOException ex) {
-                Main.log.writelog("Error when trying to close the headers file.", ex, true);
+                Main.log.writelog("Error when trying to close the headers file.", ex, false);
             }
         }
         if (FileList) {
@@ -3133,9 +3154,18 @@ public class Session {
                     boolean scs = df.delete();
                 }
             } catch (IOException ex) {
-                Main.log.writelog("Error when trying to close the download file.", ex, true);
+                Main.log.writelog("Error when trying to close the download file.", ex, false);
             }
             try {
+                //Pending File Close                    
+                try {
+                    if (pFile != null) {
+                        pFile.close();
+                        Trfile.delete();
+                    }
+                } catch (IOException ex) {
+                    Main.log.writelog("Error when trying to close the pending file.", ex, false);
+                }
                 File tmp = new File(Main.homePath + Main.dirPrefix + "Pending" + Main.separator + Transaction);
                 if (tmp.exists()) {
                 //No, keep    tmp.delete();
@@ -3143,7 +3173,7 @@ public class Session {
                 //No, don't request deletion Main.txText += "~FA:" + Transaction + "\n";
                 Main.progress = 0;
             } catch (Exception exc) {
-                Main.log.writelog("Error when trying to decode the downoad file.", exc, true);
+                Main.log.writelog("Error when trying to decode the downoad file.", exc, false);
             } catch (NoClassDefFoundError exp) {
                 Main.q.Message("problem decoding B64 file", 10);
             }
@@ -3155,7 +3185,7 @@ public class Session {
                     Trfile.delete();
                 }
             } catch (IOException ex) {
-                Main.log.writelog("Error when trying to close the pending file.", ex, true);
+                Main.log.writelog("Error when trying to close the pending file.", ex, false);
             }
             Main.progress = 0;
             //                                                    Main.log(ThisFile + " received");
@@ -3172,7 +3202,7 @@ public class Session {
                     fl.delete();
                 }
             } catch (IOException ex) {
-                Main.log.writelog("Error when trying to close the tmpmessage file.", ex, true);
+                Main.log.writelog("Error when trying to close the tmpmessage file.", ex, false);
             }
         }
         // compressed messages  download or compressed Email upload
@@ -3187,12 +3217,21 @@ public class Session {
                 if (fl.exists()) {
                     fl.delete();
                 }
+                //Pending File Close                    
+                try {
+                    if (pFile != null) {
+                        pFile.close();
+                        Trfile.delete();
+                    }
+                } catch (IOException ex) {
+                    Main.log.writelog("Error when trying to close the pending file.", ex, false);
+                }
                 File pending = new File(Main.homePath + Main.dirPrefix + "Pending" + Main.separator + Transaction);
                 if (pending.exists()) {
                 //No, keep    pending.delete();
                 }
             } catch (IOException ex) {
-                Main.log.writelog("Error when trying to close the pending file.", ex, true);
+                Main.log.writelog("Error when trying to close the pending file.", ex, false);
             }
         }
         // compressed web pages download
@@ -3202,7 +3241,7 @@ public class Session {
             try {
                 this.dlFile.close();
             } catch (IOException ex) {
-                Main.log.writelog("Error when trying to close the download file.", ex, true);
+                Main.log.writelog("Error when trying to close the download file.", ex, false);
             }
             File tmp = new File(Main.homePath + Main.dirPrefix + "TempFile");
             boolean success = tmp.delete();
@@ -3212,7 +3251,7 @@ public class Session {
                     //No, keep: Trfile.delete();
                 }
             } catch (IOException ex) {
-                Main.log.writelog("Error when trying to close the pending file.", ex, true);
+                Main.log.writelog("Error when trying to close the pending file.", ex, false);
             }
             Main.progress = 0;
         }

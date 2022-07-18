@@ -93,12 +93,12 @@ public class ServerMail {
             props.put("mail.smtp.socketFactory.class", socketFactoryClass);
             props.put("mail.smtp.auth", smtpAuth);
             props.put("mail.smtp.port", smtpPort);
-            //props.put("mail.smtp.from", fromAddress);
-            if (!fromStr.equals("")) {
-                props.put("mail.smtp.from", fromStr);
-            } else {
-                props.put("mail.smtp.from", fromAddress);
-            }
+            props.put("mail.smtp.from", fromAddress);
+            //if (!fromStr.equals("")) {
+            //    props.put("mail.smtp.from", fromStr);
+            //} else {
+            //    props.put("mail.smtp.from", fromAddress);
+            //}
             props.put("mail.smtp.starttls.enable", "true");
             //Startls OR ssl but not both?
             //props.put("mail.smtp.ssl.enable", "true");

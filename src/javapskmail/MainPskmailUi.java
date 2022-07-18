@@ -170,6 +170,8 @@ public class MainPskmailUi extends javax.swing.JFrame {
         //System.out.println("Entering mainpskmailui");
 
         initComponents();
+        //Preset default visibilities
+        resetAllMenus();
         //ButtonGroup RB = new ButtonGroup();
         //myarq = new arq();
         //String path = Main.HomePath + Main.Dirprefix;
@@ -1491,11 +1493,16 @@ public class MainPskmailUi extends javax.swing.JFrame {
         Getforecast.setEnabled(true);
         mnuGetServerfq2.setEnabled(true);
         mnuGetPskmailNews2.setEnabled(true);
-        jMenu1.setEnabled(true);
-        jMenu1.setEnabled(true);
-        Resetrecord_mnu.setEnabled(true);
-        Update_server.setEnabled(true);
         MnuTelnet.setEnabled(true);
+        //Make PERL server actions not visible (but kept in code for future possible use)
+        Update_server.setEnabled(false);
+        Update_server.setVisible(false);
+        Resetrecord_mnu.setEnabled(false);
+        Resetrecord_mnu.setVisible(false);
+        mnuMbox2.setVisible(false);
+        jMenu1.setEnabled(true);
+        jMenu1.setVisible(false);
+        PrefSaveMenu.setVisible(false);
     }
         
     public void disableMonitor() {
