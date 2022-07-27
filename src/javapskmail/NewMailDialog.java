@@ -380,7 +380,9 @@ private void SendEmail(){
                 }
                 myattachment = "";
             }
-            NewMailText += ".\n.\n";
+            //Bug fix: adds a "." at the end of the last line if does not have a line feed at the end
+            //NewMailText += ".\n.\n";
+            NewMailText += "\n.\n";
 
             File sent = new File(Main.homePath + Main.dirPrefix + "Sentmail");
             out = new FileWriter(sent, true);

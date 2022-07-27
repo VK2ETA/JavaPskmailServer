@@ -273,7 +273,7 @@ public class Arq {
         String returnframe = "";
         String serverCall = Main.configuration.getPreference("CALLSIGNASSERVER");
         //Get mail count
-        int mailCount = ServerMail.getMailCount();
+        int mailCount = ServerMail.getMailCount(reqCallSign);
         //my $QSL = sprintf("%cQSL %s de %s %s %d:%d",0x01, $1, $ServerCall, $s2n, $mls, $mlcount);
         returnframe = "00" + Unproto + "QSL " + reqCallSign + " de " + serverCall + " " + (int) Main.snr + " " + mailCount + " ";
         return returnframe;

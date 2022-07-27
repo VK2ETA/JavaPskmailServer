@@ -34,9 +34,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.0.8.3";
+    static String version = "3.0.8.4";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20220718";
+    static String versionDate = "20220727";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -737,6 +737,7 @@ public class Main {
                                     //Disconnect request
                                 } else if (rxb.type.equals("d") & (rxb.session.equals(session) | rxb.session.equals("0"))) {
                                     status = "Listening";
+                                    q.Message(javapskmail.MainPskmailUi.mainpskmailui.getString("Disconnected_from_Server"), 10);
                                     connected = false;
                                     mainui.disableMboxMenu();
                                     mainui.enableMnuPreferences2();

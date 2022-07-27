@@ -11,7 +11,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package javapskmail;
 
 import javax.mail.Message;
@@ -28,9 +27,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -43,7 +44,6 @@ import javax.mail.Folder;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.PasswordAuthentication;
-import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -57,7 +57,10 @@ import org.jsoup.safety.Whitelist;
  * @author jdouyere
  */
 public class ServerMail {
-    
+
+   
+    final static int charLimit = 10000; //Maximun number of characters of body text
+
     
     /* send mail
     ~SEND
@@ -69,10 +72,10 @@ public class ServerMail {
     3rd line
     4th line.
     .
-    */
-    public static String sendMail(String fromStr, String toStr, String subjectStr, 
+     */    
+    public static String sendMail(String fromStr, String toStr, String subjectStr,
             String bodyStr, String attachementFileName) {
-        
+
         String result = "";
         String smtpServer = Main.configuration.getPreference("SERVERSMTPHOST");
         //String socketFactoryPort = "465";
@@ -84,7 +87,6 @@ public class ServerMail {
         final String fromAddress = Main.configuration.getPreference("SERVEREMAILADDRESS");
         final String userName = Main.configuration.getPreference("SERVERUSERNAME");
         final String password = Main.configuration.getPreference("SERVERPASSWORD");
-
         try {
             Properties props = System.getProperties();
             props.put("mail.debug", "true");
@@ -153,7 +155,7 @@ public class ServerMail {
                 }
                 multipart.addBodyPart(attachPart);
             }
-            */
+             */
             // sets the multi-part as e-mail's content
             msg.setContent(multipart);
             // -- Send the message --
@@ -178,7 +180,7 @@ public class ServerMail {
     }
 
     //Request emails headers from mail server
-    public static String getHeaderList(int fromNumber) {        
+    public static String getHeaderList(int fromNumber) {
 
         IMAPFolder folder = null;
         Store store = null;
@@ -206,41 +208,127 @@ public class ServerMail {
                 folder.open(Folder.READ_WRITE);
             }
             Message[] messages;
-            //Get the number of messages in the folder and compare
-            if (fromNumber > folder.getMessageCount()) {
-                //Sorry not enough
-                mailHeaders = "Sorry only " + folder.getMessageCount() + " mails.\n";
-                return mailHeaders;
-            }
-            //Get all messages
-            messages = folder.getMessages();
-            //add all headers from the requested number. Protocol issue: QTC 0+ should be QTC 1+ as
-            //  email number 1 is first email = email index 0 in the list 
-            if (fromNumber == 0) fromNumber = 1; 
-            for (int i = fromNumber - 1; i < messages.length; i++) { //From oldest to most recent
-                //From email address
-                String fromString = messages[i].getFrom()[0].toString();
-                //Remove name and only keep email address proper
-                String[] emailAdresses = fromString.split("[ <>]+");
-                for (String fromPart : emailAdresses) {
-                    if (fromPart.indexOf("@") > 0) {
-                        fromString = fromPart;
-                        break;
+            //Virtualizing the email boxes? (uses email filters to re-route responses)
+            if (Main.configuration.getPreference("USEVIRTUALEMAILBOXES").trim().equals("yes")) {
+                //Fetch all messages
+                messages = folder.getMessages();
+                int mailCount = 0;
+                //Process in the order of most recent to oldest
+                //for (int i=0; i < messages.length;i++)
+                for (int i = messages.length; i > 0; i--) {
+                    //Filtering by date and by requester
+                    Message msg = messages[i - 1];
+                    //Save message time for making filenames later on
+                    //Date msgDateTime = msg.getReceivedDate();
+                    //c1.setTime(msgDateTime);
+                    //From email address
+                    String fromString = msg.getFrom()[0].toString();
+                    //Remove name and only keep email address proper
+                    String[] emailAdresses = fromString.split("[ <>]+");
+                    for (String fromPart : emailAdresses) {
+                        if (fromPart.indexOf("@") > 0) {
+                            fromString = fromPart;
+                            break;
+                        }
+                    }
+                    String[] tos;
+                    //boolean forAll = false;
+                    //if (forAll) {
+                    //Option of requesting all emails regardless of who they are for
+                    //Just add the requester of the QTC
+                    //    tos = new String[1];
+                    //    tos[0] = mMessage.from;
+                    //} else {
+                    //Add to reply list for each matching filter
+                    tos = RMsgProcessor.passEmailFilter(fromString);
+                    //}
+                    //Search for email addresses we communicated with before (use email filters)
+                    for (int j = 0; j < tos.length; j++) {
+                        //Only if the filter matches the requesting callsign
+                        if (tos[j] != null && (tos[j].equals("*") || Main.ttyCaller.toLowerCase(Locale.US).equals(tos[j].toLowerCase(Locale.US)))) {
+                            mailCount++;
+                            /*
+                            String smsString = getBodyTextFromMessage(msg);
+                            if (smsString.startsWith("\n")) {
+                                smsString = smsString.substring(1);
+                            }
+                            if (smsString.endsWith("\r\n\r\n")) {
+                                smsString = smsString.substring(0, smsString.length() - 4);
+                            }
+                            if (smsString.length() > charLimit) {
+                                smsString = smsString.subSequence(0, charLimit - 1) + " ...>";
+                            }
+                            String emailSubject = msg.getSubject();
+                            //Not a reply to a previous radio message, add the subject line
+                            if (!emailSubject.contains("Radio Message from ")
+                                    && !emailSubject.contains("SMS received from ")
+                                    && !emailSubject.trim().equals("")) {
+                                smsString = "Subj: " + emailSubject + "\n" + smsString;
+                            }
+                            */
+                            if (mailCount >= fromNumber) {
+                                //Build header line for that email
+                                //Pskmail does not handle unicode characters (it corrupts the CRC). 
+                                //  Therefore in plain text mode, strip all non ASCII characters 
+                                String subjectStr = msg.getSubject().replaceAll("\u2013", "-");
+                                subjectStr = subjectStr.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
+                                //JavaMail .getSize() is not accurate. Get body size and add to the header size
+                                String emailBody = getBodyTextFromMessage(msg);
+                                int mSize = emailBody.length() + fromString.length() + subjectStr.length();
+                                //VK2ETA: check if Perl server adds a space before the email number
+                                mailHeaders += "" + (mailCount) + " " + fromString + "  " + subjectStr + " " + mSize + "\n";
+                                break; //No more header for this email as this would be duplicates
+                            }
+                        }
                     }
                 }
-                //Build header line for that email
-                //Pskmail does not handle unicode characters (it corrupts the CRC). 
-                //  Therefore in plain text mode, strip all non ASCII characters 
-                String subjectStr = messages[i].getSubject().replaceAll("\u2013", "-");
-                subjectStr = subjectStr.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
-                //JavaMail .getSize() is not accurate. Get body size and add to the header size
-                String emailBody = getBodyTextFromMessage(messages[i]);
-                int mSize = emailBody.length() + fromString.length() + subjectStr.length();
-                //VK2ETA: check if Perl server adds a space before the email number
-                mailHeaders += "" + (i + 1) + " " + fromString + "  " + subjectStr + " " + mSize + "\n";
+                if (fromNumber > mailCount) {
+                    //Sorry not enough
+                    mailHeaders = "Sorry only " + mailCount + " mails.\n";
+                    return mailHeaders;
+                }
+                //Provide lead and size
+                mailHeaders = "Your mail: " + mailHeaders.length() + "\n" + mailHeaders + "-end-\n";
+            } else {
+                //Only one "mail box" for all
+                //Get the number of messages in the folder and compare
+                if (fromNumber > folder.getMessageCount()) {
+                    //Sorry not enough
+                    mailHeaders = "Sorry only " + folder.getMessageCount() + " mails.\n";
+                    return mailHeaders;
+                }
+                //In any case, now get all messages
+                messages = folder.getMessages();
+                //add all headers from the requested number. Protocol issue: QTC 0+ should be QTC 1+ as
+                //  email number 1 is first email = email index 0 in the list 
+                if (fromNumber == 0) {
+                    fromNumber = 1;
+                }
+                for (int i = fromNumber - 1; i < messages.length; i++) { //From oldest to most recent
+                    //From email address
+                    String fromString = messages[i].getFrom()[0].toString();
+                    //Remove name and only keep email address proper
+                    String[] emailAdresses = fromString.split("[ <>]+");
+                    for (String fromPart : emailAdresses) {
+                        if (fromPart.indexOf("@") > 0) {
+                            fromString = fromPart;
+                            break;
+                        }
+                    }
+                    //Build header line for that email
+                    //Pskmail does not handle unicode characters (it corrupts the CRC). 
+                    //  Therefore in plain text mode, strip all non ASCII characters 
+                    String subjectStr = messages[i].getSubject().replaceAll("\u2013", "-");
+                    subjectStr = subjectStr.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
+                    //JavaMail .getSize() is not accurate. Get body size and add to the header size
+                    String emailBody = getBodyTextFromMessage(messages[i]);
+                    int mSize = emailBody.length() + fromString.length() + subjectStr.length();
+                    //VK2ETA: check if Perl server adds a space before the email number
+                    mailHeaders += "" + (i + 1) + " " + fromString + "  " + subjectStr + " " + mSize + "\n";
+                }
+                //Provide lead and size
+                mailHeaders = "Your mail: " + mailHeaders.length() + "\n" + mailHeaders + "-end-\n";
             }
-            //Provide lead and size
-            mailHeaders = "Your mail: " + mailHeaders.length() + "\n" + mailHeaders + "-end-\n";
         } catch (Error err) {
             //err.printStackTrace();
             Main.log("Error accessing Folder: " + err.getMessage() + "\n");
@@ -265,16 +353,16 @@ public class ServerMail {
     }
 
     //Request email count from mail server
-    public static int getMailCount() {
+    public static int getMailCount(String reqCallSign) {
 
         IMAPFolder folder = null;
         Store store = null;
-        int mailCount = -1;
+        int mailCount = 0;
         String imapHost = Main.configuration.getPreference("SERVERIMAPHOST").trim();
         String userName = Main.configuration.getPreference("SERVERUSERNAME").trim();
         String emailPassword = Main.configuration.getPreference("SERVERPASSWORD").trim();
 
-        if ((Main.wantServer || Main.wantRelayEmails) && imapHost.trim().length() > 0 
+        if ((Main.wantServer || Main.wantRelayEmails) && imapHost.trim().length() > 0
                 && userName.length() > 0) {
             try {
                 Properties props = System.getProperties();
@@ -295,7 +383,108 @@ public class ServerMail {
                     folder.open(Folder.READ_WRITE);
                 }
                 //Get the number of messages in the folder
-                mailCount = folder.getMessageCount();
+                if (Main.configuration.getPreference("USEVIRTUALEMAILBOXES").trim().equals("yes")) {
+                    //We use the email filter to count the number of matching emails
+                    Message[] messages;
+                    //Fetch all messages
+                    messages = folder.getMessages();
+                    //int msgCount = 0;
+                    //Process in the order of most recent to oldest
+                    //for (int i=0; i < messages.length;i++)
+                    for (int i = messages.length; i > 0; i--) {
+                        //Filtering by date and by requester
+                        Message msg = messages[i - 1];
+                        //Save message time for making filenames later on
+                        //Date msgDateTime = msg.getReceivedDate();
+                        //c1.setTime(msgDateTime);
+                        //From email address
+                        String fromString = msg.getFrom()[0].toString();
+                        //Remove name and only keep email address proper
+                        String[] emailAdresses = fromString.split("[ <>]+");
+                        for (String fromPart : emailAdresses) {
+                            if (fromPart.indexOf("@") > 0) {
+                                fromString = fromPart;
+                                break;
+                            }
+                        }
+                        String[] tos;
+                        //boolean forAll = false;
+                        //if (forAll) {
+                        //Option of requesting all emails regardless of who they are for
+                        //Just add the requester of the QTC
+                        //    tos = new String[1];
+                        //    tos[0] = mMessage.from;
+                        //} else {
+                        //Add to reply list for each matching filter
+                        tos = RMsgProcessor.passEmailFilter(fromString);
+                        //}
+                        for (int j = 0; j < tos.length; j++) {
+
+                            //Only if the filter matches the requesting callsign (Main.ttyCaller)
+                            if (tos[j] != null && (tos[j].equals("*") || reqCallSign.toLowerCase(Locale.US).equals(tos[j].toLowerCase(Locale.US)))) {
+                                mailCount++;
+                                /*
+                                String smsString = getBodyTextFromMessage(msg);
+                                if (smsString.startsWith("\n")) {
+                                    smsString = smsString.substring(1);
+                                }
+                                if (smsString.endsWith("\r\n\r\n")) {
+                                    smsString = smsString.substring(0, smsString.length() - 4);
+                                }
+                                if (smsString.length() > charLimit) {
+                                    smsString = smsString.subSequence(0, charLimit - 1) + " ...>";
+                                }
+                                String smsSubject = msg.getSubject();
+                                //If is NOT an SMS reply, add subject line
+                                if (phoneNumber.equals("")) {
+                                    //Not a reply to a previous radio message, add the subject line
+                                    if (!smsSubject.contains("Radio Message from ")
+                                            && !smsSubject.contains("SMS received from ")
+                                            && !smsSubject.trim().equals("")) {
+                                        smsString = "Subj: " + smsSubject + "\n" + smsString;
+                                    }
+                                }
+                                //Debug
+                                //smsString = smsString + " Rec Date: " + msg.getReceivedDate() + "\n";
+
+                                RMsgObject fullMessage = new RMsgObject(tos[j], "", smsString,
+                                        null, 0, false, 0, false, null, 0L, null);
+                                //Coming from this relay station
+                                fullMessage.relay = Main.callsignAsServer.trim();
+                                //Remove via information to make sure it is not forwarded
+                                //fullMessage.via = "";
+                                //Re-send/relay in the same mode we received in
+                                fullMessage.rxMode = mMessage.rxMode;
+                                //From address: email address or cellular number replying?
+                                if (smsGatewayDomain.length() > 0 && fromString.endsWith(smsGatewayDomain)) {
+                                    //Keep only the phone number and get the alias if any
+                                    fullMessage.from = Main.mainui.msgDisplayList.getAliasFromOrigin(fromString.replace("@" + smsGatewayDomain, ""), tos[j]);
+                                } else {
+                                    //Other email addresses
+                                    fullMessage.from = Main.mainui.msgDisplayList.getAliasFromOrigin(fromString, tos[j]);
+                                }
+                                //Save received date for incoming message
+                                //Date recDate = c1.getTime();
+                                fullMessage.receiveDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                                fullMessage.receiveDate.setTime(c1.getTime()); //= c1;
+                                //Then save Message date/time in list for sorting (and limit the number of messages)
+                                fullMessage.fileName = String.format(Locale.US, "%04d", c1.get(Calendar.YEAR)) + "-"
+                                        + String.format(Locale.US, "%02d", c1.get(Calendar.MONTH) + 1) + "-"
+                                        + String.format(Locale.US, "%02d", c1.get(Calendar.DAY_OF_MONTH)) + "_"
+                                        + String.format(Locale.US, "%02d%02d%02d", c1.get(Calendar.HOUR_OF_DAY),
+                                                c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND)) + ".txt";
+                                //No need ????, only used for comparison, not for storage (storage time stamp is Tx time related)
+                                c1.add(Calendar.SECOND, 1);
+                                resendList.add(fullMessage);
+                                break; //No more messages for this email as they would be redundant
+                                 */
+                            }
+                        }
+                    }
+                } else {
+                    //Only one "mail box" for all
+                    mailCount = folder.getMessageCount();
+                }
             } catch (Error err) {
                 //err.printStackTrace();
                 Main.log.writelog("Error accessing Folder: " + err.getMessage() + "\n", false);
@@ -345,9 +534,7 @@ public class ServerMail {
         }
         return result;
     }
-    */
-    
- 
+     */
     //Extract body text from a message (can be multi-parts, plain text/html...)
     public static String getBodyTextFromMessage(Message message) throws Exception {
         String result = "";
@@ -430,7 +617,7 @@ public class ServerMail {
                     //End internal search
                 } else if (bodyPart.isMimeType("text/plain")) {
                     if (!haveText) {
-                        result += bodyPart.getContent() + "\n" ;
+                        result += bodyPart.getContent() + "\n";
                         haveText = true;
                     }
                 } else if (bodyPart.isMimeType("text/html")) {
@@ -442,9 +629,9 @@ public class ServerMail {
                 } else {
                     String attachmentFileName = bodyPart.getFileName();
                     if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())
-                            && !bodyPart.getFileName().equals("") 
+                            && !bodyPart.getFileName().equals("")
                             && ++attachmentCount < 2) {
-                        result += "filename=\"" + attachmentFileName + "\"\n" 
+                        result += "filename=\"" + attachmentFileName + "\"\n"
                                 + "Content-Transfer-Encoding: base64\n\n";
                         InputStream is = bodyPart.getInputStream();
                         try {
@@ -565,8 +752,7 @@ public class ServerMail {
         }
         return returnString;
     }
-   
-    
+
     //Compresses an email message and provides the exchange initiation string (">FM:") to send to the client
     public static String readMailZip(Message mMessage) {
         String returnString = "";
@@ -614,7 +800,7 @@ public class ServerMail {
             Random r = new Random();
             //token = Long.toString(Math.abs(r.nextLong()), 12);
             token = Long.toString(Math.abs(r.nextLong()), 12);
-            token = token.substring(token.length()-6);
+            token = token.substring(token.length() - 6);
             //Can't have a "/" in the filename as in vk2eta/pm
             codedFile = Main.homePath + Main.dirPrefix + "Outpending" + Main.separator + Destination.replaceAll("\\/", "+") + "_-m-_" + token;
             Base64.encodeFileToFile(tmpfile, codedFile);
@@ -640,7 +826,7 @@ public class ServerMail {
             } catch (IOException ex) {
                 Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
             }
-            */
+             */
         }
 
         return returnString;
@@ -713,7 +899,6 @@ public class ServerMail {
         }
         return returnString;
     }
-   
 
     //Read a web page as supplied and optionally trim with the begin: and end: strings. 
     // Returns the Text content only.
@@ -790,7 +975,6 @@ public class ServerMail {
         }
         return webPage;
     }
-    
 
     //Read a web page as supplied and optionally trim with the begin: and end: strings.
     // Returns the raw HTML code.
@@ -814,14 +998,13 @@ public class ServerMail {
         return webPage;
 
     }
-    
+
     //Compresses a web page data and provides the exchange initiation string (">FM:") to send to the client.
     // Text content only.
     public static String tgetZip(String webPage) {
         String returnString = "";
 
         //String downloaddir = Main.HomePath + Main.Dirprefix + "Downloads" + Main.Separator;
-
         String codedFile = "";
         String token = "";
         FileInputStream in = null;
@@ -866,7 +1049,7 @@ public class ServerMail {
             Random r = new Random();
             //token = Long.toString(Math.abs(r.nextLong()), 12);
             token = Long.toString(Math.abs(r.nextLong()), 12);
-            token = token.substring(token.length()-6);
+            token = token.substring(token.length() - 6);
             //token = "tmp" + token
             //Can't have the "/" in vk2eta/pm
             //codedFile = Main.homePath + Main.dirPrefix + "Outbox" + Main.separator + Destination.replaceAll("\\/", "+") + "_-w-_" + token;
@@ -894,9 +1077,9 @@ public class ServerMail {
             } catch (IOException ex) {
                 Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
             }
-            */
+             */
         }
         return returnString;
     }
-    
+
 }

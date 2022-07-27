@@ -603,6 +603,11 @@ public class OptionsDialog extends javax.swing.JDialog {
             } else {
                 this.checkboxEnablePskmailServer.setSelected(false);
             }
+            if (Main.configuration.getPreference("USEVIRTUALEMAILBOXES").equals("yes")) {
+                this.checkboxUseVirtualMailBoxes.setSelected(true);
+            } else {
+                this.checkboxUseVirtualMailBoxes.setSelected(false);
+            }
             if (Main.configuration.getPreference("RELAYOVERRADIO").equals("yes")) {
                 this.checkboxRelayOverRadio.setSelected(true);
             } else {
@@ -732,6 +737,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         jLabel18 = new javax.swing.JLabel();
         txtAccessPassword = new javax.swing.JPasswordField();
         txtServerEmailPassword = new javax.swing.JPasswordField();
+        checkboxUseVirtualMailBoxes = new javax.swing.JCheckBox();
         RadioMsgPanel = new javax.swing.JPanel();
         test1 = new javax.swing.JPanel();
         checkboxRelayOverRadio = new javax.swing.JCheckBox();
@@ -1296,14 +1302,15 @@ public class OptionsDialog extends javax.swing.JDialog {
                             .addComponent(txtServerUserName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtServerEmailAddress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(txtServerEmailPassword, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addGroup(jPanel12Layout.createSequentialGroup()
-                        .addComponent(jLabel31)
-                        .addGap(3, 3, 3)
-                        .addComponent(txtServerImapHost, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel27)
-                        .addGap(3, 3, 3)
-                        .addComponent(txtServerSmtpHost, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(jPanel12Layout.createSequentialGroup()
+                            .addComponent(jLabel31)
+                            .addGap(3, 3, 3)
+                            .addComponent(txtServerImapHost, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel12Layout.createSequentialGroup()
+                            .addComponent(jLabel27)
+                            .addGap(3, 3, 3)
+                            .addComponent(txtServerSmtpHost, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addGap(48, 48, 48))
             .addGroup(jPanel12Layout.createSequentialGroup()
                 .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1324,45 +1331,63 @@ public class OptionsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtServerImapHost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtServerSmtpHost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel27)
                     .addComponent(jLabel31))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(4, 4, 4)
+                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtServerSmtpHost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel27))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtServerEmailAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel32))
-                .addGap(5, 5, 5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtServerUserName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel33))
-                .addGap(5, 5, 5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel34)
-                    .addComponent(txtServerEmailPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(39, 39, 39))
+                    .addComponent(txtServerEmailPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
         );
+
+        checkboxUseVirtualMailBoxes.setText("Use Virtual email accounts");
+        checkboxUseVirtualMailBoxes.setToolTipText("Listen for Client's connections and provide some server's functions");
+        checkboxUseVirtualMailBoxes.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        checkboxUseVirtualMailBoxes.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        checkboxUseVirtualMailBoxes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkboxUseVirtualMailBoxesActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
         jPanel11.setLayout(jPanel11Layout);
         jPanel11Layout.setHorizontalGroup(
             jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel11Layout.createSequentialGroup()
-                .addComponent(checkboxEnablePskmailServer)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 144, Short.MAX_VALUE)
+                .addContainerGap()
+                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(checkboxEnablePskmailServer)
+                    .addComponent(checkboxUseVirtualMailBoxes))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(explainMiniServerButton)
                 .addContainerGap())
-            .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, 428, Short.MAX_VALUE)
+            .addComponent(jPanel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         jPanel11Layout.setVerticalGroup(
             jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
-                .addGap(3, 3, 3)
-                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(checkboxEnablePskmailServer)
-                    .addComponent(explainMiniServerButton))
-                .addGap(20, 20, 20)
-                .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, 196, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(149, Short.MAX_VALUE))
+                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel11Layout.createSequentialGroup()
+                        .addGap(3, 3, 3)
+                        .addComponent(explainMiniServerButton))
+                    .addGroup(jPanel11Layout.createSequentialGroup()
+                        .addComponent(checkboxEnablePskmailServer)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(checkboxUseVirtualMailBoxes)))
+                .addGap(14, 14, 14)
+                .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(112, Short.MAX_VALUE))
         );
 
         ServerPanel.add(jPanel11);
@@ -2668,7 +2693,11 @@ public class OptionsDialog extends javax.swing.JDialog {
                 cf.setPreference("ENABLESERVER", "no");
                 Main.wantServer = false;
             }
-          
+            if (this.checkboxUseVirtualMailBoxes.isSelected()) {
+                cf.setPreference("USEVIRTUALEMAILBOXES", "yes");
+            } else {
+                cf.setPreference("USEVIRTUALEMAILBOXES", "no");
+            }
             //RadioMsg preferences
             if (checkboxRelayOverRadio.isSelected()) {
                 cf.setPreference("RELAYOVERRADIO", "yes");
@@ -3073,6 +3102,10 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
         // TODO add your handling code here:
     }//GEN-LAST:event_CB_ListenInCwModeActionPerformed
 
+    private void checkboxUseVirtualMailBoxesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkboxUseVirtualMailBoxesActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_checkboxUseVirtualMailBoxesActionPerformed
+
     /**
      * A mode is checked/unchecked so the mode list should be refilled
      */
@@ -3331,6 +3364,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JCheckBox checkboxRelaySMSs;
     private javax.swing.JCheckBox checkboxRelaySMSsImmediately;
     private javax.swing.JCheckBox checkboxSendUsingLocalNumber;
+    private javax.swing.JCheckBox checkboxUseVirtualMailBoxes;
     private javax.swing.JCheckBox chkAPRSServer;
     private javax.swing.JCheckBox chkGPSConnection;
     private javax.swing.JCheckBox chkGpsd;
