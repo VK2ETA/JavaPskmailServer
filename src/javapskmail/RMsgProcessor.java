@@ -20,7 +20,6 @@ import java.util.Calendar;
 import java.util.Properties;
 import java.util.concurrent.Semaphore;
 import java.io.*;
-
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.util.MailSSLSocketFactory;
 import javax.mail.*;
@@ -79,6 +78,8 @@ public class RMsgProcessor {
     static LoggingClass log;
 
     static boolean alreadyWarned = false;
+    
+    static ArrayList<String> stationsHeard = new ArrayList<String>();
 
     public static void processor() {
         //Nothing as this is a service
@@ -153,14 +154,7 @@ public class RMsgProcessor {
                 }
                 String fromFilter = thisFilter[1].trim();
                 String phoneFilter = thisFilter[0].trim();
-                String maxHoursStr = Main.configuration.getPreference("HOURSTOKEEPLINK", "24");
-                int maxHoursSinceLastComm = 24;
-                try {
-                    maxHoursSinceLastComm = Integer.parseInt(maxHoursStr.trim());
-                } catch (Exception e) {
-                    maxHoursSinceLastComm = 24;
-                }
-                if ((fromFilter.equals("*") || from.trim().equals(fromFilter))
+                if ((fromFilter.equals("*") || from.trim().toLowerCase(Locale.US).equals(fromFilter.toLowerCase(Locale.US)))
                         && (phoneFilter.equals("*") || RMsgMisc.lTrimZeros(phoneFilter).endsWith(RMsgMisc.lTrimZeros(cellularNumber)))) {
                     //Do we need to update that last communication time
                     if (lastCommTime > 1) {
@@ -198,11 +192,6 @@ public class RMsgProcessor {
         boolean haveMatch = false;
         Long nowTime = System.currentTimeMillis();
 
-        //Not required as done before calling this
-        //Check valid email address format
-        //if (!emailAddress.matches("^[\\w.-_+]+@\\w+\\.[\\w.-]+")) {
-        //    return;
-        //}
         //Iterate through list of entries
         for (int i = 0; i < filterList.length; i++) {
             //Match on time, then on incoming phone number
@@ -217,14 +206,7 @@ public class RMsgProcessor {
                 }
                 String fromFilter = thisFilter[1].trim();
                 String emailFilter = thisFilter[0].trim();
-                String maxHoursStr = Main.configuration.getPreference("HOURSTOKEEPLINK", "24");
-                int maxHoursSinceLastComm = 24;
-                try {
-                    maxHoursSinceLastComm = Integer.parseInt(maxHoursStr.trim());
-                } catch (Exception e) {
-                    maxHoursSinceLastComm = 24;
-                }
-                if ((fromFilter.equals("*") || from.trim().equals(fromFilter))
+                if ((fromFilter.equals("*") || from.trim().toLowerCase(Locale.US).equals(fromFilter.toLowerCase(Locale.US)))
                         && (emailFilter.equals("*") || emailFilter.toLowerCase(Locale.US).equals(emailAddress.toLowerCase(Locale.US)))) {
                     //Do we need to update that last communication time
                     if (lastCommTime > 1) {
@@ -522,8 +504,10 @@ public class RMsgProcessor {
                                         String emailFilterTo[] = passEmailFilter(senderAddress);
                                         //Iterate through all the linked "to" stations as found in the SMS filter
                                         for (String toString : emailFilterTo) {
-                                            //Blank string means nobody to send to
-                                            if (toString != null && !toString.equals("")) {
+                                            //Blank string means nobody to send to. 
+                                            //And make sure the station was heard in the last hour.
+                                            if (toString != null && !toString.equals("") 
+                                                    && checkIfStationHeard(toString)) {
                                                 // Create message from cellular SMS
                                                 RMsgObject radioEmailMessage = new RMsgObject();
                                                 radioEmailMessage.to = toString;
@@ -817,7 +801,7 @@ public class RMsgProcessor {
                         && (phoneFilter.equals("*") || senderNo.endsWith(RMsgMisc.lTrimZeros(phoneFilter)))) {
                     //Do we need to update that last communication time
                     if (lastCommTime > 1) {
-                        //We had a real time stamp in here, not a zero or a mis-typed number
+                        //We had a real time stamp in here, not a zero or an '*' or a mis-typed number
                         filterList[i] = phoneFilter + "," + thisFilter[1].trim() + "," + nowTime.toString();
                     }
                     //Add the destination callsign for this number and time combination
@@ -1577,6 +1561,67 @@ public class RMsgProcessor {
         return resultNum;
     }
 
+    
+    //Updates the list of stations heard in the last hour (for auto forwarding of received emails and SMSs)
+    private static void updateStationsHeard(String fromCall) {
+        boolean found = false;
+        
+        for (int i=0; i < stationsHeard.size(); i++) {
+            String entry[] = stationsHeard.get(i).split(",");
+            if (entry.length == 2) {
+                String callsign = entry[0].trim();
+                String epoch = entry[1].trim();
+                if (callsign.length() > 0 && epoch.length() > 0) {
+                    //Valid entry, check if it matches that station just heard
+                    if (callsign.toLowerCase(Locale.US).equals(fromCall.trim().toLowerCase(Locale.US))) {
+                        String newEntry = callsign + "," + System.currentTimeMillis();
+                        stationsHeard.set(i, newEntry);
+                        found = true;
+                    }
+                }
+            }
+        }
+        //Not found, add it
+        if (!found) {
+            String newEntry = fromCall + "," + System.currentTimeMillis();
+            stationsHeard.add(newEntry);
+        }
+    }
+
+    
+    //Updates the list of stations heard in the last hour (for auto forwarding of received emails and SMSs)
+    private static boolean checkIfStationHeard(String fromCall) {
+        boolean heard = false;
+        
+        for (int i=0; i < stationsHeard.size(); i++) {
+            String entry[] = stationsHeard.get(i).split(",");
+            if (entry.length == 2) {
+                String callsign = entry[0].trim();
+                String epoch = entry[1].trim();
+                Long epochL = 0L;
+                try {
+                    epochL = Long.parseLong(epoch);
+                } catch (Exception e) {
+                    epochL = 0L;
+                }
+                if (callsign.length() > 0 && epochL > 0L) {
+                    //Valid entry, check if it matches that station just heard
+                    if (callsign.toLowerCase(Locale.US).equals(fromCall.trim().toLowerCase(Locale.US)))  {
+                        //Mtaching callsigns, heard less than one hour ago?
+                        if (epochL + 3600000L > System.currentTimeMillis()) {
+                            heard = true;
+                        } else {
+                            //Too old, delete entry
+                            stationsHeard.remove(i);
+                        }
+                    }
+                }
+            }
+        }
+        return heard;
+    }
+       
+    
     //Process the message now that it is complete (may have had to wait for the picture component)
     @SuppressWarnings("unchecked")
     public static void processTextMessage(final RMsgObject mMessage) {
@@ -1597,6 +1642,11 @@ public class RMsgProcessor {
                 || matchMyCallWith(mMessage.via, false))
                 && !matchMyCallWith(mMessage.from, false)) {
             saveAndDisplay = true;
+            //Update heard list
+            if (mMessage.relay.equals("")) {
+                    //Heard directly, not via a relay
+                    updateStationsHeard(mMessage.from);
+                }
             //Check if this is a duplicate. E.g. We received the message direct and now via a relay OR
             // the email/SMS message was already received
             if (!mMessage.timeId.equals("") || (mMessage.receiveDate != null)) {

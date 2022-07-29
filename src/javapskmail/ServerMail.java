@@ -73,7 +73,7 @@ public class ServerMail {
     4th line.
     .
      */    
-    public static String sendMail(String fromStr, String toStr, String subjectStr,
+    public static String sendMail(String fromCallsign, String toStr, String subjectStr,
             String bodyStr, String attachementFileName) {
 
         String result = "";
@@ -167,6 +167,8 @@ public class ServerMail {
             // Send the message
             t.sendMessage(msg, msg.getAllRecipients());
             result = "\nMessage sent...\n";
+            //Update filter
+            RMsgProcessor.updateEmailFilter(toStr, fromCallsign);
         } catch (Exception ex) {
             //Save in log for debugging
             Main.log("Error sending Email: " + ex.getMessage() + "\n");
@@ -205,7 +207,7 @@ public class ServerMail {
             store.connect(imapHost, userName, emailPassword);
             folder = (IMAPFolder) store.getFolder("inbox");
             if (!folder.isOpen()) {
-                folder.open(Folder.READ_WRITE);
+                folder.open(Folder.READ_ONLY);
             }
             Message[] messages;
             //Virtualizing the email boxes? (uses email filters to re-route responses)
@@ -213,11 +215,11 @@ public class ServerMail {
                 //Fetch all messages
                 messages = folder.getMessages();
                 int mailCount = 0;
-                //Process in the order of most recent to oldest
-                //for (int i=0; i < messages.length;i++)
-                for (int i = messages.length; i > 0; i--) {
+                //Process in the order of oldest to most
+                //for (int i = messages.length; i > 0; i--) {
+                for (int i=0; i < messages.length; i++) {
                     //Filtering by date and by requester
-                    Message msg = messages[i - 1];
+                    Message msg = messages[i];
                     //Save message time for making filenames later on
                     //Date msgDateTime = msg.getReceivedDate();
                     //c1.setTime(msgDateTime);
@@ -273,7 +275,7 @@ public class ServerMail {
                                 String subjectStr = msg.getSubject().replaceAll("\u2013", "-");
                                 subjectStr = subjectStr.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
                                 //JavaMail .getSize() is not accurate. Get body size and add to the header size
-                                String emailBody = getBodyTextFromMessage(msg);
+                                String emailBody = getEmailTextFromMessage(msg);
                                 int mSize = emailBody.length() + fromString.length() + subjectStr.length();
                                 //VK2ETA: check if Perl server adds a space before the email number
                                 mailHeaders += "" + (mailCount) + " " + fromString + "  " + subjectStr + " " + mSize + "\n";
@@ -321,7 +323,7 @@ public class ServerMail {
                     String subjectStr = messages[i].getSubject().replaceAll("\u2013", "-");
                     subjectStr = subjectStr.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
                     //JavaMail .getSize() is not accurate. Get body size and add to the header size
-                    String emailBody = getBodyTextFromMessage(messages[i]);
+                    String emailBody = getEmailTextFromMessage(messages[i]);
                     int mSize = emailBody.length() + fromString.length() + subjectStr.length();
                     //VK2ETA: check if Perl server adds a space before the email number
                     mailHeaders += "" + (i + 1) + " " + fromString + "  " + subjectStr + " " + mSize + "\n";
@@ -380,7 +382,7 @@ public class ServerMail {
                 store.connect(imapHost, userName, emailPassword);
                 folder = (IMAPFolder) store.getFolder("inbox");
                 if (!folder.isOpen()) {
-                    folder.open(Folder.READ_WRITE);
+                    folder.open(Folder.READ_ONLY);
                 }
                 //Get the number of messages in the folder
                 if (Main.configuration.getPreference("USEVIRTUALEMAILBOXES").trim().equals("yes")) {
@@ -389,11 +391,11 @@ public class ServerMail {
                     //Fetch all messages
                     messages = folder.getMessages();
                     //int msgCount = 0;
-                    //Process in the order of most recent to oldest
-                    //for (int i=0; i < messages.length;i++)
-                    for (int i = messages.length; i > 0; i--) {
+                    //Process in the order of oldest to most recent
+                    //for (int i = messages.length; i > 0; i--) {
+                    for (int i=0; i < messages.length;i++) {
                         //Filtering by date and by requester
-                        Message msg = messages[i - 1];
+                        Message msg = messages[i];
                         //Save message time for making filenames later on
                         //Date msgDateTime = msg.getReceivedDate();
                         //c1.setTime(msgDateTime);
@@ -536,7 +538,7 @@ public class ServerMail {
     }
      */
     //Extract body text from a message (can be multi-parts, plain text/html...)
-    public static String getBodyTextFromMessage(Message message) throws Exception {
+    public static String getEmailTextFromMessage(Message message) throws Exception {
         String result = "";
         boolean haveText = false;
         int attachmentCount = 0;
@@ -694,40 +696,97 @@ public class ServerMail {
             //folder = (IMAPFolder) store.getFolder("[Gmail]/Spam"); // This doesn't work for other email account
             folder = (IMAPFolder) store.getFolder("inbox");
             if (!folder.isOpen()) {
-                folder.open(Folder.READ_WRITE);
+                folder.open(Folder.READ_ONLY);
             }
-            Message message;
-            //Get the number of messages in the folder and compare
-            if (emailNumber > folder.getMessageCount()) {
-                //Sorry not enough
-                returnString = "Error, only " + folder.getMessageCount() + " mails.\n";
-                return returnString;
-            }
-            //Get messages - one at a time for now
-            //emailNumber--; //Adjust from email number to message array index
-            message = folder.getMessage(emailNumber);
-            String fromString = message.getFrom()[0].toString();
-            //Remove name and only keep email address proper
-            String[] emailAdresses = fromString.split("[ <>]+");
-            for (String fromPart : emailAdresses) {
-                if (fromPart.indexOf("@") > 0) {
-                    fromString = fromPart;
-                    break;
+            Message storedMessage = null;
+            Message[] messages;
+            //Virtualizing the email boxes? (uses email filters to re-route responses)
+            if (Main.configuration.getPreference("USEVIRTUALEMAILBOXES").trim().equals("yes")) {
+                //Fetch all messages
+                messages = folder.getMessages();
+                int mailCount = 0;
+                //Process in the order of oldest to most recent
+                //for (int i = messages.length; i > 0 && storedMessage == null; i--) {
+                for (int i = 0; i < messages.length && storedMessage == null; i++) {
+                    //Filtering by date and by requester
+                    Message msg = messages[i];
+                    //From email address
+                    String fromString = msg.getFrom()[0].toString();
+                    //Remove name and only keep email address proper
+                    String[] emailAdresses = fromString.split("[ <>]+");
+                    for (String fromPart : emailAdresses) {
+                        if (fromPart.indexOf("@") > 0) {
+                            fromString = fromPart;
+                            break;
+                        }
+                    }
+                    String[] tos;
+                    //boolean forAll = false;
+                    //if (forAll) {
+                    //Option of requesting all emails regardless of who they are for
+                    //Just add the requester of the QTC
+                    //    tos = new String[1];
+                    //    tos[0] = mMessage.from;
+                    //} else {
+                    //Add to reply list for each matching filter
+                    tos = RMsgProcessor.passEmailFilter(fromString);
+                    //}
+                    //Search for email addresses we communicated with before (use email filters)
+                    for (int j = 0; j < tos.length; j++) {
+                        //Only if the filter matches the requesting callsign
+                        if (tos[j] != null && (tos[j].equals("*") || Main.ttyCaller.toLowerCase(Locale.US).equals(tos[j].toLowerCase(Locale.US)))) {
+                            mailCount++;
+                            if (mailCount == emailNumber) {
+                                storedMessage = msg;
+                            }
+                            break; //No more header for this email as this would be duplicates
+                        }
+                    }
                 }
-            }
-            if (compressedMail) {
-                returnString = readMailZip(message);
+                //Not found a match and requested number above mail count
+                if (storedMessage == null && emailNumber > mailCount) {
+                    //Sorry not enough
+                    returnString = "Sorry only " + mailCount + " mails.\n";
+                    return returnString;
+                }
             } else {
-                //String emailHeader = "From: " + fromString + "\n"
-                //        + "Date: " + dateFormat.format(sentDate).replaceAll("\\.", "") + "\n"
-                //        + "Subject: " + message.getSubject() + "\n";
-                //Pskmail does not handle unicode characters (it corrupts the CRC). 
-                //  Therefore in plain text mode, strip all non ASCII characters 
-                returnString = getBodyTextFromMessage(message).replaceAll("\u2013", "-");
-                returnString = returnString.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
-                //Provide lead, size and end marker
-                returnString = "Your msg: " + returnString.length() + "\n"
-                        + returnString + "\n-end-\n";
+                //Only one "mail box" for all
+                //Get the number of messages in the folder and compare
+                if (emailNumber > folder.getMessageCount()) {
+                    //Sorry not enough
+                    returnString = "Error, only " + folder.getMessageCount() + " mails.\n";
+                    return returnString;
+                }
+                //Save message for processing
+                storedMessage = folder.getMessage(emailNumber);
+            }
+            //We should now have a message stored
+            if (storedMessage != null) {
+                /*
+                String fromString = storedMessage.getFrom()[0].toString();
+                //Remove name and only keep email address proper
+                String[] emailAdresses = fromString.split("[ <>]+");
+                for (String fromPart : emailAdresses) {
+                    if (fromPart.indexOf("@") > 0) {
+                        fromString = fromPart;
+                        break;
+                    }
+                }
+                */
+                if (compressedMail) {
+                    returnString = readMailZip(storedMessage);
+                } else {
+                    //String emailHeader = "From: " + fromString + "\n"
+                    //        + "Date: " + dateFormat.format(sentDate).replaceAll("\\.", "") + "\n"
+                    //        + "Subject: " + message.getSubject() + "\n";
+                    //Pskmail does not handle unicode characters (it corrupts the CRC). 
+                    //  Therefore in plain text mode, strip all non ASCII characters 
+                    returnString = getEmailTextFromMessage(storedMessage).replaceAll("\u2013", "-");
+                    returnString = returnString.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
+                    //Provide lead, size and end marker
+                    returnString = "Your msg: " + returnString.length() + "\n"
+                            + returnString + "\n-end-\n";
+                }
             }
         } catch (Error err) {
             err.printStackTrace();
@@ -764,7 +823,7 @@ public class ServerMail {
             String Destination = Main.ttyCaller;
             String mysourcefile = Main.homePath + Main.dirPrefix + "tmpfile";
             try {
-                String emailBody = getBodyTextFromMessage(mMessage);
+                String emailBody = getEmailTextFromMessage(mMessage);
                 RMsgUtil.saveDataStringAsFile("", mysourcefile, emailBody); //no path as it is included in filename
             } catch (Exception e) {
             }
@@ -863,14 +922,72 @@ public class ServerMail {
             if (!folder.isOpen()) {
                 folder.open(Folder.READ_WRITE);
             }
-            //Get the number of messages in the folder and compare
-            if (emailNumber > folder.getMessageCount()) {
-                //Sorry not enough
-                returnString = "Email # " + emailNumber + " does Not exist.\n";
-                return returnString;
+            int messageToDelete = -1;
+            Message[] messages;
+            //Virtualizing the email boxes? (uses email filters to re-route responses)
+            if (Main.configuration.getPreference("USEVIRTUALEMAILBOXES").trim().equals("yes")) {
+                //Fetch all messages
+                messages = folder.getMessages();
+                int mailCount = 0;
+                //Process in the order of oldest to most recent
+                //for (int i = messages.length; i > 0 && messageToDelete == -1; i--) {
+                for (int i = 0; i < messages.length && messageToDelete == -1; i++) {
+                    //Filtering by date and by requester
+                    Message msg = messages[i];
+                    //From email address
+                    String fromString = msg.getFrom()[0].toString();
+                    //Remove name and only keep email address proper
+                    String[] emailAdresses = fromString.split("[ <>]+");
+                    for (String fromPart : emailAdresses) {
+                        if (fromPart.indexOf("@") > 0) {
+                            fromString = fromPart;
+                            break;
+                        }
+                    }
+                    String[] tos;
+                    //boolean forAll = false;
+                    //if (forAll) {
+                    //Option of requesting all emails regardless of who they are for
+                    //Just add the requester of the QTC
+                    //    tos = new String[1];
+                    //    tos[0] = mMessage.from;
+                    //} else {
+                    //Add to reply list for each matching filter
+                    tos = RMsgProcessor.passEmailFilter(fromString);
+                    //}
+                    //Search for email addresses we communicated with before (use email filters)
+                    for (int j = 0; j < tos.length; j++) {
+                        //Only if the filter matches the requesting callsign
+                        if (tos[j] != null && (tos[j].equals("*") || Main.ttyCaller.toLowerCase(Locale.US).equals(tos[j].toLowerCase(Locale.US)))) {
+                            mailCount++;
+                            if (mailCount == emailNumber) {
+                                messageToDelete = i + 1; //Message numbers in the folder start at 1
+                            }
+                            break; //No more header for this email as this would be duplicates
+                        }
+                    }
+                }
+                //Not found any match AND we have less messages than requested
+                if (messageToDelete == -1 && emailNumber > mailCount) {
+                    //Sorry not enough
+                    returnString = "Sorry only " + mailCount + " mails.\n";
+                    return returnString;
+                }
             } else {
+                //Only one "mail box" for all
+                //Get the number of messages in the folder and compare
+                if (emailNumber > folder.getMessageCount()) {
+                    //Sorry not enough
+                    returnString = "Error, only " + folder.getMessageCount() + " mails.\n";
+                    return returnString;
+                }
+                //Save message number for processing
+                messageToDelete = emailNumber;
+            }
+            //Process if found a valid email
+            if (messageToDelete != -1) {
                 //Get the selected messages
-                Message message = folder.getMessage(emailNumber);
+                Message message = folder.getMessage(messageToDelete);
                 //Mark it for deletion
                 message.setFlag(Flags.Flag.DELETED, true);
                 returnString = "Deleted Email # " + emailNumber + "\n";

@@ -1670,7 +1670,11 @@ public class Session {
                     //Make sure we have something to send
                     if (!to.equals("") & (!subject.equals("") | !body.equals(""))) {
                         //No attachment yet
-                        Main.txText += ServerMail.sendMail(from, to, subject, body, ""); //last param is attachementFileName
+                        //Main.txText += ServerMail.sendMail(from, to, subject, body, ""); //last param is attachementFileName
+                        //use call sign as originator since all emails emanate from one mail box
+                        String cleanCall = Main.cleanCallForAprs(Main.ttyCaller);
+                        subject = "Radio Mail from " + cleanCall + ": " + subject;
+                        Main.txText += ServerMail.sendMail(cleanCall, to, subject, body, ""); //last param is attachementFileName
                     }
                 }
             } else {
@@ -1918,7 +1922,9 @@ public class Session {
                     //Make sure we have something to send
                     if (!to.equals("") && (!subject.equals("") | !body.equals(""))) {
                         //No attachment yet
-                        String resultStr = ServerMail.sendMail(from, to, subject, body, ""); //last param is attachementFileName
+                        String cleanCall = Main.cleanCallForAprs(Main.ttyCaller);
+                        subject = "Radio Mail from " + cleanCall + ": " + subject;
+                        String resultStr = ServerMail.sendMail(cleanCall, to, subject, body, ""); //last param is attachementFileName
                         //Format reply depending on sending method (~SEND or compressed & restartable)
                         if (resultStr.contains("Message sent..")) {
                             if (Main.protocol > 0) {
