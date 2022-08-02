@@ -587,7 +587,11 @@ public class OptionsDialog extends javax.swing.JDialog {
             this.txtCallsignAsServer.setText(Main.configuration.getPreference("CALLSIGNASSERVER"));
             this.txtAccessPassword.setText(Main.configuration.getPreference("ACCESSPASSWORD").trim());
             this.txtServerImapHost.setText(Main.configuration.getPreference("SERVERIMAPHOST"));
+            this.spinnerImapProtocol.setValue(Main.configuration.getPreference("SERVERIMAPPROTOCOL", "SSL/TLS"));
+            this.txtServerImapPort.setText(Main.configuration.getPreference("SERVERIMAPPORT", "993"));
             this.txtServerSmtpHost.setText(Main.configuration.getPreference("SERVERSMTPHOST"));
+            this.spinnerSmtpProtocol.setValue(Main.configuration.getPreference("SERVERSMTPPROTOCOL", "STARTTLS"));
+            this.txtServerSmtpPort.setText(Main.configuration.getPreference("SERVERSMTPPORT", "587"));
             this.txtServerEmailAddress.setText(Main.configuration.getPreference("SERVEREMAILADDRESS"));
             this.txtServerUserName.setText(Main.configuration.getPreference("SERVERUSERNAME"));
             this.txtServerEmailPassword.setText(Main.configuration.getPreference("SERVERPASSWORD"));
@@ -652,7 +656,11 @@ public class OptionsDialog extends javax.swing.JDialog {
         // Get the possibly saved value
         String mystr = Main.configuration.getPreference(key);
         if (!mystr.equals("")) {
-            retval = Integer.parseInt(mystr);
+            try {
+               retval = Integer.parseInt(mystr);
+            } catch (NumberFormatException e) {
+                //nothing, already set to defvalue
+            }
         }
         return retval;
     }
@@ -737,6 +745,12 @@ public class OptionsDialog extends javax.swing.JDialog {
         jLabel18 = new javax.swing.JLabel();
         txtAccessPassword = new javax.swing.JPasswordField();
         txtServerEmailPassword = new javax.swing.JPasswordField();
+        txtServerImapPort = new javax.swing.JTextField();
+        txtServerSmtpPort = new javax.swing.JTextField();
+        spinnerSmtpProtocol = new javax.swing.JSpinner();
+        spinnerImapProtocol = new javax.swing.JSpinner();
+        jLabel35 = new javax.swing.JLabel();
+        jLabel36 = new javax.swing.JLabel();
         checkboxUseVirtualMailBoxes = new javax.swing.JCheckBox();
         RadioMsgPanel = new javax.swing.JPanel();
         test1 = new javax.swing.JPanel();
@@ -1286,36 +1300,83 @@ public class OptionsDialog extends javax.swing.JDialog {
         txtServerEmailPassword.setMinimumSize(new java.awt.Dimension(4, 27));
         txtServerEmailPassword.setPreferredSize(new java.awt.Dimension(4, 27));
 
+        txtServerImapPort.setToolTipText(optionsdialog.getString("SERVER IMAP PORT")); // NOI18N
+        txtServerImapPort.setAlignmentX(22.0F);
+        txtServerImapPort.setMinimumSize(new java.awt.Dimension(100, 27));
+        txtServerImapPort.setPreferredSize(new java.awt.Dimension(150, 27));
+        txtServerImapPort.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtServerImapPortActionPerformed(evt);
+            }
+        });
+
+        txtServerSmtpPort.setToolTipText(optionsdialog.getString("SERVER SMTP PORT")); // NOI18N
+        txtServerSmtpPort.setAlignmentX(22.0F);
+        txtServerSmtpPort.setMinimumSize(new java.awt.Dimension(100, 27));
+        txtServerSmtpPort.setPreferredSize(new java.awt.Dimension(150, 27));
+        txtServerSmtpPort.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtServerSmtpPortActionPerformed(evt);
+            }
+        });
+
+        spinnerSmtpProtocol.setModel(new javax.swing.SpinnerListModel(new String[] {"NONE", "STARTTLS", "SSL/TLS"}));
+        spinnerSmtpProtocol.setToolTipText("The security protocol used to establish a link with the SMTP server");
+        spinnerSmtpProtocol.setMinimumSize(new java.awt.Dimension(32, 27));
+        spinnerSmtpProtocol.setName(""); // NOI18N
+        spinnerSmtpProtocol.setPreferredSize(new java.awt.Dimension(32, 27));
+
+        spinnerImapProtocol.setModel(new javax.swing.SpinnerListModel(new String[] {"NONE", "STARTTLS", "SSL/TLS"}));
+        spinnerImapProtocol.setToolTipText("The security protocol used to establish a link with the IMAP server");
+        spinnerImapProtocol.setMinimumSize(new java.awt.Dimension(32, 27));
+        spinnerImapProtocol.setName(""); // NOI18N
+        spinnerImapProtocol.setPreferredSize(new java.awt.Dimension(32, 27));
+
+        jLabel35.setText("Protocol");
+
+        jLabel36.setText("Port");
+
         javax.swing.GroupLayout jPanel12Layout = new javax.swing.GroupLayout(jPanel12);
         jPanel12.setLayout(jPanel12Layout);
         jPanel12Layout.setHorizontalGroup(
             jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel12Layout.createSequentialGroup()
-                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel12Layout.createSequentialGroup()
-                        .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel32, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel33, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel34, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtServerUserName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtServerEmailAddress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(txtServerEmailPassword, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addGroup(jPanel12Layout.createSequentialGroup()
-                            .addComponent(jLabel31)
-                            .addGap(3, 3, 3)
-                            .addComponent(txtServerImapHost, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE))
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel12Layout.createSequentialGroup()
-                            .addComponent(jLabel27)
-                            .addGap(3, 3, 3)
-                            .addComponent(txtServerSmtpHost, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel32, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel33, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel34, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(txtServerUserName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtServerEmailAddress, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtServerEmailPassword, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(48, 48, 48))
             .addGroup(jPanel12Layout.createSequentialGroup()
-                .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(3, 3, 3)
-                .addComponent(txtAccessPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel12Layout.createSequentialGroup()
+                        .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 128, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(3, 3, 3)
+                        .addComponent(txtAccessPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel12Layout.createSequentialGroup()
+                        .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addGroup(jPanel12Layout.createSequentialGroup()
+                                .addComponent(jLabel31)
+                                .addGap(3, 3, 3)
+                                .addComponent(txtServerImapHost, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel12Layout.createSequentialGroup()
+                                .addComponent(jLabel27)
+                                .addGap(3, 3, 3)
+                                .addComponent(txtServerSmtpHost, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(spinnerSmtpProtocol, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(spinnerImapProtocol, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel35, javax.swing.GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(txtServerImapPort, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtServerSmtpPort, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel36, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel12Layout.setVerticalGroup(
@@ -1328,15 +1389,23 @@ public class OptionsDialog extends javax.swing.JDialog {
                     .addGroup(jPanel12Layout.createSequentialGroup()
                         .addGap(4, 4, 4)
                         .addComponent(txtAccessPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel35)
+                    .addComponent(jLabel36))
+                .addGap(3, 3, 3)
                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtServerImapHost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel31))
+                    .addComponent(jLabel31)
+                    .addComponent(txtServerImapPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(spinnerImapProtocol, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(4, 4, 4)
                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtServerSmtpHost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel27))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(jLabel27)
+                    .addComponent(txtServerSmtpPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(spinnerSmtpProtocol, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtServerEmailAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel32))
@@ -1347,7 +1416,8 @@ public class OptionsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel34)
-                    .addComponent(txtServerEmailPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(txtServerEmailPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         checkboxUseVirtualMailBoxes.setText("Use Virtual email accounts");
@@ -1369,7 +1439,7 @@ public class OptionsDialog extends javax.swing.JDialog {
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(checkboxEnablePskmailServer)
                     .addComponent(checkboxUseVirtualMailBoxes))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 110, Short.MAX_VALUE)
                 .addComponent(explainMiniServerButton)
                 .addContainerGap())
             .addComponent(jPanel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1385,9 +1455,9 @@ public class OptionsDialog extends javax.swing.JDialog {
                         .addComponent(checkboxEnablePskmailServer)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(checkboxUseVirtualMailBoxes)))
-                .addGap(14, 14, 14)
-                .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(112, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(105, Short.MAX_VALUE))
         );
 
         ServerPanel.add(jPanel11);
@@ -2671,8 +2741,18 @@ public class OptionsDialog extends javax.swing.JDialog {
             if (txtServerImapHost.getText().length() > 0) {
                 cf.setPreference("SERVERIMAPHOST", txtServerImapHost.getText());
             }
+            myobject = spinnerImapProtocol.getValue();
+            cf.setPreference("SERVERIMAPPROTOCOL", myobject.toString());
+            if (txtServerImapPort.getText().length() > 0) {
+                cf.setPreference("SERVERIMAPPORT", txtServerImapPort.getText());
+            }
             if (txtServerSmtpHost.getText().length() > 0) {
                 cf.setPreference("SERVERSMTPHOST", txtServerSmtpHost.getText());
+            }
+            myobject = spinnerSmtpProtocol.getValue();
+            cf.setPreference("SERVERSMTPPROTOCOL", myobject.toString());
+            if (txtServerSmtpPort.getText().length() > 0) {
+                cf.setPreference("SERVERSMTPPORT", txtServerSmtpPort.getText());
             }
             if (txtServerEmailAddress.getText().length() > 0) {
                 cf.setPreference("SERVEREMAILADDRESS", txtServerEmailAddress.getText());
@@ -3106,6 +3186,14 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
         // TODO add your handling code here:
     }//GEN-LAST:event_checkboxUseVirtualMailBoxesActionPerformed
 
+    private void txtServerImapPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtServerImapPortActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtServerImapPortActionPerformed
+
+    private void txtServerSmtpPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtServerSmtpPortActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtServerSmtpPortActionPerformed
+
     /**
      * A mode is checked/unchecked so the mode list should be refilled
      */
@@ -3401,6 +3489,8 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JLabel jLabel32;
     private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel34;
+    private javax.swing.JLabel jLabel35;
+    private javax.swing.JLabel jLabel36;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -3456,6 +3546,8 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JSpinner spinRetries;
     private javax.swing.JSpinner spinTXdelay;
     private javax.swing.JSpinner spinnerHoursToKeepLink;
+    private javax.swing.JSpinner spinnerImapProtocol;
+    private javax.swing.JSpinner spinnerSmtpProtocol;
     private javax.swing.JTabbedPane tabOptions;
     private javax.swing.JPanel test1;
     private javax.swing.JPanel test2;
@@ -3483,7 +3575,9 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JTextField txtServerEmailAddress;
     private javax.swing.JPasswordField txtServerEmailPassword;
     private javax.swing.JTextField txtServerImapHost;
+    private javax.swing.JTextField txtServerImapPort;
     private javax.swing.JTextField txtServerSmtpHost;
+    private javax.swing.JTextField txtServerSmtpPort;
     private javax.swing.JTextField txtServerUserName;
     private javax.swing.JTextField txtSmsEmailGatewayDomain;
     // End of variables declaration//GEN-END:variables

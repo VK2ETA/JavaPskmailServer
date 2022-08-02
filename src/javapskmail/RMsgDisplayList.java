@@ -333,7 +333,7 @@ public class RMsgDisplayList {
     // would have received the original message at the same time, the allowed time difference
     // is 10 seconds to account for time drifts and different CPU speeds at both stations
     //
-    //2. When re request messages to be resent (they can be radio messages or relayed message or emails/SMSs messages)
+    //2. When requesting messages to be resent (they can be radio messages or relayed message or emails/SMSs messages)
     //   The "ro" field is received with the offset in seconds since this message was received by the sender
     //   This can be the receive time of a radio message or the email receive time at the email provider.
     //   A duplicate is a message whose content (text, positions, etc...) is identical to an already 

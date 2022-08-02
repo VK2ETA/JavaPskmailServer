@@ -79,11 +79,11 @@ public class ServerMail {
         String result = "";
         String smtpServer = Main.configuration.getPreference("SERVERSMTPHOST");
         //String socketFactoryPort = "465";
-        String socketFactoryPort = "587";
+        String socketFactoryPort = Main.configuration.getPreference("SERVERSMTPPORT", "587");
         String socketFactoryClass = "javax.net.ssl.SSLSocketFactory";
         String smtpAuth = "true";
         //String smtpPort = "465";
-        String smtpPort = "587";
+        String smtpPort = Main.configuration.getPreference("SERVERSMTPPORT", "587");
         final String fromAddress = Main.configuration.getPreference("SERVEREMAILADDRESS");
         final String userName = Main.configuration.getPreference("SERVERUSERNAME");
         final String password = Main.configuration.getPreference("SERVERPASSWORD");
@@ -96,15 +96,16 @@ public class ServerMail {
             props.put("mail.smtp.auth", smtpAuth);
             props.put("mail.smtp.port", smtpPort);
             props.put("mail.smtp.from", fromAddress);
-            //if (!fromStr.equals("")) {
-            //    props.put("mail.smtp.from", fromStr);
-            //} else {
-            //    props.put("mail.smtp.from", fromAddress);
-            //}
-            props.put("mail.smtp.starttls.enable", "true");
             //Startls OR ssl but not both?
-            //props.put("mail.smtp.ssl.enable", "true");
-            props.put("mail.smtp.ssl.trust", smtpServer);
+            String smtpProtocol = Main.configuration.getPreference("SERVERSMTPPROTOCOL", "STARTTLS");
+            if (smtpProtocol.equals("STARTTLS")) {
+                props.put("mail.smtp.starttls.enable", "true");
+            } else if (smtpProtocol.equals("STARTTLS")) {
+                props.put("mail.smtp.ssl.enable", "true");
+            } else {
+                //Must be NONE, do nothing for now (to be tested)
+            }
+           props.put("mail.smtp.ssl.trust", smtpServer);
             // Accept only TLS 1.1 and 1.2
             //props.setProperty("mail.smtp.ssl.protocols", "TLSv1.1 TLSv1.2");
             //props.put("mail.smtp.socketFactory.fallback", "false");
@@ -190,16 +191,39 @@ public class ServerMail {
 
         try {
             Properties props = System.getProperties();
-            props.setProperty("mail.store.protocol", "imaps");
-            props.setProperty("mail.imap.starttls.enable", "true");
-            props.setProperty("mail.imap.ssl.enable", "true");
+            String imapProtocol = Main.configuration.getPreference("SERVERIMAPPROTOCOL", "SSL/TLS");
+            if (imapProtocol.equals("SSL/TLS")) {
+                props.setProperty("mail.store.protocol", "imaps");
+                props.setProperty("mail.imaps.socketFactory.port",
+                        Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                props.setProperty("mail.imaps.port",
+                        Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                //props.setProperty("mail.imap.starttls.enable", "true");
+                props.setProperty("mail.imap.ssl.enable", "true");    
+            } else if (imapProtocol.equals("STARTTLS")) {
+                props.setProperty("mail.store.protocol", "imaps");
+                props.setProperty("mail.imaps.socketFactory.port",
+                        Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                props.setProperty("mail.imaps.port", 
+                        Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                props.setProperty("mail.imap.starttls.enable", "true");
+                //props.setProperty("mail.imap.ssl.enable", "true");
+            } else {
+                props.setProperty("mail.store.protocol", "imap");
+                props.setProperty("mail.imap.port", 
+                        Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+            }
             MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
             socketFactory.setTrustAllHosts(true);
             props.put("mail.imaps.ssl.socketFactory", socketFactory);
             //conflict with default instance, create a new one each time
             //Session session = Session.getDefaultInstance(props, null);
             javax.mail.Session session = javax.mail.Session.getInstance(props, null); //Conflicts with local Session.java, must be explicit
-            store = session.getStore("imaps");
+            if (imapProtocol.equals("NONE")) {
+                store = session.getStore("imap");
+            } else {
+                store = session.getStore("imaps");
+            }
             String imapHost = Main.configuration.getPreference("SERVERIMAPHOST").trim();
             String userName = Main.configuration.getPreference("SERVERUSERNAME").trim();
             String emailPassword = Main.configuration.getPreference("SERVERPASSWORD").trim();
@@ -368,17 +392,39 @@ public class ServerMail {
                 && userName.length() > 0) {
             try {
                 Properties props = System.getProperties();
-                props.setProperty("mail.store.protocol", "imaps");
-                props.setProperty("mail.imap.starttls.enable", "true");
-                props.setProperty("mail.imap.ssl.enable", "true");
+                String imapProtocol = Main.configuration.getPreference("SERVERIMAPPROTOCOL", "SSL/TLS");
+                if (imapProtocol.equals("SSL/TLS")) {
+                    props.setProperty("mail.store.protocol", "imaps");
+                    props.setProperty("mail.imaps.socketFactory.port",
+                            Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                    props.setProperty("mail.imaps.port",
+                            Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                    //props.setProperty("mail.imap.starttls.enable", "true");
+                    props.setProperty("mail.imap.ssl.enable", "true");
+                } else if (imapProtocol.equals("STARTTLS")) {
+                    props.setProperty("mail.store.protocol", "imaps");
+                    props.setProperty("mail.imaps.socketFactory.port",
+                            Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                    props.setProperty("mail.imaps.port",
+                            Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                    props.setProperty("mail.imap.starttls.enable", "true");
+                    //props.setProperty("mail.imap.ssl.enable", "true");
+                } else {
+                    props.setProperty("mail.store.protocol", "imap");
+                    props.setProperty("mail.imap.port",
+                            Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                }
                 MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
                 socketFactory.setTrustAllHosts(true);
                 props.put("mail.imaps.ssl.socketFactory", socketFactory);
                 //conflict with default instance, create a new one each time
                 //Session session = Session.getDefaultInstance(props, null);
                 javax.mail.Session session = javax.mail.Session.getInstance(props, null); //Conflicts with local Session.java, must be explicit
-                store = session.getStore("imaps");
-                //store.connect("imap.googlemail.com",emailAddress, emailPassword);
+                if (imapProtocol.equals("NONE")) {
+                    store = session.getStore("imap");
+                } else {
+                    store = session.getStore("imaps");
+                }
                 store.connect(imapHost, userName, emailPassword);
                 folder = (IMAPFolder) store.getFolder("inbox");
                 if (!folder.isOpen()) {
@@ -390,15 +436,10 @@ public class ServerMail {
                     Message[] messages;
                     //Fetch all messages
                     messages = folder.getMessages();
-                    //int msgCount = 0;
                     //Process in the order of oldest to most recent
-                    //for (int i = messages.length; i > 0; i--) {
                     for (int i=0; i < messages.length;i++) {
                         //Filtering by date and by requester
                         Message msg = messages[i];
-                        //Save message time for making filenames later on
-                        //Date msgDateTime = msg.getReceivedDate();
-                        //c1.setTime(msgDateTime);
                         //From email address
                         String fromString = msg.getFrom()[0].toString();
                         //Remove name and only keep email address proper
@@ -421,65 +462,9 @@ public class ServerMail {
                         tos = RMsgProcessor.passEmailFilter(fromString);
                         //}
                         for (int j = 0; j < tos.length; j++) {
-
                             //Only if the filter matches the requesting callsign (Main.ttyCaller)
                             if (tos[j] != null && (tos[j].equals("*") || reqCallSign.toLowerCase(Locale.US).equals(tos[j].toLowerCase(Locale.US)))) {
                                 mailCount++;
-                                /*
-                                String smsString = getBodyTextFromMessage(msg);
-                                if (smsString.startsWith("\n")) {
-                                    smsString = smsString.substring(1);
-                                }
-                                if (smsString.endsWith("\r\n\r\n")) {
-                                    smsString = smsString.substring(0, smsString.length() - 4);
-                                }
-                                if (smsString.length() > charLimit) {
-                                    smsString = smsString.subSequence(0, charLimit - 1) + " ...>";
-                                }
-                                String smsSubject = msg.getSubject();
-                                //If is NOT an SMS reply, add subject line
-                                if (phoneNumber.equals("")) {
-                                    //Not a reply to a previous radio message, add the subject line
-                                    if (!smsSubject.contains("Radio Message from ")
-                                            && !smsSubject.contains("SMS received from ")
-                                            && !smsSubject.trim().equals("")) {
-                                        smsString = "Subj: " + smsSubject + "\n" + smsString;
-                                    }
-                                }
-                                //Debug
-                                //smsString = smsString + " Rec Date: " + msg.getReceivedDate() + "\n";
-
-                                RMsgObject fullMessage = new RMsgObject(tos[j], "", smsString,
-                                        null, 0, false, 0, false, null, 0L, null);
-                                //Coming from this relay station
-                                fullMessage.relay = Main.callsignAsServer.trim();
-                                //Remove via information to make sure it is not forwarded
-                                //fullMessage.via = "";
-                                //Re-send/relay in the same mode we received in
-                                fullMessage.rxMode = mMessage.rxMode;
-                                //From address: email address or cellular number replying?
-                                if (smsGatewayDomain.length() > 0 && fromString.endsWith(smsGatewayDomain)) {
-                                    //Keep only the phone number and get the alias if any
-                                    fullMessage.from = Main.mainui.msgDisplayList.getAliasFromOrigin(fromString.replace("@" + smsGatewayDomain, ""), tos[j]);
-                                } else {
-                                    //Other email addresses
-                                    fullMessage.from = Main.mainui.msgDisplayList.getAliasFromOrigin(fromString, tos[j]);
-                                }
-                                //Save received date for incoming message
-                                //Date recDate = c1.getTime();
-                                fullMessage.receiveDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                                fullMessage.receiveDate.setTime(c1.getTime()); //= c1;
-                                //Then save Message date/time in list for sorting (and limit the number of messages)
-                                fullMessage.fileName = String.format(Locale.US, "%04d", c1.get(Calendar.YEAR)) + "-"
-                                        + String.format(Locale.US, "%02d", c1.get(Calendar.MONTH) + 1) + "-"
-                                        + String.format(Locale.US, "%02d", c1.get(Calendar.DAY_OF_MONTH)) + "_"
-                                        + String.format(Locale.US, "%02d%02d%02d", c1.get(Calendar.HOUR_OF_DAY),
-                                                c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND)) + ".txt";
-                                //No need ????, only used for comparison, not for storage (storage time stamp is Tx time related)
-                                c1.add(Calendar.SECOND, 1);
-                                resendList.add(fullMessage);
-                                break; //No more messages for this email as they would be redundant
-                                 */
                             }
                         }
                     }
@@ -676,18 +661,39 @@ public class ServerMail {
 
         try {
             Properties props = System.getProperties();
-            props.setProperty("mail.store.protocol", "imaps");
-
-            props.setProperty("mail.imap.starttls.enable", "true");
-            props.setProperty("mail.imap.ssl.enable", "true");
-
+            String imapProtocol = Main.configuration.getPreference("SERVERIMAPPROTOCOL", "SSL/TLS");
+            if (imapProtocol.equals("SSL/TLS")) {
+                props.setProperty("mail.store.protocol", "imaps");
+                props.setProperty("mail.imaps.socketFactory.port",
+                        Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                props.setProperty("mail.imaps.port",
+                        Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                //props.setProperty("mail.imap.starttls.enable", "true");
+                props.setProperty("mail.imap.ssl.enable", "true");    
+            } else if (imapProtocol.equals("STARTTLS")) {
+                props.setProperty("mail.store.protocol", "imaps");
+                props.setProperty("mail.imaps.socketFactory.port",
+                        Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                props.setProperty("mail.imaps.port", 
+                        Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                props.setProperty("mail.imap.starttls.enable", "true");
+                //props.setProperty("mail.imap.ssl.enable", "true");
+            } else {
+                props.setProperty("mail.store.protocol", "imap");
+                props.setProperty("mail.imap.port", 
+                        Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+            }
             MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
             socketFactory.setTrustAllHosts(true);
             props.put("mail.imaps.ssl.socketFactory", socketFactory);
             //conflict with default instance, create a new one each time
             //Session session = Session.getDefaultInstance(props, null);
             javax.mail.Session session = javax.mail.Session.getInstance(props, null); //Conflicts with local Session.java, must be explicit
-            store = session.getStore("imaps");
+            if (imapProtocol.equals("NONE")) {
+                store = session.getStore("imap");
+            } else {
+                store = session.getStore("imaps");
+            }
             String imapHost = Main.configuration.getPreference("SERVERIMAPHOST").trim();
             String userName = Main.configuration.getPreference("SERVERUSERNAME").trim();
             String emailPassword = Main.configuration.getPreference("SERVERPASSWORD").trim();
@@ -900,18 +906,39 @@ public class ServerMail {
 
         try {
             Properties props = System.getProperties();
-            props.setProperty("mail.store.protocol", "imaps");
-
-            props.setProperty("mail.imap.starttls.enable", "true");
-            props.setProperty("mail.imap.ssl.enable", "true");
-
+            String imapProtocol = Main.configuration.getPreference("SERVERIMAPPROTOCOL", "SSL/TLS");
+            if (imapProtocol.equals("SSL/TLS")) {
+                props.setProperty("mail.store.protocol", "imaps");
+                props.setProperty("mail.imaps.socketFactory.port",
+                        Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                props.setProperty("mail.imaps.port",
+                        Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                //props.setProperty("mail.imap.starttls.enable", "true");
+                props.setProperty("mail.imap.ssl.enable", "true");    
+            } else if (imapProtocol.equals("STARTTLS")) {
+                props.setProperty("mail.store.protocol", "imaps");
+                props.setProperty("mail.imaps.socketFactory.port",
+                        Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                props.setProperty("mail.imaps.port", 
+                        Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                props.setProperty("mail.imap.starttls.enable", "true");
+                //props.setProperty("mail.imap.ssl.enable", "true");
+            } else {
+                props.setProperty("mail.store.protocol", "imap");
+                props.setProperty("mail.imap.port", 
+                        Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+            }
             MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
             socketFactory.setTrustAllHosts(true);
             props.put("mail.imaps.ssl.socketFactory", socketFactory);
             //conflict with default instance, create a new one each time
             //Session session = Session.getDefaultInstance(props, null);
             javax.mail.Session session = javax.mail.Session.getInstance(props, null); //Conflicts with local Session.java, must be explicit
-            store = session.getStore("imaps");
+            if (imapProtocol.equals("NONE")) {
+                store = session.getStore("imap");
+            } else {
+                store = session.getStore("imaps");
+            }
             String imapHost = Main.configuration.getPreference("SERVERIMAPHOST");
             String userName = Main.configuration.getPreference("SERVERUSERNAME");
             String emailPassword = Main.configuration.getPreference("SERVERPASSWORD");

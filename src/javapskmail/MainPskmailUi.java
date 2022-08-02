@@ -37,7 +37,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 import javax.swing.*;
-import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.text.*;
@@ -1489,12 +1488,14 @@ public class MainPskmailUi extends javax.swing.JFrame {
     }
   
     public void resetAllMenus() {
-        jGetIAC.setEnabled(true);
-        Getforecast.setEnabled(true);
         mnuGetServerfq2.setEnabled(true);
         mnuGetPskmailNews2.setEnabled(true);
         MnuTelnet.setEnabled(true);
         //Make PERL server actions not visible (but kept in code for future possible use)
+        jGetIAC.setEnabled(false);
+        Getforecast.setEnabled(false);
+        jGetIAC.setVisible(false);
+        Getforecast.setVisible(false);
         Update_server.setEnabled(false);
         Update_server.setVisible(false);
         Resetrecord_mnu.setEnabled(false);
