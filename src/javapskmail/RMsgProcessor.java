@@ -1119,6 +1119,7 @@ public class RMsgProcessor {
             Message[] messages;
             if (numberOf == -1) {
                 //We must have a valid date to select messages from (date only, then select individually
+                //IMAP/Javamail limitation: Only the date counts, not the time, therefore returns no messages if in same day
                 SearchTerm st = new ReceivedDateTerm(ComparisonTerm.GE, recMsgDate);
                 messages = folder.search(st);
             } else {

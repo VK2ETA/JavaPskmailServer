@@ -301,7 +301,7 @@ public class RMsgResendDialog extends javax.swing.JDialog {
     private void jButtonOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOkActionPerformed
 
         if (Main.mainui.selectedTo.equals("*") && Main.mainui.selectedVia.equals("")) {
-            Main.q.Message(bundle.getString("you_must_select_to_or_via"), 5);
+            Main.q.Message(bundle.getString("RMsgResendDialog.you_must_select_to_or_via"), 5);
             //middleToastText("CAN'T Request Positions from \"ALL\"\n\nSelect a single TO destination above");
             //} else if (RMsgProcessor.matchMyCallWith(selectedTo, false)) {
             //middleToastText("CAN'T Request Positions from \"YOURSELF\"\n\nSelect another TO destination above");
@@ -311,11 +311,11 @@ public class RMsgResendDialog extends javax.swing.JDialog {
             //System.out.println("howMany: " + howManyToResend);
             //System.out.println("whatType: " + whatToResend);            
             boolean forceRelayingQTC = jCheckBoxForceRelaying.isSelected();
-            String resendString = " " + (forceRelayingQTC ? "r" : "") + howManyToResend + (whatToResend.length() > 0 ? " " + whatToResend : "");
+            String resendString = "*qtc? " + (forceRelayingQTC ? "r" : "") + howManyToResend + (whatToResend.length() > 0 ? "" + whatToResend : "");
             //Remove To if we use a via data as we never relay *qtc? messages
             // RMsgTxList.addMessageToList("*", selectedVia, "*qtc?" + resendString, false, null, 0, null);
             String toStr = (Main.mainui.selectedVia.equals("") || forceRelayingQTC) ? Main.mainui.selectedTo : "*";
-            RMsgTxList.addMessageToList(toStr, Main.mainui.selectedVia, "*qtc?" + resendString.trim(), false, null, 0, null);
+            RMsgTxList.addMessageToList(toStr, Main.mainui.selectedVia, resendString.trim(), false, null, 0, null);
         }
         //Done
         this.setVisible(false);

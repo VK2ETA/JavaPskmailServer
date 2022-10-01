@@ -78,11 +78,9 @@ public class ServerMail {
 
         String result = "";
         String smtpServer = Main.configuration.getPreference("SERVERSMTPHOST");
-        //String socketFactoryPort = "465";
         String socketFactoryPort = Main.configuration.getPreference("SERVERSMTPPORT", "587");
         String socketFactoryClass = "javax.net.ssl.SSLSocketFactory";
         String smtpAuth = "true";
-        //String smtpPort = "465";
         String smtpPort = Main.configuration.getPreference("SERVERSMTPPORT", "587");
         final String fromAddress = Main.configuration.getPreference("SERVEREMAILADDRESS");
         final String userName = Main.configuration.getPreference("SERVERUSERNAME");
