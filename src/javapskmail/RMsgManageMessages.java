@@ -393,7 +393,8 @@ public class RMsgManageMessages extends javax.swing.JFrame {
         
         int lastRow = tblRadioMsgs.getRowCount() - 1;
         if (lastRow >= 0) {
-            tblRadioMsgs.clearSelection();
+            //Bug Fix: would always select all messages
+            //tblRadioMsgs.clearSelection();
             for (int i = 0; i < tblRadioMsgs.getRowCount(); i ++) {
                 if (tblRadioMsgs.isRowSelected(i)) {
                     tblRadioMsgs.removeRowSelectionInterval(i, i);

@@ -55,21 +55,27 @@ public class Config {
     private int offsetminute;
     private int offsetsecond;
 
+    private String WebLabel1 = "";    
     private String Webpage1 = "none";
     private String Webpage1b = "";
     private String Webpage1e = "";
+    private String WebLabel2 = ""; 
     private String Webpage2 = "none";
     private String Webpage2b = "";
     private String Webpage2e = "";
+    private String WebLabel3 = "";
     private String Webpage3 = "none";
     private String Webpage3b = "";
     private String Webpage3e = "";
+    private String WebLabel4 = "";
     private String Webpage4 = "none";
     private String Webpage4b = "";
     private String Webpage4e = "";
+    private String WebLabel5 = "";
     private String Webpage5 = "none";
     private String Webpage5b = "";
     private String Webpage5e = "";
+    private String WebLabel6 = "";
     private String Webpage6 = "none";
     private String Webpage6b = "";
     private String Webpage6e = "";
@@ -444,6 +450,15 @@ public class Config {
         return statustxt;
     }
 
+    public void SetWebLabels(String url1, String url2, String url3, String url4, String url5, String url6) {
+        WebLabel1 = url1;
+        WebLabel2 = url2;
+        WebLabel3 = url3;
+        WebLabel4 = url4;
+        WebLabel5 = url5;
+        WebLabel6 = url6;
+    }
+
     public void SetWebPages(String url1, String url2, String url3, String url4, String url5, String url6) {
         Webpage1 = url1;
         Webpage2 = url2;
@@ -480,61 +495,30 @@ public class Config {
     }
 
     public void saveURLs() {
-        //VK2ETA: always save the strings otherwise we can't blank the fields out
-        //if (Webpage1.length() > 0) {
+            setPreference("LABELURL1", WebLabel1);
+            setPreference("LABELURL2", WebLabel2);
+            setPreference("LABELURL3", WebLabel3);
+            setPreference("LABELURL4", WebLabel4);
+            setPreference("LABELURL5", WebLabel5);
+            setPreference("LABELURL6", WebLabel6);
             setPreference("URL1", Webpage1);
-        //}
-        //if (Webpage2.length() > 0) {
             setPreference("URL2", Webpage2);
-        //}
-        //if (Webpage3.length() > 0) {
             setPreference("URL3", Webpage3);
-        //}
-        //if (Webpage4.length() > 0) {
             setPreference("URL4", Webpage4);
-        //}
-        //if (Webpage5.length() > 0) {
             setPreference("URL5", Webpage5);
-        //}
-        //if (Webpage6.length() > 0) {
             setPreference("URL6", Webpage6);
-        //}
-        //if (Webpage1b.length() > 0) {
             setPreference("URL1B", Webpage1b);
-        //}
-        //if (Webpage2b.length() > 0) {
             setPreference("URL2B", Webpage2b);
-        //}
-        //if (Webpage3b.length() > 0) {
             setPreference("URL3B", Webpage3b);
-        //}
-        //if (Webpage4b.length() > 0) {
             setPreference("URL4B", Webpage4b);
-        //}
-        //if (Webpage5b.length() > 0) {
             setPreference("URL5B", Webpage5b);
-        //}
-        //if (Webpage6b.length() > 0) {
             setPreference("URL6B", Webpage6b);
-        //}
-        //if (Webpage1e.length() > 0) {
             setPreference("URL1E", Webpage1e);
-        //}
-        //if (Webpage2e.length() > 0) {
             setPreference("URL2E", Webpage2e);
-        //}
-        //if (Webpage3e.length() > 0) {
             setPreference("URL3E", Webpage3e);
-        //}
-        //if (Webpage4e.length() > 0) {
             setPreference("URL4E", Webpage4e);
-        //}
-        //if (Webpage5e.length() > 0) {
             setPreference("URL5E", Webpage5e);
-        //}
-        //if (Webpage6e.length() > 0) {
             setPreference("URL6E", Webpage6e);
-        //}
     }
 
     /**
