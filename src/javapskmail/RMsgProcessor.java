@@ -365,7 +365,7 @@ public class RMsgProcessor {
             //msg.setText(body);
             // creates message part
             MimeBodyPart messageBodyPart = new MimeBodyPart();
-            messageBodyPart.setContent(body, "text/plain");
+            messageBodyPart.setContent(body, "text/plain; charset=UTF-8");
             // creates multi-part
             Multipart multipart = new MimeMultipart();
             multipart.addBodyPart(messageBodyPart);
@@ -514,9 +514,34 @@ public class RMsgProcessor {
                                             if (smsGatewayDomain.length() > 0 && senderAddress.endsWith(smsGatewayDomain)) {
                                                 phoneNumber = senderAddress.replace("@" + smsGatewayDomain, "");
                                                 //Only store the phone number in international format, not the sms gateway
-                                                senderAddress = convertNumberToE164(phoneNumber);// + "@" + smsGatewayDomain;
+                                                senderAddress = convertNumberToE164(phoneNumber);
+                                                //Perform extra trimming since it is coming from Email to SMS gateways
+                                                String txtDeleteUpTo = Main.configuration.getPreference("DELETESMSREPLYUPTO");
+                                                String txtDeleteWholeLine = Main.configuration.getPreference("DELETESMSREPLYSWHOLELINE", "no");
+                                                String txtDeleteFrom = Main.configuration.getPreference("DELETESMSREPLYFROM");
+                                                //Trim start of email text?
+                                                if (txtDeleteUpTo.length() > 0) {
+                                                    int deleteUpToIndex = smsString.indexOf(txtDeleteUpTo);
+                                                    if (deleteUpToIndex >= 0) {
+                                                        //Found in email text
+                                                        if (txtDeleteWholeLine.equalsIgnoreCase("yes")) {
+                                                            //Go to the next LF character
+                                                            deleteUpToIndex = smsString.indexOf(10, deleteUpToIndex);
+                                                        }
+                                                        //Trim the beggining
+                                                        smsString = smsString.substring(deleteUpToIndex);
+                                                    }
+                                                }
+                                                //Trim end of email text?
+                                                if (txtDeleteFrom.length() > 0) {
+                                                    int deleteFromIndex = smsString.indexOf(txtDeleteFrom);
+                                                    if (deleteFromIndex >= 0) {
+                                                        //Found in email text, trim the end
+                                                        smsString = smsString.substring(0, deleteFromIndex);
+                                                    }
+                                                }
                                             } else {
-                                                //Not a reply to a previous radio message, add the subject line
+                                                //Not an SMS reply to a previous radio message, add the subject line
                                                 if (!smsSubject.contains("Radio Message from ")
                                                         && !smsSubject.contains("Reply from ")
                                                         && !smsSubject.trim().equals("")) {
@@ -681,8 +706,9 @@ public class RMsgProcessor {
         if (email2SmsGateway.length() > 3 && email2SmsGateway.contains(".")) {
             RMsgObject mailMessage = mMessage;
             String resultNum = mailMessage.to;
-            //Need to send in local phone format?
-            if (Main.configuration.getPreference("SENDUSINGLOCALNUMBER", "no").equals("yes")) {
+            //Format number for email to SMS gateway
+            String txtSendCellNumAs = Main.configuration.getPreference("SENDCELLULARNUMBERAS", "Local Number");
+            if (txtSendCellNumAs.equalsIgnoreCase("Local Number")) {
                 PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
                 try {
                     String countryCode = Main.configuration.getPreference("GATEWAYISOCOUNTRYCODE").trim();
@@ -696,6 +722,9 @@ public class RMsgProcessor {
                 } catch (NumberParseException e) {
                     System.err.println("NumberParseException was thrown: " + e.toString());
                 }
+            } else if (txtSendCellNumAs.equalsIgnoreCase("Int'l Number Without + prefix")) {
+                //Remove leading "+"
+                resultNum = resultNum.replace("+", "");
             }
             String sendTo = resultNum + "@" + email2SmsGateway;
             //Send via the email to SMS gateway
@@ -704,8 +733,6 @@ public class RMsgProcessor {
             if (!result.equals("")) {
                 RMsgUtil.replyWithText(mMessage, "Error sending SMS: " + result);
             }
-            //Redundant, done in sendMailMsg. 
-            //updateSMSFilter(mailMessage.to, mailMessage.from);
         }
     }
 
@@ -874,12 +901,12 @@ public class RMsgProcessor {
         //String[] filterList = {"*,*,0"}; // tbf config.getPreferenceS("EMAILLISTENINGFILTER", "*,*,0").split("\\|");
         String[] filterList = Main.configuration.getPreference("EMAILLISTENINGFILTER", "").split("\\|");
         int toCount = 0;
-        int maxHoursSinceLastComm;//tbf config.getPreferenceI("MAXHOURSSINCELASTCOMM", 24);
-        String maxHoursStr = Main.configuration.getPreference("HOURSTOKEEPLINK", "24");
+        int maxDaysSinceLastComm;
+        String maxDaysStr = Main.configuration.getPreference("DAYSTOKEEPLINK", "90");
         try {
-            maxHoursSinceLastComm = Integer.parseInt(maxHoursStr.trim());
+            maxDaysSinceLastComm = Integer.parseInt(maxDaysStr.trim());
         } catch (Exception e) {
-            maxHoursSinceLastComm = 24;
+            maxDaysSinceLastComm = 90;
         }
         Long nowTime = System.currentTimeMillis();
         for (int i = 0; i < filterList.length; i++) {
@@ -894,7 +921,7 @@ public class RMsgProcessor {
                     lastCommTime = 1; //Any small number non zero
                 }
                 String emailFilter = thisFilter[0].trim();
-                if ((lastCommTime == 0 || lastCommTime + maxHoursSinceLastComm * 3600000L > nowTime)
+                if ((lastCommTime == 0 || lastCommTime + (maxDaysSinceLastComm * 3600000L * 24L) > nowTime)
                         && (emailFilter.equals("*") || emailFilter.toLowerCase(Locale.US).equals(emailAddress.toLowerCase(Locale.US)))) {
                     //Do we need to update that last communication time
                     if (lastCommTime > 1) {
@@ -907,7 +934,7 @@ public class RMsgProcessor {
                     if (toCount >= myResult.length) {
                         break;
                     }
-                } else if (lastCommTime > 1 && lastCommTime + maxHoursSinceLastComm * 3600000L <= nowTime) {
+                } else if (lastCommTime > 1 && lastCommTime + (maxDaysSinceLastComm * 3600000L * 24L) <= nowTime) {
                     //Remove obsolete filters with valid time stamps
                     filterList[i] = "";
                 }
@@ -958,12 +985,16 @@ public class RMsgProcessor {
                     //AND be only a position message if requested so
                     && (!positionsOnly || recDisplayItem.mMessage.msgHasPosition)
                     //AND must not be a command, position request, QTC or "No messages" message
+                    && (!recDisplayItem.mMessage.sms.startsWith("*qtc?"))
                     && (!recDisplayItem.mMessage.sms.startsWith("*cmd"))
                     && (!recDisplayItem.mMessage.sms.startsWith("*pos?"))
-                    && (!recDisplayItem.mMessage.sms.startsWith("*qtc?"))
-                    && (!recDisplayItem.mMessage.sms.equals("No Messages"))
-                    //AND must not be an already re-sent message
-                    && (!recDisplayItem.mMessage.sms.startsWith("Re-Sending ")) //old method
+                    && (!recDisplayItem.mMessage.sms.startsWith("No messages"))
+                    && (!recDisplayItem.mMessage.sms.startsWith("Re-Sending "))
+                    && (!recDisplayItem.mMessage.sms.startsWith("Scan is Off for "))
+                    && (!recDisplayItem.mMessage.sms.startsWith("Scan is On"))
+                    && (!recDisplayItem.mMessage.sms.startsWith("*tim?"))
+                    && (!recDisplayItem.mMessage.sms.startsWith("*Time Reference Received*"))
+                    && (!recDisplayItem.mMessage.sms.matches("^\\d{1,3}\\%")) //Not an Inquire reply
                     && (recDisplayItem.mMessage.receiveDate == null)) { //New method
                 if (forLast > 0L) { //We have a time-based request
                     Date recMsgDate;
@@ -1165,8 +1196,13 @@ public class RMsgProcessor {
                 String smsGatewayDomain = Main.configuration.getPreference("SMSEMAILGATEWAY", "").trim();
                 if (smsGatewayDomain.length() > 0 && fromString.endsWith(smsGatewayDomain)) {
                     phoneNumber = fromString.replace("@" + smsGatewayDomain, "");
-                    //Reformat as +614123456789@mysmsgateway.com.au..NO, filters for SMSs are stored as phonenumber only
-                    fromString = convertNumberToE164(phoneNumber);  // + "@" + smsGatewayDomain;
+                    //Are we expecting an internqational number without a leading "+"?
+                    String txtSendCellNumAs = Main.configuration.getPreference("SENDCELLULARNUMBERAS", "Local Number");
+                    if (txtSendCellNumAs.equalsIgnoreCase("Int'l Number Without + prefix")) {
+                        phoneNumber = "+" + phoneNumber;
+                    }
+                    //Reformat as +614123456789. Filters for SMSs are stored as international phone numbers
+                    fromString = convertNumberToE164(phoneNumber);
                 }
                 String[] tos;
                 if (forAll) {
@@ -1199,6 +1235,32 @@ public class RMsgProcessor {
                                     && !smsSubject.contains("SMS received from ")
                                     && !smsSubject.trim().equals("")) {
                                 smsString = "Subj: " + smsSubject + "\n" + smsString;
+                            }
+                        } else {
+                            //Extra trimming for SMS replies
+                            String txtDeleteUpTo = Main.configuration.getPreference("DELETESMSREPLYUPTO");
+                            String txtDeleteWholeLine = Main.configuration.getPreference("DELETESMSREPLYSWHOLELINE", "no");
+                            String txtDeleteFrom = Main.configuration.getPreference("DELETESMSREPLYFROM");
+                            //Trim start of email text?
+                            if (txtDeleteUpTo.length() > 0) {
+                                int deleteUpToIndex = smsString.indexOf(txtDeleteUpTo);
+                                if (deleteUpToIndex >= 0) {
+                                    //Found in email text
+                                    if (txtDeleteWholeLine.equalsIgnoreCase("yes")) {
+                                        //Go to the next LF character
+                                        deleteUpToIndex = smsString.indexOf(10, deleteUpToIndex);
+                                    }
+                                    //Trim the beggining
+                                    smsString = smsString.substring(deleteUpToIndex);
+                                }
+                            }
+                            //Trim end of email text?
+                            if (txtDeleteFrom.length() > 0) {
+                                int deleteFromIndex = smsString.indexOf(txtDeleteFrom);
+                                if (deleteFromIndex >= 0) {
+                                    //Found in email text, trim the end
+                                    smsString = smsString.substring(0, deleteFromIndex);
+                                }
                             }
                         }
                         //Debug
@@ -1303,6 +1365,11 @@ public class RMsgProcessor {
                     && (!recDisplayItem.mMessage.sms.startsWith("*pos?"))
                     && (!recDisplayItem.mMessage.sms.startsWith("No messages"))
                     && (!recDisplayItem.mMessage.sms.startsWith("Re-Sending "))
+                    && (!recDisplayItem.mMessage.sms.startsWith("Scan is Off for "))
+                    && (!recDisplayItem.mMessage.sms.startsWith("Scan is On"))
+                    && (!recDisplayItem.mMessage.sms.startsWith("*tim?"))
+                    && (!recDisplayItem.mMessage.sms.startsWith("*Time Reference Received*"))
+                    && (!recDisplayItem.mMessage.sms.matches("^\\d{1,3}\\%")) //Not an Inquire reply
                     && (recDisplayItem.mMessage.receiveDate == null)) {
                 if (forLast > 0L) { //We have a time-based request
                     Date recMsgDate;
@@ -1588,6 +1655,7 @@ public class RMsgProcessor {
         return accessPw;
     }
 
+    //Convert local numbers to international format using country code
     public static String convertNumberToE164(String phoneNumber) {
         String resultNum = phoneNumber.replaceAll(" ", "");
         if (resultNum.startsWith("+")) {

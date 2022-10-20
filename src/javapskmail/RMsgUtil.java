@@ -364,7 +364,7 @@ public class RMsgUtil {
         replyMessage.rxMode = mMessage.rxMode;
         replyMessage.from = Main.callsignAsServer.trim();
         replyMessage.to = mMessage.from;
-        replyMessage.via = "";
+        replyMessage.via = mMessage.relay;
         replyMessage.sms = (int)Main.snr + "%";
         RMsgTxList.addMessageToList(replyMessage);
     }

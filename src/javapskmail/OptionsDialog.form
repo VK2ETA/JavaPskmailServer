@@ -71,6 +71,9 @@
     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
       <Dimension value="[470, 420]"/>
     </Property>
+    <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+      <Dimension value="[470, 420]"/>
+    </Property>
     <Property name="size" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
       <Dimension value="[455, 410]"/>
     </Property>
@@ -688,8 +691,8 @@
           </Properties>
           <Constraints>
             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
-              <JTabbedPaneConstraints tabName="Mini-Server">
-                <Property name="tabTitle" type="java.lang.String" value="Mini-Server"/>
+              <JTabbedPaneConstraints tabName="Server">
+                <Property name="tabTitle" type="java.lang.String" value="Server"/>
               </JTabbedPaneConstraints>
             </Constraint>
           </Constraints>
@@ -711,36 +714,36 @@
               <Layout>
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
+                      <Component id="jPanel12" alignment="0" max="32767" attributes="0"/>
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="checkboxEnablePskmailServer" min="-2" max="-2" attributes="0"/>
-                              <Component id="checkboxUseVirtualMailBoxes" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Group type="102" attributes="0">
+                                  <Component id="checkboxUseVirtualMailBoxes" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                  <Component id="jLabel23" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <Component id="checkboxEnablePskmailServer" min="-2" pref="234" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace pref="110" max="32767" attributes="0"/>
-                          <Component id="explainMiniServerButton" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
+                          <Component id="spinnerDaysToKeepLink" min="-2" pref="59" max="-2" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
                       </Group>
-                      <Component id="jPanel12" alignment="0" max="32767" attributes="0"/>
                   </Group>
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="1" attributes="0">
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" alignment="0" attributes="0">
-                                  <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
-                                  <Component id="explainMiniServerButton" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="checkboxEnablePskmailServer" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                  <Component id="checkboxUseVirtualMailBoxes" min="-2" max="-2" attributes="0"/>
-                              </Group>
+                          <Component id="checkboxEnablePskmailServer" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="spinnerDaysToKeepLink" alignment="3" pref="25" max="32767" attributes="0"/>
+                              <Component id="jLabel23" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="checkboxUseVirtualMailBoxes" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                           <Component id="jPanel12" min="-2" pref="235" max="-2" attributes="0"/>
-                          <EmptySpace pref="105" max="32767" attributes="0"/>
+                          <EmptySpace pref="107" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -748,23 +751,13 @@
               <SubComponents>
                 <Component class="javax.swing.JCheckBox" name="checkboxEnablePskmailServer">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Enable Mini Pskmail Server"/>
-                    <Property name="toolTipText" type="java.lang.String" value="Listen for Client&apos;s connections and provide some server&apos;s functions"/>
+                    <Property name="text" type="java.lang.String" value="Enable Pskmail Server"/>
+                    <Property name="toolTipText" type="java.lang.String" value="Listen for Client&apos;s connections and provide Pskmail server&apos;s functions"/>
                     <Property name="horizontalAlignment" type="int" value="2"/>
                     <Property name="verticalAlignment" type="int" value="1"/>
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="checkboxEnablePskmailServerActionPerformed"/>
-                  </Events>
-                </Component>
-                <Component class="javax.swing.JButton" name="explainMiniServerButton">
-                  <Properties>
-                    <Property name="text" type="java.lang.String" value="Explain"/>
-                    <Property name="toolTipText" type="java.lang.String" value="Opens a new window explaning how the Mini-Server works"/>
-                    <Property name="enabled" type="boolean" value="false"/>
-                  </Properties>
-                  <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="explainMiniServerButtonActionPerformed"/>
                   </Events>
                 </Component>
                 <Container class="javax.swing.JPanel" name="jPanel12">
@@ -1096,14 +1089,31 @@
                 </Container>
                 <Component class="javax.swing.JCheckBox" name="checkboxUseVirtualMailBoxes">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Use Virtual email accounts"/>
-                    <Property name="toolTipText" type="java.lang.String" value="Listen for Client&apos;s connections and provide some server&apos;s functions"/>
+                    <Property name="text" type="java.lang.String" value="Virtual email accounts"/>
+                    <Property name="toolTipText" type="java.lang.String" value="Share the email account by linking email addresses with the clients&apos; callsigns. De-select for single callsign use."/>
                     <Property name="horizontalAlignment" type="int" value="2"/>
                     <Property name="verticalAlignment" type="int" value="1"/>
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="checkboxUseVirtualMailBoxesActionPerformed"/>
                   </Events>
+                </Component>
+                <Component class="javax.swing.JLabel" name="jLabel23">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Days to keep links for"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JSpinner" name="spinnerDaysToKeepLink">
+                  <Properties>
+                    <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
+                      <SpinnerModel initial="90" minimum="0" numberType="java.lang.Integer" stepSize="1" type="number"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" value="When several callsigns use this gateway, how long should we associate a callsign with an E-Mail address or SMS number for proper redirection"/>
+                    <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                      <Dimension value="[32, 25]"/>
+                    </Property>
+                    <Property name="name" type="java.lang.String" value="" noResource="true"/>
+                  </Properties>
                 </Component>
               </SubComponents>
             </Container>
@@ -1131,7 +1141,6 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="jPanel9" alignment="0" max="32767" attributes="0"/>
                   <Component id="jPanel10" alignment="0" max="32767" attributes="0"/>
-                  <Component id="jPanel7" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="test1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="52" max="-2" attributes="0"/>
@@ -1152,9 +1161,7 @@
                       <Component id="jPanel9" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
                       <Component id="jPanel10" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jPanel7" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="27" max="32767" attributes="0"/>
+                      <EmptySpace pref="62" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -1288,33 +1295,14 @@
                       <Group type="102" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" alignment="0" attributes="0">
+                              <Group type="102" attributes="0">
                                   <Component id="checkboxRelaySMSs" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace min="-2" pref="48" max="-2" attributes="0"/>
                                   <Component id="checkboxRelaySMSsImmediately" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="jLabel16" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Group type="102" alignment="0" attributes="0">
-                                          <Component id="jLabel8" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace type="separate" max="-2" attributes="0"/>
-                                          <Component id="txtGatewayISOCountryCode" min="-2" pref="41" max="-2" attributes="0"/>
-                                      </Group>
-                                  </Group>
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Group type="102" attributes="0">
-                                          <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
-                                          <Component id="txtSmsEmailGatewayDomain" min="-2" pref="209" max="-2" attributes="0"/>
-                                      </Group>
-                                      <Group type="102" alignment="0" attributes="0">
-                                          <EmptySpace type="separate" max="-2" attributes="0"/>
-                                          <Component id="checkboxSendUsingLocalNumber" min="-2" max="-2" attributes="0"/>
-                                      </Group>
-                                  </Group>
-                              </Group>
+                              <Component id="jButtonConfigSmsGateway" alignment="0" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace pref="21" max="32767" attributes="0"/>
+                          <EmptySpace max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1325,18 +1313,9 @@
                               <Component id="checkboxRelaySMSs" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="checkboxRelaySMSsImmediately" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="txtSmsEmailGatewayDomain" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="jLabel16" alignment="3" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="txtGatewayISOCountryCode" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="jLabel8" alignment="3" min="-2" max="-2" attributes="0"/>
-                              <Component id="checkboxSendUsingLocalNumber" alignment="3" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                          <EmptySpace max="32767" attributes="0"/>
+                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <Component id="jButtonConfigSmsGateway" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace pref="41" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1357,99 +1336,15 @@
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="checkboxRelaySMSsImmediatelyActionPerformed"/>
                   </Events>
                 </Component>
-                <Component class="javax.swing.JTextField" name="txtSmsEmailGatewayDomain">
+                <Component class="javax.swing.JButton" name="jButtonConfigSmsGateway">
                   <Properties>
-                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                      <ResourceString bundle="javapskmail/optionsdialog.properties" key="EMAIL SMS GATEWAY" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="javapskmail/optionsdialog.properties" key="CONFIGURESMSGATEWAY" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
                     </Property>
-                    <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                      <Dimension value="[100, 27]"/>
-                    </Property>
-                    <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                      <Dimension value="[150, 27]"/>
-                    </Property>
-                  </Properties>
-                </Component>
-                <Component class="javax.swing.JLabel" name="jLabel16">
-                  <Properties>
-                    <Property name="text" type="java.lang.String" value="SMS E-mail Gateway Domain"/>
-                  </Properties>
-                </Component>
-                <Component class="javax.swing.JLabel" name="jLabel8">
-                  <Properties>
-                    <Property name="text" type="java.lang.String" value="ISO Country code"/>
-                  </Properties>
-                </Component>
-                <Component class="javax.swing.JTextField" name="txtGatewayISOCountryCode">
-                  <Properties>
-                    <Property name="toolTipText" type="java.lang.String" value="The two letter ISO country code like US or AU or FR. Leave blank to use computer setting. Used to format phone numbers as international numbers."/>
-                    <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                      <Dimension value="[4, 27]"/>
-                    </Property>
-                    <Property name="requestFocusEnabled" type="boolean" value="false"/>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtGatewayISOCountryCodeActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonConfigSmsGatewayActionPerformed"/>
                   </Events>
-                </Component>
-                <Component class="javax.swing.JCheckBox" name="checkboxSendUsingLocalNumber">
-                  <Properties>
-                    <Property name="text" type="java.lang.String" value="Send using local number"/>
-                    <Property name="toolTipText" type="java.lang.String" value="Use local Phone number format (E.g. 0412 345 678) instead of international one like +61 412 345 678"/>
-                  </Properties>
-                  <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="checkboxSendUsingLocalNumberActionPerformed"/>
-                  </Events>
-                </Component>
-              </SubComponents>
-            </Container>
-            <Container class="javax.swing.JPanel" name="jPanel7">
-              <Properties>
-                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-                  <Border info="org.netbeans.modules.form.compat2.border.EtchedBorderInfo">
-                    <EtchetBorder/>
-                  </Border>
-                </Property>
-              </Properties>
-
-              <Layout>
-                <DimensionLayout dim="0">
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace max="-2" attributes="0"/>
-                          <Component id="jLabel23" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace type="separate" max="-2" attributes="0"/>
-                          <Component id="spinnerHoursToKeepLink" min="-2" pref="59" max="-2" attributes="0"/>
-                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                      </Group>
-                  </Group>
-                </DimensionLayout>
-                <DimensionLayout dim="1">
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="103" alignment="0" groupAlignment="3" attributes="0">
-                          <Component id="spinnerHoursToKeepLink" alignment="3" pref="25" max="32767" attributes="0"/>
-                          <Component id="jLabel23" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                  </Group>
-                </DimensionLayout>
-              </Layout>
-              <SubComponents>
-                <Component class="javax.swing.JLabel" name="jLabel23">
-                  <Properties>
-                    <Property name="text" type="java.lang.String" value="Hours to keep links to Callsigns valid for"/>
-                  </Properties>
-                </Component>
-                <Component class="javax.swing.JSpinner" name="spinnerHoursToKeepLink">
-                  <Properties>
-                    <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
-                      <SpinnerModel initial="24" minimum="0" numberType="java.lang.Integer" stepSize="1" type="number"/>
-                    </Property>
-                    <Property name="toolTipText" type="java.lang.String" value="When several callsigns use this gateway, how long should we associate a callsign with an E-Mail address or SMS number for proper redirection"/>
-                    <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                      <Dimension value="[32, 25]"/>
-                    </Property>
-                    <Property name="name" type="java.lang.String" value="" noResource="true"/>
-                  </Properties>
                 </Component>
               </SubComponents>
             </Container>
@@ -1740,18 +1635,18 @@
                 </Property>
                 <Property name="borderPainted" type="boolean" value="true"/>
                 <Property name="horizontalAlignment" type="int" value="2"/>
-                <Property name="horizontalTextPosition" type="int" value="10"/>
+                <Property name="horizontalTextPosition" type="int" value="4"/>
                 <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                   <Insets value="[10, 10, 2, 2]"/>
                 </Property>
                 <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                  <Dimension value="[150, 25]"/>
+                  <Dimension value="[170, 25]"/>
                 </Property>
                 <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                  <Dimension value="[150, 25]"/>
+                  <Dimension value="[170, 25]"/>
                 </Property>
                 <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-                  <Dimension value="[120, 25]"/>
+                  <Dimension value="[170, 25]"/>
                 </Property>
               </Properties>
               <Events>

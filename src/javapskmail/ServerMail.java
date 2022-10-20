@@ -136,7 +136,7 @@ public class ServerMail {
             // creates message part
             MimeBodyPart messageBodyPart = new MimeBodyPart();
             //messageBodyPart.setContent(body, "text/html");
-            messageBodyPart.setContent(body, "text/plain");
+            messageBodyPart.setContent(body, "text/plain; charset=UTF-8");
             // creates multi-part
             Multipart multipart = new MimeMultipart();
             multipart.addBodyPart(messageBodyPart);

@@ -66,6 +66,13 @@ public class OptionsDialog extends javax.swing.JDialog {
 
     private int defaultmodemindex = 0;
 
+    private String txtSmsEmailGatewayDomain;
+    private String txtSendCellNumAs;
+    private String txtGatewayISOCountryCode;
+    private String txtDeleteUpTo;
+    private String txtDeleteWholeLine;
+    private String txtDeleteFrom;
+        
     /**
      *
      * @return
@@ -277,6 +284,22 @@ public class OptionsDialog extends javax.swing.JDialog {
      */
     public void SaveOptions() {
         this.SaveConfiguration();
+    }
+    
+    public void saveSmsConfig(String txtSmsEmailGatewayDomain,
+            String jComboBoxSendCellNumAs,
+            String txtGatewayISOCountryCode,
+            String jTextDeleteUpTo,
+            String jCheckBoxDeleteWholeLine,
+            String jTextDeleteFrom) {
+
+        this.txtSmsEmailGatewayDomain = txtSmsEmailGatewayDomain;
+        this.txtSendCellNumAs = jComboBoxSendCellNumAs;
+        this.txtGatewayISOCountryCode = txtGatewayISOCountryCode;
+        this.txtDeleteUpTo = jTextDeleteUpTo;
+        this.txtDeleteWholeLine = jCheckBoxDeleteWholeLine;
+        this.txtDeleteFrom = jTextDeleteFrom;
+
     }
 
     /**
@@ -595,13 +618,12 @@ public class OptionsDialog extends javax.swing.JDialog {
             this.txtServerEmailAddress.setText(Main.configuration.getPreference("SERVEREMAILADDRESS"));
             this.txtServerUserName.setText(Main.configuration.getPreference("SERVERUSERNAME"));
             this.txtServerEmailPassword.setText(Main.configuration.getPreference("SERVERPASSWORD"));
-            this.txtSmsEmailGatewayDomain.setText(Main.configuration.getPreference("SMSEMAILGATEWAY"));
-            this.txtGatewayISOCountryCode.setText(Main.configuration.getPreference("GATEWAYISOCOUNTRYCODE"));
-            if (Main.configuration.getPreference("SENDUSINGLOCALNUMBER").equals("yes")) {
-                this.checkboxSendUsingLocalNumber.setSelected(true);
-            } else {
-                this.checkboxSendUsingLocalNumber.setSelected(false);
-            }
+            txtSmsEmailGatewayDomain = Main.configuration.getPreference("SMSEMAILGATEWAY");
+            txtSendCellNumAs = Main.configuration.getPreference("SENDCELLULARNUMBERAS", "Local Number");
+            txtGatewayISOCountryCode = Main.configuration.getPreference("GATEWAYISOCOUNTRYCODE");
+            txtDeleteUpTo = Main.configuration.getPreference("DELETESMSREPLYUPTO");
+            txtDeleteWholeLine = Main.configuration.getPreference("DELETESMSREPLYSWHOLELINE", "no");
+            txtDeleteFrom = Main.configuration.getPreference("DELETESMSREPLYFROM");
             if (Main.configuration.getPreference("ENABLESERVER").equals("yes")) {
                 this.checkboxEnablePskmailServer.setSelected(true);
             } else {
@@ -637,7 +659,7 @@ public class OptionsDialog extends javax.swing.JDialog {
             } else {
                 this.checkboxRelaySMSsImmediately.setSelected(false);
             }
-            spinnerHoursToKeepLink.setValue(GetSpinValue("HOURSTOKEEPLINK", 24));
+            spinnerDaysToKeepLink.setValue(GetSpinValue("DAYSTOKEEPLINK", 90));
             
          } catch (Exception ex) {
             Main.log.writelog(optionsdialog.getString("ERROR WHEN FETCHING SETTINGS!"), ex, true);
@@ -731,7 +753,6 @@ public class OptionsDialog extends javax.swing.JDialog {
         ServerPanel = new javax.swing.JPanel();
         jPanel11 = new javax.swing.JPanel();
         checkboxEnablePskmailServer = new javax.swing.JCheckBox();
-        explainMiniServerButton = new javax.swing.JButton();
         jPanel12 = new javax.swing.JPanel();
         jLabel27 = new javax.swing.JLabel();
         txtServerImapHost = new javax.swing.JTextField();
@@ -752,6 +773,8 @@ public class OptionsDialog extends javax.swing.JDialog {
         jLabel35 = new javax.swing.JLabel();
         jLabel36 = new javax.swing.JLabel();
         checkboxUseVirtualMailBoxes = new javax.swing.JCheckBox();
+        jLabel23 = new javax.swing.JLabel();
+        spinnerDaysToKeepLink = new javax.swing.JSpinner();
         RadioMsgPanel = new javax.swing.JPanel();
         test1 = new javax.swing.JPanel();
         checkboxRelayOverRadio = new javax.swing.JCheckBox();
@@ -762,14 +785,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         jPanel10 = new javax.swing.JPanel();
         checkboxRelaySMSs = new javax.swing.JCheckBox();
         checkboxRelaySMSsImmediately = new javax.swing.JCheckBox();
-        txtSmsEmailGatewayDomain = new javax.swing.JTextField();
-        jLabel16 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
-        txtGatewayISOCountryCode = new javax.swing.JTextField();
-        checkboxSendUsingLocalNumber = new javax.swing.JCheckBox();
-        jPanel7 = new javax.swing.JPanel();
-        jLabel23 = new javax.swing.JLabel();
-        spinnerHoursToKeepLink = new javax.swing.JSpinner();
+        jButtonConfigSmsGateway = new javax.swing.JButton();
         explainRadioMsgButton = new javax.swing.JButton();
         pnlConfiguration = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
@@ -886,6 +902,7 @@ public class OptionsDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(470, 420));
+        setPreferredSize(new java.awt.Dimension(470, 420));
         setSize(new java.awt.Dimension(455, 410));
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
@@ -1223,22 +1240,13 @@ public class OptionsDialog extends javax.swing.JDialog {
         jPanel11.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         jPanel11.setPreferredSize(new java.awt.Dimension(430, 400));
 
-        checkboxEnablePskmailServer.setText("Enable Mini Pskmail Server");
-        checkboxEnablePskmailServer.setToolTipText("Listen for Client's connections and provide some server's functions");
+        checkboxEnablePskmailServer.setText("Enable Pskmail Server");
+        checkboxEnablePskmailServer.setToolTipText("Listen for Client's connections and provide Pskmail server's functions");
         checkboxEnablePskmailServer.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         checkboxEnablePskmailServer.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         checkboxEnablePskmailServer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 checkboxEnablePskmailServerActionPerformed(evt);
-            }
-        });
-
-        explainMiniServerButton.setText("Explain");
-        explainMiniServerButton.setToolTipText("Opens a new window explaning how the Mini-Server works");
-        explainMiniServerButton.setEnabled(false);
-        explainMiniServerButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                explainMiniServerButtonActionPerformed(evt);
             }
         });
 
@@ -1420,8 +1428,8 @@ public class OptionsDialog extends javax.swing.JDialog {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        checkboxUseVirtualMailBoxes.setText("Use Virtual email accounts");
-        checkboxUseVirtualMailBoxes.setToolTipText("Listen for Client's connections and provide some server's functions");
+        checkboxUseVirtualMailBoxes.setText("Virtual email accounts");
+        checkboxUseVirtualMailBoxes.setToolTipText("Share the email account by linking email addresses with the clients' callsigns. De-select for single callsign use.");
         checkboxUseVirtualMailBoxes.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         checkboxUseVirtualMailBoxes.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         checkboxUseVirtualMailBoxes.addActionListener(new java.awt.event.ActionListener() {
@@ -1430,39 +1438,47 @@ public class OptionsDialog extends javax.swing.JDialog {
             }
         });
 
+        jLabel23.setText("Days to keep links for");
+
+        spinnerDaysToKeepLink.setModel(new javax.swing.SpinnerNumberModel(90, 0, null, 1));
+        spinnerDaysToKeepLink.setToolTipText("When several callsigns use this gateway, how long should we associate a callsign with an E-Mail address or SMS number for proper redirection");
+        spinnerDaysToKeepLink.setMinimumSize(new java.awt.Dimension(32, 25));
+        spinnerDaysToKeepLink.setName(""); // NOI18N
+
         javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
         jPanel11.setLayout(jPanel11Layout);
         jPanel11Layout.setHorizontalGroup(
             jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(jPanel11Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(checkboxEnablePskmailServer)
-                    .addComponent(checkboxUseVirtualMailBoxes))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 110, Short.MAX_VALUE)
-                .addComponent(explainMiniServerButton)
-                .addContainerGap())
-            .addComponent(jPanel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel11Layout.createSequentialGroup()
+                        .addComponent(checkboxUseVirtualMailBoxes)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel23))
+                    .addComponent(checkboxEnablePskmailServer, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(spinnerDaysToKeepLink, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel11Layout.setVerticalGroup(
             jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel11Layout.createSequentialGroup()
-                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel11Layout.createSequentialGroup()
-                        .addGap(3, 3, 3)
-                        .addComponent(explainMiniServerButton))
-                    .addGroup(jPanel11Layout.createSequentialGroup()
-                        .addComponent(checkboxEnablePskmailServer)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(checkboxUseVirtualMailBoxes)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(checkboxEnablePskmailServer)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel11Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(spinnerDaysToKeepLink, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
+                    .addComponent(jLabel23)
+                    .addComponent(checkboxUseVirtualMailBoxes))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, 235, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(105, Short.MAX_VALUE))
+                .addContainerGap(107, Short.MAX_VALUE))
         );
 
         ServerPanel.add(jPanel11);
 
-        tabOptions.addTab("Mini-Server", ServerPanel);
+        tabOptions.addTab("Server", ServerPanel);
 
         RadioMsgPanel.setMinimumSize(new java.awt.Dimension(600, 282));
         RadioMsgPanel.setPreferredSize(new java.awt.Dimension(600, 282));
@@ -1557,28 +1573,10 @@ public class OptionsDialog extends javax.swing.JDialog {
             }
         });
 
-        txtSmsEmailGatewayDomain.setToolTipText(optionsdialog.getString("EMAIL SMS GATEWAY")); // NOI18N
-        txtSmsEmailGatewayDomain.setMinimumSize(new java.awt.Dimension(100, 27));
-        txtSmsEmailGatewayDomain.setPreferredSize(new java.awt.Dimension(150, 27));
-
-        jLabel16.setText("SMS E-mail Gateway Domain");
-
-        jLabel8.setText("ISO Country code");
-
-        txtGatewayISOCountryCode.setToolTipText("The two letter ISO country code like US or AU or FR. Leave blank to use computer setting. Used to format phone numbers as international numbers.");
-        txtGatewayISOCountryCode.setPreferredSize(new java.awt.Dimension(4, 27));
-        txtGatewayISOCountryCode.setRequestFocusEnabled(false);
-        txtGatewayISOCountryCode.addActionListener(new java.awt.event.ActionListener() {
+        jButtonConfigSmsGateway.setText(optionsdialog.getString("CONFIGURESMSGATEWAY")); // NOI18N
+        jButtonConfigSmsGateway.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtGatewayISOCountryCodeActionPerformed(evt);
-            }
-        });
-
-        checkboxSendUsingLocalNumber.setText("Send using local number");
-        checkboxSendUsingLocalNumber.setToolTipText("Use local Phone number format (E.g. 0412 345 678) instead of international one like +61 412 345 678");
-        checkboxSendUsingLocalNumber.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                checkboxSendUsingLocalNumberActionPerformed(evt);
+                jButtonConfigSmsGatewayActionPerformed(evt);
             }
         });
 
@@ -1593,21 +1591,8 @@ public class OptionsDialog extends javax.swing.JDialog {
                         .addComponent(checkboxRelaySMSs)
                         .addGap(48, 48, 48)
                         .addComponent(checkboxRelaySMSsImmediately))
-                    .addGroup(jPanel10Layout.createSequentialGroup()
-                        .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel16)
-                            .addGroup(jPanel10Layout.createSequentialGroup()
-                                .addComponent(jLabel8)
-                                .addGap(18, 18, 18)
-                                .addComponent(txtGatewayISOCountryCode, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel10Layout.createSequentialGroup()
-                                .addGap(3, 3, 3)
-                                .addComponent(txtSmsEmailGatewayDomain, javax.swing.GroupLayout.PREFERRED_SIZE, 209, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel10Layout.createSequentialGroup()
-                                .addGap(18, 18, 18)
-                                .addComponent(checkboxSendUsingLocalNumber)))))
-                .addContainerGap(21, Short.MAX_VALUE))
+                    .addComponent(jButtonConfigSmsGateway))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel10Layout.setVerticalGroup(
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1615,43 +1600,9 @@ public class OptionsDialog extends javax.swing.JDialog {
                 .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(checkboxRelaySMSs)
                     .addComponent(checkboxRelaySMSsImmediately))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtSmsEmailGatewayDomain, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel16))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtGatewayISOCountryCode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8)
-                    .addComponent(checkboxSendUsingLocalNumber))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-
-        jPanel7.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
-        jLabel23.setText("Hours to keep links to Callsigns valid for");
-
-        spinnerHoursToKeepLink.setModel(new javax.swing.SpinnerNumberModel(24, 0, null, 1));
-        spinnerHoursToKeepLink.setToolTipText("When several callsigns use this gateway, how long should we associate a callsign with an E-Mail address or SMS number for proper redirection");
-        spinnerHoursToKeepLink.setMinimumSize(new java.awt.Dimension(32, 25));
-        spinnerHoursToKeepLink.setName(""); // NOI18N
-
-        javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
-        jPanel7.setLayout(jPanel7Layout);
-        jPanel7Layout.setHorizontalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel7Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel23)
-                .addGap(18, 18, 18)
-                .addComponent(spinnerHoursToKeepLink, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
-        );
-        jPanel7Layout.setVerticalGroup(
-            jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(spinnerHoursToKeepLink, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
-                .addComponent(jLabel23))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButtonConfigSmsGateway)
+                .addContainerGap(41, Short.MAX_VALUE))
         );
 
         explainRadioMsgButton.setText("Explain");
@@ -1669,7 +1620,6 @@ public class OptionsDialog extends javax.swing.JDialog {
             RadioMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(RadioMsgPanelLayout.createSequentialGroup()
                 .addComponent(test1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(52, 52, 52)
@@ -1687,9 +1637,7 @@ public class OptionsDialog extends javax.swing.JDialog {
                 .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(5, 5, 5)
                 .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(27, Short.MAX_VALUE))
+                .addContainerGap(62, Short.MAX_VALUE))
         );
 
         tabOptions.addTab("RadioMsg", RadioMsgPanel);
@@ -1847,11 +1795,11 @@ public class OptionsDialog extends javax.swing.JDialog {
         Compressed.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
         Compressed.setBorderPainted(true);
         Compressed.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        Compressed.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+        Compressed.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
         Compressed.setMargin(new java.awt.Insets(10, 10, 2, 2));
-        Compressed.setMaximumSize(new java.awt.Dimension(150, 25));
-        Compressed.setMinimumSize(new java.awt.Dimension(150, 25));
-        Compressed.setPreferredSize(new java.awt.Dimension(120, 25));
+        Compressed.setMaximumSize(new java.awt.Dimension(170, 25));
+        Compressed.setMinimumSize(new java.awt.Dimension(170, 25));
+        Compressed.setPreferredSize(new java.awt.Dimension(170, 25));
         Compressed.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 CompressedActionPerformed(evt);
@@ -2815,15 +2763,15 @@ public class OptionsDialog extends javax.swing.JDialog {
                 Main.wantRelaySMSsImmediat = false;
             }
             //Always save in case we blank it out
-            cf.setPreference("SMSEMAILGATEWAY", txtSmsEmailGatewayDomain.getText());
-            cf.setPreference("GATEWAYISOCOUNTRYCODE", txtGatewayISOCountryCode.getText());
-            if (checkboxSendUsingLocalNumber.isSelected()) {
-                cf.setPreference("SENDUSINGLOCALNUMBER", "yes");
-            } else {
-                cf.setPreference("SENDUSINGLOCALNUMBER", "no");
-            }
-            myobject = spinnerHoursToKeepLink.getValue();
-            cf.setPreference("HOURSTOKEEPLINK", myobject.toString());
+            cf.setPreference("SMSEMAILGATEWAY", txtSmsEmailGatewayDomain);
+            cf.setPreference("SENDCELLULARNUMBERAS", txtSendCellNumAs);
+            cf.setPreference("GATEWAYISOCOUNTRYCODE", txtGatewayISOCountryCode);
+            cf.setPreference("DELETESMSREPLYUPTO", txtDeleteUpTo);
+            cf.setPreference("DELETESMSREPLYSWHOLELINE", txtDeleteWholeLine);
+            cf.setPreference("DELETESMSREPLYFROM", txtDeleteFrom);
+
+            myobject = spinnerDaysToKeepLink.getValue();
+            cf.setPreference("DAYSTOKEEPLINK", myobject.toString());
 
         } catch (Exception ex) {
             Main.log.writelog(optionsdialog.getString("ERROR ENCOUNTERED WHEN STORING PREFERENCES!"), ex, true);
@@ -3104,10 +3052,6 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
         // TODO add your handling code here:
     }//GEN-LAST:event_explainRadioMsgButtonActionPerformed
 
-    private void explainMiniServerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_explainMiniServerButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_explainMiniServerButtonActionPerformed
-
     private void txtPopUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPopUserActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtPopUserActionPerformed
@@ -3158,17 +3102,9 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
                 }
     }//GEN-LAST:event_bPosConverterActionPerformed
 
-    private void txtGatewayISOCountryCodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtGatewayISOCountryCodeActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtGatewayISOCountryCodeActionPerformed
-
     private void checkboxRelaySMSsImmediatelyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkboxRelaySMSsImmediatelyActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_checkboxRelaySMSsImmediatelyActionPerformed
-
-    private void checkboxSendUsingLocalNumberActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkboxSendUsingLocalNumberActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_checkboxSendUsingLocalNumberActionPerformed
 
     private void txtFldigipathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtFldigipathActionPerformed
         // TODO add your handling code here:
@@ -3193,6 +3129,23 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private void txtServerSmtpPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtServerSmtpPortActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtServerSmtpPortActionPerformed
+
+    private void jButtonConfigSmsGatewayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonConfigSmsGatewayActionPerformed
+
+        SmsConfigDialog dialog = new SmsConfigDialog(new javax.swing.JFrame(), true);
+        //Pass "this" reference to the dialog for getters and setters
+        dialog.SetBackReference(this);
+        dialog.setValues(txtSmsEmailGatewayDomain,
+            txtSendCellNumAs,
+            txtGatewayISOCountryCode,
+            txtDeleteUpTo,
+            txtDeleteWholeLine,
+            txtDeleteFrom);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+        //Finished, clean
+        dialog.dispose();
+    }//GEN-LAST:event_jButtonConfigSmsGatewayActionPerformed
 
     /**
      * A mode is checked/unchecked so the mode list should be refilled
@@ -3451,12 +3404,10 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JCheckBox checkboxRelayOverRadio;
     private javax.swing.JCheckBox checkboxRelaySMSs;
     private javax.swing.JCheckBox checkboxRelaySMSsImmediately;
-    private javax.swing.JCheckBox checkboxSendUsingLocalNumber;
     private javax.swing.JCheckBox checkboxUseVirtualMailBoxes;
     private javax.swing.JCheckBox chkAPRSServer;
     private javax.swing.JCheckBox chkGPSConnection;
     private javax.swing.JCheckBox chkGpsd;
-    private javax.swing.JButton explainMiniServerButton;
     private javax.swing.JButton explainRadioMsgButton;
     private javax.swing.JPanel frAPRSServer;
     private javax.swing.JPanel frGPS;
@@ -3464,6 +3415,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButtonConfigSmsGateway;
     private javax.swing.JCheckBox jCheckBoxRigctl;
     private javax.swing.JDesktopPane jDesktopPane1;
     private javax.swing.JLabel jLabel1;
@@ -3473,7 +3425,6 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
-    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
@@ -3495,7 +3446,6 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabelRigStatus;
     private javax.swing.JPanel jPanel1;
@@ -3505,7 +3455,6 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JPasswordField jPasswordField1;
@@ -3545,7 +3494,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     public javax.swing.JSpinner spinOffsetSeconds;
     private javax.swing.JSpinner spinRetries;
     private javax.swing.JSpinner spinTXdelay;
-    private javax.swing.JSpinner spinnerHoursToKeepLink;
+    private javax.swing.JSpinner spinnerDaysToKeepLink;
     private javax.swing.JSpinner spinnerImapProtocol;
     private javax.swing.JSpinner spinnerSmtpProtocol;
     private javax.swing.JTabbedPane tabOptions;
@@ -3557,7 +3506,6 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JTextField txtCallsign;
     private javax.swing.JTextField txtCallsignAsServer;
     private javax.swing.JTextField txtFldigipath;
-    private javax.swing.JTextField txtGatewayISOCountryCode;
     private javax.swing.JFormattedTextField txtLatitude;
     private javax.swing.JTextField txtLinkto;
     private javax.swing.JTextField txtLogFile;
@@ -3579,7 +3527,6 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JTextField txtServerSmtpHost;
     private javax.swing.JTextField txtServerSmtpPort;
     private javax.swing.JTextField txtServerUserName;
-    private javax.swing.JTextField txtSmsEmailGatewayDomain;
     // End of variables declaration//GEN-END:variables
 
 }
