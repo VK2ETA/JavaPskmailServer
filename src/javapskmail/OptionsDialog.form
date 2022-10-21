@@ -1108,7 +1108,9 @@
                     <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
                       <SpinnerModel initial="90" minimum="0" numberType="java.lang.Integer" stepSize="1" type="number"/>
                     </Property>
-                    <Property name="toolTipText" type="java.lang.String" value="When several callsigns use this gateway, how long should we associate a callsign with an E-Mail address or SMS number for proper redirection"/>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="javapskmail/optionsdialog.properties" key="DAYSTOKEEPLINKFOR" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
+                    </Property>
                     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[32, 25]"/>
                     </Property>
@@ -1143,9 +1145,7 @@
                   <Component id="jPanel10" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="test1" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="52" max="-2" attributes="0"/>
-                      <Component id="explainRadioMsgButton" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -1153,10 +1153,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace pref="26" max="32767" attributes="0"/>
-                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Component id="test1" max="32767" attributes="0"/>
-                          <Component id="explainRadioMsgButton" max="32767" attributes="0"/>
-                      </Group>
+                      <Component id="test1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace pref="20" max="32767" attributes="0"/>
                       <Component id="jPanel9" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
@@ -1199,8 +1196,12 @@
               <SubComponents>
                 <Component class="javax.swing.JCheckBox" name="checkboxRelayOverRadio">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Relay Over Radio (when &quot;via&quot; is used)"/>
-                    <Property name="toolTipText" type="java.lang.String" value="Relays Radio Messages that carry a &quot;via&quot; information"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="javapskmail/optionsdialog.properties" key="RELAYRADIOMESSAGES" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="javapskmail/optionsdialog.properties" key="RELAYRADIOMESSAGESTIP" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
+                    </Property>
                     <Property name="horizontalAlignment" type="int" value="2"/>
                     <Property name="verticalAlignment" type="int" value="1"/>
                   </Properties>
@@ -1235,7 +1236,7 @@
                                   <Component id="jLabel30" min="-2" max="-2" attributes="0"/>
                               </Group>
                           </Group>
-                          <EmptySpace pref="23" max="32767" attributes="0"/>
+                          <EmptySpace pref="21" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1257,8 +1258,12 @@
               <SubComponents>
                 <Component class="javax.swing.JCheckBox" name="checkboxRelayEmail">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Relay E-mails"/>
-                    <Property name="toolTipText" type="java.lang.String" value="Relay Radio Messages to E-mails and from E-mail replies"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="javapskmail/optionsdialog.properties" key="RELAYEMAILS" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="javapskmail/optionsdialog.properties" key="RELAYEMAILSTIP" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="checkboxRelayEmailActionPerformed"/>
@@ -1266,8 +1271,12 @@
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="checkboxRelayEmailsImmediately">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Relay Immediately When Received"/>
-                    <Property name="toolTipText" type="java.lang.String" value="Monitor E-mails and relay over radio when received"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="javapskmail/optionsdialog.properties" key="RELAYEMAILSIMMEDIATELY" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="javapskmail/optionsdialog.properties" key="RELAYEMAILSIMMEDIATELYTIP" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="checkboxRelayEmailsImmediatelyActionPerformed"/>
@@ -1275,7 +1284,9 @@
                 </Component>
                 <Component class="javax.swing.JLabel" name="jLabel30">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Note: requires email data in Mini-Server Tab"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="javapskmail/optionsdialog.properties" key="REQUIRESEMAILDATAINSERVERTAB" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                 </Component>
               </SubComponents>
@@ -1323,14 +1334,20 @@
               <SubComponents>
                 <Component class="javax.swing.JCheckBox" name="checkboxRelaySMSs">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Relay SMSs"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="javapskmail/optionsdialog.properties" key="RELAYSMSS" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
+                    </Property>
                     <Property name="toolTipText" type="java.lang.String" value="Relay Radio Messages as Cellular SMS and relay SMSs as Radio Messages"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="checkboxRelaySMSsImmediately">
                   <Properties>
-                    <Property name="text" type="java.lang.String" value="Relay Immediately When Received"/>
-                    <Property name="toolTipText" type="java.lang.String" value="Monitor SMSs and relay over radio when received"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="javapskmail/optionsdialog.properties" key="RELAYSMSIMMEDIATELYWHENRECEIVED" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
+                    </Property>
+                    <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="javapskmail/optionsdialog.properties" key="RELAYSMSSIMMEDIATELYTIP" replaceFormat="optionsdialog.getString(&quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="checkboxRelaySMSsImmediatelyActionPerformed"/>
@@ -1348,16 +1365,6 @@
                 </Component>
               </SubComponents>
             </Container>
-            <Component class="javax.swing.JButton" name="explainRadioMsgButton">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Explain"/>
-                <Property name="toolTipText" type="java.lang.String" value="Opens a new window explaning how the RadioMsg relay works"/>
-                <Property name="enabled" type="boolean" value="false"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="explainRadioMsgButtonActionPerformed"/>
-              </Events>
-            </Component>
           </SubComponents>
         </Container>
         <Container class="javax.swing.JPanel" name="pnlConfiguration">

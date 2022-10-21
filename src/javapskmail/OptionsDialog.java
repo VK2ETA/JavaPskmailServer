@@ -786,7 +786,6 @@ public class OptionsDialog extends javax.swing.JDialog {
         checkboxRelaySMSs = new javax.swing.JCheckBox();
         checkboxRelaySMSsImmediately = new javax.swing.JCheckBox();
         jButtonConfigSmsGateway = new javax.swing.JButton();
-        explainRadioMsgButton = new javax.swing.JButton();
         pnlConfiguration = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
         txtLogFile = new javax.swing.JTextField();
@@ -1441,7 +1440,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         jLabel23.setText("Days to keep links for");
 
         spinnerDaysToKeepLink.setModel(new javax.swing.SpinnerNumberModel(90, 0, null, 1));
-        spinnerDaysToKeepLink.setToolTipText("When several callsigns use this gateway, how long should we associate a callsign with an E-Mail address or SMS number for proper redirection");
+        spinnerDaysToKeepLink.setToolTipText(optionsdialog.getString("DAYSTOKEEPLINKFOR")); // NOI18N
         spinnerDaysToKeepLink.setMinimumSize(new java.awt.Dimension(32, 25));
         spinnerDaysToKeepLink.setName(""); // NOI18N
 
@@ -1486,8 +1485,8 @@ public class OptionsDialog extends javax.swing.JDialog {
         test1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         test1.setName(""); // NOI18N
 
-        checkboxRelayOverRadio.setText("Relay Over Radio (when \"via\" is used)");
-        checkboxRelayOverRadio.setToolTipText("Relays Radio Messages that carry a \"via\" information");
+        checkboxRelayOverRadio.setText(optionsdialog.getString("RELAYRADIOMESSAGES")); // NOI18N
+        checkboxRelayOverRadio.setToolTipText(optionsdialog.getString("RELAYRADIOMESSAGESTIP")); // NOI18N
         checkboxRelayOverRadio.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         checkboxRelayOverRadio.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         checkboxRelayOverRadio.addActionListener(new java.awt.event.ActionListener() {
@@ -1514,23 +1513,23 @@ public class OptionsDialog extends javax.swing.JDialog {
 
         jPanel9.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        checkboxRelayEmail.setText("Relay E-mails");
-        checkboxRelayEmail.setToolTipText("Relay Radio Messages to E-mails and from E-mail replies");
+        checkboxRelayEmail.setText(optionsdialog.getString("RELAYEMAILS")); // NOI18N
+        checkboxRelayEmail.setToolTipText(optionsdialog.getString("RELAYEMAILSTIP")); // NOI18N
         checkboxRelayEmail.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 checkboxRelayEmailActionPerformed(evt);
             }
         });
 
-        checkboxRelayEmailsImmediately.setText("Relay Immediately When Received");
-        checkboxRelayEmailsImmediately.setToolTipText("Monitor E-mails and relay over radio when received");
+        checkboxRelayEmailsImmediately.setText(optionsdialog.getString("RELAYEMAILSIMMEDIATELY")); // NOI18N
+        checkboxRelayEmailsImmediately.setToolTipText(optionsdialog.getString("RELAYEMAILSIMMEDIATELYTIP")); // NOI18N
         checkboxRelayEmailsImmediately.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 checkboxRelayEmailsImmediatelyActionPerformed(evt);
             }
         });
 
-        jLabel30.setText("Note: requires email data in Mini-Server Tab");
+        jLabel30.setText(optionsdialog.getString("REQUIRESEMAILDATAINSERVERTAB")); // NOI18N
 
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
@@ -1546,7 +1545,7 @@ public class OptionsDialog extends javax.swing.JDialog {
                     .addGroup(jPanel9Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jLabel30)))
-                .addContainerGap(23, Short.MAX_VALUE))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
         jPanel9Layout.setVerticalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1562,11 +1561,11 @@ public class OptionsDialog extends javax.swing.JDialog {
 
         jPanel10.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        checkboxRelaySMSs.setText("Relay SMSs");
+        checkboxRelaySMSs.setText(optionsdialog.getString("RELAYSMSS")); // NOI18N
         checkboxRelaySMSs.setToolTipText("Relay Radio Messages as Cellular SMS and relay SMSs as Radio Messages");
 
-        checkboxRelaySMSsImmediately.setText("Relay Immediately When Received");
-        checkboxRelaySMSsImmediately.setToolTipText("Monitor SMSs and relay over radio when received");
+        checkboxRelaySMSsImmediately.setText(optionsdialog.getString("RELAYSMSIMMEDIATELYWHENRECEIVED")); // NOI18N
+        checkboxRelaySMSsImmediately.setToolTipText(optionsdialog.getString("RELAYSMSSIMMEDIATELYTIP")); // NOI18N
         checkboxRelaySMSsImmediately.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 checkboxRelaySMSsImmediatelyActionPerformed(evt);
@@ -1605,15 +1604,6 @@ public class OptionsDialog extends javax.swing.JDialog {
                 .addContainerGap(41, Short.MAX_VALUE))
         );
 
-        explainRadioMsgButton.setText("Explain");
-        explainRadioMsgButton.setToolTipText("Opens a new window explaning how the RadioMsg relay works");
-        explainRadioMsgButton.setEnabled(false);
-        explainRadioMsgButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                explainRadioMsgButtonActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout RadioMsgPanelLayout = new javax.swing.GroupLayout(RadioMsgPanel);
         RadioMsgPanel.setLayout(RadioMsgPanelLayout);
         RadioMsgPanelLayout.setHorizontalGroup(
@@ -1622,17 +1612,13 @@ public class OptionsDialog extends javax.swing.JDialog {
             .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(RadioMsgPanelLayout.createSequentialGroup()
                 .addComponent(test1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(52, 52, 52)
-                .addComponent(explainRadioMsgButton)
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         RadioMsgPanelLayout.setVerticalGroup(
             RadioMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(RadioMsgPanelLayout.createSequentialGroup()
                 .addContainerGap(26, Short.MAX_VALUE)
-                .addGroup(RadioMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(test1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(explainRadioMsgButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(test1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
                 .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(5, 5, 5)
@@ -3048,10 +3034,6 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
         callsign = txtCallsign.getText();
     }//GEN-LAST:event_txtCallsignActionPerformed
 
-    private void explainRadioMsgButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_explainRadioMsgButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_explainRadioMsgButtonActionPerformed
-
     private void txtPopUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPopUserActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtPopUserActionPerformed
@@ -3132,7 +3114,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
 
     private void jButtonConfigSmsGatewayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonConfigSmsGatewayActionPerformed
 
-        SmsConfigDialog dialog = new SmsConfigDialog(new javax.swing.JFrame(), true);
+        OptionsDialogSms dialog = new OptionsDialogSms(new javax.swing.JFrame(), true);
         //Pass "this" reference to the dialog for getters and setters
         dialog.SetBackReference(this);
         dialog.setValues(txtSmsEmailGatewayDomain,
@@ -3408,7 +3390,6 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JCheckBox chkAPRSServer;
     private javax.swing.JCheckBox chkGPSConnection;
     private javax.swing.JCheckBox chkGpsd;
-    private javax.swing.JButton explainRadioMsgButton;
     private javax.swing.JPanel frAPRSServer;
     private javax.swing.JPanel frGPS;
     private javax.swing.JButton jButton1;

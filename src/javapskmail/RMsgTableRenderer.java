@@ -49,7 +49,7 @@ public class RMsgTableRenderer extends JTextArea implements TableCellRenderer
             setSize(table.getColumnModel().getColumn(column).getWidth(), table.getRowHeight(row));
             //  Recalculate the preferred height now that the text and renderer width have been set.
             int preferredHeight = getPreferredSize().height;
-            if (table.getRowHeight(row) != preferredHeight) {
+            if (table.getRowHeight(row) != preferredHeight && preferredHeight > 1) {
                 table.setRowHeight(row, preferredHeight);
             }
             setBorder(mItem.myOwn ? paddingSent : paddingReceived);

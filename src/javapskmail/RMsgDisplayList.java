@@ -268,7 +268,7 @@ public class RMsgDisplayList {
                         if (mDisplayItem.myOwn) { //Sent message
                             msc = pscf.matcher(mDisplayItem.mMessage.to);
                             if (msc.lookingAt()) {
-                                if (fromAlias.equals(msc.group(1) + "=")
+                                if (fromAlias.equalsIgnoreCase(msc.group(1) + "=")
                                         && !msc.group(2).equals("")
                                         && !msc.group(2).equals("**unknown**")) {
                                     //We have a match

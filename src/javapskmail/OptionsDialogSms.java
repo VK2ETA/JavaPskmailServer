@@ -5,13 +5,14 @@
  */
 package javapskmail;
 
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
  *
  * @author jdouyere
  */
-public class SmsConfigDialog extends javax.swing.JDialog {
+public class OptionsDialogSms extends javax.swing.JDialog {
 
     private static final ResourceBundle optionsdialog = ResourceBundle.getBundle("javapskmail/optionsdialog");
     private OptionsDialog optionDialogRef;
@@ -41,7 +42,7 @@ public class SmsConfigDialog extends javax.swing.JDialog {
     /**
      * Creates new form SmsConfigDialog
      */
-    public SmsConfigDialog(java.awt.Frame parent, boolean modal) {
+    public OptionsDialogSms(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
     }
@@ -73,7 +74,7 @@ public class SmsConfigDialog extends javax.swing.JDialog {
         jButtonCancel = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jLabel5 = new javax.swing.JLabel();
-        jComboBox2 = new javax.swing.JComboBox<>();
+        jCBoxProviderWizard = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(optionsdialog.getString("SMSGATEWAYCONFIGTITLE")); // NOI18N
@@ -147,7 +148,7 @@ public class SmsConfigDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(9, 0, 0, 0);
         jPanel1.add(jLabel1, gridBagConstraints);
 
-        txtGatewayISOCountryCode.setToolTipText("The two letter ISO country code like US or AU or FR. Leave blank to use computer setting. Used to format phone numbers as international numbers.");
+        txtGatewayISOCountryCode.setToolTipText(optionsdialog.getString("ISOCOUNTRYCODETIP")); // NOI18N
         txtGatewayISOCountryCode.setMinimumSize(new java.awt.Dimension(40, 27));
         txtGatewayISOCountryCode.setPreferredSize(new java.awt.Dimension(40, 27));
         txtGatewayISOCountryCode.setRequestFocusEnabled(false);
@@ -191,6 +192,7 @@ public class SmsConfigDialog extends javax.swing.JDialog {
         jPanel1.add(txtSmsEmailGatewayDomain, gridBagConstraints);
 
         jSpinnerSendCellNumAs.setModel(new javax.swing.SpinnerListModel(new String[] {"Local Number", "Int'l Number With + prefix", "Int'l Number Without + prefix"}));
+        jSpinnerSendCellNumAs.setToolTipText(optionsdialog.getString("SENDCELLULARNUMBERASTIP")); // NOI18N
         jSpinnerSendCellNumAs.setMinimumSize(new java.awt.Dimension(233, 27));
         jSpinnerSendCellNumAs.setPreferredSize(new java.awt.Dimension(233, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -229,12 +231,17 @@ public class SmsConfigDialog extends javax.swing.JDialog {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         jPanel2.add(jLabel5, gridBagConstraints);
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "None", "SMS Global", "Clicksend", "SMS Broadcast - AU" }));
+        jCBoxProviderWizard.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "None", "SMS Global", "Clicksend", "SMS Broadcast - AU" }));
+        jCBoxProviderWizard.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCBoxProviderWizardActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
-        jPanel2.add(jComboBox2, gridBagConstraints);
+        jPanel2.add(jCBoxProviderWizard, gridBagConstraints);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -245,7 +252,6 @@ public class SmsConfigDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButtonOk, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButtonCancel))
@@ -291,6 +297,43 @@ public class SmsConfigDialog extends javax.swing.JDialog {
         this.setVisible(false);
     }//GEN-LAST:event_jButtonCancelActionPerformed
 
+    private void jCBoxProviderWizardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCBoxProviderWizardActionPerformed
+        //Try via the Locale set on this computer as a last resort
+        Locale currentLocale = Locale.getDefault();
+        String countryCode = currentLocale.getCountry();
+
+        //Prefill fields with "wizard" data
+        switch (jCBoxProviderWizard.getSelectedIndex()) {
+
+            case 1: //SMS Global
+                this.txtSmsEmailGatewayDomain.setText("email.smsglobal.com");
+                this.jSpinnerSendCellNumAs.setValue("Int'l Number Without + prefix");
+                this.txtGatewayISOCountryCode.setText(countryCode);
+                this.jTextDeleteUpTo.setText("MESSAGE: ");
+                this.jCheckBoxDeleteWholeLine.setSelected(false);
+                this.jTextDeleteFrom.setText("DATE:");
+                break;
+            case 2: //Clicksend
+                this.txtSmsEmailGatewayDomain.setText("sms.clicksend.com");
+                this.jSpinnerSendCellNumAs.setValue("Int'l Number With + prefix");
+                this.txtGatewayISOCountryCode.setText(countryCode);
+                this.jTextDeleteUpTo.setText("You've received a reply from");
+                this.jCheckBoxDeleteWholeLine.setSelected(true);
+                this.jTextDeleteFrom.setText("Original Message");
+                break;
+            case 3: //SMS Broadcast Australia
+                this.txtSmsEmailGatewayDomain.setText("e2s.smsbroadcast.com.au");
+                this.jSpinnerSendCellNumAs.setValue("Int'l Number With + prefix");
+                this.txtGatewayISOCountryCode.setText(countryCode);
+                this.jTextDeleteUpTo.setText("");
+                this.jCheckBoxDeleteWholeLine.setSelected(false);
+                this.jTextDeleteFrom.setText("----Original Message");
+                break;
+            default:
+                break;
+        }
+    }//GEN-LAST:event_jCBoxProviderWizardActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -308,20 +351,21 @@ public class SmsConfigDialog extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(SmsConfigDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(OptionsDialogSms.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(SmsConfigDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(OptionsDialogSms.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(SmsConfigDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(OptionsDialogSms.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(SmsConfigDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(OptionsDialogSms.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                SmsConfigDialog dialog = new SmsConfigDialog(new javax.swing.JFrame(), true);
+                OptionsDialogSms dialog = new OptionsDialogSms(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -336,8 +380,8 @@ public class SmsConfigDialog extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonCancel;
     private javax.swing.JButton jButtonOk;
+    private javax.swing.JComboBox<String> jCBoxProviderWizard;
     private javax.swing.JCheckBox jCheckBoxDeleteWholeLine;
-    private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel2;

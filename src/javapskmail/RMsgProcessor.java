@@ -43,6 +43,8 @@ import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.sun.mail.smtp.SMTPTransport;
 import javax.swing.SwingUtilities;
+import org.jsoup.nodes.Document.OutputSettings;
+import org.jsoup.safety.Whitelist;
 
 public class RMsgProcessor {
 
@@ -80,6 +82,9 @@ public class RMsgProcessor {
     static boolean alreadyWarned = false;
     
     static ArrayList<String> stationsHeard = new ArrayList<String>();
+    
+    static final boolean TRIMORIGINALMSG = false;
+    static final boolean WHOLEMSGBODY = true;
 
     public static void processor() {
         //Nothing as this is a service
@@ -496,17 +501,6 @@ public class RMsgProcessor {
                                             //Calendar c1 = Calendar.getInstance(TimeZone.getDefault());
                                             Date msgDateTime = msg.getReceivedDate();
                                             c1.setTime(msgDateTime);
-                                            //Body
-                                            smsString = getBodyTextFromMessage(msg);
-                                            if (smsString.startsWith("\n")) {
-                                                smsString = smsString.substring(1);
-                                            }
-                                            if (smsString.endsWith("\r\n\r\n")) {
-                                                smsString = smsString.substring(0, smsString.length() - 4);
-                                            }
-                                            if (smsString.length() > 155) {
-                                                smsString = smsString.subSequence(0, 155 - 1) + " ...>";
-                                            }
                                             String phoneNumber = "";
                                             String smsSubject = msg.getSubject();
                                             //SMS from gateway, convert phone number to E.164 format always
@@ -515,7 +509,9 @@ public class RMsgProcessor {
                                                 phoneNumber = senderAddress.replace("@" + smsGatewayDomain, "");
                                                 //Only store the phone number in international format, not the sms gateway
                                                 senderAddress = convertNumberToE164(phoneNumber);
-                                                //Perform extra trimming since it is coming from Email to SMS gateways
+                                                //Body
+                                                smsString = getBodyTextFromMessage(msg, WHOLEMSGBODY);
+                                                //Perform special trimming since it is coming from Email to SMS gateways
                                                 String txtDeleteUpTo = Main.configuration.getPreference("DELETESMSREPLYUPTO");
                                                 String txtDeleteWholeLine = Main.configuration.getPreference("DELETESMSREPLYSWHOLELINE", "no");
                                                 String txtDeleteFrom = Main.configuration.getPreference("DELETESMSREPLYFROM");
@@ -527,6 +523,9 @@ public class RMsgProcessor {
                                                         if (txtDeleteWholeLine.equalsIgnoreCase("yes")) {
                                                             //Go to the next LF character
                                                             deleteUpToIndex = smsString.indexOf(10, deleteUpToIndex);
+                                                        } else {
+                                                            //Go to the end of the matching word
+                                                            deleteUpToIndex += txtDeleteUpTo.length();
                                                         }
                                                         //Trim the beggining
                                                         smsString = smsString.substring(deleteUpToIndex);
@@ -540,13 +539,23 @@ public class RMsgProcessor {
                                                         smsString = smsString.substring(0, deleteFromIndex);
                                                     }
                                                 }
+                                                //Remove unwanted line feeds
+                                                smsString = trimLeadingAndLaggingLFs(smsString);
                                             } else {
                                                 //Not an SMS reply to a previous radio message, add the subject line
+                                                smsString = getBodyTextFromMessage(msg, TRIMORIGINALMSG);
+                                                //Remove unwanted line feeds
+                                                smsString = trimLeadingAndLaggingLFs(smsString);
+                                                //Add subject if appropriate
                                                 if (!smsSubject.contains("Radio Message from ")
                                                         && !smsSubject.contains("Reply from ")
                                                         && !smsSubject.trim().equals("")) {
                                                     smsString = smsSubject
                                                             + "\n" + smsString;
+                                                }
+                                                //Now limits the size
+                                                if (smsString.length() > 155) {
+                                                    smsString = smsString.subSequence(0, 155 - 1) + " ...>";
                                                 }
                                             }
                                         } catch (Exception e) {
@@ -1217,27 +1226,28 @@ public class RMsgProcessor {
                 for (int j = 0; j < tos.length; j++) {
                     //Only if the filter matches the requesting callsign
                     if (tos[j] != null && (tos[j].equals("*") || mMessage.from.toLowerCase(Locale.US).equals(tos[j].toLowerCase(Locale.US)))) {
-                        String smsString = getBodyTextFromMessage(msg);
-                        if (smsString.startsWith("\n")) {
-                            smsString = smsString.substring(1);
-                        }
-                        if (smsString.endsWith("\r\n\r\n")) {
-                            smsString = smsString.substring(0, smsString.length() - 4);
-                        }
-                        if (smsString.length() > charLimit) {
-                            smsString = smsString.subSequence(0, charLimit - 1) + " ...>";
-                        }
-                        String smsSubject = msg.getSubject();
-                        //If is NOT an SMS reply, add subject line
+                        String smsString;
                         if (phoneNumber.equals("")) {
-                            //Not a reply to a previous radio message, add the subject line
+                            //Non SMS reply, filter original email content as replied to
+                            smsString = getBodyTextFromMessage(msg, TRIMORIGINALMSG);
+                            //Remove unwanted line feeds
+                            smsString = trimLeadingAndLaggingLFs(smsString);
+                            //Add subject if appropriate
+                            String smsSubject = msg.getSubject();
                             if (!smsSubject.contains("Radio Message from ")
-                                    && !smsSubject.contains("SMS received from ")
+                                    && !smsSubject.contains("Reply from ")
                                     && !smsSubject.trim().equals("")) {
-                                smsString = "Subj: " + smsSubject + "\n" + smsString;
+                                smsString = smsSubject
+                                        + "\n" + smsString;
+                            }
+                            //Now limits the size
+                            if (smsString.length() > 155) {
+                                smsString = smsString.subSequence(0, 155 - 1) + " ...>";
                             }
                         } else {
-                            //Extra trimming for SMS replies
+                            //SMS reply, get the whole text
+                            smsString = getBodyTextFromMessage(msg, WHOLEMSGBODY);
+                            //Special trimming for SMS replies
                             String txtDeleteUpTo = Main.configuration.getPreference("DELETESMSREPLYUPTO");
                             String txtDeleteWholeLine = Main.configuration.getPreference("DELETESMSREPLYSWHOLELINE", "no");
                             String txtDeleteFrom = Main.configuration.getPreference("DELETESMSREPLYFROM");
@@ -1249,6 +1259,9 @@ public class RMsgProcessor {
                                     if (txtDeleteWholeLine.equalsIgnoreCase("yes")) {
                                         //Go to the next LF character
                                         deleteUpToIndex = smsString.indexOf(10, deleteUpToIndex);
+                                    } else {
+                                        //Go to the end of the matching word
+                                        deleteUpToIndex += txtDeleteUpTo.length();
                                     }
                                     //Trim the beggining
                                     smsString = smsString.substring(deleteUpToIndex);
@@ -1262,10 +1275,11 @@ public class RMsgProcessor {
                                     smsString = smsString.substring(0, deleteFromIndex);
                                 }
                             }
+                            //Remove unwanted line feeds
+                            smsString = trimLeadingAndLaggingLFs(smsString);
                         }
                         //Debug
                         //smsString = smsString + " Rec Date: " + msg.getReceivedDate() + "\n";
-
                         RMsgObject fullMessage = new RMsgObject(tos[j], "", smsString,
                                 null, 0, false, 0, false, null, 0L, null);
                         //Coming from this relay station
@@ -1490,57 +1504,20 @@ public class RMsgProcessor {
     }
 
     //Extract the first part's body and return a plain text string
-    public static String getBodyTextFromMessage(Message message) throws Exception {
-        // general spacers for time and date
-        //String spacers = "[\\s,/\\.\\-]";
-        // matches times
-        //String timePattern  = "(?:[0-2])?[0-9]:[0-5][0-9](?::[0-5][0-9])?(?:(?:\\s)?[AP]M)?";
-        // matches day of the week
-        //String dayPattern   = "(?:(?:Mon(?:day)?)|(?:Tue(?:sday)?)|(?:Wed(?:nesday)?)|(?:Thu(?:rsday)?)|(?:Fri(?:day)?)|(?:Sat(?:urday)?)|(?:Sun(?:day)?))";
-        // matches day of the month (number and st, nd, rd, th)
-        //String dayOfMonthPattern = "[0-3]?[0-9]" + spacers + "*(?:(?:th)|(?:st)|(?:nd)|(?:rd))?";
-        // matches months (numeric and text)
-        //String monthPattern = "(?:(?:Jan(?:uary)?)|(?:Feb(?:ruary)?)|(?:Mar(?:ch)?)|(?:Apr(?:il)?)|(?:May)|(?:Jun(?:e)?)|(?:Jul(?:y)?)" +
-        //                                      "|(?:Aug(?:ust)?)|(?:Sep(?:tember)?)|(?:Oct(?:ober)?)|(?:Nov(?:ember)?)|(?:Dec(?:ember)?)|(?:[0-1]?[0-9]))";
-        // matches years (only 1000's and 2000's, because we are matching emails)
-        //String yearPattern  = "(?:[1-2]?[0-9])[0-9][0-9]";
-        // matches a full date
-        //String datePattern     = "(?:" + dayPattern + spacers + "+)?(?:(?:" + dayOfMonthPattern + spacers + "+" + monthPattern + ")|" +
-        //                                        "(?:" + monthPattern + spacers + "+" + dayOfMonthPattern + "))" +
-        //                                         spacers + "+" + yearPattern;
-        // matches a date and time combo (in either order)
-        //String dateTimePattern = "(?:" + datePattern + "[\\s,]*(?:(?:at)|(?:@))?\\s*" + timePattern + ")|" +
-        //                                        "(?:" + timePattern + "[\\s,]*(?:on)?\\s*"+ datePattern + ")";
-        // matches a leading line such as
-        // ----Original Message----
-        // or simply
-        // ------------------------
-        // Allows underscores, = and + in a raw also
-        //
-        //String leadInLine    = "[-_+=]+\\s*(?:Original(?:\\sMessage)?)?\\s*[-_+=]+\n";
-        // matches a header line indicating the date
-        //String dateLine    = "(?:(?:date)|(?:sent)|(?:time)):\\s*"+ dateTimePattern + ".*\n";
-        //String dateLine    = "(?:(?:date)|(?:sent)|(?:time)):.*\n";
-        // matches a subject or address line
-        //Correction , removed the "|"
-        //String subjectOrAddressLine    = "((?:from)|(?:subject)|(?:b?cc)|(?:to))|:.*\n";
-        //String subjectOrAddressLine    = "((?:from)|(?:subject)|(?:b?cc)|(?:to)):.*\n";
-        // matches gmail style quoted text beginning, i.e.
-        //On Mon Jun 7, 2010 at 8:50 PM, Simon wrote:
-        //String gmailQuotedTextBeginning = "(On\\s+" + dateTimePattern + ".*wrote:\n)";
-        // matches the start of a quoted section of an email
-        //Pattern quotedTextStart = Pattern.compile("(?i)(?:(?:" + leadInLine + ")?" +
-        //    "(?:(?:(>\\s{0,3})?" + subjectOrAddressLine + ")|(?:" + dateLine + ")){2,6})");
+    public static String getBodyTextFromMessage(Message message, boolean wholeBodyText) throws Exception {
 
         //first extract complete message text
+        String plainResult = "";
+        String htmlResult = "";
         String result = "";
         if (message.isMimeType("text/plain")) {
-            result = message.getContent().toString();
+            plainResult = message.getContent().toString();
         } else if (message.isMimeType("multipart/*")) {
             MimeMultipart mimeMultipart = (MimeMultipart) message.getContent();
             int count = mimeMultipart.getCount();
             for (int i = 0; i < count; i++) {
-                BodyPart bodyPart = mimeMultipart.getBodyPart(i);
+                //Forgets LFs
+/*                BodyPart bodyPart = mimeMultipart.getBodyPart(i);
                 if (bodyPart.isMimeType("text/plain")) {
                     result = result + "\n" + bodyPart.getContent();
                     break;  //without break same text appears twice in my tests
@@ -1548,36 +1525,91 @@ public class RMsgProcessor {
                     String html = (String) bodyPart.getContent();
                     result = result + "\n" + Jsoup.parse(html).text();
                 }
+*/
+                BodyPart bodyPart = mimeMultipart.getBodyPart(i);
+                if (bodyPart.isMimeType("text/html")) {
+                    String html = (String) bodyPart.getContent();
+                    OutputSettings settings = new OutputSettings();
+                    settings.prettyPrint(false);
+                    //String cleanHtml                     
+                    //htmlResult = Jsoup.parse(html).text();
+                    htmlResult = Jsoup.clean(html, "", Whitelist.none(), settings);
+                } else if (bodyPart.isMimeType("text/plain")) {
+                    plainResult = bodyPart.getContent().toString();
+                }
             }
         }
-        //Remove the original message if this was a reply to an email
-        //Essential for reducing message size and for keeping privacy (as To: and From: 
-        //  details are included in appended original message)
-        Pattern omPatterm = Pattern.compile("(?:(?:^[-_+=]+(?:\\s*Original(?:\\s*Message)?\\s*)?[-_+=]+$)"
-                + "|(?:^\\s*(?:>\\s{0,7})?(?:(?:(?:(?:from)|(?:subject)"
-                + "|(?:b?cc)|(?:to)):.*)|(?:(?:(?:date)"
-                + "|(?:sent)|(?:time)):.*$))))", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
-        Pattern gmailPatterm = Pattern.compile("(?:^On.{1,500}wrote:)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
-        if (result.length() > 0) {
-            Matcher omMatcher = omPatterm.matcher(result);
-            Matcher gmailMatcher = gmailPatterm.matcher(result);
-            if (gmailMatcher.find()) {
-                int quotedTextPos = gmailMatcher.start();
-                result = result.substring(0, quotedTextPos);
-            } else if (omMatcher.find()) {
-                int quotedTextPos = omMatcher.start();
-                int matchCount = 1;
-                while (omMatcher.find()) {
-                    matchCount++;
-                }
-                if (matchCount > 1) {
+        //Prioritise html text for sms replies and plain text for emails
+        if (wholeBodyText) {
+            if (htmlResult.length() > 0) {
+                result = htmlResult;
+            } else {
+                result = plainResult;
+            }
+        } else {
+            if (plainResult.length() > 0) {
+                result = plainResult;
+            } else {
+                result = htmlResult;
+            }
+        }
+        if (!wholeBodyText) {
+            //Remove the original message if this was a reply to an email
+            //Essential for reducing message size and for keeping privacy (as To: and From: 
+            //  details are included in appended original message)
+            Pattern omPatterm = Pattern.compile("(?:(?:^[-_+=]+(?:\\s*Original(?:\\s*Message)?\\s*)?[-_+=]+$)"
+                    + "|(?:^\\s*(?:>\\s{0,7})?(?:(?:(?:(?:from)|(?:subject)"
+                    + "|(?:b?cc)|(?:to)):.*)|(?:(?:(?:date)"
+                    + "|(?:sent)|(?:time)):.*$))))", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
+            Pattern gmailPatterm = Pattern.compile("(?:^On.{1,500}wrote:)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
+            if (result.length() > 0) {
+                Matcher omMatcher = omPatterm.matcher(result);
+                Matcher gmailMatcher = gmailPatterm.matcher(result);
+                if (gmailMatcher.find()) {
+                    int quotedTextPos = gmailMatcher.start();
                     result = result.substring(0, quotedTextPos);
+                } else if (omMatcher.find()) {
+                    int quotedTextPos = omMatcher.start();
+                    int matchCount = 1;
+                    while (omMatcher.find()) {
+                        matchCount++;
+                    }
+                    if (matchCount > 1) {
+                        result = result.substring(0, quotedTextPos);
+                    }
                 }
             }
         }
         return result;
     }
 
+    //Remove CRs and LFs from start and end of text (avoids non-essential blank lines in received messages list)
+    private static String trimLeadingAndLaggingLFs(String str) {
+
+        if (str != null && str.length() > 0) {
+            int start = 0;
+            int strLen = str.length();
+            int end = strLen;
+
+            for (int i = 0; i < strLen; i++) {
+                if (str.charAt(i) != 10 && str.charAt(i) != 13) {
+                    start = i;
+                    break;
+                }
+            }
+            for (int i = strLen - 1; i >= 0; i--) {
+                if (str.charAt(i) != 10 && str.charAt(i) != 13) {
+                    end = i + 1;
+                    break;
+                }
+            }
+            str = str.substring(start, end);
+        }
+
+        return str;
+    }
+
+    
     /*
     Parked code
     private boolean textIsHtml = false;

@@ -34,9 +34,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.0.9.0";
+    static String version = "3.0.10.0";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20221019";
+    static String versionDate = "20221021";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
