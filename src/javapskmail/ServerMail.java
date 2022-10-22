@@ -50,7 +50,8 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.safety.Safelist;
+
 
 /**
  *
@@ -248,13 +249,7 @@ public class ServerMail {
                     //From email address
                     String fromString = msg.getFrom()[0].toString();
                     //Remove name and only keep email address proper
-                    String[] emailAdresses = fromString.split("[ <>]+");
-                    for (String fromPart : emailAdresses) {
-                        if (fromPart.indexOf("@") > 0) {
-                            fromString = fromPart;
-                            break;
-                        }
-                    }
+                    fromString = RMsgProcessor.extractEmailAddress(fromString);
                     String[] tos;
                     //boolean forAll = false;
                     //if (forAll) {
@@ -441,13 +436,7 @@ public class ServerMail {
                         //From email address
                         String fromString = msg.getFrom()[0].toString();
                         //Remove name and only keep email address proper
-                        String[] emailAdresses = fromString.split("[ <>]+");
-                        for (String fromPart : emailAdresses) {
-                            if (fromPart.indexOf("@") > 0) {
-                                fromString = fromPart;
-                                break;
-                            }
-                        }
+                        fromString = RMsgProcessor.extractEmailAddress(fromString);
                         String[] tos;
                         //boolean forAll = false;
                         //if (forAll) {
@@ -717,13 +706,7 @@ public class ServerMail {
                     //From email address
                     String fromString = msg.getFrom()[0].toString();
                     //Remove name and only keep email address proper
-                    String[] emailAdresses = fromString.split("[ <>]+");
-                    for (String fromPart : emailAdresses) {
-                        if (fromPart.indexOf("@") > 0) {
-                            fromString = fromPart;
-                            break;
-                        }
-                    }
+                    fromString = RMsgProcessor.extractEmailAddress(fromString);
                     String[] tos;
                     //boolean forAll = false;
                     //if (forAll) {
@@ -962,13 +945,7 @@ public class ServerMail {
                     //From email address
                     String fromString = msg.getFrom()[0].toString();
                     //Remove name and only keep email address proper
-                    String[] emailAdresses = fromString.split("[ <>]+");
-                    for (String fromPart : emailAdresses) {
-                        if (fromPart.indexOf("@") > 0) {
-                            fromString = fromPart;
-                            break;
-                        }
-                    }
+                    fromString = RMsgProcessor.extractEmailAddress(fromString);
                     String[] tos;
                     //boolean forAll = false;
                     //if (forAll) {
@@ -1063,7 +1040,7 @@ public class ServerMail {
                 doc.select("p").prepend("\\n");
                 String s = doc.html().replaceAll("\\\\n", "\n");
                 //webPage = doc.text();
-                webPage = Jsoup.clean(s, "", Whitelist.none(), new Document.OutputSettings().prettyPrint(false));
+                webPage = Jsoup.clean(s, "", Safelist.none(), new Document.OutputSettings().prettyPrint(false));
             }
             //Extract begin and end limits if any
             if (startStopStr.contains("end:")) {

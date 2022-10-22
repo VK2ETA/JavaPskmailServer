@@ -43,8 +43,10 @@ import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.sun.mail.smtp.SMTPTransport;
 import javax.swing.SwingUtilities;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Document.OutputSettings;
-import org.jsoup.safety.Whitelist;
+import org.jsoup.safety.Safelist;
+
 
 public class RMsgProcessor {
 
@@ -490,13 +492,7 @@ public class RMsgProcessor {
                                             //From email address
                                             senderAddress = msg.getFrom()[0].toString();
                                             //Remove name and only keep email address proper
-                                            String[] emailAdresses = senderAddress.split("[ <>]+");
-                                            for (String fromPart : emailAdresses) {
-                                                if (fromPart.indexOf("@") > 0) {
-                                                    senderAddress = fromPart;
-                                                    break;
-                                                }
-                                            }
+                                            senderAddress = extractEmailAddress(senderAddress);
                                             //Save message time for making filenames later on
                                             //Calendar c1 = Calendar.getInstance(TimeZone.getDefault());
                                             Date msgDateTime = msg.getReceivedDate();
@@ -1193,13 +1189,7 @@ public class RMsgProcessor {
                 //From email address
                 String fromString = msg.getFrom()[0].toString();
                 //Remove name and only keep email address proper
-                String[] emailAdresses = fromString.split("[ <>]+");
-                for (String fromPart : emailAdresses) {
-                    if (fromPart.indexOf("@") > 0) {
-                        fromString = fromPart;
-                        break;
-                    }
-                }
+                fromString = extractEmailAddress(fromString);
                 String phoneNumber = "";
                 //SMS from gateway, convert phone number to E.164 format always. To match stored number format.
                 String smsGatewayDomain = Main.configuration.getPreference("SMSEMAILGATEWAY", "").trim();
@@ -1502,6 +1492,52 @@ public class RMsgProcessor {
 
         return fullMessage;
     }
+    
+ /*   
+    //Test
+    //private static boolean textIsHtml = false;
+
+    // Return the primary text content of the message.
+     
+    private static String getText(Part p) throws
+                MessagingException, IOException {
+        if (p.isMimeType("text/*")) {
+            String s = (String)p.getContent();
+            //textIsHtml = p.isMimeType("text/html");
+            return s;
+        }
+
+        if (p.isMimeType("multipart/alternative")) {
+            // prefer html text over plain text
+            Multipart mp = (Multipart)p.getContent();
+            String text = null;
+            for (int i = 0; i < mp.getCount(); i++) {
+                Part bp = mp.getBodyPart(i);
+                if (bp.isMimeType("text/plain")) {
+                    if (text == null)
+                        text = getText(bp);
+                    continue;
+                } else if (bp.isMimeType("text/html")) {
+                    String s = getText(bp);
+                    if (s != null)
+                        return s;
+                } else {
+                    return getText(bp);
+                }
+            }
+            return text;
+        } else if (p.isMimeType("multipart/*")) {
+            Multipart mp = (Multipart)p.getContent();
+            for (int i = 0; i < mp.getCount(); i++) {
+                String s = getText(mp.getBodyPart(i));
+                if (s != null)
+                    return s;
+            }
+        }
+
+        return null;
+    }
+*/
 
     //Extract the first part's body and return a plain text string
     public static String getBodyTextFromMessage(Message message, boolean wholeBodyText) throws Exception {
@@ -1510,30 +1546,44 @@ public class RMsgProcessor {
         String plainResult = "";
         String htmlResult = "";
         String result = "";
+        //test
+        //String gt = getText(message);
+        //gt = "<" + gt + ">";
+        
         if (message.isMimeType("text/plain")) {
             plainResult = message.getContent().toString();
         } else if (message.isMimeType("multipart/*")) {
             MimeMultipart mimeMultipart = (MimeMultipart) message.getContent();
             int count = mimeMultipart.getCount();
             for (int i = 0; i < count; i++) {
-                //Forgets LFs
-/*                BodyPart bodyPart = mimeMultipart.getBodyPart(i);
+                /*Old method: Forgets linefeeds
+                BodyPart bodyPart = mimeMultipart.getBodyPart(i);
                 if (bodyPart.isMimeType("text/plain")) {
                     result = result + "\n" + bodyPart.getContent();
                     break;  //without break same text appears twice in my tests
                 } else if (bodyPart.isMimeType("text/html")) {
                     String html = (String) bodyPart.getContent();
                     result = result + "\n" + Jsoup.parse(html).text();
-                }
-*/
+                }      */
                 BodyPart bodyPart = mimeMultipart.getBodyPart(i);
                 if (bodyPart.isMimeType("text/html")) {
-                    String html = (String) bodyPart.getContent();
-                    OutputSettings settings = new OutputSettings();
-                    settings.prettyPrint(false);
-                    //String cleanHtml                     
-                    //htmlResult = Jsoup.parse(html).text();
-                    htmlResult = Jsoup.clean(html, "", Whitelist.none(), settings);
+                    String html1 = (String) bodyPart.getContent();
+                    //Remove all non html linefeeds
+                    String html = html1.replaceAll("\n", "");
+                    Document doc = Jsoup.parse(html.replaceAll("(?i)<br[^>]*>","br2sn"));
+                    String s = doc.html();
+                    //Preserve or convert line breaks
+                    doc.outputSettings(new Document.OutputSettings().prettyPrint(false));//makes html() preserve linebreaks and spacing
+                    ////s = doc.html();
+                    //doc.select("br").append("\\n");
+                    //s = doc.html();
+                    s = doc.text();
+                    ////doc.select("p").prepend("\\n");
+                    ////s = doc.html();
+                    //s = s.replaceAll("\\\\n", "\n");
+                    htmlResult = Jsoup.clean(s, "", Safelist.none(), new Document.OutputSettings().prettyPrint(false));
+                    htmlResult = System.getProperty("line.separator") + htmlResult.replaceAll("br2sn", System.getProperty("line.separator"));
+                    ////htmlResult = Jsoup.parse(html1).text();
                 } else if (bodyPart.isMimeType("text/plain")) {
                     plainResult = bodyPart.getContent().toString();
                 }
@@ -1561,7 +1611,7 @@ public class RMsgProcessor {
                     + "|(?:^\\s*(?:>\\s{0,7})?(?:(?:(?:(?:from)|(?:subject)"
                     + "|(?:b?cc)|(?:to)):.*)|(?:(?:(?:date)"
                     + "|(?:sent)|(?:time)):.*$))))", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
-            Pattern gmailPatterm = Pattern.compile("(?:^On.{1,500}wrote:)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
+            Pattern gmailPatterm = Pattern.compile("(?:^\\s{0,10}On.{1,500}wrote:)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
             if (result.length() > 0) {
                 Matcher omMatcher = omPatterm.matcher(result);
                 Matcher gmailMatcher = gmailPatterm.matcher(result);
@@ -1583,7 +1633,7 @@ public class RMsgProcessor {
         return result;
     }
 
-    //Remove CRs and LFs from start and end of text (avoids non-essential blank lines in received messages list)
+    //Remove CRs and LFs from start and end, plus Spaces for end of text (avoids non-essential blank lines in received messages list)
     private static String trimLeadingAndLaggingLFs(String str) {
 
         if (str != null && str.length() > 0) {
@@ -1598,7 +1648,7 @@ public class RMsgProcessor {
                 }
             }
             for (int i = strLen - 1; i >= 0; i--) {
-                if (str.charAt(i) != 10 && str.charAt(i) != 13) {
+                if (str.charAt(i) != 10 && str.charAt(i) != 13 && str.charAt(i) != 32) {
                     end = i + 1;
                     break;
                 }
@@ -2356,4 +2406,21 @@ public class RMsgProcessor {
         RMsgProcessor.PostToTerminal(myTime() + " " + logtext + "\n");
     }
 
+    
+    //Remove the name poart and returns the email address propper
+    public static String extractEmailAddress(String senderAddress) {
+        String[] emailAdresses = senderAddress.split("[ <>]+");
+        String resultStr = "";
+        for (String fromPart : emailAdresses) {
+            if (fromPart.indexOf("@") > 0
+                    && fromPart.indexOf("\"") == -1) {
+                resultStr = fromPart;
+                break;
+            }
+        }
+        return resultStr;
+    }
+
+
+    
 }
