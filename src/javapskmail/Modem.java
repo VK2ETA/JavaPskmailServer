@@ -18,6 +18,8 @@ package javapskmail;
 import java.io.*;
 import java.io.InputStream;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -144,6 +146,12 @@ public class Modem implements Runnable {
     public static int customNumModes = 0;
     public static int minImageModeIndex;
     public static int maxImageModeIndex;
+    
+    //UTF-8 handling
+    private int utfExpectedChars = 0;
+    private int utfFoundChars = 0;
+    private byte[] utf8PartialBuffer = new byte[20];
+    private int utfLen = 0;
 
 //  public int MAXDCD = 3;
     Modem(String host, int port) {
@@ -1084,7 +1092,7 @@ public class Modem implements Runnable {
                         Main.lastModemCharTime = System.currentTimeMillis();
                     }
                 }
-                myChar = (char) back;
+                    myChar = (char) back;
                 //if (myChar == 2) {
                 //    Main.stxflag = false;
                 //}
@@ -1163,7 +1171,7 @@ public class Modem implements Runnable {
     private void GetBlock() {
         try {
 
-            char inChar = '\0';
+            int inChar = '\0';
             boolean DC2_rcvd = false;
             int first = -1;
             BlockActive = false;
@@ -1181,7 +1189,7 @@ public class Modem implements Runnable {
 
                 if (Main.rxModem == ModemModesEnum.CTSTIA) {
                     inChar = GetByte();
-                    ModemModesEnum myrxmode = checkMode(inChar);
+                    ModemModesEnum myrxmode = checkMode((char)inChar);
                     if (inChar > 64 & inChar < 73) {
                         first = inChar - 65;
                         inChar = GetByte();
@@ -1191,7 +1199,7 @@ public class Modem implements Runnable {
                         B -= 74;
                         C = B + (first * 16);
                         inChar = (char) C;
-                        Main.shown(Character.toString(inChar));
+                        Main.shown(Character.toString((char)inChar));
                         first = 0;
                         //lst = 0;
                     } else if (inChar == 6) {
@@ -1201,16 +1209,76 @@ public class Modem implements Runnable {
                     } else {           // no contestia                      
                         inChar = (char) 178;
                     }
-                } else {    // not contestia ?
-                    inChar = GetByte();
-                }
-                //VK2ETA not here
-                //if (!Main.Connected & !Main.Connecting) {
-                //    Main.DCD = Main.MAXDCD;
+                } //else if (utfExpectedChars == 0 && utfFoundChars == 0) {
+                //VK2ETA utf-8 handling
+                //Only send complete UTF-8 sequences to Java
+                //Behaviour on invalid combinations: discard and re-sync only on valid characters to
+                //  avoid exceptions in upstream methods.
+                // not contestia and we have used all utf characters or are accumulating more
+                inChar = GetByte();
                 //}
-                if (inChar > 127) {
-                    // todo: unicode encoding
-                    inChar = 0;
+                if (utfExpectedChars < 1) { //Normally zero
+                    //We are not in a multi-byte sequence yet
+                    if ((inChar & 0xE0) == 0xC0) {
+                        utfExpectedChars = 1; //One extra characters
+                        utfLen = 2;
+                        utfFoundChars = 0;
+                        utf8PartialBuffer[utfFoundChars++] = (byte)inChar;
+                        inChar = 0; //No further processing
+                    } else if ((inChar & 0xF0) == 0xE0) {
+                        utfExpectedChars = 2; //Two extra characters
+                        utfLen = 3;
+                        utfFoundChars = 0;
+                        utf8PartialBuffer[utfFoundChars++] = (byte)inChar;
+                        inChar = 0; //No further processing
+                    } else if ((inChar & 0xF8) == 0xF0) {
+                        utfExpectedChars = 3; //Three extra characters
+                        utfLen = 4;
+                        utfFoundChars = 0;
+                        utf8PartialBuffer[utfFoundChars++] = (byte)inChar;
+                        inChar = 0; //No further processing
+                    } else if ((inChar & 0xC0) == 0x80) { //Is it a follow-on character?
+                        //Should not be there (missing first character in sequence), discard and reset just in case
+                        utfExpectedChars = utfFoundChars = utfLen = 0;
+                        inChar = 0; //No further processing
+                    //} else if ((inChar & 0x80) == 0x00) { //Could be a single Chareacter, check it is legal
+                        //decodedBuffer[lastCharPos++] = inChar;
+                    //    utf8PartialBuffer[utfFoundChars++] = inChar;
+                        //test no. utfExpectedChars = utfFoundChars = 0; //Reset to zero in case counter is negative (just in case)
+                    //} else { //Not a legal case, ignore and reset counter
+                        //utfExpectedChars = utfFoundChars = 0;
+                        //inChar = 0; //Blank that character
+                    }
+                } else { //we are still expecting follow-up UTF-8 characters
+                    if ((inChar & 0xC0) == 0x80) { //Valid follow-on character, store it
+                        utfExpectedChars--;
+                        utf8PartialBuffer[utfFoundChars++] = (byte)inChar;
+                        //Check if we have the whole sequence
+                        if (utfExpectedChars == 0 && utfFoundChars >= utfLen) {
+                            //Add to data string
+                            utf8PartialBuffer[utfFoundChars] = 0;
+                            String utfDataPoint = StandardCharsets.UTF_8.decode(ByteBuffer.wrap(utf8PartialBuffer, 0, utfLen)).toString();
+                            if (BlockActive) {
+                                //Add to string buffer
+                                BlockString += utfDataPoint;
+                                WriteToMonitor(utfDataPoint);
+                                Main.lastCharacterTime = System.currentTimeMillis();
+                                //No need to update the display, the next non-utf character will trigger an update
+                            }
+                        }
+                        inChar = 0; //No further processing
+                    } else { //Invalid sequence, discard it and start from scratch
+                        utfExpectedChars = utfFoundChars = utfLen = 0;
+                        inChar = 0; //No further processing
+                    }
+                    // NO, done above
+                    //If we have a complete sequence, add to receive buffer 
+                    //if (utfExpectedChars < 1 && utfFoundChars > 0) {
+                    //    for (int i = 0; i < utfFoundChars; i++) {
+                    //        decodedBuffer[lastCharPos++] = utf8PartialBuffer[i];
+                    //    }
+                    //    utfExpectedChars = utfFoundChars = 0; //Reset
+                    //}
                 }
                 switch (inChar) {
                     case 0:
@@ -1325,7 +1393,7 @@ public class Modem implements Runnable {
                     case 13:
                         WriteToMonitor("\n");
                         if (BlockActive) {
-                            BlockString += inChar;
+                            BlockString += "\n";
                             Main.lastCharacterTime = System.currentTimeMillis();
                             //RM check if we have the start of a RadioMessage block
                             if (!Main.receivingRadioMsg) {
@@ -1519,10 +1587,10 @@ public class Modem implements Runnable {
                                 possibleCwFrame = true;
                                 cwStringBuilder.append(inChar);
                             } 
-                            WriteToMonitor(inChar);
+                            WriteToMonitor((char)inChar);
                         }
                         if (BlockActive) {
-                            BlockString += inChar;
+                            BlockString += (char)inChar;
                             Main.lastCharacterTime = System.currentTimeMillis();
                             //            System.out.println("BS:" + BlockString);
                             //Determine if this is a status frame coming

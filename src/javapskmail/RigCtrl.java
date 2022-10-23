@@ -63,12 +63,6 @@ public class RigCtrl {
 
     public static void initfreqs() {
         OFF = Integer.parseInt(Offset);
-//       freqs = Main.configuration.getQRGs();
-//       freqs[0] = Main.configuration.getPreference(Main.configuration.qrg0);
-//       freqs[1] = Main.configuration.getPreference(Main.configuration.qrg1);
-//       freqs[2] = Main.configuration.getPreference(Main.configuration.qrg2);
-//       freqs[3] = Main.configuration.getPreference(Main.configuration.qrg3);
-//       freqs[4] = Main.configuration.getPreference(Main.configuration.qrg4);
         freqs[0] = Main.configuration.getPreference("QRG0");
         freqs[1] = Main.configuration.getPreference("QRG1");
         freqs[2] = Main.configuration.getPreference("QRG2");
