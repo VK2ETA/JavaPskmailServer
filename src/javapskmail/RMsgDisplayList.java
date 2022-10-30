@@ -353,13 +353,11 @@ public class RMsgDisplayList {
                 recDisplayItem = displayList.get(ii);
                 //Only received messages
                 if (!recDisplayItem.myOwn) {
-                    //No need to check past the three previous messages
-                    //Not true anymore, need to check until the end or until a duplicate is found
-                    //if (++trialCount > 3) break;
+                    //Need to check until the end or until a duplicate is found
                     oldMessage = recDisplayItem.mMessage;
                     //Looks like the same message was received direct and via a relay?
                     if (oldMessage.from.equals(newMessage.from)
-                            //&& recMessage.via.equals(mMessage.relay)
+                            && oldMessage.to.equals(newMessage.to) //added for when resending with full alias
                             && oldMessage.sms.equals(newMessage.sms)
                             && oldMessage.msgHasPosition == newMessage.msgHasPosition) {
                         if (!oldMessage.msgHasPosition ||

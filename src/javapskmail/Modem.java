@@ -17,6 +17,7 @@ package javapskmail;
 
 import java.io.*;
 import java.io.InputStream;
+import static java.lang.Math.abs;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -1206,7 +1207,7 @@ public class Modem implements Runnable {
                         if (Main.TxActive) {
                             Main.TxActive = false;
                         }
-                    } else {           // no contestia                      
+                    } else {// no contestia                      
                         inChar = (char) 178;
                     }
                 } //else if (utfExpectedChars == 0 && utfFoundChars == 0) {
@@ -1323,7 +1324,8 @@ public class Modem implements Runnable {
                         Main.oldtime = System.currentTimeMillis();
                         Main.haveSOH = false;                        //Just received RSID, restart counting Radio Msg header timeout from now
                         Main.possibleRadioMsg = 0L;
-                        Main.receivingRadioMsg = false;
+                        //VK2ETA testing symnc between rx and tx
+                        //Main.receivingRadioMsg = false;
                         receivingStatusBlock = false;
                         Main.blockval = blocktime;
                         WriteToMonitor("<EOT>\n");
@@ -1377,7 +1379,9 @@ public class Modem implements Runnable {
                         if (!Main.ttyConnected.equals("")) {
                             Main.rxDelayCount = Main.rxDelay;
                         } else {
-                            Main.rxDelayCount = 0.0f; //Make sure it is zero in all other cases
+                            //Consume RadioMsg inter-TX delay if any
+                            Main.rxDelayCount = Main.RadioMsgAcksDelay;
+                            Main.RadioMsgAcksDelay = 0;
                         }
                         //Reset TxRSID as it is OFF by default and needs to be enabled when required
                         Main.m.requestTxRsid("OFF");
@@ -1418,14 +1422,14 @@ public class Modem implements Runnable {
                         break;
                     default:
                         if (DC2_rcvd) {
-                            notifier += inChar;
+                            notifier += (char)inChar;
                             //Not found char(62) yet, check length
                             if (notifier.length() > 35) {
                                 //Too long, false positive
                                 DC2_rcvd = false;
                                 notifier = "";
                             }
-                            if (inChar == 62) { // ">" character
+                            if ((char)inChar == 62) { // ">" character
                                 DC2_rcvd = false;
 //                               System.out.println(notifier);
                                 //    <s2n: 58, 100.0, 0.0>
@@ -1458,7 +1462,7 @@ public class Modem implements Runnable {
                                         // the Client's delay to send an RSID so that we adapt to its timing.
                                         //This may be of value when using repeaters with long hang times. 
                                         // The client can then safely increase the Tx delay. Useful for slow CPUs too.
-                                        if (Main.oldtime > 0) {
+                                        if (Main.Connecting && Main.oldtime > 0) {
                                             validPskmailRxDelay = (System.currentTimeMillis() - Main.oldtime) / 1000;
                                             if (validPskmailRxDelay < 10.0f && validPskmailRxDelay >= 0.0f) { //Max 10 seconds delay
                                                 //With average
@@ -1479,7 +1483,7 @@ public class Modem implements Runnable {
                                 notifier = "";
                             }
                         }
-                        if (inChar > 31 & !DC2_rcvd) {
+                        if ((char)inChar > 31 & !DC2_rcvd) {
                             if (Main.wantbulletins) {
                                 try {
 //                                    Main.Bul.get("" + inChar);
@@ -1491,7 +1495,7 @@ public class Modem implements Runnable {
                             //Build sequence for CW APRS messages
                             if (possibleCwFrame) {
                                 //Continue building the sequence and reject if does not conform to expected format
-                                cwStringBuilder.append(inChar);
+                                cwStringBuilder.append((char)inChar);
                                 if (cwStringBuilder.length() > 68) { //Around 50 characters max for status or message
                                     //Too long, erase and reset flag
                                     cwStringBuilder.setLength(0);
@@ -1583,9 +1587,9 @@ public class Modem implements Runnable {
                                         cwStringBuilder.setLength(0);
                                     }                                    
                                 }
-                            } else if (inChar == 'V') {
+                            } else if ((char)inChar == 'V') {
                                 possibleCwFrame = true;
-                                cwStringBuilder.append(inChar);
+                                cwStringBuilder.append((char)inChar);
                             } 
                             WriteToMonitor((char)inChar);
                         }
@@ -1871,5 +1875,96 @@ public class Modem implements Runnable {
         GetBlock();
     }
   
+    
+    //Acknowledgement code for 1 to 8 stations. 
+    //Only used here for calculating the waiting time before ack
+    private static final int DIT = 100; //in milli-seconds
+    private static final int DAH = 400;
+    private static final int SPACE = -100; //Negative means silence of that duration
+    private static final int[][] ackArray = {
+            {SPACE, SPACE, SPACE}, //Position zero is not used
+            {DIT, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE},
+            {DIT, SPACE, DIT, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE},
+            {DIT, SPACE, DIT, SPACE, DIT, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE},
+            {DAH, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE},
+            {DAH, SPACE, DIT, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE},
+            {DAH, SPACE, DIT, SPACE, DIT, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE},
+            {DAH, SPACE, DAH, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE},
+            {DAH, SPACE, DAH, SPACE, DIT, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE, SPACE}
+    };
+
+    //For non-Morse code readers, make it simpler with a maximum of 3 symbols per acknowledgement position
+    //Also minimizes the total duration of all acknowledgments (already is 10.3 seconds for 8 stations)
+    private static final String[]ackArrayMorse = {" ", "E", "I", "S", "T", "N", "D", "M", "G" }; 
+    
+    
+    //Generates a sequence of Morse-like DITs and DAHs.
+    public void generateDitDahSequence(int ackPosition, boolean positiveAck) {
+        String toSend;
+
+        if (!positiveAck) {
+            toSend = "5";
+        } else if (ackPosition < ackArrayMorse.length) {
+            toSend = ackArrayMorse[ackPosition];
+        } else {
+            return;
+        }
+        //Now send the ack
+        Main.m.Sendln(toSend, "CW", "");
+    }
+    
+    //Calculates the total accumulated time to wait tio get to my ack position
+    public long delayUntilMyAckPosition(int ackPosition, boolean inclusiveOfMyAck) {
+        long beepsDelay = 0L;
+        int symbol;
+
+        if (inclusiveOfMyAck) {
+            for (int i = 0; i <= ackPosition; i++) {
+                for (int seq = 0; seq < ackArray[i].length; seq++) {
+                    symbol = ackArray[i][seq];
+                    beepsDelay += abs(symbol);
+                }
+            }
+        } else {
+            for (int i = 0; i < ackPosition; i++) {
+                for (int seq = 0; seq < ackArray[i].length; seq++) {
+                    symbol = ackArray[i][seq];
+                    beepsDelay += abs(symbol);
+                }
+            }
+        }
+   
+        return beepsDelay;
+    }
+    
+    //Set the delay before the next TX the duration of Preference MAXACKS to allow for all the acks to take place
+    public long delayUntilMaxAcksHeard() {
+
+        //Integer.parseInt(config.getPreferenceS("MAXACKS", "0"));
+        String maxAckStr = Main.configuration.getPreference("MAXACKS", "0");
+        int maxAcks = 0;
+        try {
+            maxAcks = Integer.parseInt(maxAckStr);
+        } catch (NumberFormatException e) {
+            //Nothing
+        }
+        //Check we are within the bounds of the array
+        if (maxAcks >= ackArray.length) {
+            maxAcks = ackArray.length - 1;
+        }
+        //Now calculate total accumulated time to maxAcks (inclusive of)
+        long delayToTx = 0L;
+        int symbol;
+        for (int i = 0; i <= maxAcks; i++) {
+            for (int seq = 0; seq < ackArray[i].length; seq++) {
+                symbol = ackArray[i][seq];
+                delayToTx += abs(symbol);
+            }
+        }
+        return delayToTx;
+    }
+
+    
+    
 }  // end Modem
 

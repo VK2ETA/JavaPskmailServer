@@ -333,6 +333,25 @@ public class RigCtrl {
         return -1;
     }
 
+    /* Parked code
+    public static int SetModeByName(String newMode) {
+
+        if (function_ok) {
+
+            Object[] params = new Object[]{new String(newMode)};
+
+            try {
+                Object result = client.execute("modem.set_by_name", params);
+                String myobject = result.toString();
+                return 0;
+            } catch (XmlRpcException ex) {
+                //Main.log.writelog("Problem with xmlrpc modem.set_by_name: " + ex, true);
+                function_ok = false;
+            }
+        } else if (!function_ok) Rigctl(); //Try to re-connect
+        return -1;
+    }
+    */
 
 
 }

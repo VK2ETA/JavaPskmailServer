@@ -268,20 +268,6 @@ public class MainPskmailUi extends javax.swing.JFrame {
         Main.icon = myIcon;
         lblAPRSIcon.setText("");
 
-        if (Main.configuration.getPreference("IGATE", "no").equals("yes")) {
-            if (Igate.aprsavailable) {
-                IgateSwitch.setSelected(true);
-                IgateSwitch.setText("ON");
-                Main.wantIgate = true;
-                //iGate cIgateCallFieldallsign must be uppercase and free of prefixes and Non-Aprs IDs
-                IgateCallField.setText(Main.cleanCallForAprs(Main.configuration.getPreference("CALLSIGNASSERVER")));
-            } else {
-                IgateSwitch.setSelected(false);
-                IgateSwitch.setText("OFF");
-                Main.wantIgate = false;
-            }
-        }
-
         // Fetch server to link to
         this.cboServer.removeAllItems();
         // Add servers from main
@@ -303,9 +289,9 @@ public class MainPskmailUi extends javax.swing.JFrame {
             Main.wantScanner = false;
         }
 
-        String bl = Main.configuration.getBlocklength();
-        Character c = bl.charAt(0);
-        int charval = c.charValue() - 48;
+        //String bl = Main.configuration.getBlocklength();
+        //Character c = bl.charAt(0);
+        //int charval = c.charValue() - 48;
 
         
         //IgateCallField.setText(Main.configuration.getPreference("APRSCALL"));
@@ -316,10 +302,30 @@ public class MainPskmailUi extends javax.swing.JFrame {
         } else {
             APRSServerSelect.setSelectedIndex(Integer.parseInt(nr));
         }
-        if (Main.wantIgate) {
-            if (IgateCallField.getText().length() > 0) {
+                /*
+        //Initial connection to APRS
+        if (Main.configuration.getPreference("IGATE", "no").equals("yes")) {
+            if (Igate.aprsavailable) {
                 IgateSwitch.setSelected(true);
                 IgateSwitch.setText("ON");
+                //Main.wantIgate = true;
+                //iGate cIgateCallFieldallsign must be uppercase and free of prefixes and Non-Aprs IDs
+                IgateCallField.setText(Main.cleanCallForAprs(Main.configuration.getPreference("CALLSIGNASSERVER")));
+            } else {
+                IgateSwitch.setSelected(false);
+                IgateSwitch.setText("OFF");
+                //Main.wantIgate = false;
+            }
+        }
+        */
+        Main.wantIgate = Main.configuration.getPreference("IGATE", "no").equals("yes");
+        if (Main.wantIgate) {
+            //Get the callsign and clean it for APRS
+            String IgateCall = Main.cleanCallForAprs(Main.configuration.getPreference("CALLSIGNASSERVER"));
+            if (IgateCall.length() > 0) {
+                IgateSwitch.setSelected(true);
+                IgateSwitch.setText("ON");
+                IgateCallField.setText(IgateCall);
                 try {
                     Igate.start();
                 } catch (IOException ex) {
@@ -327,9 +333,11 @@ public class MainPskmailUi extends javax.swing.JFrame {
                     Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else {
+                //My call sign is not valid for APRS, do NOT connect ever
                 IgateSwitch.setSelected(false);
                 IgateSwitch.setText("OFF");
                 Main.wantIgate = false;
+                Main.q.Message("Call sign not valid, no APRS", 10);
             }
         }
         
@@ -815,15 +823,16 @@ public class MainPskmailUi extends javax.swing.JFrame {
                         CPSValue.setText(Integer.toString(mincps));
                     }
 
-                    if (Main.wantIgate) {
-                        if (Igate.connected) {
-
-                            try {
-                                if (Igate.in.ready()) {
-                                    Igate.read();
+                    if (!Main.bulletinMode & !Main.connected & !Main.iacMode) {
+                        if (Main.wantIgate) {
+                            if (Igate.connected) {
+                                try {
+                                    if (Igate.in.ready()) {
+                                        Igate.read();
+                                    }
+                                } catch (IOException ex) {
+                                    Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
                                 }
-                            } catch (IOException ex) {
-                                Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }
                     }
@@ -839,6 +848,18 @@ public class MainPskmailUi extends javax.swing.JFrame {
                     }
                     //Loop run every MINUTE
                     if (Minute != oldminute) {
+                        //Try to reconnect to APRS if we want to and haven't be able to,
+                        //OR if the existing APRS connection has been idle for the last 10 minutes
+                        if (Main.wantIgate 
+                                && (!Igate.connected
+                                || (Igate.connected && System.currentTimeMillis() > Igate.lastAprsServerPacketTime + 600000L))) { //debug 600000L
+                            try {
+                                Igate.start();
+                            } catch (IOException ex) {
+                                //            System.out.println("FAILED");
+                                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
                         //Check if we have RadioMsg activity
                         boolean radioMsgActive = false;
                         if (RMsgTxList.getAvailableLength() > 0 | Main.receivingRadioMsg
@@ -949,7 +970,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                                 }
                             }
 
-                            // set scanner frequency ?
+                            // Ready to restart sanning (after a scan off command)
                             if ((mnuMailScanning.isSelected() & !Main.connected) | 
                                     (!Main.connected & !Main.Connecting & !Main.monitorMode & !sendbeacon & !Main.bulletinMode)) {
                                 if (Main.configuration.getPreference("SCANNER").equals("yes")) {
@@ -1138,20 +1159,6 @@ public class MainPskmailUi extends javax.swing.JFrame {
                                     }
                                 }
                                 serverlist.setText(ListContent);
-
-                                if (Main.wantIgate) {
-
-                                    if (Igate.connected) {
-
-                                        try {
-                                            if (Igate.in.ready()) {
-                                                Igate.read();
-                                            }
-                                        } catch (IOException ex) {
-                                            Logger.getLogger(MainPskmailUi.class.getName()).log(Level.SEVERE, null, ex);
-                                        }
-                                    }
-                                }
                             }//if not bulletin, not connected, not IAC mode
                         }//modem auto restart end
                     }//minute loop end
@@ -5632,31 +5639,37 @@ private void IgateSwitchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
             try {
                 Igate.in.close();
                 Igate.out.close();
+                Igate.connected = false;
             } catch (IOException e) {
-                ;
+                //
             }
         }
         Main.wantIgate = false;
     } else {
-
-        IgateSwitch.setText("ON");
-        Main.configuration.setPreference("IGATE", "yes");
-        Main.savePreferences();
-
-        try {
-            Igate.start();
-        } catch (IOException ex) {
+        //Get the callsign and clean it for APRS
+        String IgateCall = Main.cleanCallForAprs(Main.configuration.getPreference("CALLSIGNASSERVER"));
+        if (IgateCall.length() > 0) {
+            IgateSwitch.setText("ON");
+            Main.configuration.setPreference("IGATE", "yes");
+            Main.savePreferences();
+            try {
+                Igate.start();
+            } catch (IOException ex) {
 //                System.out.println("FAILED");
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (Igate.connected) {
+                IgateSwitch.setSelected(true);
+                IgateIndicator.setText("Connected");
+                Main.wantIgate = true;
+            }
+        } else {
+            //My call sign is not valid for APRS, do NOT connect ever
+            IgateSwitch.setSelected(false);
+            IgateSwitch.setText("OFF");
+            Main.wantIgate = false;
+            Main.q.Message("Call sign can't be used on APRS. No iGate.", 10);
         }
-        if (Igate.connected) {
-            IgateSwitch.setSelected(true);
-            //Moved up to show requested status immediately 
-            //IgateSwitch.setText("ON");
-            IgateIndicator.setText("Connected");
-            Main.wantIgate = true;
-        }
-
     }
 
 }//GEN-LAST:event_IgateSwitchActionPerformed

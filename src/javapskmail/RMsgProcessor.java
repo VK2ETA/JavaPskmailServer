@@ -640,7 +640,7 @@ public class RMsgProcessor {
                             });
                             // Check mail once in "freq" MILLIseconds
                             //int freq = config.getPreferenceI("CHECKEMAILSEVERY", 600) * 1000; //converted to milliseconds
-                            int freq = 30000; //every 60 seconds for now 
+                            int freq = 30000; //every 30 seconds for now 
                             //Minimum every 10 seconds
                             freq = freq < 30000 ? 30000 : freq;
                             boolean supportsIdle = false;
@@ -650,7 +650,7 @@ public class RMsgProcessor {
                                     //System.out.println("Entering first idle()");
                                     Main.q.Message("Monitoring New Email Messages", 5);
                                     f.idle();
-                                    //System.out.println("First idle() completed, must have got new mail");
+                                    System.out.println("First idle() completed, must have got new mail");
                                     supportsIdle = true;
                                 }
                             } catch (FolderClosedException fex) {
@@ -662,11 +662,12 @@ public class RMsgProcessor {
                                 if (supportsIdle && folder instanceof IMAPFolder) {
                                     IMAPFolder f = (IMAPFolder) folder;
                                     f.idle();
-                                    //System.out.println("idle() completed, must have got new mail");
+                                    System.out.println("idle() completed, must have got new mail");
                                 } else {
                                     Thread.sleep(freq); // sleep for freq milliseconds
                                     // This is to force the IMAP server to send us
                                     // EXISTS notifications.
+                                    System.out.println("Checking new mail periodically - supportsIdle is false");
                                     folder.getMessageCount();
                                 }
                             }
@@ -679,11 +680,11 @@ public class RMsgProcessor {
                                 alreadyWarned = true;
                             }
                             try {
-                                Thread.sleep(10000); //Retry in 10 seconds
+                                Thread.sleep(30000); //Retry in 30 seconds
                             } catch (InterruptedException e2) {
                                 //Nothing
                             }
-                            //System.out.println("Restarting NewMailMonitor loop");
+                            System.out.println("Restarting NewMailMonitor loop");
                         } finally {
                             try {
                                 if (folder != null && folder.isOpen()) {
@@ -824,69 +825,6 @@ public class RMsgProcessor {
         }
     }
 
-    //Tries to find a match for a given combination of phone number and time
-    //Alows wildcards "*" for any incoming numbers and "0" for time-persistent filters
-    // Returns "" if no match
-    //Examples:
-    // *,*,0 (the default, matches any incoming cellular number at any time and sends SMSs to ALL Radio recipients
-    // *,vk2eta,0  send any incoming SMS to "vk2eta" only, any time
-    // 0412345678,vk2eta,0 sends SMSes from 0412345678 to vk2eta, any time
-    // Automatically generated entries look like:
-    // 0412345678,vk2eta,1524632518000
-    // This entry links the sender of a radio message with the nominated cellular number it was
-    //   relayed to, counting time from the epoch as shown after the last comma.
-    // Receipts of incoming cellular SMSs which result in a match will update the time of the last exchange to keep the link alive (unless
-    //   the link is timeless, i.e. "0" time).
-    private String[] passSMSFilter(String senderNo) {
-        String myResult[] = new String[20]; //Max 20 links = max 20 messages to send on receipt of this SMS
-        String[] filterList = {"*,*,0"}; // tbf config.getPreferenceS("SMSLISTENINGFILTER", "0,*,*").split("\\|");
-        int toCount = 0;
-        int maxHoursSinceLastComm = 24; // tbf config.getPreferenceI("MAXHOURSSINCELASTCOMM", 24);
-        Long nowTime = System.currentTimeMillis();
-        for (int i = 0; i < filterList.length; i++) {
-            //Match on time, then on incoming phone number
-            String[] thisFilter = filterList[i].split(",");
-            //Only properly formed filters
-            if (thisFilter.length == 3) {
-                long lastCommTime;
-                try {
-                    lastCommTime = Long.parseLong(thisFilter[2].trim());
-                } catch (Exception e) {
-                    lastCommTime = 1; //Any small number non zero
-                }
-                String phoneFilter = thisFilter[0].trim();
-                if ((lastCommTime == 0 || lastCommTime + maxHoursSinceLastComm * 3600000L > nowTime)
-                        && (phoneFilter.equals("*") || senderNo.endsWith(RMsgMisc.lTrimZeros(phoneFilter)))) {
-                    //Do we need to update that last communication time
-                    if (lastCommTime > 1) {
-                        //We had a real time stamp in here, not a zero or an '*' or a mis-typed number
-                        filterList[i] = phoneFilter + "," + thisFilter[1].trim() + "," + nowTime.toString();
-                    }
-                    //Add the destination callsign for this number and time combination
-                    myResult[toCount++] = thisFilter[1].trim();
-                    //Make sure we don't max out
-                    if (toCount >= myResult.length) {
-                        break;
-                    }
-                } else if (lastCommTime > 1 && lastCommTime + maxHoursSinceLastComm * 3600000L <= nowTime) {
-                    //Remove obsolete filters with valid time stamps
-                    filterList[i] = "";
-                }
-            }
-        }
-        //Rebuild the new filter list with the updated link times, minus the time obsolete filters
-        String newSmsFilter = "";
-        for (int j = 0; j < filterList.length; j++) {
-            if (!filterList[j].equals("")) { //Skip blanked ones
-                newSmsFilter = newSmsFilter + filterList[j] + "|";
-            }
-        }
-        //tbf SharedPreferences.Editor editor = RadioMSG.mysp.edit();
-        //editor.putString("SMSLISTENINGFILTER", newSmsFilter.replace("||", "|"));
-        //editor.commit();
-        //Return resulting matches in an array
-        return myResult;
-    }
 
     //Tries to find a match for a given combination of email address and time
     //Alows wildcards "*" for any incoming email address and "0" for timeless filters
@@ -959,6 +897,23 @@ public class RMsgProcessor {
         //Return resulting matches in an array
         return myResult;
     }
+
+    
+    //Extract alias if address contains a full alias like alias=origins, with origins being a phone number
+    private static String getAliasFromFullAlias(String fullAlias) {
+        String alias = fullAlias;
+        Pattern pscf = Pattern.compile("^\\s*(.+)\\s*=(.+)\\s*$");
+
+        Matcher mscf = pscf.matcher(fullAlias);
+        if (mscf.lookingAt()) {
+            String group2 = mscf.group(2);
+            if (group2 != null && mscf.group(1) != null && (isCellular(group2) || isEmail(group2))) {
+                alias = mscf.group(1) + "=";
+            }
+        }
+        return alias;
+    }
+
 
     //Builds the list of messages to send to the qtc request. For but to email requests as the messages are already in the received list of the app.
     private static ArrayList<RMsgObject> buildNonEmailResendList(RMsgObject mMessage, int numberOf, Long forLast, Boolean forAll, Boolean positionsOnly) {
@@ -1709,7 +1664,7 @@ public class RMsgProcessor {
     //Is the string representative of an email
     public static boolean isEmail(String destination) {
 
-        return destination.matches("^[\\w.-]+@\\w+\\.[\\w.-]+");
+        return destination.matches("^([\\w-]+=)?[\\w.-]+@\\w+\\.[\\w.-]+");
     }
 
     //Is the string representative of a cellular number
@@ -1946,7 +1901,7 @@ public class RMsgProcessor {
                             if (matchMyCallWith(mMessage.via, false) || (mMessage.via.length() == 0
                                     && matchMyCallWith(mMessage.to, false))) {
                                 //A scan on/off command? e.g. "*cmd s off 30 m" or "*cmd s on"
-                                //Scan off can also have a duration after which it restarts automatically. E.g. "s off 3h"
+                                //Scan off Must also have a duration after which it restarts automatically. E.g. "s off 3h"
                                 boolean cmdOk = false;
                                 String replyString = "";
                                 Pattern psc = Pattern.compile("^\\*cmd\\s((?:s\\son)|(?:s\\soff))(?:\\s(\\d{1,3})\\s*([mh]))?$");
@@ -2052,8 +2007,15 @@ public class RMsgProcessor {
                                     RMsgUtil.sendBeeps(true);
                                     //Wait for the ack to pass first
                                     Thread.sleep(500);
-                                    //Reply to ALL and may need to reply via relay station
-                                    RMsgUtil.replyWithPosition("*", mMessage.relay, mMessage.rxMode);
+                                    //Reply to ALL unless the requester was an email or an SMS ,
+                                    //  and may need to reply via relay station
+                                    //Reply to ALL unless the requester was an email or an SMS ,
+                                    //  and may need to reply via relay station
+                                    String replyTo = "*";
+                                    if (isCellular(mMessage.from) || isEmail(mMessage.from)) {
+                                        replyTo = getAliasFromFullAlias(mMessage.from);
+                                    }
+                                    RMsgUtil.replyWithPosition(replyTo, mMessage.relay, mMessage.rxMode);
                                 }
                             }
                         //Time Sync request
@@ -2326,7 +2288,6 @@ public class RMsgProcessor {
                             }
                             //When re-sent pos request may not be in the beginning of the text
                             // } else if (mMessage.sms.startsWith("*pos?")) { //Position request?
-
                         } else {
                             //Not an action message, send ack as appropriate if directed to me ONLY
                             if (matchMyCallWith(mMessage.to, true)) {
@@ -2337,6 +2298,8 @@ public class RMsgProcessor {
                 } catch (Exception e) {
                     //loggingclass.writelog("Exception Error in 'processTextMessage' " + e.getMessage(), null, true);
                 }
+                //VK2ETA test sync between message rx and tx
+                Main.receivingRadioMsg = false;
             }
         };
         myThread.start();

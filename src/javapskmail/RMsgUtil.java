@@ -527,58 +527,58 @@ public class RMsgUtil {
         return fileNamesArray;
     }
 
+   
     //Send a single beep or double beep by sending a Tune command to the modem for short periods of time
     public static void sendBeeps(final boolean positiveAck) {
 
+        //Mark as Sending Beeps
+        Main.sendingAcks = true;
         Thread myThread = new Thread() {
             @Override
             public void run() {
                 try {
                     //int ackPosition = config.getPreferenceI("ACKPOSITION", 0);
-                    int ackPosition = 1; //for now
+                    String ackPosStr = Main.configuration.getPreference("ACKPOSITION", "0");
+                    int ackPosition = 0;
+                    try {
+                        ackPosition = Integer.parseInt(ackPosStr);
+                    } catch (NumberFormatException e) {
+                        //Nothing
+                    }
+                    ackPosition = ackPosition > 8 ? 8 : ackPosition;
+                    ackPosition = ackPosition < 0 ? 0 : ackPosition;
                     //boolean onlyForAlerts = config.getPreferenceB("ACKONLYALERTS", false);
                     if (ackPosition > 0) {
+                        //Sure that we will TX, set flag
+                        Main.TxActive = true;
                         //Wait for any TXing to complete
                         int waitCount = 0;
-                        while (Main.TxActive && waitCount < 100) { //Max 5 seconds
+                        /*while (Main.TxActive && waitCount < 100) { //Max 5 seconds
                             Thread.sleep(50);
                             waitCount++;
-                        }
-                        //Only send if we waiting less than 5 seconds otherwise it is pointless
+                        }*/
+                        //Only send if we are waiting less than 5 seconds otherwise it is pointless
                         if (waitCount < 100) {
-                            //Mark as TXing
-                            Main.TxActive = true;
                             //Time for reception to finish trailing tones
-                            //Wait 3 seconds for the Rx to be fully completed
-                            int remainingSleep = 3000 - 100 * waitCount;
+                            //Wait 0.4 seconds for the Rx to be fully completed
+                            long remainingSleep = Main.m.delayUntilMyAckPosition(ackPosition, false) - (50 * waitCount);
                             remainingSleep = remainingSleep < 0 ? 0 : remainingSleep;
+                            remainingSleep = remainingSleep > 10000 ? 10000 : remainingSleep;
                             Thread.sleep(remainingSleep);
-                            //int oldAudioFreq = 0;
-                            //If CRC is wrong send double tone
-                            if (positiveAck) {
-                                //
-                                RigCtrl.Tune();
-                                Thread.sleep(500);
-                                RigCtrl.Abort();
-                            } else {
-                                //oldAudioFreq = Rigctl.SetAudiofreq(2200); //Does not work if either TX lock or reset to carrier is on
-                                for (int x = 0; x < 5; x++) {
-                                    RigCtrl.Tune();
-                                    Thread.sleep(150);
-                                    RigCtrl.Abort();
-                                    //Restore modem to last audio frequency
-                                    Thread.sleep(300);
-                                }
-                                //if (oldAudioFreq > 0 && !mMessage.crcValid && !mMessage.crcValidWithPW) {
-                                //    Rigctl.SetAudiofreq(oldAudioFreq);
-                                //}
+                            Main.m.generateDitDahSequence(ackPosition, positiveAck);
+                            //Wait for the highest Acknowledgement position before allowing TX again
+                            long endOfBeepsDuration = Main.m.delayUntilMyAckPosition(ackPosition, true);
+                            long maxAckDelay = Main.m.delayUntilMaxAcksHeard();
+                            long extraDelay = maxAckDelay - endOfBeepsDuration;
+                            if (extraDelay > 0L) {
+                                Thread.sleep(extraDelay);
                             }
-                            Main.TxActive = false;
                         }
                     }
                 } catch (Exception e) {
                     //loggingclass.writelog("Exception Error in 'sendBeeps' " + e.getMessage(), null, true);
                 }
+                Main.sendingAcks = false;
             }
         };
         myThread.start();

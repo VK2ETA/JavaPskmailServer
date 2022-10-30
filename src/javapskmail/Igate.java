@@ -1,5 +1,5 @@
 /*
- * igate.java
+ * Igate.java
  * 
  * Copyright (C) 2008 Pär Crusefalk and Rein Couperus
  *
@@ -37,24 +37,27 @@ public class Igate {
     static String aprscheck = "";
     static String aprspass = "";
     static String aprsversion = "";
-    static boolean connected = false;
+    public static boolean connected = false;
     static String aprs_output = "";
     static String[] status = {"", "Testing"};
     static int maxstatus = 2;
     static boolean aprsavailable = true;
     //VK2ETA add Linked station service
     static ArrayList<String> linkedStationsList = new ArrayList<String>();
+    public static long lastAprsServerPacketTime = 0L;
     
     public static void start() throws IOException {
 
         aprsversion = Main.application;
 
-        //Main.wantigate becomes true after connection, so never connects
-        //while (!connected & Main.wantigate) {
         while (!connected) {
 
-            //aprscall = Main.configuration.getPreference("CALL");
             aprsCall = Main.cleanCallForAprs(Main.configuration.getPreference("CALLSIGNASSERVER"));
+            if (aprsCall.length() == 0) {
+                //Not a valid callsign
+                return;
+            }
+            
             aprspass = getHash(aprsCall);
 
             connected = true;
@@ -89,6 +92,7 @@ public class Igate {
             try {
                 while (connected & (line = in.readLine()) != null) {
                     Main.q.Message("APRS connected to " + Main.aprsServer, 10);
+                    System.out.println("APRS Server says:" + line);
                     break;
                 }
             } catch (NullPointerException np) {
@@ -99,7 +103,7 @@ public class Igate {
             if (connected) {
                 break;
             } else if (!connected & aprsindex > 0) {
-                System.out.println("No APRS connection, giving up...");
+                System.out.println("No APRS connection, to be retried...");
 //                    Main.mainui.IgateSwitch.setSelected(false);
 //                    Main.mainui.IgateSwitch.setText("OFF");
                 aprsavailable = false;
@@ -120,8 +124,9 @@ public class Igate {
     public static void read() throws IOException {
         String line = "";
 
-        if (in.ready()) {
+        if (in.ready()) {     
             while ((line = in.readLine()) != null) {
+                lastAprsServerPacketTime = System.currentTimeMillis();
                 //VK2ETA Add listening for and forwarding of APRS messages
                 if (line.length() > 0 & !line.startsWith("#")) {
                     //System.out.println(line);
@@ -258,6 +263,7 @@ public class Igate {
         return Integer.toString(Out);
     }
     
+    //Forward APRS message over the air
     private static void doAprsRfForward(String line) {
         //elsif ($line =~ /^(\w*\-*\d*)>(\w*),*(.*?):(.)(\w*\-*\d*)\s*:(.*)(\{*.*)/) {	# message
         Pattern pl = Pattern.compile("^(\\w*\\-*\\d*)>(\\w*),*(.*?):(.)(\\w*\\-*\\d*)\\s*:(.*)(\\{*.*)");

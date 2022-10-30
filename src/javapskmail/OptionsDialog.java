@@ -423,10 +423,10 @@ public class OptionsDialog extends javax.swing.JDialog {
                 QRG4.setText(Main.configuration.getPreference("QRG4"));
 
                 if (Main.configuration.getPreference("SCANNER").equals("yes")) {
-                    Main.wantScanner = true;
+                    //Main.wantScanner = true;
                     ScannerCheckbox.setSelected(true);
                 } else {
-                    Main.wantScanner = false;
+                    //Main.wantScanner = false;
                     ScannerCheckbox.setSelected(false);
                 }
             }
@@ -659,6 +659,9 @@ public class OptionsDialog extends javax.swing.JDialog {
             } else {
                 this.checkboxRelaySMSsImmediately.setSelected(false);
             }
+            spinnerAckPosition.setValue(GetSpinValue("ACKPOSITION", 0));
+            spinnerMaxAckPosition.setValue(GetSpinValue("MAXACKS", 0));
+            
             spinnerDaysToKeepLink.setValue(GetSpinValue("DAYSTOKEEPLINK", 90));
             
          } catch (Exception ex) {
@@ -786,6 +789,11 @@ public class OptionsDialog extends javax.swing.JDialog {
         checkboxRelaySMSs = new javax.swing.JCheckBox();
         checkboxRelaySMSsImmediately = new javax.swing.JCheckBox();
         jButtonConfigSmsGateway = new javax.swing.JButton();
+        jPanel13 = new javax.swing.JPanel();
+        spinnerAckPosition = new javax.swing.JSpinner();
+        jLabel24 = new javax.swing.JLabel();
+        jLabel25 = new javax.swing.JLabel();
+        spinnerMaxAckPosition = new javax.swing.JSpinner();
         pnlConfiguration = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
         txtLogFile = new javax.swing.JTextField();
@@ -1437,7 +1445,7 @@ public class OptionsDialog extends javax.swing.JDialog {
             }
         });
 
-        jLabel23.setText("Days to keep links for");
+        jLabel23.setText(optionsdialog.getString("DAYSTOKEEPLINKSFORLABEL")); // NOI18N
 
         spinnerDaysToKeepLink.setModel(new javax.swing.SpinnerNumberModel(90, 0, null, 1));
         spinnerDaysToKeepLink.setToolTipText(optionsdialog.getString("DAYSTOKEEPLINKFOR")); // NOI18N
@@ -1545,7 +1553,7 @@ public class OptionsDialog extends javax.swing.JDialog {
                     .addGroup(jPanel9Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(jLabel30)))
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel9Layout.setVerticalGroup(
             jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1601,7 +1609,52 @@ public class OptionsDialog extends javax.swing.JDialog {
                     .addComponent(checkboxRelaySMSsImmediately))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButtonConfigSmsGateway)
-                .addContainerGap(41, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jPanel13.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        spinnerAckPosition.setModel(new javax.swing.SpinnerNumberModel(0, 0, 8, 1));
+        spinnerAckPosition.setToolTipText(optionsdialog.getString("ACKPOSITIONTIP")); // NOI18N
+        spinnerAckPosition.setMinimumSize(new java.awt.Dimension(32, 25));
+        spinnerAckPosition.setName(""); // NOI18N
+
+        jLabel24.setText(optionsdialog.getString("ACKPOSITION")); // NOI18N
+
+        jLabel25.setText(optionsdialog.getString("MAXACKPOSITION")); // NOI18N
+
+        spinnerMaxAckPosition.setModel(new javax.swing.SpinnerNumberModel(0, 0, 8, 1));
+        spinnerMaxAckPosition.setToolTipText(optionsdialog.getString("MAXACKPOSITIONTIP")); // NOI18N
+        spinnerMaxAckPosition.setMinimumSize(new java.awt.Dimension(32, 25));
+        spinnerMaxAckPosition.setName(""); // NOI18N
+
+        javax.swing.GroupLayout jPanel13Layout = new javax.swing.GroupLayout(jPanel13);
+        jPanel13.setLayout(jPanel13Layout);
+        jPanel13Layout.setHorizontalGroup(
+            jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel13Layout.createSequentialGroup()
+                .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel13Layout.createSequentialGroup()
+                        .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(spinnerAckPosition, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel13Layout.createSequentialGroup()
+                        .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(spinnerMaxAckPosition, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+        jPanel13Layout.setVerticalGroup(
+            jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel13Layout.createSequentialGroup()
+                .addGap(4, 4, 4)
+                .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel24)
+                    .addComponent(spinnerAckPosition, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel25)
+                    .addComponent(spinnerMaxAckPosition, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)))
         );
 
         javax.swing.GroupLayout RadioMsgPanelLayout = new javax.swing.GroupLayout(RadioMsgPanel);
@@ -1609,21 +1662,24 @@ public class OptionsDialog extends javax.swing.JDialog {
         RadioMsgPanelLayout.setHorizontalGroup(
             RadioMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(RadioMsgPanelLayout.createSequentialGroup()
                 .addComponent(test1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(215, Short.MAX_VALUE))
+            .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel13, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         RadioMsgPanelLayout.setVerticalGroup(
             RadioMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(RadioMsgPanelLayout.createSequentialGroup()
-                .addContainerGap(26, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(test1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
                 .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(5, 5, 5)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(62, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(40, 40, 40))
         );
 
         tabOptions.addTab("RadioMsg", RadioMsgPanel);
@@ -2748,6 +2804,11 @@ public class OptionsDialog extends javax.swing.JDialog {
                 cf.setPreference("RELAYSMSSIMMEDIATELY", "no");
                 Main.wantRelaySMSsImmediat = false;
             }
+            myobject = spinnerAckPosition.getValue();
+            cf.setPreference("ACKPOSITION", myobject.toString());
+            myobject = spinnerMaxAckPosition.getValue();
+            cf.setPreference("MAXACKS", myobject.toString());
+            
             //Always save in case we blank it out
             cf.setPreference("SMSEMAILGATEWAY", txtSmsEmailGatewayDomain);
             cf.setPreference("SENDCELLULARNUMBERAS", txtSendCellNumAs);
@@ -3414,6 +3475,8 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;
@@ -3433,6 +3496,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel12;
+    private javax.swing.JPanel jPanel13;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
@@ -3475,8 +3539,10 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     public javax.swing.JSpinner spinOffsetSeconds;
     private javax.swing.JSpinner spinRetries;
     private javax.swing.JSpinner spinTXdelay;
+    private javax.swing.JSpinner spinnerAckPosition;
     private javax.swing.JSpinner spinnerDaysToKeepLink;
     private javax.swing.JSpinner spinnerImapProtocol;
+    private javax.swing.JSpinner spinnerMaxAckPosition;
     private javax.swing.JSpinner spinnerSmtpProtocol;
     private javax.swing.JTabbedPane tabOptions;
     private javax.swing.JPanel test1;

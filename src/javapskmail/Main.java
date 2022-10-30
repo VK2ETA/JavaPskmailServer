@@ -34,9 +34,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.0.10.2";
+    static String version = "3.0.10.3";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20221023";
+    static String versionDate = "20221030";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -101,6 +101,7 @@ public class Main {
     static int RxBlockSize = 0;
     static int totalBytes = 0;
     static boolean TxActive = false;
+    static boolean sendingAcks = false;
     static int second = 30;  // Beacon second
     static String[] modes = {"       ", "THOR8", "MFSK16", "THOR22",
         "MFSK32", "PSK250R", "PSK500R", "PSK500",
@@ -160,6 +161,7 @@ public class Main {
     static final double initialRxDelay = 1.0f;//Initial 1 seconds delay of RX just in case
     static double rxDelay = initialRxDelay;
     static double rxDelayCount = initialRxDelay;
+    static double RadioMsgAcksDelay = 0.0f; //Time to hear all acks in the group (Max number of Acks settings)
     static String connectsecond;
     static long oldtime = 0L;
     static int missedBlocks = 0;
@@ -429,7 +431,7 @@ public class Main {
 
             //Always have RXid ON so that TTY connects and igates beacons can be heard on any mode
             m.setRxRsid("ON");
-
+            
             // Main  loop
             //m.setRxRsid("ON");
             //q.send_txrsid_command("ON");
@@ -459,9 +461,10 @@ public class Main {
                 Thread.sleep(50);
                 sendCommand = "";
                 //Handle RadioMsg messages only when fully idle
-                if (sendLine.length() == 0 & !TxActive
+                if (sendLine.length() == 0 & !Main.TxActive
                         & !connected & !Connecting & !aborting
-                        & ttyConnected.equals("") & !receivingRadioMsg) {
+                        & ttyConnected.equals("") & !receivingRadioMsg
+                        & !sendingAcks & possibleRadioMsg == 0L & rxDelayCount < 0.1f) {
                     if (RMsgTxList.getAvailableLength() > 0) {
                         Main.TxActive = true; //Moved up to prevent change in mode when replying
                         m.txMessage = RMsgTxList.getOldest();
@@ -485,6 +488,8 @@ public class Main {
                                 + String.format(Locale.US, "%02d", c1.get(Calendar.DAY_OF_MONTH)) + "_"
                                 + String.format(Locale.US, "%02d%02d%02d", c1.get(Calendar.HOUR_OF_DAY),
                                         c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND)) + ".txt";
+                        //Load the RadioMsgAcksDelay 
+                        RadioMsgAcksDelay = (double)Main.m.delayUntilMaxAcksHeard() / 1000.0f; //in seconds
                         m.Sendln(toSend, m.txMessage.rxMode, "ON"); //Tx Rsid ON
                         //Log in monitor screen
                         Main.monitorText += "\n*TX*  " + "<SOH>"
@@ -1427,6 +1432,16 @@ public class Main {
                                         //q.send_txrsid_command("OFF");
                                         myRxStatus = sm.getTXStatus();
                                         q.send_status(myRxStatus);  // send our status
+                                        //Register on the APRS network
+                                        String linkCallAprs = cleanCallForAprs(ttyCaller);
+                                        String serverCallAprs = cleanCallForAprs(serverCall);
+                                        //$MSG = "$ServerCall>PSKAPR,TCPIP*::PSKAPR   :GATING $1";
+                                        String linkString = serverCallAprs + ">PSKAPR,TCPIP*::PSKAPR   :GATING " + linkCallAprs;
+                                        try {
+                                            Igate.write(linkString);
+                                        } catch (IOException e) {
+                                            //Noting for now: check if recovery required
+                                        }
                                     }
                                 } else if (rxb.radioMsgBlock) {//process RadioMsg message
                                     //if (wantRelayOverRadio | wantRelaySMSs | wantRelayEmails) {
