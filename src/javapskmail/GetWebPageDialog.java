@@ -828,7 +828,7 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         String url1 = this.WebPage1.getText();
         if (url1.length() > 0) {
             String webText = "";
-            if (URL1b.getText().equals("") | URL1e.getText().equals("")) {
+            if (URL1b.getText().equals("") && URL1e.getText().equals("")) {
                 webText = ServerMail.readWebPage(url1, "", false);
             } else {
                 webText = ServerMail.readWebPage(url1, " begin:" + URL1b.getText() + " end:" + URL1e.getText(), false);
@@ -844,7 +844,7 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         String url2 = this.WebPage2.getText();
         if (url2.length() > 0) {
             String webText = "";
-            if (URL2b.getText().equals("") | URL2e.getText().equals("")) {
+            if (URL2b.getText().equals("") && URL2e.getText().equals("")) {
                 webText = ServerMail.readWebPage(url2, "", false);
             } else {
                 webText = ServerMail.readWebPage(url2, " begin:" + URL2b.getText() + " end:" + URL2e.getText(), false);
@@ -860,7 +860,7 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         String url3 = this.WebPage3.getText();
         if (url3.length() > 0) {
             String webText = "";
-            if (URL3b.getText().equals("") | URL3e.getText().equals("")) {
+            if (URL3b.getText().equals("") && URL3e.getText().equals("")) {
                 webText = ServerMail.readWebPage(url3, "", false);
             } else {
                 webText = ServerMail.readWebPage(url3, " begin:" + URL3b.getText() + " end:" + URL3e.getText(), false);
@@ -876,7 +876,7 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         String url4 = this.WebPage4.getText();
         if (url4.length() > 0) {
             String webText = "";
-            if (URL4b.getText().equals("") | URL4e.getText().equals("")) {
+            if (URL4b.getText().equals("") && URL4e.getText().equals("")) {
                 webText = ServerMail.readWebPage(url4, "", false);
             } else {
                 webText = ServerMail.readWebPage(url4, " begin:" + URL4b.getText() + " end:" + URL4e.getText(), false);
@@ -892,7 +892,7 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         String url5 = this.WebPage5.getText();
         if (url5.length() > 0) {
             String webText = "";
-            if (URL5b.getText().equals("") | URL5e.getText().equals("")) {
+            if (URL5b.getText().equals("") && URL5e.getText().equals("")) {
                 webText = ServerMail.readWebPage(url5, "", false);
             } else {
                 webText = ServerMail.readWebPage(url5, " begin:" + URL5b.getText() + " end:" + URL5e.getText(), false);
@@ -908,7 +908,7 @@ public class GetWebPageDialog extends javax.swing.JDialog {
         String url6 = this.WebPage6.getText();
         if (url6.length() > 0) {
             String webText = "";
-            if (URL6b.getText().equals("") | URL6e.getText().equals("")) {
+            if (URL6b.getText().equals("") && URL6e.getText().equals("")) {
                 webText = ServerMail.readWebPage(url6, "", false);
             } else {
                 webText = ServerMail.readWebPage(url6, " begin:" + URL6b.getText() + " end:" + URL6e.getText(), false);
