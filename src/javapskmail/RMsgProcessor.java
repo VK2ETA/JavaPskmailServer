@@ -335,8 +335,10 @@ public class RMsgProcessor {
             String smtpProtocol = Main.configuration.getPreference("SERVERSMTPPROTOCOL", "STARTTLS");
             if (smtpProtocol.equals("STARTTLS")) {
                 props.put("mail.smtp.starttls.enable", "true");
-            } else if (smtpProtocol.equals("STARTTLS")) {
+                props.setProperty("mail.smtp.ssl.protocols", "TLSv1.2");
+            } else if (smtpProtocol.equals("SSL/TLS")) {
                 props.put("mail.smtp.ssl.enable", "true");
+                props.setProperty("mail.smtps.ssl.protocols", "TLSv1.2");
             } else {
                 //Must be NONE, do nothing for now (to be tested)
             }
@@ -406,6 +408,7 @@ public class RMsgProcessor {
             //RadioMSG.middleToastText("Error relaying message as Email: " + ex.toString());
             //Save in log for debugging
             RMsgUtil.addEntryToLog("Error relaying message as Email: \n" + ex.toString());
+            System.out.println("Error relaying message as Email: " + ex.getMessage() + "\n");
             String errorMessage = ex.getMessage();
             if (errorMessage.indexOf("http") > 0) {
                 errorMessage = errorMessage.substring(0, errorMessage.indexOf("http")) + "...";
@@ -444,7 +447,9 @@ public class RMsgProcessor {
                                 props.setProperty("mail.imaps.port",
                                         Main.configuration.getPreference("SERVERIMAPPORT", "993"));
                                 //props.setProperty("mail.imap.starttls.enable", "true");
-                                props.setProperty("mail.imap.ssl.enable", "true");
+                                props.setProperty("mail.imaps.ssl.enable", "true");
+                                //Test to fix error under Java 1.7
+                                props.put("mail.imaps.ssl.protocols", "TLSv1.2");
                             } else if (imapProtocol.equals("STARTTLS")) {
                                 props.setProperty("mail.store.protocol", "imaps");
                                 props.setProperty("mail.imaps.socketFactory.port",
@@ -453,10 +458,14 @@ public class RMsgProcessor {
                                         Main.configuration.getPreference("SERVERIMAPPORT", "993"));
                                 props.setProperty("mail.imap.starttls.enable", "true");
                                 //props.setProperty("mail.imap.ssl.enable", "true");
+                                //Test to fix error under Java 1.7
+                                props.put("mail.imaps.ssl.protocols", "TLSv1.2");
                             } else {
                                 props.setProperty("mail.store.protocol", "imap");
                                 props.setProperty("mail.imap.port",
                                         Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                                //Test to fix error under Java 1.7
+                                props.put("mail.imap.ssl.protocols", "TLSv1.2");
                             }
                             MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
                             socketFactory.setTrustAllHosts(true);
@@ -469,6 +478,7 @@ public class RMsgProcessor {
                             } else {
                                 store = session.getStore("imaps");
                             }
+                            session.setDebug(true);
                             //String emailAddress = Main.configuration.getPreference("SERVEREMAILADDRESS", "");
                             String emailPassword = Main.configuration.getPreference("SERVERPASSWORD", "");
                             String emailUsername = Main.configuration.getPreference("SERVERUSERNAME", "");
@@ -677,6 +687,7 @@ public class RMsgProcessor {
                             keepInLoop = true;
                             if (!alreadyWarned) {
                                 Main.q.Message("Can't connect to Imap server", 8);
+                                System.out.println("Can't connect to Imap server: " + e.toString());
                                 alreadyWarned = true;
                             }
                             try {
@@ -1073,7 +1084,8 @@ public class RMsgProcessor {
                 props.setProperty("mail.imaps.port",
                         Main.configuration.getPreference("SERVERIMAPPORT", "993"));
                 //props.setProperty("mail.imap.starttls.enable", "true");
-                props.setProperty("mail.imap.ssl.enable", "true");    
+                props.setProperty("mail.imap.ssl.enable", "true");
+                props.put("mail.imaps.ssl.protocols", "TLSv1.2");
             } else if (imapProtocol.equals("STARTTLS")) {
                 props.setProperty("mail.store.protocol", "imaps");
                 props.setProperty("mail.imaps.socketFactory.port",
@@ -1082,10 +1094,12 @@ public class RMsgProcessor {
                         Main.configuration.getPreference("SERVERIMAPPORT", "993"));
                 props.setProperty("mail.imap.starttls.enable", "true");
                 //props.setProperty("mail.imap.ssl.enable", "true");
+                props.put("mail.imaps.ssl.protocols", "TLSv1.2");
             } else {
                 props.setProperty("mail.store.protocol", "imap");
                 props.setProperty("mail.imap.port", 
                         Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                props.put("mail.imap.ssl.protocols", "TLSv1.2");
             }
             MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
             socketFactory.setTrustAllHosts(true);
@@ -1098,6 +1112,7 @@ public class RMsgProcessor {
             } else {
                 store = session.getStore("imaps");
             }
+            session.setDebug(true);
             String imapHost = Main.configuration.getPreference("SERVERIMAPHOST");
             String userName = Main.configuration.getPreference("SERVERUSERNAME");
             String emailPassword = Main.configuration.getPreference("SERVERPASSWORD");
@@ -1261,16 +1276,19 @@ public class RMsgProcessor {
         } catch (Error err) {
             err.printStackTrace();
             Main.log.writelog("Error accessing Folder: " + err.getMessage() + "\n", false);
-            //throw (err);
+            System.out.println("Error accessing Folder: " + err.getMessage() + "\n");
         } catch (FolderNotFoundException e) {
             Exception e1 = e;
             Main.log.writelog("E-mail folder not found: " + e1.getMessage() + "\n", false);
+            System.out.println("E-mail folder not found: " + e1.getMessage() + "\n");
         } catch (MessagingException e) {
             Exception e1 = e;
             Main.log.writelog("Error accessing emails: " + e1.getMessage() + "\n", false);
+            System.out.println("Error accessing emails: " + e1.getMessage() + "\n");
         } catch (Exception e) {
             Exception e1 = e;
             Main.log.writelog("Error accessing emails: " + e1.getMessage() + "\n", false);
+            System.out.println("Error accessing emails: " + e1.getMessage() + "\n");
         } finally {
             try {
                 if (folder != null && folder.isOpen()) {

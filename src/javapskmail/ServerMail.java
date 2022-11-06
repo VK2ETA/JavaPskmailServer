@@ -99,8 +99,10 @@ public class ServerMail {
             String smtpProtocol = Main.configuration.getPreference("SERVERSMTPPROTOCOL", "STARTTLS");
             if (smtpProtocol.equals("STARTTLS")) {
                 props.put("mail.smtp.starttls.enable", "true");
+                props.setProperty("mail.smtp.ssl.protocols", "TLSv1.2");
             } else if (smtpProtocol.equals("STARTTLS")) {
                 props.put("mail.smtp.ssl.enable", "true");
+                props.setProperty("mail.smtps.ssl.protocols", "TLSv1.2");
             } else {
                 //Must be NONE, do nothing for now (to be tested)
             }
@@ -172,6 +174,7 @@ public class ServerMail {
         } catch (Exception ex) {
             //Save in log for debugging
             Main.log("Error sending Email: " + ex.getMessage() + "\n");
+            System.out.println("Error sending Email: " + ex.getMessage() + "\n");
             String errorMessage = ex.getMessage();
             if (errorMessage.indexOf("http") > 0) {
                 errorMessage = errorMessage.substring(0, errorMessage.indexOf("http")) + "...";
@@ -198,7 +201,8 @@ public class ServerMail {
                 props.setProperty("mail.imaps.port",
                         Main.configuration.getPreference("SERVERIMAPPORT", "993"));
                 //props.setProperty("mail.imap.starttls.enable", "true");
-                props.setProperty("mail.imap.ssl.enable", "true");    
+                props.setProperty("mail.imap.ssl.enable", "true");
+                props.put("mail.imaps.ssl.protocols", "TLSv1.2");
             } else if (imapProtocol.equals("STARTTLS")) {
                 props.setProperty("mail.store.protocol", "imaps");
                 props.setProperty("mail.imaps.socketFactory.port",
@@ -207,10 +211,12 @@ public class ServerMail {
                         Main.configuration.getPreference("SERVERIMAPPORT", "993"));
                 props.setProperty("mail.imap.starttls.enable", "true");
                 //props.setProperty("mail.imap.ssl.enable", "true");
+                props.put("mail.imaps.ssl.protocols", "TLSv1.2");
             } else {
                 props.setProperty("mail.store.protocol", "imap");
                 props.setProperty("mail.imap.port", 
                         Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                props.put("mail.imap.ssl.protocols", "TLSv1.2");
             }
             MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
             socketFactory.setTrustAllHosts(true);
@@ -356,6 +362,7 @@ public class ServerMail {
         } catch (Exception e) {
             Main.log("Error accessing emails: " + e.getMessage() + "\n");
             mailHeaders = "Error accessing emails: " + e.getMessage() + "\n";
+            System.out.println("Error accessing emails: " + e.getMessage() + "\n");
         } finally {
             try {
                 if (folder != null && folder.isOpen()) {
@@ -394,6 +401,7 @@ public class ServerMail {
                             Main.configuration.getPreference("SERVERIMAPPORT", "993"));
                     //props.setProperty("mail.imap.starttls.enable", "true");
                     props.setProperty("mail.imap.ssl.enable", "true");
+                    props.put("mail.imaps.ssl.protocols", "TLSv1.2");
                 } else if (imapProtocol.equals("STARTTLS")) {
                     props.setProperty("mail.store.protocol", "imaps");
                     props.setProperty("mail.imaps.socketFactory.port",
@@ -402,10 +410,12 @@ public class ServerMail {
                             Main.configuration.getPreference("SERVERIMAPPORT", "993"));
                     props.setProperty("mail.imap.starttls.enable", "true");
                     //props.setProperty("mail.imap.ssl.enable", "true");
+                    props.put("mail.imaps.ssl.protocols", "TLSv1.2");
                 } else {
                     props.setProperty("mail.store.protocol", "imap");
                     props.setProperty("mail.imap.port",
                             Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                    props.put("mail.imap.ssl.protocols", "TLSv1.2");
                 }
                 MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
                 socketFactory.setTrustAllHosts(true);
@@ -466,6 +476,7 @@ public class ServerMail {
             } catch (Exception e) {
                 Exception e1 = e;
                 Main.log.writelog("Error accessing emails: " + e1.getMessage() + "\n", false);
+                System.out.println("Error accessing emails: " + e.getMessage() + "\n");
                 mailCount = -1;
             } finally {
                 try {
@@ -656,7 +667,8 @@ public class ServerMail {
                 props.setProperty("mail.imaps.port",
                         Main.configuration.getPreference("SERVERIMAPPORT", "993"));
                 //props.setProperty("mail.imap.starttls.enable", "true");
-                props.setProperty("mail.imap.ssl.enable", "true");    
+                props.setProperty("mail.imap.ssl.enable", "true");
+                props.put("mail.imaps.ssl.protocols", "TLSv1.2");
             } else if (imapProtocol.equals("STARTTLS")) {
                 props.setProperty("mail.store.protocol", "imaps");
                 props.setProperty("mail.imaps.socketFactory.port",
@@ -665,10 +677,12 @@ public class ServerMail {
                         Main.configuration.getPreference("SERVERIMAPPORT", "993"));
                 props.setProperty("mail.imap.starttls.enable", "true");
                 //props.setProperty("mail.imap.ssl.enable", "true");
+                props.put("mail.imaps.ssl.protocols", "TLSv1.2");
             } else {
                 props.setProperty("mail.store.protocol", "imap");
                 props.setProperty("mail.imap.port", 
                         Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                props.put("mail.imap.ssl.protocols", "TLSv1.2");
             }
             MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
             socketFactory.setTrustAllHosts(true);
@@ -784,6 +798,7 @@ public class ServerMail {
             Exception e1 = e;
             Main.log("Error accessing emails: " + e1.getMessage() + "\n");
             returnString = "Error accessing Folder: " + e1.getMessage() + "\n";
+            System.out.println("Error accessing emails: " + e.getMessage() + "\n");
         } finally {
             try {
                 if (folder != null && folder.isOpen()) {
@@ -895,7 +910,8 @@ public class ServerMail {
                 props.setProperty("mail.imaps.port",
                         Main.configuration.getPreference("SERVERIMAPPORT", "993"));
                 //props.setProperty("mail.imap.starttls.enable", "true");
-                props.setProperty("mail.imap.ssl.enable", "true");    
+                props.setProperty("mail.imap.ssl.enable", "true");
+                props.put("mail.imaps.ssl.protocols", "TLSv1.2");
             } else if (imapProtocol.equals("STARTTLS")) {
                 props.setProperty("mail.store.protocol", "imaps");
                 props.setProperty("mail.imaps.socketFactory.port",
@@ -904,10 +920,12 @@ public class ServerMail {
                         Main.configuration.getPreference("SERVERIMAPPORT", "993"));
                 props.setProperty("mail.imap.starttls.enable", "true");
                 //props.setProperty("mail.imap.ssl.enable", "true");
+                props.put("mail.imaps.ssl.protocols", "TLSv1.2");
             } else {
                 props.setProperty("mail.store.protocol", "imap");
                 props.setProperty("mail.imap.port", 
                         Main.configuration.getPreference("SERVERIMAPPORT", "993"));
+                props.put("mail.imap.ssl.protocols", "TLSv1.2");
             }
             MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
             socketFactory.setTrustAllHosts(true);
@@ -1003,6 +1021,7 @@ public class ServerMail {
             Exception e1 = e;
             Main.log("Error deleting emails: " + e1.getMessage() + "\n");
             returnString = "Error deleting emails: " + e1.getMessage() + "\n";
+            System.out.println("Error accessing emails: " + e.getMessage() + "\n");
         } finally {
             try {
                 if (folder != null && folder.isOpen()) {
