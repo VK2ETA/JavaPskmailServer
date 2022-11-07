@@ -918,8 +918,9 @@ public class Modem implements Runnable {
         double cps = 2;
         double myblocktime = 0;
 
-        //VK2ETA: some delays now calculated at connect time firstCharDelay = 4; //Must account for Client's TX delay, RSID and silences, FEC/interleaver delay, decoding delay
-        firstCharDelay = 2; //Must account for FEC/interleaver delay and decoding delay
+        //VK2ETA: some delays now calculated at connect time firstCharDelay = 4; 
+        //Must account for Client's TX delay, RSID and silences, FEC/interleaver delay, decoding delay
+        firstCharDelay = 2;
         try {
             switch (mode) {
                 case PSK63:
@@ -968,11 +969,11 @@ public class Modem implements Runnable {
                     break;
                 case THOR16:
                     firstCharDelay = 7;
-                    cps = 7;
+                    cps = 4;
                     break;
                 case THOR22:
                     firstCharDelay = 6;
-                    cps = 11;
+                    cps = 5.6;
                     break;
                 case DOMINOEX5:
                     cps = 4;
@@ -1399,8 +1400,8 @@ public class Modem implements Runnable {
                         if (BlockActive) {
                             BlockString += "\n";
                             Main.lastCharacterTime = System.currentTimeMillis();
-                            //RM check if we have the start of a RadioMessage block
-                            if (!Main.receivingRadioMsg) {
+                            //RM check if we have the start of a RadioMessage block (and not while in a connected session)
+                            if (!Main.receivingRadioMsg && Main.ttyConnected.equals("") && !Main.connected) {
                                 Matcher msc = RxBlock.validRMsgHeader.matcher(BlockString);
                                 if (msc.find()) {
                                     //Processor.CrcString = msc.group(1);
@@ -1423,7 +1424,7 @@ public class Modem implements Runnable {
                     default:
                         if (DC2_rcvd) {
                             notifier += (char)inChar;
-                            //Not found char(62) yet, check length
+                            //Not found char(62) ">" yet, check length
                             if (notifier.length() > 35) {
                                 //Too long, false positive
                                 DC2_rcvd = false;

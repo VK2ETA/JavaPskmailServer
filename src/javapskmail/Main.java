@@ -34,9 +34,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.1.1";
+    static String version = "3.1.2";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20221031";
+    static String versionDate = "20221107";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -1019,22 +1019,27 @@ public class Main {
                                                     //System.out.println("FOUND:" +  Blockline);
                                                     String fromcall = cleanCallForAprs(gmm.group(1));// + "         ";
                                                     //fromcall = fromcall.substring(0, 9);
-                                                    String outcall = gmm.group(2).toUpperCase(Locale.US) + "         ";
-                                                    outcall = outcall.substring(0, 9);
-                                                    binfo = gmm.group(3);
-                                                    if (!mycall.toUpperCase(Locale.US).equals(fromcall)) {
-                                                        //Not for my Client's callsign (can be different to myserver's callsign)
-                                                        String toxastir = gmm.group(2) + ">PSKAPR,TCPIP*,qAC," + gmm.group(1) + "::" + fromcall + "  " + ":" + gmm.group(3) + "\n";
-                                                        mapSock.sendmessage(toxastir);
-                                                        //test: VK2ETA>PSKAPR,TCPIP*::vk2eta-1 :test aprs 1
-                                                        //VK2ZZZ>APWW11,TCPIP*,qAC,T2LUBLIN::VK2XXX-8 :Hello Jack Long time no see!{21}
-                                                        String aprsmessage = fromcall + ">PSKAPR,TCPIP*::" + outcall + ":" + binfo;
-                                                        boolean igateSendOk = Igate.write(aprsmessage);
-                                                        //System.out.println(aprsmessage);
-                                                        //If I run as server, send QSL
-                                                        if (Main.wantServer && igateSendOk) {
-                                                            q.send_QSL_reply();
+                                                    String outcall = cleanCallForAprs(gmm.group(2).toUpperCase(Locale.US));
+                                                    if (fromcall.length() > 0 && outcall.length() > 0) {
+                                                        //Pad call to 9 characters and spaces
+                                                        outcall = outcall + "         ";
+                                                        outcall = outcall.substring(0, 9);
+                                                        binfo = gmm.group(3);
+                                                        if (!mycall.toUpperCase(Locale.US).equals(fromcall)) {
+                                                            //Not for my Client's callsign (can be different to myserver's callsign)
+                                                            String toxastir = gmm.group(2) + ">PSKAPR,TCPIP*,qAC," + gmm.group(1) + "::" + fromcall + "  " + ":" + gmm.group(3) + "\n";
+                                                            mapSock.sendmessage(toxastir);
+                                                            //test: VK2ETA>PSKAPR,TCPIP*::vk2eta-1 :test aprs 1
+                                                            //VK2ZZZ>APWW11,TCPIP*,qAC,T2LUBLIN::VK2XXX-8 :Hello Jack Long time no see!{21}
+                                                            String aprsmessage = fromcall + ">PSKAPR,TCPIP*::" + outcall + ":" + binfo;
+                                                            boolean igateSendOk = Igate.write(aprsmessage);
+                                                            //System.out.println(aprsmessage);
+                                                            //If I run as server, send QSL
+                                                            if (Main.wantServer && igateSendOk) {
+                                                                q.send_QSL_reply();
+                                                            }
                                                         }
+
                                                     }
                                                 }
                                             }

@@ -549,7 +549,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                     if (Main.receivingRadioMsg) {
                         Main.statusLine = "Receiving radio Message";
                         Main.statusLineTimer = 2;
-                    } else if (Main.possibleRadioMsg > 0L && !Main.connected) {
+                    } else if (Main.possibleRadioMsg > 0L && Main.ttyConnected.equals("") && !Main.connected) {
                         Main.statusLine = "Receiving Frame?";
                         Main.statusLineTimer = 2;
                     } else if (!Main.connected && !Main.Connecting
