@@ -34,9 +34,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.1.2";
+    static String version = "3.1.5";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20221107";
+    static String versionDate = "20230304";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -863,7 +863,7 @@ public class Main {
                                             mainui.addServer(scall); // add to servers drop down list
                                         }
                                     }
-                                } else if (Blockline.contains(":71 ")) {
+                                } else if (Blockline.contains(":71 ")) { //Inquire (SNR) request
                                     Pattern psc = Pattern.compile(".*00u(\\S+):71\\s(\\d*)\\s([0123456789ABCDEF]{4}).*");
                                     Matcher msc = psc.matcher(Blockline);
                                     String scall = "";
@@ -1361,7 +1361,7 @@ public class Main {
                                         //q.Message("Rejected:" + rejectreason, 10);
                                         log("Rejected:" + rejectreason);
                                     }
-                                    // connect_ack
+                                    //Connect ack
                                 } else if (rxb.type.equals("k") & rxb.valid) {
                                     Pattern pk = Pattern.compile("^(\\S+):\\d+\\s(\\S+):\\d+\\s(\\d)$");
                                     Matcher mk = pk.matcher(rxb.payload);
@@ -2499,10 +2499,9 @@ public class Main {
     }
 
     static int getserverindex(String server) {
-        int i = 0;
-        int o = 10;
-        for (i = 0; i < serversArray.length; i++) {
-            if (server.equals(serversArray[i])) {
+        int o = 0;
+        for (int i = 0; i < serversArray.length; i++) {
+            if (server.toLowerCase(Locale.US).equals(serversArray[i].toLowerCase(Locale.US))) {
                 o = i;
             }
         }

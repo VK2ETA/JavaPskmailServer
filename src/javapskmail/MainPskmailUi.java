@@ -348,6 +348,10 @@ public class MainPskmailUi extends javax.swing.JFrame {
         loadRMsgComboBoxes();
         //Set Alias only by default
         jRadBtnAliasOnly.setSelected(true);
+        
+        //Pre-select and load Inbox in email tab
+        emailgrid = grid.IN;
+        LoadInbox();
 
 // timer, 1 sec tick
         u = new javax.swing.Timer(1000, new ActionListener() {
@@ -1834,7 +1838,8 @@ public class MainPskmailUi extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("jPSKmailServer"); // NOI18N
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        setMinimumSize(new java.awt.Dimension(740, 480));
+        setMinimumSize(new java.awt.Dimension(640, 480));
+        setPreferredSize(new java.awt.Dimension(640, 469));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
@@ -1844,7 +1849,6 @@ public class MainPskmailUi extends javax.swing.JFrame {
 
         tabMain.setBackground(new java.awt.Color(251, 219, 187));
         tabMain.setTabPlacement(javax.swing.JTabbedPane.BOTTOM);
-        tabMain.setMaximumSize(new java.awt.Dimension(1400, 1024));
         tabMain.setMinimumSize(new java.awt.Dimension(725, 290));
         tabMain.setPreferredSize(new java.awt.Dimension(725, 290));
         tabMain.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -1853,7 +1857,6 @@ public class MainPskmailUi extends javax.swing.JFrame {
             }
         });
 
-        tabTerminal.setMaximumSize(new java.awt.Dimension(1024, 1024));
         tabTerminal.setMinimumSize(new java.awt.Dimension(708, 306));
         tabTerminal.setLayout(new javax.swing.BoxLayout(tabTerminal, javax.swing.BoxLayout.PAGE_AXIS));
 
@@ -3378,7 +3381,10 @@ public class MainPskmailUi extends javax.swing.JFrame {
 
                 tabMain.addTab(mainpskmailui.getString("MainPskmailUi.tabRadioMsg.TabConstraints.tabTitle"), tabRadioMsg); // NOI18N
 
-                getContentPane().add(tabMain, new java.awt.GridBagConstraints());
+                gridBagConstraints = new java.awt.GridBagConstraints();
+                gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+                gridBagConstraints.weighty = 1.4;
+                getContentPane().add(tabMain, gridBagConstraints);
                 tabMain.setEnabledAt(7, true);
 
                 pnlStatus.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
@@ -3617,6 +3623,9 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 gridBagConstraints.weightx = 0.5;
                 gridBagConstraints.weighty = 0.5;
                 getContentPane().add(pnlMainEntry, gridBagConstraints);
+
+                jMenuBar3.setMaximumSize(new java.awt.Dimension(1024, 32769));
+                jMenuBar3.setName(""); // NOI18N
 
                 mnuFile2.setText(bundle.getString("MainPskmailUi.mnuFile2.text")); // NOI18N
 
@@ -7757,6 +7766,8 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             MessageViewHandler inboxHandler = new MessageViewHandler(Main.homePath + Main.dirPrefix + "Inbox");
             // We will try to show the inbox so update enum
             emailgrid = grid.IN;
+            //Selector in the right position for the next click/double click on the list
+            lstBoxSelector.setSelectedIndex(1);
 
             if (inboxHandler.Fetchmbox()) {
                 tblInbox.setModel(inboxmodel);
@@ -8097,17 +8108,23 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
      * Refresh whatever grid is now showing
      */
     public void refreshEmailGrid() {
+        
         switch (emailgrid) {
+            case HEADERS:
+                //Pre-select the box slector on the left to ensure consistency of next double click on the list
+                lstBoxSelector.setSelectedIndex(0);
+                LoadHeaders();
+                break;
             case IN:
+                lstBoxSelector.setSelectedIndex(1);
                 LoadInbox();
                 break;
             case OUT:
+                lstBoxSelector.setSelectedIndex(2);
                 LoadOutbox();
                 break;
-            case HEADERS:
-                LoadHeaders();
-                break;
             case SENT:
+                lstBoxSelector.setSelectedIndex(3);
                 LoadSent();
                 break;
         }

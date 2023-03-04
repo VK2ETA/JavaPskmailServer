@@ -17,6 +17,7 @@ import javax.mail.Message;
 import javax.mail.Store;
 import java.util.Properties;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPFolder.FetchProfileItem;
 import com.sun.mail.smtp.SMTPTransport;
 import com.sun.mail.util.MailSSLSocketFactory;
 import java.io.File;
@@ -39,6 +40,7 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 import javax.mail.Authenticator;
 import javax.mail.BodyPart;
+import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Multipart;
@@ -241,8 +243,19 @@ public class ServerMail {
             Message[] messages;
             //Virtualizing the email boxes? (uses email filters to re-route responses)
             if (Main.configuration.getPreference("USEVIRTUALEMAILBOXES").trim().equals("yes")) {
-                //Fetch all messages
+                //Fetch number of messages
                 messages = folder.getMessages();
+                //Pre-Fetch items of interest
+                FetchProfile fp = new FetchProfile();
+                fp.add(FetchProfile.Item.ENVELOPE);
+                fp.add(FetchProfile.Item.FLAGS);
+                fp.add(FetchProfile.Item.CONTENT_INFO);
+                fp.add(FetchProfile.Item.SIZE);
+                fp.add(IMAPFolder.FetchProfileItem.MESSAGE);
+                fp.add(IMAPFolder.FetchProfileItem.HEADERS);
+                fp.add(IMAPFolder.FetchProfileItem.INTERNALDATE);
+                fp.add("X-mailer");
+                folder.fetch(messages, fp); // Load the profile of the messages in 1 fetch.
                 int mailCount = 0;
                 //Process in the order of oldest to most
                 //for (int i = messages.length; i > 0; i--) {
@@ -324,6 +337,17 @@ public class ServerMail {
                 }
                 //In any case, now get all messages
                 messages = folder.getMessages();
+                //Pre-Fetch items of interest
+                FetchProfile fp = new FetchProfile();
+                fp.add(FetchProfile.Item.ENVELOPE);
+                fp.add(FetchProfile.Item.FLAGS);
+                fp.add(FetchProfile.Item.CONTENT_INFO);
+                fp.add(FetchProfile.Item.SIZE);
+                fp.add(IMAPFolder.FetchProfileItem.MESSAGE);
+                fp.add(IMAPFolder.FetchProfileItem.HEADERS);
+                fp.add(IMAPFolder.FetchProfileItem.INTERNALDATE);
+                fp.add("X-mailer");
+                folder.fetch(messages, fp); // Load the profile of the messages in 1 fetch.
                 //add all headers from the requested number. Protocol issue: QTC 0+ should be QTC 1+ as
                 //  email number 1 is first email = email index 0 in the list 
                 if (fromNumber == 0) {
@@ -711,6 +735,17 @@ public class ServerMail {
             if (Main.configuration.getPreference("USEVIRTUALEMAILBOXES").trim().equals("yes")) {
                 //Fetch all messages
                 messages = folder.getMessages();
+                //Fetch messges data in one swoop (avoid SSL connection for each item)
+                FetchProfile fp = new FetchProfile();
+                fp.add(FetchProfile.Item.ENVELOPE);
+                fp.add(FetchProfile.Item.FLAGS);
+                fp.add(FetchProfile.Item.CONTENT_INFO);
+                fp.add(FetchProfile.Item.SIZE);
+                fp.add(IMAPFolder.FetchProfileItem.MESSAGE);
+                fp.add(IMAPFolder.FetchProfileItem.HEADERS);
+                fp.add(IMAPFolder.FetchProfileItem.INTERNALDATE);
+                fp.add("X-mailer");
+                folder.fetch(messages, fp); // Load the profile of the messages in 1 fetch.
                 int mailCount = 0;
                 //Process in the order of oldest to most recent
                 //for (int i = messages.length; i > 0 && storedMessage == null; i--) {

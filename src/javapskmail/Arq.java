@@ -520,16 +520,21 @@ public class Arq {
 
     private String connect_ack(String server) {
         // <US><SOH>1/kPI4TUE:24 PA0R:1024 56663<SOH>0/s   60D3<EOT>
-        Random generator = new Random();
-        int randomIndex = generator.nextInt(64);
-        // get random number between 1...63
-        while (randomIndex == 0) {
-            randomIndex = generator.nextInt(64) + 32;
-        }
+        //Generate a session number if we don't have one already
+        if (Main.session.length() == 0) {
+            Random generator = new Random();
+            int randomIndex = generator.nextInt(64);
+            // get random number between 1...63
+            while (randomIndex == 0) {
+                randomIndex = generator.nextInt(64) + 32;
+            }
 
-        char c = (char) (randomIndex + '0');
-        Streamid = Character.toString(c);
-        Main.session = Streamid;
+            char c = (char) (randomIndex + '0');
+            Streamid = Character.toString(c);
+            Main.session = Streamid;
+        } else {
+            Streamid = Main.session;
+        }
         //This block is only used as a server, use different callsign.
         //callsign = Main.configuration.getPreference("CALL");
         callsign = Main.configuration.getPreference("CALLSIGNASSERVER");

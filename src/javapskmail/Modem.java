@@ -52,6 +52,7 @@ public class Modem implements Runnable {
     static final int MAXQUEUE = 8;
     private Vector<String> messages = new Vector<String>();
     private String BlockString;
+    private String newLine;
     private String rxIDstart = "<cmd><rsid>";
     private String rxIDend = "</rsid></cmd>";
     private String txIDstart = "<cmd><txrsid>";
@@ -153,6 +154,9 @@ public class Modem implements Runnable {
     private int utfFoundChars = 0;
     private byte[] utf8PartialBuffer = new byte[20];
     private int utfLen = 0;
+    
+    //To abandon reception of malformed messages (prevents scanning and sending)
+    private static Pattern validDataLinesPattern = Pattern.compile("^([a-p]{4})|(via\\:)|(rly\\:)|(sms\\:)|(id\\:.)|(rd\\:.)|(ro\\:.)|(pos\\:)|(pic\\:)|(tim\\:)");
 
 //  public int MAXDCD = 3;
     Modem(String host, int port) {
@@ -1414,6 +1418,8 @@ public class Modem implements Runnable {
                             //Main.Bul.get("" + inChar); 
                             //String dummy = amp.get("" + inChar);
                         }
+                        //Reset Accumulation of new line characters for checking radio message format
+                        newLine = "";
                         //VK2ETA not here
                         //Main.DCD = 0;
                         break;
@@ -1596,6 +1602,7 @@ public class Modem implements Runnable {
                         }
                         if (BlockActive) {
                             BlockString += (char)inChar;
+                            newLine += (char)inChar;
                             Main.lastCharacterTime = System.currentTimeMillis();
                             //            System.out.println("BS:" + BlockString);
                             //Determine if this is a status frame coming
@@ -1624,9 +1631,16 @@ public class Modem implements Runnable {
                 }
                 //Reset if end marker not found within
                 // 500 characters of start (A Radio Message is an SMS system not an email one)
-                if (Main.receivingRadioMsg
-                        && BlockString.length() > 500) {
+                if (Main.receivingRadioMsg && BlockString.length() > 500) {
                     Main.receivingRadioMsg = false;
+                }
+                //Reset if receiving message and lines are not in valid format ("sms:" or "via:" or "ro:x" etc...)
+                if (Main.receivingRadioMsg && newLine.length() == 4) {
+                    Matcher msc = validDataLinesPattern.matcher(newLine);
+                    if (!msc.find()) {
+                        ///malformed Radio Message, reset reception flag to allow scanning or sending.
+                        Main.receivingRadioMsg = false;
+                    }
                 }
             } // end while
         } catch (InterruptedException ex) {

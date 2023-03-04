@@ -85,13 +85,13 @@ public class RMsgResendDialog extends javax.swing.JDialog {
         jPanel4.setMinimumSize(new java.awt.Dimension(300, 35));
 
         buttonGroupWhatType.add(jRadioButtonWhatShortEmails);
+        jRadioButtonWhatShortEmails.setSelected(true);
         jRadioButtonWhatShortEmails.setText(bundle.getString("RMsgResendDialog.WhatShortEmails")); // NOI18N
 
         buttonGroupWhatType.add(jRadioButtonWhatLongEmails);
         jRadioButtonWhatLongEmails.setText(bundle.getString("RMsgResendDialog.WhatLongEmails")); // NOI18N
 
         buttonGroupWhatType.add(jRadioButtonWhatAnyType);
-        jRadioButtonWhatAnyType.setSelected(true);
         jRadioButtonWhatAnyType.setText(bundle.getString("RMsgResendDialog.WhatAnyType")); // NOI18N
 
         buttonGroupWhatType.add(jRadioButtonWhatPositions);
@@ -116,13 +116,13 @@ public class RMsgResendDialog extends javax.swing.JDialog {
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addGap(16, 16, 16)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jRadioButtonWhatLongEmails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jRadioButtonWhatShortEmails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jRadioButtonWhatPositions, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jRadioButtonWhatRadioOnly, javax.swing.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE)
+                    .addComponent(jRadioButtonWhatRadioOnly, javax.swing.GroupLayout.DEFAULT_SIZE, 524, Short.MAX_VALUE)
                     .addComponent(jRadioButtonWhatLastMinutes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jRadioButtonWhatLastHours, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jRadioButtonWhatLastDays, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jRadioButtonWhatLongEmails, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jRadioButtonWhatAnyType, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -130,11 +130,11 @@ public class RMsgResendDialog extends javax.swing.JDialog {
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addGap(30, 30, 30)
-                .addComponent(jRadioButtonWhatAnyType)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jRadioButtonWhatShortEmails)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(4, 4, 4)
                 .addComponent(jRadioButtonWhatLongEmails)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jRadioButtonWhatAnyType)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jRadioButtonWhatRadioOnly)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -145,7 +145,7 @@ public class RMsgResendDialog extends javax.swing.JDialog {
                 .addComponent(jRadioButtonWhatLastHours)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jRadioButtonWhatLastDays)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(50, Short.MAX_VALUE))
         );
 
         jPanel1.setMaximumSize(new java.awt.Dimension(300, 35));

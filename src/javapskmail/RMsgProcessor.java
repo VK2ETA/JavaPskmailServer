@@ -44,7 +44,6 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.sun.mail.smtp.SMTPTransport;
 import javax.swing.SwingUtilities;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Document.OutputSettings;
 import org.jsoup.safety.Safelist;
 
 
@@ -1135,7 +1134,20 @@ public class RMsgProcessor {
                 //Date oldDate = localCalendar.getTime();
                 //SearchTerm st = new ReceivedDateTerm(ComparisonTerm.GE,oldDate);
                 //messages = folder.search(st);
-            }
+            }    
+            //Fetch messges data in one swoop (avoid SSL connection for each item)
+            //Message[] messages = folder.getMessages();
+            FetchProfile fp = new FetchProfile();
+            fp.add(FetchProfile.Item.ENVELOPE);
+            fp.add(FetchProfile.Item.FLAGS);
+            fp.add(FetchProfile.Item.CONTENT_INFO);
+            fp.add(FetchProfile.Item.SIZE);
+            fp.add(IMAPFolder.FetchProfileItem.MESSAGE);
+            fp.add(IMAPFolder.FetchProfileItem.HEADERS);
+            fp.add(IMAPFolder.FetchProfileItem.INTERNALDATE);
+            fp.add("X-mailer");
+            folder.fetch(messages, fp); // Load the profile of the messages in 1 fetch.
+            //
             int msgCount = 0;
             //Process in the order of most recent to oldest
             //for (int i=0; i < messages.length;i++)
@@ -1827,6 +1839,9 @@ public class RMsgProcessor {
             //To-Do: Add check for messages that are resent as the sms field contains the sender's filename
         } else {
             saveAndDisplay = false;
+            if (matchMyCallWith(mMessage.from, false)) {
+                Main.q.Message("Message from myself, ignoring", 8);
+            }
         }
         //Update heard list if messages are valid
         if ((mMessage.crcValid || mMessage.crcValidWithPW)) {
