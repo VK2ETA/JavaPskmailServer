@@ -1840,7 +1840,7 @@ public class Session {
                                             // Never mind if its a grib file
                                             attachmentFilename = "Files" + Main.separator + attachmentFilename;
                                             attachmentFilename = Main.homePath + Main.dirPrefix + attachmentFilename;
-                                            // SaveAttachmentToFile(attachmentFilename, attachment, true);                                                                            
+                                            SaveAttachmentToFile(attachmentFilename, attachment, true);                                                                            
                                         }
                                     }
                                 }

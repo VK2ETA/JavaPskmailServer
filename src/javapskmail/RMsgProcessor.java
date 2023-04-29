@@ -2030,57 +2030,6 @@ public class RMsgProcessor {
                                     RMsgUtil.replyWithText(mMessage, replyString);
                                 }
                             }
-                        } else if (mMessage.sms.contains("*pos?")) { //Position request?
-                            //For me, and ONLY for me? (positions requests from ALL are not allowed)
-                            if (matchMyCallWith(mMessage.to, false)) {
-                                if (mMessage.via.length() == 0) {
-                                    //NO VIA information, sent direct or received via relay, reply ASAP
-                                    //Otherwise I may send my reply as the relay station forwards this 
-                                    // request to me (and obviously I heard it direct but I have to wait for the relay)
-                                    RMsgUtil.sendBeeps(true);
-                                    //Wait for the ack to pass first
-                                    Thread.sleep(500);
-                                    //Reply to ALL unless the requester was an email or an SMS ,
-                                    //  and may need to reply via relay station
-                                    //Reply to ALL unless the requester was an email or an SMS ,
-                                    //  and may need to reply via relay station
-                                    String replyTo = "*";
-                                    if (isCellular(mMessage.from) || isEmail(mMessage.from)) {
-                                        replyTo = getAliasFromFullAlias(mMessage.from);
-                                    }
-                                    RMsgUtil.replyWithPosition(replyTo, mMessage.relay, mMessage.rxMode);
-                                }
-                            }
-                        //Time Sync request
-                        } else if (mMessage.sms.startsWith("*tim?")) {
-                            if (matchMyCallWith(mMessage.to, false)
-                                    || (matchMyCallWith(mMessage.via, false) && mMessage.to.equals("*"))) {
-                                RMsgUtil.sendBeeps(true);
-                                //Reply to the requesting station only
-                                RMsgUtil.replyWithTime(mMessage);
-                            }
-                        //Remote station SNR request (for last message)
-                        } else if (mMessage.sms.startsWith("*snr?")) {
-                            if (matchMyCallWith(mMessage.to, false)
-                                    || (matchMyCallWith(mMessage.via, false) && mMessage.to.equals("*"))) {
-                                RMsgUtil.sendBeeps(true);
-                                //Reply to the requesting station only
-                                RMsgUtil.replyWithSNR(mMessage);
-                            }
-                        //Time Sync data received, notify
-                        } else if (mMessage.sms.toLowerCase(Locale.US).equals("*time reference received*")) {
-                            if (matchMyCallWith(mMessage.to, false) && Main.refTimeSource.length() > 0) {
-                                RMsgUtil.sendBeeps(true);
-                                if (Main.deviceToRefTimeCorrection == 0) {
-                                    Main.mainui.appendMainWindow("This device clock is the same as " + Main.refTimeSource + "'s clock\n");
-                                } else if (Main.deviceToRefTimeCorrection < 0) {
-                                    Main.mainui.appendMainWindow("This device clock is " + (-Main.deviceToRefTimeCorrection) + " seconds in front of " + Main.refTimeSource + "'s clock\n");
-                                } else {
-                                    Main.mainui.appendMainWindow("This device clock is " + Main.deviceToRefTimeCorrection + " seconds behind " + Main.refTimeSource + "'s clock\n");
-                                }
-                                //Reset source to mean "processed"
-                                Main.refTimeSource = "";
-                            }
                         } else if (mMessage.sms.startsWith("*qtc?")) {
                             //Simplified QTC processing:
                             //By default resends the last of any message (sent directly, heard as relay, email, sms). 
@@ -2321,8 +2270,59 @@ public class RMsgProcessor {
                             }
                             //When re-sent pos request may not be in the beginning of the text
                             // } else if (mMessage.sms.startsWith("*pos?")) { //Position request?
+                        } else if (mMessage.sms.contains("*pos?")) { //Position request?
+                            //For me, and ONLY for me? (positions requests from ALL are not allowed)
+                            if (matchMyCallWith(mMessage.to, false)) {
+                                if (mMessage.via.length() == 0) {
+                                    //NO VIA information, sent direct or received via relay, reply ASAP
+                                    //Otherwise I may send my reply as the relay station forwards this 
+                                    // request to me (and obviously I heard it direct but I have to wait for the relay)
+                                    RMsgUtil.sendBeeps(true);
+                                    //Wait for the ack to pass first
+                                    Thread.sleep(500);
+                                    //Reply to ALL unless the requester was an email or an SMS ,
+                                    //  and may need to reply via relay station
+                                    //Reply to ALL unless the requester was an email or an SMS ,
+                                    //  and may need to reply via relay station
+                                    String replyTo = "*";
+                                    if (isCellular(mMessage.from) || isEmail(mMessage.from)) {
+                                        replyTo = getAliasFromFullAlias(mMessage.from);
+                                    }
+                                    RMsgUtil.replyWithPosition(replyTo, mMessage.relay, mMessage.rxMode);
+                                }
+                            }
+                        //Time Sync request
+                        } else if (mMessage.sms.startsWith("*tim?")) {
+                            if (matchMyCallWith(mMessage.to, false)
+                                    || (matchMyCallWith(mMessage.via, false) && mMessage.to.equals("*"))) {
+                                RMsgUtil.sendBeeps(true);
+                                //Reply to the requesting station only
+                                RMsgUtil.replyWithTime(mMessage);
+                            }
+                        //Remote station SNR request (for last message)
+                        } else if (mMessage.sms.startsWith("*snr?")) {
+                            if (matchMyCallWith(mMessage.to, false)
+                                    || (matchMyCallWith(mMessage.via, false) && mMessage.to.equals("*"))) {
+                                RMsgUtil.sendBeeps(true);
+                                //Reply to the requesting station only
+                                RMsgUtil.replyWithSNR(mMessage);
+                            }
+                        //Time Sync data received, notify
+                        } else if (mMessage.sms.toLowerCase(Locale.US).equals("*time reference received*")) {
+                            if (matchMyCallWith(mMessage.to, false) && Main.refTimeSource.length() > 0) {
+                                RMsgUtil.sendBeeps(true);
+                                if (Main.deviceToRefTimeCorrection == 0) {
+                                    Main.mainui.appendMainWindow("This device clock is the same as " + Main.refTimeSource + "'s clock\n");
+                                } else if (Main.deviceToRefTimeCorrection < 0) {
+                                    Main.mainui.appendMainWindow("This device clock is " + (-Main.deviceToRefTimeCorrection) + " seconds in front of " + Main.refTimeSource + "'s clock\n");
+                                } else {
+                                    Main.mainui.appendMainWindow("This device clock is " + Main.deviceToRefTimeCorrection + " seconds behind " + Main.refTimeSource + "'s clock\n");
+                                }
+                                //Reset source to mean "processed"
+                                Main.refTimeSource = "";
+                            }
                         } else {
-                            //Not an action message, send ack as appropriate if directed to me ONLY
+                            //Not an action message, send ack as appropriate if directed to me ONLY or to ALL
                             if (matchMyCallWith(mMessage.to, true)) {
                                 RMsgUtil.sendBeeps(mMessage.crcValid || mMessage.crcValidWithPW);
                             }

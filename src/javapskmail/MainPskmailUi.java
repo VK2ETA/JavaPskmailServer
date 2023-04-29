@@ -4632,28 +4632,14 @@ private void AbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 
             private void FileConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FileConnectActionPerformed
 
-                ConnectButtonAction();
-                /*if (Main.Connected) {
-                    Main.TX_Text += ("~QUIT" + "\n");
-                    lblStatus.setText(mainpskmailui.getString("Discon"));
-                    lblStatus.setForeground(Color.RED);
-                    Main.q.Message(mainpskmailui.getString("trying_to_disconnect..."), 5);
-                    Main.sm.FileDownload = false;
-
+                Main.summoning = false;
+                if (Main.connected) {
+                    ConnectButtonAction();
                 } else {
-                    try {
-                        Main.m.setRxRsid("ON");
-                        Main.q.set_txstatus(txstatus.TXConnect);
-                        Main.Connecting = true;
-                        Main.connectingPhase = true;
-                        Connect_time = 5;
-                        Main.q.send_frame("");
-                        Main.q.Message(mainpskmailui.getString("Connecting to server..."), 5);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(mainpskmailui.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    ConnectWindow cw = new ConnectWindow(this, true);
+                    cw.setLocationRelativeTo(this);
+                    cw.setVisible(true);
                 }
-                */
             }//GEN-LAST:event_FileConnectActionPerformed
 
             private void FileAbortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FileAbortButtonActionPerformed
@@ -5722,6 +5708,8 @@ private void FileSendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GE
         File uploads = new File(Main.homePath + Main.dirPrefix + "Uploads" + Main.separator);
 
         JFileChooser chooser = new JFileChooser(uploads);
+        //Test showing hidden files as well
+        //chooser.setFileHidingEnabled(false);
         int returnVal = chooser.showOpenDialog(chooser);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -6762,9 +6750,15 @@ private void mnuEmailOpenGetActionPerformed(java.awt.event.ActionEvent evt) {//G
 }//GEN-LAST:event_mnuEmailOpenGetActionPerformed
 
 private void Conn_connectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Conn_connectActionPerformed
-    // TODO add your handling code here:
-    ConnectButtonAction();
 
+    Main.summoning = false;
+    if (Main.connected) {
+        ConnectButtonAction();
+    } else {
+        ConnectWindow cw = new ConnectWindow(this, true);
+        cw.setLocationRelativeTo(this);
+        cw.setVisible(true);
+    }
 }//GEN-LAST:event_Conn_connectActionPerformed
 
 private void Conn_abortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Conn_abortActionPerformed
