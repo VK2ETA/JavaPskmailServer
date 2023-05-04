@@ -1828,8 +1828,8 @@ public class RMsgProcessor {
                 && !matchMyCallWith(mMessage.from, false)) {
             saveAndDisplay = true;
             //Check if this is a duplicate. E.g. We received the message direct and now via a relay OR
-            // the email/SMS message was already received
-            if (!mMessage.timeId.equals("") || (mMessage.receiveDate != null)) {
+            // the email/SMS message was already received, but let pos? requests go through as we don't answer on teh direct path
+            if ((!mMessage.timeId.equals("") || (mMessage.receiveDate != null)) && !mMessage.sms.contains("*pos?")) {
                 //Relayed and with timeId, check if it is a duplicate
                 if (Main.mainui.msgDisplayList.isDuplicate(mMessage)) {
                     saveAndDisplay = false;
