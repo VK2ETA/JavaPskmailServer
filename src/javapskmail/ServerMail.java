@@ -307,8 +307,10 @@ public class ServerMail {
                                 //Build header line for that email
                                 //Pskmail does not handle unicode characters (it corrupts the CRC). 
                                 //  Therefore in plain text mode, strip all non ASCII characters 
-                                String subjectStr = msg.getSubject().replaceAll("\u2013", "-");
-                                subjectStr = subjectStr.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
+                                //VK2ETA UTF-8 full support now
+                                //String subjectStr = msg.getSubject().replaceAll("\u2013", "-");
+                                //subjectStr = subjectStr.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
+                                String subjectStr = msg.getSubject();
                                 //JavaMail .getSize() is not accurate. Get body size and add to the header size
                                 String emailBody = getEmailTextFromMessage(msg);
                                 int mSize = emailBody.length() + fromString.length() + subjectStr.length();
@@ -366,8 +368,10 @@ public class ServerMail {
                     //Build header line for that email
                     //Pskmail does not handle unicode characters (it corrupts the CRC). 
                     //  Therefore in plain text mode, strip all non ASCII characters 
-                    String subjectStr = messages[i].getSubject().replaceAll("\u2013", "-");
-                    subjectStr = subjectStr.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
+                    //VK2ETA UTF-8 full support now
+                    //String subjectStr = messages[i].getSubject().replaceAll("\u2013", "-");
+                    //subjectStr = subjectStr.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
+                    String subjectStr = messages[i].getSubject();
                     //JavaMail .getSize() is not accurate. Get body size and add to the header size
                     String emailBody = getEmailTextFromMessage(messages[i]);
                     int mSize = emailBody.length() + fromString.length() + subjectStr.length();
@@ -816,8 +820,10 @@ public class ServerMail {
                     //        + "Subject: " + message.getSubject() + "\n";
                     //Pskmail does not handle unicode characters (it corrupts the CRC). 
                     //  Therefore in plain text mode, strip all non ASCII characters 
-                    returnString = getEmailTextFromMessage(storedMessage).replaceAll("\u2013", "-");
-                    returnString = returnString.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
+                    //VK2ETA full UTF-8 support
+                    //returnString = getEmailTextFromMessage(storedMessage).replaceAll("\u2013", "-");
+                    //returnString = returnString.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
+                    returnString = getEmailTextFromMessage(storedMessage);
                     //Provide lead, size and end marker
                     returnString = "Your msg: " + returnString.length() + "\n"
                             + returnString + "\n-end-\n";
@@ -1137,8 +1143,9 @@ public class ServerMail {
                 webPage = tgetZip(webPage);
             } else {
                 //Pskmail does not handle unicode (the CRC gets corrupted), replace or strip any non ASCII character
-                webPage = webPage.replaceAll("\u2013", "-");
-                webPage = webPage.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
+                //VK2ETA UTF-8 Full support
+                //webPage = webPage.replaceAll("\u2013", "-");
+                //webPage = webPage.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
                 webPage = "Your wwwpage: " + webPage.length() + "\n"
                         + webPage + "\n-end-\n";
             }
