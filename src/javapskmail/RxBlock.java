@@ -235,7 +235,7 @@ public class RxBlock{
             BlockCRCwithPW = checksum(checkstring + Main.accessPassword);
        }
         if (BlockCRC.equals(crc)){
-           valid =true;
+           valid = true;
         }
         if (BlockCRCwithPW.equals(crc)) {
             validWithPW = true;
@@ -419,7 +419,13 @@ public class RxBlock{
         };
 
 
-        byte[] bytes = intext.getBytes();
+        //byte[] bytes = intext.getBytes();
+        byte[] bytes;
+        try {
+            bytes = intext.getBytes("UTF-8");
+        } catch (java.io.UnsupportedEncodingException e) {
+            bytes = intext.getBytes();
+        }
         int crc1 = 0x0000;
         for (byte b : bytes) {
             crc1 = (crc1 >>> 8) ^ table[(crc1 ^ b) & 0xff];

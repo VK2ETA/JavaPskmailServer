@@ -34,9 +34,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.1.8";
+    static String version = "3.1.8.1";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20230825";
+    static String versionDate = "20230826";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -1100,7 +1100,7 @@ public class Main {
                                             scall = cleanCallForAprs(scall);
                                             if (scall.length() > 0) {
                                                 //Looks like a valid call sign
-                                                byte[] cmps = binfo.substring(0, 11).getBytes();
+                                                byte[] cmps = binfo.substring(0, 11).getBytes("UTF-8");
                                                 int flg = cmps[0] - 32;
                                                 int latdegrees = cmps[1] - 32;
                                                 String s_latdegrees = String.format("%02d", latdegrees);
