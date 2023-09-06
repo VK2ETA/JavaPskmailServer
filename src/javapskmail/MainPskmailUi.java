@@ -638,7 +638,8 @@ public class MainPskmailUi extends javax.swing.JFrame {
                             //Squelch fully open when actively listening
                             if (Main.connected || Main.m.BlockActive
                                     || Main.receivingRadioMsg || Main.possibleRadioMsg != 0L 
-                                    || Main.modemTestMode) {
+                                    || Main.modemTestMode 
+                                    || Main.configuration.getPreference("LISTENINCWMODE").equals("yes")) {
                                 Main.sql = Main.SQL_FLOOR;
                                 RigCtrl.setSquelchOn(false); //OFF
                             } else {

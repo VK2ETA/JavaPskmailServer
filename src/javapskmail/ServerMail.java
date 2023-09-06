@@ -74,6 +74,7 @@ public class ServerMail {
     3rd line
     4th line.
     .
+    .
      */    
     public static String sendMail(String fromCallsign, String toStr, String subjectStr,
             String bodyStr, String attachementFileName) {
@@ -268,6 +269,11 @@ public class ServerMail {
                     String fromString = msg.getFrom()[0].toString();
                     //Remove name and only keep email address proper
                     fromString = RMsgProcessor.extractEmailAddress(fromString);
+                    //Special case for GRIB files replies: grib requests are sent to "query@saildocs.com" but 
+                    //  replies are coming from "query-reply@saildocs.com", thereby never matching the filter
+                    if (fromString.equals("query-reply@saildocs.com")) {
+                        fromString = "query@saildocs.com";
+                    }
                     String[] tos;
                     //boolean forAll = false;
                     //if (forAll) {
@@ -310,7 +316,7 @@ public class ServerMail {
                                 //VK2ETA UTF-8 full support now
                                 //String subjectStr = msg.getSubject().replaceAll("\u2013", "-");
                                 //subjectStr = subjectStr.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
-                                String subjectStr = msg.getSubject();
+                                String subjectStr = msg.getSubject().replaceAll("\r", ""); //Remove carriage returns
                                 //JavaMail .getSize() is not accurate. Get body size and add to the header size
                                 String emailBody = getEmailTextFromMessage(msg);
                                 int mSize = emailBody.length() + fromString.length() + subjectStr.length();
@@ -371,9 +377,9 @@ public class ServerMail {
                     //VK2ETA UTF-8 full support now
                     //String subjectStr = messages[i].getSubject().replaceAll("\u2013", "-");
                     //subjectStr = subjectStr.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
-                    String subjectStr = messages[i].getSubject();
+                    String subjectStr = messages[i].getSubject().replaceAll("\r", ""); //Remove carriage returns;
                     //JavaMail .getSize() is not accurate. Get body size and add to the header size
-                    String emailBody = getEmailTextFromMessage(messages[i]);
+                    String emailBody = getEmailTextFromMessage(messages[i]).replaceAll("\r", ""); //Remove carriage returns;;
                     int mSize = emailBody.length() + fromString.length() + subjectStr.length();
                     //VK2ETA: check if Perl server adds a space before the email number
                     mailHeaders += "" + (i + 1) + " " + fromString + "  " + subjectStr + " " + mSize + "\n";
@@ -474,6 +480,11 @@ public class ServerMail {
                         String fromString = msg.getFrom()[0].toString();
                         //Remove name and only keep email address proper
                         fromString = RMsgProcessor.extractEmailAddress(fromString);
+                                            //Special case for GRIB files replies: grib requests are sent to "query@saildocs.com" but 
+                        //  replies are coming from "query-reply@saildocs.com", thereby never matching the filter
+                        if (fromString.equals("query-reply@saildocs.com")) {
+                            fromString = "query@saildocs.com";
+                        }
                         String[] tos;
                         //boolean forAll = false;
                         //if (forAll) {
@@ -759,6 +770,11 @@ public class ServerMail {
                     String fromString = msg.getFrom()[0].toString();
                     //Remove name and only keep email address proper
                     fromString = RMsgProcessor.extractEmailAddress(fromString);
+                    //Special case for GRIB files replies: grib requests are sent to "query@saildocs.com" but 
+                    //  replies are coming from "query-reply@saildocs.com", thereby never matching the filter
+                    if (fromString.equals("query-reply@saildocs.com")) {
+                        fromString = "query@saildocs.com";
+                    }
                     String[] tos;
                     //boolean forAll = false;
                     //if (forAll) {
@@ -823,7 +839,7 @@ public class ServerMail {
                     //VK2ETA full UTF-8 support
                     //returnString = getEmailTextFromMessage(storedMessage).replaceAll("\u2013", "-");
                     //returnString = returnString.replaceAll("[^a-zA-Z0-9\\n\\s\\<\\>\\!\\[\\]\\{\\}\\:\\;\\\\\'\"\\/\\?\\=\\+\\-\\_\\@\\#\\+\\$\\%\\^\\&\\*,\\.\\(\\)\\|]", "~");
-                    returnString = getEmailTextFromMessage(storedMessage);
+                    returnString = getEmailTextFromMessage(storedMessage).replaceAll("\r", ""); //Remove carriage returns;
                     //Provide lead, size and end marker
                     returnString = "Your msg: " + returnString.length() + "\n"
                             + returnString + "\n-end-\n";
@@ -1004,6 +1020,11 @@ public class ServerMail {
                     String fromString = msg.getFrom()[0].toString();
                     //Remove name and only keep email address proper
                     fromString = RMsgProcessor.extractEmailAddress(fromString);
+                                        //Special case for GRIB files replies: grib requests are sent to "query@saildocs.com" but 
+                    //  replies are coming from "query-reply@saildocs.com", thereby never matching the filter
+                    if (fromString.equals("query-reply@saildocs.com")) {
+                        fromString = "query@saildocs.com";
+                    }
                     String[] tos;
                     //boolean forAll = false;
                     //if (forAll) {

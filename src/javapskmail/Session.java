@@ -1019,7 +1019,7 @@ public class Session {
         }
 
         //send mail (~SEND)
-        Pattern SMp = Pattern.compile("^(~SEND)$");
+        Pattern SMp = Pattern.compile("^\\s*(~SEND)$");
         Matcher smm = SMp.matcher(str);
         if (Main.ttyConnected.equals("Connected") & smm.lookingAt()) {
             foundMatchingCommand = true;

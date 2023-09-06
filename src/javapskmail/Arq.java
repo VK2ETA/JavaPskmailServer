@@ -550,6 +550,8 @@ public class Arq {
         //VK2ETA not automatically, decided elsewhere
         //send_txrsid_command("ON");
         //test Thread.sleep(1000);
+        //Ensure we don't leave an old status here like a CW ack status
+        this.txserverstatus = TxStatus.TTYConnect_ack;
         info = connect_ack(server);
         outstring = make_block(info);
         if (Main.ttyConnected.equals("Connecting")) { //I am a TTY server

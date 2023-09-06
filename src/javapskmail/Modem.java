@@ -682,7 +682,7 @@ public class Modem implements Runnable {
                         Main.justReceivedRSID = false;
                         //Calculate the expected return time to Rx (to prevent TX lockups). Add 50% margin.
                         //expectedReturnToRxTime = System.currentTimeMillis() + (3000 * (long) (getTxTimeEstimate(Main.txModem, outLine.length()))) / 2;
-                        long txTime = (3000 * (long)(getTxTimeEstimate(Main.txModem, outLine.length())))/2;
+                        long txTime = (3000 * (long)(getTxTimeEstimate(Main.txModem, outLine.getBytes("UTF-8").length)));
                         System.out.println("txTime: " + txTime);
                         expectedReturnToRxTime = System.currentTimeMillis() + txTime;
                     }
@@ -727,7 +727,7 @@ public class Modem implements Runnable {
                             Main.justReceivedRSID = false;
                             ModemModesEnum txMode = Main.convmodem(modemString);
                             //Calculate the expected return time to Rx (to prevent TX lockups). Add 50% margin.
-                            long txTime = (3000 * (long)(getTxTimeEstimate(txMode, outLine.length())))/2;
+                            long txTime = (3000 * (long)(getTxTimeEstimate(txMode, outLine.getBytes("UTF-8").length)));
                             System.out.println("txTime: " + txTime);
                             expectedReturnToRxTime = System.currentTimeMillis() + txTime;
                         }
