@@ -880,6 +880,42 @@ public class MainPskmailUi extends javax.swing.JFrame {
                         if (Main.connected | Main.Connecting | Main.bulletinMode | Main.TxActive) {
                             clientActive = true;
                         }
+                        
+                        //To-do: APRS-IS listening stops after 1 hour. Must renew subscription every 1/2 hour or so
+                        
+                        //Time to send a server beacon if required
+                        //E.g: AFA1EO>PSKAPR,TCPIP*,qAC,T2UK:@092354z4353.57NP06955.94W&PSKmail 1.9.4  server
+                        /* from Perl server
+                        
+                        			if ($Aprs_connect == 1) {
+				if (time() - $systime >= 60 * $posit_time) {			## 10 mins aprs beacon...
+					$systime = time();
+					# now do what we want....
+
+					my ($month, $hour, $min) = (gmtime) [3, 2, 1];
+					$month = substr (("0" . $month), -2, 2);
+					$hour = substr (("0" . $hour), -2, 2);
+					$min = substr (("0" . $min), -2, 2);
+
+					my $mytime = $month . $hour . $min . "z";
+					if (-e "$ENV{HOME}/.pskmail/aprs_wx.txt") {
+
+						my $WX = `cat "$ENV{HOME}/.pskmail/aprs_wx.txt"`;
+
+						if (index ($WX, "_") == 0) { $WX = substr($WX, 1);}
+
+						$MSG = "$ServerCall" . ">PSKAPR:" . "@" . $mytime . $Aprs_beacon . $WX ."\n";
+					} else {
+						$MSG = "$ServerCall" . ">PSKAPR:" . "@" . $mytime . $Aprs_beacon ."\n";
+					}
+
+					aprs_send ($MSG);
+
+					# end
+				}
+			}
+                        */
+                        
                         //Time to restart the modem? Skip the rest of the process then
                         String everyXHoursStr = Main.configuration.getPreference("EVERYXHOURS", "1");
                         int everyXHours = 1;
@@ -975,7 +1011,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                                 }
                             }
 
-                            // Ready to restart sanning (after a scan off command)
+                            // Ready to restart scanning (after a scan off command)
                             if ((mnuMailScanning.isSelected() & !Main.connected) | 
                                     (!Main.connected & !Main.Connecting & !Main.monitorMode & !sendbeacon & !Main.bulletinMode)) {
                                 if (Main.configuration.getPreference("SCANNER").equals("yes")) {
@@ -986,8 +1022,8 @@ public class MainPskmailUi extends javax.swing.JFrame {
                                 }
                                 Main.summoning = false;
                             }
+                            
                             // set igate indicator
-
                             if (Igate.connected) {
                                 IgateIndicator.setText("Connected to " + Main.aprsServer);
                             } else {

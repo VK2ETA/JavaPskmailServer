@@ -68,7 +68,6 @@ public class Modem implements Runnable {
     public  boolean BlockActive = false;
     public boolean possibleCwFrame = false;
     private StringBuilder cwStringBuilder = new StringBuilder(100);
-    //private int stxcount = 0;
     static String[] fldigimodes = {"unknown", "THOR 8>", "MFSK-16>", "THOR 22>", "MFSK-32>",
         "PSK-250R>", "PSK-500R>", "BPSK-500>", "BPSK-250>", "BPSK-125>",
         "BPSK-63>", "PSK-125R>", "MFSK-64>", "THOR 11>", "THOR 4>", "Contestia>",
@@ -127,7 +126,12 @@ public class Modem implements Runnable {
     public boolean commToFldigiOpened = false; // Use this to suppress errors when the port is closed
     public RMsgObject txMessage = null;
     public long expectedReturnToRxTime = 0L;  
-
+    
+    public static final char SOH = 1;
+    public static final char EOT = 4;
+    public static final char DC1 = 17; //Olivia SOH replacement (used in jPskmail due to Fldigi limitations of Olivia's character set)
+    public static final char DC2 = 18;
+    public static final char DC3 = 19; //Olivia EOT replacement of
 
     //RadioMsg stuff
     //Picture transfer conversion of speed to SPP (Samples Per Pixel) and vice-versa
@@ -720,7 +724,6 @@ public class Modem implements Runnable {
                         }
                     }
                     if (!outLine.equals("")) {
-                        pout.println(outLine);
                         if (!outLine.contains("<cmd>")) {
                             //Must be a data block, reset receive marker of RSID for next RX
                             //VK2ETA: TO-DO: check if logic (and place of decision) is consistent with RadioMsg
@@ -730,7 +733,12 @@ public class Modem implements Runnable {
                             long txTime = (3000 * (long)(getTxTimeEstimate(txMode, outLine.getBytes("UTF-8").length)));
                             System.out.println("txTime: " + txTime);
                             expectedReturnToRxTime = System.currentTimeMillis() + txTime;
+                            //Olivia and MT-63 modes, replace SOH by DC1 and EOT by DC3 due to limitation in Olivia's and MT-63's character set in Fldigi (ch > 7 only)
+                            if (modemString.startsWith("OLIV") || modemString.startsWith("MT63")) {
+                                outLine = outLine.replace(SOH, DC1).replace(EOT, DC3);
+                            }
                         }
+                        pout.println(outLine);
                     }
                 }
             } catch (Exception ex) {
@@ -1289,7 +1297,9 @@ public class Modem implements Runnable {
                 switch (inChar) {
                     case 0:
                         break; // ignore
-                    case 1: //SOH
+                    case DC1:
+                        inChar = SOH; //Valid Olivia SOH replacement. Exchange and fall through to processing of normal SOH
+                    case SOH:
                         Main.lastCharacterTime = blockstart = System.currentTimeMillis();
                         Main.haveSOH = true;
                         //Just received RSID, restart counting Radio Msg header timeout from now
@@ -1322,7 +1332,9 @@ public class Modem implements Runnable {
                         //VK2ETA not here
                         //Main.DCD = 0;
                         break;
-                    case 4: //EOT
+                    case DC3:
+                        inChar = EOT; //Valid Olivia EOT replacement. Exchange and fall through to processing of normal EOT
+                    case EOT:
                         //        System.out.println("EOT:" + BlockString);
                         blocktime = (System.currentTimeMillis() - blockstart);
                         //VK2ETA debug extra status send when TXing long data in slow mode from server
@@ -1423,20 +1435,19 @@ public class Modem implements Runnable {
                         //VK2ETA not here
                         //Main.DCD = 0;
                         break;
-                    case 18:
-                        // DC2 received
+                    case DC2:
                         DC2_rcvd = true;
                         break;
                     default:
                         if (DC2_rcvd) {
-                            notifier += (char)inChar;
+                            notifier += (char) inChar;
                             //Not found char(62) ">" yet, check length
                             if (notifier.length() > 35) {
                                 //Too long, false positive
                                 DC2_rcvd = false;
                                 notifier = "";
                             }
-                            if ((char)inChar == 62) { // ">" character
+                            if ((char) inChar == 62) { // ">" character
                                 DC2_rcvd = false;
 //                               System.out.println(notifier);
                                 //    <s2n: 58, 100.0, 0.0>
@@ -1490,7 +1501,7 @@ public class Modem implements Runnable {
                                 notifier = "";
                             }
                         }
-                        if ((char)inChar > 31 & !DC2_rcvd) {
+                        if ((char) inChar > 31 & !DC2_rcvd) {
                             if (Main.wantbulletins) {
                                 try {
 //                                    Main.Bul.get("" + inChar);
@@ -1502,12 +1513,12 @@ public class Modem implements Runnable {
                             //Build sequence for CW APRS messages
                             if (possibleCwFrame) {
                                 //Continue building the sequence and reject if does not conform to expected format
-                                cwStringBuilder.append((char)inChar);
+                                cwStringBuilder.append((char) inChar);
                                 if (cwStringBuilder.length() > 68) { //Around 50 characters max for status or message
                                     //Too long, erase and reset flag
                                     cwStringBuilder.setLength(0);
                                     possibleCwFrame = false;
-                                } else if (cwStringBuilder.length() > 5 
+                                } else if (cwStringBuilder.length() > 5
                                         && cwStringBuilder.toString().contains("VVV--")) {
                                     //Align start at last discovery of header start (in the case of 
                                     //  a send error, the opertor can ignore the rest of the message and 
@@ -1527,7 +1538,7 @@ public class Modem implements Runnable {
                                         } catch (NumberFormatException e) {
                                             sentDataLen = 0;
                                         }
-                                        int dataLen = (cwBeaconMatcher.group(1) + "/" 
+                                        int dataLen = (cwBeaconMatcher.group(1) + "/"
                                                 + cwBeaconMatcher.group(2) + "/"
                                                 + cwBeaconMatcher.group(3) + "/").length();
                                         //Check the conversion to GPS coordinates
@@ -1540,12 +1551,12 @@ public class Modem implements Runnable {
                                             BlockString = "00u" + scall
                                                     + ":26 !" + gpsLatLon + cwBeaconMatcher.group(5)
                                                     + cwBeaconMatcher.group(3);
-                                                    String check = Main.q.checksum(BlockString);
-                                                    BlockString = "<SOH>" + BlockString + check + "<EOT>";
-                                                    possibleCwFrame = false; //Reset flag
-                                                    Main.isCwFrame = true;
-                                                    putMessage(BlockString);
-                                                    BlockString = "";
+                                            String check = Main.q.checksum(BlockString);
+                                            BlockString = "<SOH>" + BlockString + check + "<EOT>";
+                                            possibleCwFrame = false; //Reset flag
+                                            Main.isCwFrame = true;
+                                            putMessage(BlockString);
+                                            BlockString = "";
                                         } else {
                                             //Send NACK
                                             Main.isCwFrame = true;
@@ -1564,8 +1575,8 @@ public class Modem implements Runnable {
                                             sentDataLen = Integer.parseInt(cwAprsMsgMatcher.group(6));
                                         } catch (NumberFormatException e) {
                                             sentDataLen = 0;
-                                        }       
-                                        int dataLen = (cwAprsMsgMatcher.group(1) + "/25/" 
+                                        }
+                                        int dataLen = (cwAprsMsgMatcher.group(1) + "/25/"
                                                 + cwAprsMsgMatcher.group(2) + "/"
                                                 + cwAprsMsgMatcher.group(3) + "/"
                                                 + cwAprsMsgMatcher.group(4) + "/"
@@ -1575,16 +1586,16 @@ public class Modem implements Runnable {
                                             //Build the new block with the received information
                                             //"00u" + scall + ":25" + spaces1 + email + spaces2 + body + "\n";
                                             BlockString = "00u" + scall
-                                                    + ":25 " + cwAprsMsgMatcher.group(2) + "@" 
+                                                    + ":25 " + cwAprsMsgMatcher.group(2) + "@"
                                                     + cwAprsMsgMatcher.group(3) + "."
                                                     + cwAprsMsgMatcher.group(4) + " "
                                                     + cwAprsMsgMatcher.group(5) + "\n";
-                                                    String check = Main.q.checksum(BlockString);
-                                                    BlockString = "<SOH>" + BlockString + check + "<EOT>";
-                                                    possibleCwFrame = false; //Reset flag
-                                                    Main.isCwFrame = true;
-                                                    putMessage(BlockString);
-                                                    BlockString = "";
+                                            String check = Main.q.checksum(BlockString);
+                                            BlockString = "<SOH>" + BlockString + check + "<EOT>";
+                                            possibleCwFrame = false; //Reset flag
+                                            Main.isCwFrame = true;
+                                            putMessage(BlockString);
+                                            BlockString = "";
                                         } else {
                                             //Send NACK
                                             Main.isCwFrame = true;
@@ -1592,17 +1603,17 @@ public class Modem implements Runnable {
                                         }
                                         //Consume data
                                         cwStringBuilder.setLength(0);
-                                    }                                    
+                                    }
                                 }
-                            } else if ((char)inChar == 'V') {
+                            } else if ((char) inChar == 'V') {
                                 possibleCwFrame = true;
-                                cwStringBuilder.append((char)inChar);
-                            } 
-                            WriteToMonitor((char)inChar);
+                                cwStringBuilder.append((char) inChar);
+                            }
+                            WriteToMonitor((char) inChar);
                         }
                         if (BlockActive) {
-                            BlockString += (char)inChar;
-                            newLine += (char)inChar;
+                            BlockString += (char) inChar;
+                            newLine += (char) inChar;
                             Main.lastCharacterTime = System.currentTimeMillis();
                             //            System.out.println("BS:" + BlockString);
                             //Determine if this is a status frame coming
@@ -1614,7 +1625,7 @@ public class Modem implements Runnable {
                             //  single character to "<SOH>" or "<EOT>" string (Fldigi specific)
                             if (BlockString.length() > 280) {
                                 BlockActive = false;
-                                BlockString = "";                               
+                                BlockString = "";
                             }
                         }
                         break;
