@@ -1363,7 +1363,12 @@ public class MainPskmailUi extends javax.swing.JFrame {
 
     // convert to degrees/minutes
     public String convcoord(String instring) {
-        Double lt = Double.parseDouble(instring);
+        Double lt = 0.0;
+        try {
+            lt = Double.parseDouble(instring);
+        } catch (NumberFormatException e) {
+            //Continue using zero
+        }
         int deg = lt.intValue();
         Double rest = lt - deg;
         Double minutes = 60 * rest;
