@@ -461,9 +461,9 @@ public class PosFormatConv extends javax.swing.JDialog {
         String myLatitude="";
 
         // Get the degrees
-        result = new Float(deg).floatValue();
+        result = Float.parseFloat(deg);
         // Get only the minutes
-        myfloat = new Float(min).floatValue();
+        myfloat = Float.parseFloat(min);
         // Convert to decimal fraction of degrees
         myfloat = myfloat/60;
         // Put it back together
@@ -493,9 +493,9 @@ public class PosFormatConv extends javax.swing.JDialog {
         String myLongitude="";
 
         // Get the degrees
-        result = new Float(deg).floatValue();
+        result = Float.parseFloat(deg);
         // Get only the minutes
-        myfloat = new Float(min).floatValue();
+        myfloat = Float.parseFloat(min);
         // Convert to decimal fraction of degrees
         myfloat = myfloat/60;
         // Put it back together

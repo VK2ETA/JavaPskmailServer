@@ -388,6 +388,11 @@ public class OptionsDialog extends javax.swing.JDialog {
             }
 
             // Setup configuration tab
+            String mystr = Main.configuration.getPreference("UIOPTION");
+            if (mystr.equals("")) {
+                mystr = "Default";
+            }
+            spinUiOption.setValue(mystr);
             DCDSpinner.setValue(GetSpinValue("DCD", 1));
             spinRetries.setValue(GetSpinValue("RETRIES", 16));
             spinIdleTime.setValue(GetSpinValue("IDLETIME", 15));
@@ -810,6 +815,8 @@ public class OptionsDialog extends javax.swing.JDialog {
         DCDSpinner = new javax.swing.JSpinner();
         lblDCD = new javax.swing.JLabel();
         Compressed = new javax.swing.JCheckBox();
+        jLabel8 = new javax.swing.JLabel();
+        spinUiOption = new javax.swing.JSpinner();
         pnlGPS = new javax.swing.JPanel();
         frGPS = new javax.swing.JPanel();
         chkGPSConnection = new javax.swing.JCheckBox();
@@ -1688,6 +1695,7 @@ public class OptionsDialog extends javax.swing.JDialog {
 
         jLabel12.setText(optionsdialog.getString("LOG FILE")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
         pnlConfiguration.add(jLabel12, gridBagConstraints);
@@ -1701,14 +1709,16 @@ public class OptionsDialog extends javax.swing.JDialog {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         pnlConfiguration.add(txtLogFile, gridBagConstraints);
 
         lblRetries.setText(optionsdialog.getString("MAX RETRIES")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
         pnlConfiguration.add(lblRetries, gridBagConstraints);
@@ -1716,7 +1726,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         lblIdle.setText(optionsdialog.getString("IDLE TIME")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
         pnlConfiguration.add(lblIdle, gridBagConstraints);
@@ -1724,7 +1734,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         lblTXdelay.setText(optionsdialog.getString("TX DELAY")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
         pnlConfiguration.add(lblTXdelay, gridBagConstraints);
@@ -1733,7 +1743,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         lblOffsetmin.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
         pnlConfiguration.add(lblOffsetmin, gridBagConstraints);
@@ -1744,7 +1754,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         spinRetries.setPreferredSize(new java.awt.Dimension(50, 24));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         pnlConfiguration.add(spinRetries, gridBagConstraints);
@@ -1756,7 +1766,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         spinIdleTime.setPreferredSize(new java.awt.Dimension(50, 24));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         pnlConfiguration.add(spinIdleTime, gridBagConstraints);
@@ -1773,7 +1783,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         pnlConfiguration.add(spinTXdelay, gridBagConstraints);
@@ -1781,7 +1791,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         lblSecond.setText(optionsdialog.getString("SECOND")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
         pnlConfiguration.add(lblSecond, gridBagConstraints);
@@ -1792,7 +1802,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         spinOffsetMinute.setPreferredSize(new java.awt.Dimension(50, 24));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         pnlConfiguration.add(spinOffsetMinute, gridBagConstraints);
 
@@ -1803,7 +1813,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         spinOffsetSeconds.setValue(30);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         pnlConfiguration.add(spinOffsetSeconds, gridBagConstraints);
         spinOffsetSeconds.setModel(new SpinnerNumberModel(30, 0, 50, 10));
@@ -1819,7 +1829,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         pnlConfiguration.add(DCDSpinner, gridBagConstraints);
         DCDSpinner.setModel(new SpinnerNumberModel(3,0,9,1));
@@ -1827,7 +1837,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         lblDCD.setText(optionsdialog.getString("DCD")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
         pnlConfiguration.add(lblDCD, gridBagConstraints);
@@ -1855,6 +1865,20 @@ public class OptionsDialog extends javax.swing.JDialog {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.BASELINE;
         gridBagConstraints.insets = new java.awt.Insets(30, 0, 0, 0);
         pnlConfiguration.add(Compressed, gridBagConstraints);
+
+        jLabel8.setText(optionsdialog.getString("USER INTERFACE")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 5);
+        pnlConfiguration.add(jLabel8, gridBagConstraints);
+
+        spinUiOption.setModel(new javax.swing.SpinnerListModel(new String[] {"Default", "RadioMsg"}));
+        spinUiOption.setPreferredSize(new java.awt.Dimension(90, 25));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 0);
+        pnlConfiguration.add(spinUiOption, gridBagConstraints);
 
         tabOptions.addTab("Configuration", pnlConfiguration);
 
@@ -2634,6 +2658,8 @@ public class OptionsDialog extends javax.swing.JDialog {
             cf.setPreference("QRG4", QRG4.getText());
 
             // Configuration tab
+            myobject = spinUiOption.getValue();
+            cf.setPreference("UIOPTION", myobject.toString());
             myobject = DCDSpinner.getValue();
             cf.setPreference("DCD", myobject.toString());
             myobject = spinRetries.getValue();
@@ -3490,6 +3516,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabelRigStatus;
     private javax.swing.JPanel jPanel1;
@@ -3539,6 +3566,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     public javax.swing.JSpinner spinOffsetSeconds;
     private javax.swing.JSpinner spinRetries;
     private javax.swing.JSpinner spinTXdelay;
+    private javax.swing.JSpinner spinUiOption;
     private javax.swing.JSpinner spinnerAckPosition;
     private javax.swing.JSpinner spinnerDaysToKeepLink;
     private javax.swing.JSpinner spinnerImapProtocol;
