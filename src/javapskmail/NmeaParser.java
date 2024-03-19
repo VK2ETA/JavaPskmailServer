@@ -230,13 +230,15 @@ public class NmeaParser {
     private String ConvertLatitude(String inlat, String hemi){
         Double mydouble;  // Work with this
         Double result;   // Put the finished one here
-        String myLatitude="";
+        String myLatitude="0.0";
         
         try {
             // Get the degrees
-            result = new Double(inlat.substring(0, 2)).doubleValue();
+            //Deprecated result = new Double(inlat.substring(0, 2)).doubleValue();
+            result = Double.parseDouble(inlat.substring(0, 2));
             // Get only the minutes 
-            mydouble = new Double(inlat.substring(2)).doubleValue();
+            //Deprecated mydouble = new Double(inlat.substring(2)).doubleValue();
+            mydouble = Double.parseDouble(inlat.substring(2));
             // Convert to decimal fraction of degrees
             mydouble = mydouble / 60;
             // Put it back together
@@ -267,13 +269,15 @@ public class NmeaParser {
     private String ConvertLongitude(String inlon, String hemi){
         Double mydouble;  // Work with this
         Double result;   // Put the finished one here
-        String myLongitude="";
+        String myLongitude="0.0";
         
         try {
             // Get the degrees
-            result = new Double(inlon.substring(0, 3)).doubleValue();
+            //Deprecated result = new Double(inlon.substring(0, 3)).doubleValue();
+            result = Double.parseDouble(inlon.substring(0, 3));
             // Get only the minutes 
-            mydouble = new Double(inlon.substring(3)).doubleValue();
+            //Deprecated mydouble = new Double(inlon.substring(3)).doubleValue();
+            mydouble = Double.parseDouble(inlon.substring(3));
             // Convert to decimal fraction of degrees
             mydouble = mydouble / 60;
             // Put it back together

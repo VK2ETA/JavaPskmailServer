@@ -78,7 +78,7 @@ public class RigCtrl {
             Double Outfreq = Double.parseDouble(Frequency);
             Outfreq -= OFF;
 
-            Object[] params = new Object[]{new Double(Outfreq)};
+            Object[] params = new Object[]{Outfreq};
 
             try {
                 Object result = client.execute("main.set_frequency", params);
@@ -104,7 +104,7 @@ public class RigCtrl {
         if (function_ok & Sql >= 0) {
 
             d = Double.parseDouble(Integer.toString(Sql));
-            Object[] params = new Object[]{new Double(d)};
+            Object[] params = new Object[]{d};
 
             try {
                 Object result = client.execute("main.set_squelch_level", params);
@@ -242,7 +242,7 @@ public class RigCtrl {
     public static String setSquelchOn(Boolean on) { //false = Off
         if (function_ok) {
 
-            Object[] params = new Object[]{new Boolean(on)};
+            Object[] params = new Object[]{on};
             Object result = null;
 
             try {
@@ -318,7 +318,7 @@ public class RigCtrl {
 
         if (function_ok & aFrequency >= 500 & aFrequency <= 2500) {
 
-            Object[] params = new Object[]{new Integer(aFrequency)};
+            Object[] params = new Object[]{aFrequency};
 
             try {
                 Object result = client.execute("modem.set_carrier", params);

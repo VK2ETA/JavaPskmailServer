@@ -171,6 +171,11 @@ public class MainPskmailUi extends javax.swing.JFrame {
         initComponents();
         //Preset default visibilities
         resetAllMenus();
+        //Preset requested visibilities
+        String uiOption = Main.configuration.getPreference("UIOPTION", "Default");
+        if (uiOption.equals("RadioMsg")) {
+            setRadioMsgUi();
+        }
         //ButtonGroup RB = new ButtonGroup();
         //myarq = new arq();
         //String path = Main.HomePath + Main.Dirprefix;
@@ -1557,6 +1562,30 @@ public class MainPskmailUi extends javax.swing.JFrame {
         jMenu1.setEnabled(true);
         jMenu1.setVisible(false);
         PrefSaveMenu.setVisible(false);
+    }
+    
+    //Hides the non RadioMsg relevant UI components
+    private void setRadioMsgUi() {
+        mnuMbox2.setVisible(false);
+        jMenu1.setVisible(false);
+        mnuIACcodes.setVisible(false);
+        mnuLink.setVisible(false);
+        mnuFqHelp.setVisible(false);
+        mnuMailAPRS2.setVisible(false);
+        mnuMailScanning.setVisible(false);
+        mnuMonitor.setVisible(false);
+        mnuModeQSY2.setVisible(false);
+        mnuConnection.setVisible(false);
+        mnuClear2.setVisible(false);
+        mnuFileList.setVisible(false);
+        jRadioButtonAccept.setVisible(false);
+        jRadioButtonReject.setVisible(false);
+        jRadioButtonDelete.setVisible(false);
+        for (int i = 0; i < 7; i++) {
+                tabMain.removeTabAt(0);
+        }
+        //Remove modem text
+        jScrollPane3.setVisible(false);
     }
         
     public void disableMonitor() {
@@ -3423,10 +3452,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
 
                 tabMain.addTab(mainpskmailui.getString("MainPskmailUi.tabRadioMsg.TabConstraints.tabTitle"), tabRadioMsg); // NOI18N
 
-                gridBagConstraints = new java.awt.GridBagConstraints();
-                gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-                gridBagConstraints.weighty = 1.4;
-                getContentPane().add(tabMain, gridBagConstraints);
+                getContentPane().add(tabMain, new java.awt.GridBagConstraints());
                 tabMain.setEnabledAt(7, true);
 
                 pnlStatus.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
