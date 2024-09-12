@@ -1926,6 +1926,11 @@ public class RMsgProcessor {
                             }
                         }
                          */
+                        //Do we request to have RSID ack (E.G. for ELWHA Transceiver with no audio feedback)
+                        boolean useRsid = false;
+                        if (Main.configuration.getPreference("ACKWITHRSID", "no").equals("yes")) {
+                            useRsid = true;
+                        }
                         //Is it a valid message
                         boolean messageAuthorized = ((Main.accessPassword.length() == 0 && mMessage.crcValid)
                                 || (Main.accessPassword.length() > 0 && mMessage.crcValidWithPW));
@@ -2024,7 +2029,7 @@ public class RMsgProcessor {
                                         replyString = "Address/Number/Alias not in subscriptions";
                                     }
                                 }
-                                RMsgUtil.sendBeeps(cmdOk);
+                                RMsgUtil.sendAcks(cmdOk, useRsid && cmdOk); //Only use RSID is asked and if positive ack
                                 //Reply with acknowledgment message
                                 if (!replyString.equals("")) {
                                     RMsgUtil.replyWithText(mMessage, replyString);
@@ -2046,7 +2051,7 @@ public class RMsgProcessor {
                                     || (matchMyCallWith(mMessage.to, false) && mMessage.via.equals(""))) {
                                 //Only properly received (and secured) messages
                                 if (messageAuthorized) {
-                                    RMsgUtil.sendBeeps(true);
+                                    RMsgUtil.sendAcks(true, useRsid);
                                     Boolean resendLast = false;
                                     //Read request (last X minutes or last N messages). Default is last ONE message if nothing is sent.
                                     int numberOf = 1;
@@ -2112,7 +2117,7 @@ public class RMsgProcessor {
                                         }
                                     }
                                     //Are we asked to relay that QTC message to it's destination?
-                                    if (Main.wantRelayOverRadio && forceRelaying && !matchMyCallWith(mMessage.to, false)
+                                    if (forceRelaying && Main.wantRelayOverRadio  && !matchMyCallWith(mMessage.to, false)
                                             && matchMyCallWith(mMessage.via, false)) {
                                         //Remove the "r" from the string and forward the rest of the QTC request as is
                                         extractedStr = mMessage.sms.substring(6).replaceAll("r", "");
@@ -2190,7 +2195,7 @@ public class RMsgProcessor {
                                     }
                                 } else {
                                     //Alert with low beep to indicate invalid message
-                                    RMsgUtil.sendBeeps(false);
+                                    RMsgUtil.sendAcks(false, false);
                                     //We have an access password missing
                                     //RMsgUtil.replyWithText(mMessage, "Sorry...Missing Access Password");
                                 }
@@ -2203,7 +2208,7 @@ public class RMsgProcessor {
                                 //Looks like an email address? Send via internet as email
                                 if (isEmail(toStr)) {
                                     if (messageAuthorized & Main.wantRelayEmails) {
-                                        RMsgUtil.sendBeeps(true);
+                                        RMsgUtil.sendAcks(true, useRsid);
                                         //Get full message with binary data
                                         RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirInbox, mMessage.fileName, true);
                                         //remove alias prefix 
@@ -2215,7 +2220,7 @@ public class RMsgProcessor {
                                             RMsgUtil.replyWithText(mMessage, "Error sending Email: " + result);
                                         }
                                     } else {
-                                        RMsgUtil.sendBeeps(false);
+                                        RMsgUtil.sendAcks(false, false);
                                         //We have an access password missing
                                         //RMsgUtil.replyWithText(mMessage, "Sorry...Missing Access Password");
                                     }
@@ -2225,14 +2230,14 @@ public class RMsgProcessor {
                                     //tbf if (config.getPreferenceB("SMSSENDRELAY", false)) {
                                     //Get the full message including any picture (as saved on file)
                                     if (messageAuthorized & Main.wantRelaySMSs) {
-                                        RMsgUtil.sendBeeps(true);
+                                        RMsgUtil.sendAcks(true, useRsid);
                                         RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirInbox, mMessage.fileName, true);
                                         //remove alias prefix 
                                         fullMessage.to = RMsgUtil.extractDestination(fullMessage.to);
                                         //Only forward properly received (and secured) messages
                                         sendCellularMsg(fullMessage);
                                     } else {
-                                        RMsgUtil.sendBeeps(false);
+                                        RMsgUtil.sendAcks(false, false);
                                         //We have an access password missing
                                         //RMsgUtil.replyWithText(mMessage, "Sorry...Missing Access Password");
                                     }
@@ -2240,7 +2245,7 @@ public class RMsgProcessor {
                                 } else if (toStr.equals("*") || mMessage.to.length() > 0) { //To ALL or at least one character call-sign or name? Send over Radio
                                     //Only forward properly received messages (allows relay over radio even if access password is not supplied)
                                     if ((mMessage.crcValid || mMessage.crcValidWithPW) && Main.wantRelayOverRadio) {
-                                        RMsgUtil.sendBeeps(true);
+                                        RMsgUtil.sendAcks(true, useRsid);
                                         //Get full message with binary data
                                         RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirInbox, mMessage.fileName, true);
                                         //Add relay and remove via information
@@ -2257,7 +2262,7 @@ public class RMsgProcessor {
                                         //Then send Message
                                         RMsgTxList.addMessageToList(fullMessage);
                                     } else {
-                                        RMsgUtil.sendBeeps(false);
+                                        RMsgUtil.sendAcks(false, false);
                                         //We have an access password missing
                                         //RMsgUtil.replyWithText(mMessage, "Sorry...Missing Access Password");
                                     }
@@ -2277,7 +2282,7 @@ public class RMsgProcessor {
                                     //NO VIA information, sent direct or received via relay, reply ASAP
                                     //Otherwise I may send my reply as the relay station forwards this 
                                     // request to me (and obviously I heard it direct but I have to wait for the relay)
-                                    RMsgUtil.sendBeeps(true);
+                                    RMsgUtil.sendAcks(true, useRsid);
                                     //Wait for the ack to pass first
                                     Thread.sleep(500);
                                     //Reply to ALL unless the requester was an email or an SMS ,
@@ -2295,7 +2300,7 @@ public class RMsgProcessor {
                         } else if (mMessage.sms.startsWith("*tim?")) {
                             if (matchMyCallWith(mMessage.to, false)
                                     || (matchMyCallWith(mMessage.via, false) && mMessage.to.equals("*"))) {
-                                RMsgUtil.sendBeeps(true);
+                                RMsgUtil.sendAcks(true, useRsid);
                                 //Reply to the requesting station only
                                 RMsgUtil.replyWithTime(mMessage);
                             }
@@ -2303,14 +2308,14 @@ public class RMsgProcessor {
                         } else if (mMessage.sms.startsWith("*snr?")) {
                             if (matchMyCallWith(mMessage.to, false)
                                     || (matchMyCallWith(mMessage.via, false) && mMessage.to.equals("*"))) {
-                                RMsgUtil.sendBeeps(true);
+                                RMsgUtil.sendAcks(true, useRsid);
                                 //Reply to the requesting station only
                                 RMsgUtil.replyWithSNR(mMessage);
                             }
                         //Time Sync data received, notify
                         } else if (mMessage.sms.toLowerCase(Locale.US).equals("*time reference received*")) {
                             if (matchMyCallWith(mMessage.to, false) && Main.refTimeSource.length() > 0) {
-                                RMsgUtil.sendBeeps(true);
+                                RMsgUtil.sendAcks(true, useRsid);
                                 if (Main.deviceToRefTimeCorrection == 0) {
                                     Main.mainui.appendMainWindow("This device clock is the same as " + Main.refTimeSource + "'s clock\n");
                                 } else if (Main.deviceToRefTimeCorrection < 0) {
@@ -2323,8 +2328,12 @@ public class RMsgProcessor {
                             }
                         } else {
                             //Not an action message, send ack as appropriate if directed to me ONLY or to ALL
-                            if (matchMyCallWith(mMessage.to, true)) {
-                                RMsgUtil.sendBeeps(mMessage.crcValid || mMessage.crcValidWithPW);
+                            if (matchMyCallWith(mMessage.to, false)) {
+                                //Directed to me and only to me, we can use a single RSID ack if requested
+                                RMsgUtil.sendAcks(mMessage.crcValid || mMessage.crcValidWithPW, useRsid);
+                            } else if (matchMyCallWith(mMessage.to, true)) { //Must be to All then
+                                //Don't use single RSID ack if to ALL, use beep sequence instead
+                                RMsgUtil.sendAcks(mMessage.crcValid || mMessage.crcValidWithPW, false);
                             }
                         }
                     }

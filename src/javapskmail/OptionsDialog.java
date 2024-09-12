@@ -666,6 +666,12 @@ public class OptionsDialog extends javax.swing.JDialog {
             }
             spinnerAckPosition.setValue(GetSpinValue("ACKPOSITION", 0));
             spinnerMaxAckPosition.setValue(GetSpinValue("MAXACKS", 0));
+            if (Main.configuration.getPreference("ACKWITHRSID").equals("yes")) {
+                this.checkboxAckWithRSID.setSelected(true);
+            } else {
+                this.checkboxAckWithRSID.setSelected(false);
+            }
+
             
             spinnerDaysToKeepLink.setValue(GetSpinValue("DAYSTOKEEPLINK", 90));
             
@@ -799,6 +805,8 @@ public class OptionsDialog extends javax.swing.JDialog {
         jLabel24 = new javax.swing.JLabel();
         jLabel25 = new javax.swing.JLabel();
         spinnerMaxAckPosition = new javax.swing.JSpinner();
+        jLabel26 = new javax.swing.JLabel();
+        checkboxAckWithRSID = new javax.swing.JCheckBox();
         pnlConfiguration = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
         txtLogFile = new javax.swing.JTextField();
@@ -1606,7 +1614,7 @@ public class OptionsDialog extends javax.swing.JDialog {
                         .addGap(48, 48, 48)
                         .addComponent(checkboxRelaySMSsImmediately))
                     .addComponent(jButtonConfigSmsGateway))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
         jPanel10Layout.setVerticalGroup(
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1614,7 +1622,7 @@ public class OptionsDialog extends javax.swing.JDialog {
                 .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(checkboxRelaySMSs)
                     .addComponent(checkboxRelaySMSsImmediately))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(18, 18, 18)
                 .addComponent(jButtonConfigSmsGateway)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -1635,6 +1643,11 @@ public class OptionsDialog extends javax.swing.JDialog {
         spinnerMaxAckPosition.setMinimumSize(new java.awt.Dimension(32, 25));
         spinnerMaxAckPosition.setName(""); // NOI18N
 
+        jLabel26.setText(optionsdialog.getString("ACKNOWLEDGEWITHRSID")); // NOI18N
+        jLabel26.setToolTipText("");
+
+        checkboxAckWithRSID.setToolTipText(optionsdialog.getString("ACKWITHRSIDTOOLTIP")); // NOI18N
+
         javax.swing.GroupLayout jPanel13Layout = new javax.swing.GroupLayout(jPanel13);
         jPanel13.setLayout(jPanel13Layout);
         jPanel13Layout.setHorizontalGroup(
@@ -1646,10 +1659,14 @@ public class OptionsDialog extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(spinnerAckPosition, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel13Layout.createSequentialGroup()
+                        .addComponent(jLabel26, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(checkboxAckWithRSID))
+                    .addGroup(jPanel13Layout.createSequentialGroup()
                         .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(spinnerMaxAckPosition, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addGap(0, 173, Short.MAX_VALUE))
         );
         jPanel13Layout.setVerticalGroup(
             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1658,10 +1675,15 @@ public class OptionsDialog extends javax.swing.JDialog {
                 .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel24)
                     .addComponent(spinnerAckPosition, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel25)
-                    .addComponent(spinnerMaxAckPosition, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)))
+                    .addComponent(spinnerMaxAckPosition, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel26)
+                    .addComponent(checkboxAckWithRSID))
+                .addGap(12, 12, 12))
         );
 
         javax.swing.GroupLayout RadioMsgPanelLayout = new javax.swing.GroupLayout(RadioMsgPanel);
@@ -1680,13 +1702,13 @@ public class OptionsDialog extends javax.swing.JDialog {
             .addGroup(RadioMsgPanelLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(test1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(19, 19, 19)
                 .addComponent(jPanel13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(40, 40, 40))
+                .addContainerGap())
         );
 
         tabOptions.addTab("RadioMsg", RadioMsgPanel);
@@ -2834,6 +2856,12 @@ public class OptionsDialog extends javax.swing.JDialog {
             cf.setPreference("ACKPOSITION", myobject.toString());
             myobject = spinnerMaxAckPosition.getValue();
             cf.setPreference("MAXACKS", myobject.toString());
+            if (checkboxAckWithRSID.isSelected()) {
+                cf.setPreference("ACKWITHRSID", "yes");
+            } else {
+                cf.setPreference("ACKWITHRSID", "no");
+            }
+
             
             //Always save in case we blank it out
             cf.setPreference("SMSEMAILGATEWAY", txtSmsEmailGatewayDomain);
@@ -3467,6 +3495,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JComboBox<String> cboGPSSerialPort;
     private javax.swing.JComboBox cboGPSSpeed;
     private javax.swing.JComboBox<String> cboModes;
+    private javax.swing.JCheckBox checkboxAckWithRSID;
     private javax.swing.JCheckBox checkboxEnablePskmailServer;
     private javax.swing.JCheckBox checkboxRelayEmail;
     private javax.swing.JCheckBox checkboxRelayEmailsImmediately;
@@ -3503,6 +3532,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel25;
+    private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;

@@ -171,6 +171,8 @@ public class MainPskmailUi extends javax.swing.JFrame {
         initComponents();
         //Preset default visibilities
         resetAllMenus();
+        //Remove MQTT Tab until completed
+        tabMain.removeTabAt(8);
         //Preset requested visibilities
         String uiOption = Main.configuration.getPreference("UIOPTION", "Default");
         if (uiOption.equals("RadioMsg")) {
@@ -1758,6 +1760,15 @@ public class MainPskmailUi extends javax.swing.JFrame {
         bRMsgResend = new javax.swing.JButton();
         serverControl = new javax.swing.JButton();
         bRMsgManageMsg = new javax.swing.JButton();
+        tabMqtt = new javax.swing.JPanel();
+        jScrollMqttSettings = new javax.swing.JScrollPane();
+        jPanelMqttSettings = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        CBconnectAtStart = new javax.swing.JCheckBox();
+        jLabel4 = new javax.swing.JLabel();
+        MqttServerAddress = new javax.swing.JTextField();
+        jScrollMqttData = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
         pnlStatus = new javax.swing.JPanel();
         snLabel = new javax.swing.JLabel();
         StatusLabel = new javax.swing.JLabel();
@@ -1920,6 +1931,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
 
         tabMain.setBackground(new java.awt.Color(251, 219, 187));
         tabMain.setTabPlacement(javax.swing.JTabbedPane.BOTTOM);
+        tabMain.setDoubleBuffered(true);
         tabMain.setMinimumSize(new java.awt.Dimension(725, 290));
         tabMain.setPreferredSize(new java.awt.Dimension(725, 290));
         tabMain.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -1934,7 +1946,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
         pnlTerminalButtons.setMaximumSize(new java.awt.Dimension(32767, 40));
         pnlTerminalButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        bConnect.setFont(new java.awt.Font("Metal", 1, 11)); // NOI18N
+        bConnect.setFont(new java.awt.Font("Dialog", 1, 11)); // NOI18N
         bConnect.setForeground(new java.awt.Color(0, 102, 51));
         bConnect.setText(bundle.getString("MainPskmailUi.bConnect.text")); // NOI18N
         bConnect.setMaximumSize(new java.awt.Dimension(100, 25));
@@ -1947,7 +1959,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
         });
         pnlTerminalButtons.add(bConnect);
 
-        AbortButton.setFont(new java.awt.Font("Metal", 1, 11)); // NOI18N
+        AbortButton.setFont(new java.awt.Font("SansSerif", 1, 11)); // NOI18N
         AbortButton.setForeground(new java.awt.Color(0, 102, 0));
         AbortButton.setText(bundle.getString("MainPskmailUi.AbortButton.text")); // NOI18N
         AbortButton.setMaximumSize(new java.awt.Dimension(100, 25));
@@ -1960,7 +1972,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
         });
         pnlTerminalButtons.add(AbortButton);
 
-        CQButton.setFont(new java.awt.Font("DejaVu Sans", 1, 12)); // NOI18N
+        CQButton.setFont(new java.awt.Font("SansSerif", 1, 11)); // NOI18N
         CQButton.setForeground(new java.awt.Color(0, 128, 19));
         CQButton.setText(bundle.getString("MainPskmailUi.CQButton.text")); // NOI18N
         CQButton.setMaximumSize(new java.awt.Dimension(100, 25));
@@ -1973,7 +1985,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
         });
         pnlTerminalButtons.add(CQButton);
 
-        PositButton.setFont(new java.awt.Font("Metal", 1, 11)); // NOI18N
+        PositButton.setFont(new java.awt.Font("SansSerif", 1, 11)); // NOI18N
         PositButton.setForeground(new java.awt.Color(0, 102, 0));
         PositButton.setText(bundle.getString("MainPskmailUi.PositButton.text")); // NOI18N
         PositButton.setMaximumSize(new java.awt.Dimension(100, 25));
@@ -1986,7 +1998,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
         });
         pnlTerminalButtons.add(PositButton);
 
-        SendButton.setFont(new java.awt.Font("Metal", 1, 11)); // NOI18N
+        SendButton.setFont(new java.awt.Font("SansSerif", 1, 11)); // NOI18N
         SendButton.setForeground(new java.awt.Color(0, 102, 0));
         SendButton.setText(bundle.getString("MainPskmailUi.SendButton.text")); // NOI18N
         SendButton.setFocusPainted(false);
@@ -2005,7 +2017,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
         jTextPane2.setBackground(new java.awt.Color(255, 255, 230));
         jTextPane2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
         jTextPane2.setDocument(terminaldoc);
-        jTextPane2.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
+        jTextPane2.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
         jTextPane2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 jTextPane2MousePressed(evt);
@@ -3452,6 +3464,66 @@ public class MainPskmailUi extends javax.swing.JFrame {
 
                 tabMain.addTab(mainpskmailui.getString("MainPskmailUi.tabRadioMsg.TabConstraints.tabTitle"), tabRadioMsg); // NOI18N
 
+                tabMqtt.setLayout(new java.awt.GridBagLayout());
+
+                jScrollMqttSettings.setMinimumSize(new java.awt.Dimension(400, 300));
+                jScrollMqttSettings.setPreferredSize(new java.awt.Dimension(400, 300));
+
+                jPanelMqttSettings.setLayout(new java.awt.GridBagLayout());
+
+                jLabel2.setText(mainpskmailui.getString("MainPskmailUi.jLabel2.text")); // NOI18N
+                gridBagConstraints = new java.awt.GridBagConstraints();
+                gridBagConstraints.gridx = 0;
+                gridBagConstraints.gridy = 0;
+                gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+                jPanelMqttSettings.add(jLabel2, gridBagConstraints);
+
+                CBconnectAtStart.setText(mainpskmailui.getString("MainPskmailUi.CBconnectAtStart.text")); // NOI18N
+                gridBagConstraints = new java.awt.GridBagConstraints();
+                gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+                gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+                jPanelMqttSettings.add(CBconnectAtStart, gridBagConstraints);
+
+                jLabel4.setText(mainpskmailui.getString("MainPskmailUi.jLabel4.text")); // NOI18N
+                gridBagConstraints = new java.awt.GridBagConstraints();
+                gridBagConstraints.gridx = 0;
+                gridBagConstraints.gridy = 1;
+                gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+                gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+                jPanelMqttSettings.add(jLabel4, gridBagConstraints);
+
+                MqttServerAddress.setText(mainpskmailui.getString("MainPskmailUi.MqttServerAddress.text")); // NOI18N
+                MqttServerAddress.setMinimumSize(new java.awt.Dimension(80, 19));
+                MqttServerAddress.setPreferredSize(new java.awt.Dimension(150, 19));
+                gridBagConstraints = new java.awt.GridBagConstraints();
+                gridBagConstraints.gridx = 1;
+                gridBagConstraints.gridy = 1;
+                gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+                gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
+                jPanelMqttSettings.add(MqttServerAddress, gridBagConstraints);
+
+                jScrollMqttSettings.setViewportView(jPanelMqttSettings);
+
+                gridBagConstraints = new java.awt.GridBagConstraints();
+                gridBagConstraints.gridx = 0;
+                gridBagConstraints.gridy = 0;
+                gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+                tabMqtt.add(jScrollMqttSettings, gridBagConstraints);
+
+                jScrollMqttData.setMinimumSize(new java.awt.Dimension(400, 300));
+                jScrollMqttData.setPreferredSize(new java.awt.Dimension(400, 300));
+
+                jTextArea1.setColumns(20);
+                jTextArea1.setRows(5);
+                jScrollMqttData.setViewportView(jTextArea1);
+
+                gridBagConstraints = new java.awt.GridBagConstraints();
+                gridBagConstraints.gridx = 1;
+                gridBagConstraints.gridy = 0;
+                tabMqtt.add(jScrollMqttData, gridBagConstraints);
+
+                tabMain.addTab(mainpskmailui.getString("MainPskmailUi.tabMqtt.TabConstraints.tabTitle"), tabMqtt); // NOI18N
+
                 getContentPane().add(tabMain, new java.awt.GridBagConstraints());
                 tabMain.setEnabledAt(7, true);
 
@@ -3484,7 +3556,6 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 pnlStatus.add(StatusLabel, gridBagConstraints);
 
                 cboServer.setEditable(true);
-                cboServer.setFont(new java.awt.Font("DejaVu Sans Mono", 0, 12)); // NOI18N
                 cboServer.setMinimumSize(new java.awt.Dimension(150, 27));
                 cboServer.setPreferredSize(new java.awt.Dimension(150, 27));
                 cboServer.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -3515,7 +3586,6 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 });
 
                 spnMinute.setModel(new SpinnerNumberModel(0,0,4,1));
-                spnMinute.setFont(new java.awt.Font("DejaVu Sans Mono", 0, 12)); // NOI18N
                 spnMinute.setToolTipText(mainpskmailui.getString("During_what_minute_(0-4)_will_the_server_listen_and_the_client_transmit?")); // NOI18N
                 spnMinute.setPreferredSize(new java.awt.Dimension(28, 29));
                 spnMinute.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -3542,7 +3612,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 gridBagConstraints.gridy = 0;
                 pnlStatus.add(ProgressBar, gridBagConstraints);
 
-                jTextField1.setFont(jTextField1.getFont().deriveFont((jTextField1.getFont().getStyle() & ~java.awt.Font.ITALIC) & ~java.awt.Font.BOLD, 12));
+                jTextField1.setFont(new java.awt.Font("Dialog", 1, 12)); // NOI18N
                 jTextField1.setForeground(new java.awt.Color(47, 120, 93));
                 jTextField1.setHorizontalAlignment(javax.swing.JTextField.CENTER);
                 jTextField1.setMaximumSize(new java.awt.Dimension(100, 26));
@@ -3576,7 +3646,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 pnlStatus.add(linkstatus, gridBagConstraints);
 
                 RXlabel.setBackground(new java.awt.Color(255, 255, 255));
-                RXlabel.setFont(new java.awt.Font("DejaVu Sans Mono", 0, 12)); // NOI18N
+                RXlabel.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
                 RXlabel.setForeground(new java.awt.Color(37, 109, 87));
                 RXlabel.setText(bundle.getString("MainPskmailUi.RXlabel.text")); // NOI18N
                 RXlabel.setMaximumSize(new java.awt.Dimension(120, 14));
@@ -3627,7 +3697,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 gridBagConstraints.insets = new java.awt.Insets(5, 10, 3, 0);
                 pnlMainEntry.add(txtMainEntry, gridBagConstraints);
 
-                lblStatus.setFont(new java.awt.Font("DejaVu Sans", 1, 12)); // NOI18N
+                lblStatus.setFont(new java.awt.Font("SansSerif", 1, 12)); // NOI18N
                 lblStatus.setForeground(new java.awt.Color(153, 153, 153));
                 lblStatus.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
                 lblStatus.setText("Listening"); // NOI18N
@@ -3666,7 +3736,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 txtLinkMonitor.setBackground(new java.awt.Color(220, 235, 207));
                 txtLinkMonitor.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.LOWERED));
                 txtLinkMonitor.setDocument(monitordoc);
-                txtLinkMonitor.setFont(new java.awt.Font("DejaVu Sans Mono", 0, 12)); // NOI18N
+                txtLinkMonitor.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
                 txtLinkMonitor.setMaximumSize(new java.awt.Dimension(1400, 100));
                 txtLinkMonitor.setMinimumSize(new java.awt.Dimension(400, 1400));
                 jScrollPane3.setViewportView(txtLinkMonitor);
@@ -8161,6 +8231,10 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         }
         return in;
     }
+    
+    public void addToStatusField(final String statusMessageFromBundle, final int time) {
+        Main.q.Message(mainpskmailui.getString(statusMessageFromBundle), time);
+    }
 
     public void refreshHeaders() {
         LoadHeaders();
@@ -8598,6 +8672,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     public javax.swing.JCheckBox APRS_IS;
     private javax.swing.JButton AbortButton;
     private javax.swing.JMenuItem Beacon_menu_item;
+    private javax.swing.JCheckBox CBconnectAtStart;
     private javax.swing.JTextField CPSValue;
     private javax.swing.JButton CQButton;
     public static javax.swing.JTextField ClientFreqTxtfield;
@@ -8623,6 +8698,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JMenuItem Link_menu_item;
     private javax.swing.JButton ListFilesButton;
     private javax.swing.JMenuItem MnuTelnet;
+    private javax.swing.JTextField MqttServerAddress;
     private javax.swing.JMenuItem Ping_menu_item;
     private javax.swing.JButton PositButton;
     private javax.swing.JMenuItem PrefSaveMenu;
@@ -8683,7 +8759,9 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JComboBox<String> jComboRMsgVia;
     private javax.swing.JMenuItem jGetIAC;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar3;
     private javax.swing.JMenuItem jMenuQuality;
@@ -8692,11 +8770,14 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanelMqttSettings;
     private javax.swing.JRadioButton jRadBtnAliasAndAddress;
     private javax.swing.JRadioButton jRadBtnAliasOnly;
     public javax.swing.JRadioButtonMenuItem jRadioButtonAccept;
     public javax.swing.JRadioButtonMenuItem jRadioButtonDelete;
     public javax.swing.JRadioButtonMenuItem jRadioButtonReject;
+    private javax.swing.JScrollPane jScrollMqttData;
+    private javax.swing.JScrollPane jScrollMqttSettings;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
@@ -8715,6 +8796,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JSplitPane jSplitPane2;
+    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextPane jTextPane2;
     private javax.swing.JLabel labelCurrentFreq;
@@ -8829,6 +8911,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JPanel tabIgate;
     private javax.swing.JTabbedPane tabMain;
     private javax.swing.JPanel tabModem;
+    private javax.swing.JPanel tabMqtt;
     private javax.swing.JPanel tabRadioMsg;
     private javax.swing.JPanel tabRigctl;
     private javax.swing.JPanel tabTerminal;

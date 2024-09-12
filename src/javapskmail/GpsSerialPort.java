@@ -139,7 +139,7 @@ public class GpsSerialPort {
         }
     }
 
-    /**
+    /*
     * Disconnect the port
     */
    void disconnect(){

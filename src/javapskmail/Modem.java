@@ -1176,6 +1176,8 @@ public class Modem implements Runnable {
                 }
             } else if (modeStr.startsWith("MT63-1") || modeStr.startsWith("MT63-2")) {
                 modeStr = modeStr.replace("000", "XX");
+            } else if (modeStr.startsWith("EOT")) {
+                Main.receivedRsidAck = true;
             }
         }
       
@@ -1400,6 +1402,10 @@ public class Modem implements Runnable {
                             Main.rxDelayCount = Main.RadioMsgAcksDelay;
                             Main.RadioMsgAcksDelay = 0;
                         }
+                        //Ensure we don't have EOT RSID enabled for next transmission
+                         RigCtrl.setEotRsid(false);
+                         //Rset sending Ack flag
+                         Main.sendingAcks = false;
                         //Reset TxRSID as it is OFF by default and needs to be enabled when required
                         Main.m.requestTxRsid("OFF");
                         //Does not solve intermittent TXID issue
@@ -1464,38 +1470,52 @@ public class Modem implements Runnable {
                                         }
                                     }
                                 } else { //We must have received an RSID                         
-                                    Main.lastRsidTime = Main.possibleRadioMsg = System.currentTimeMillis();
-                                    //Open squelch...a frame may be coming
-                                    RigCtrl.SetSqlLevel(Main.SQL_FLOOR);
-                                    //Reset receiving radio message as we are getting a new message in all logic and the RSID would have resetted the modem anyway
-                                    Main.receivingRadioMsg = false;
-                                    Main.haveSOH = false;
+                                    //Interpret the text after "<Mode:"
                                     Main.lastRsidReceived = rawRsidToModeString(notifier);
                                     //          System.out.println(notifier);
-                                    int mi = getmodeindex(notifier);
-                                    //          System.out.println(mi);
-                                    if (mi < 16 & mi > 0) {
-                                        Main.justReceivedRSID = true;
-                                        //As the client always sends an RSID in connect phase, calculate
-                                        // the Client's delay to send an RSID so that we adapt to its timing.
-                                        //This may be of value when using repeaters with long hang times. 
-                                        // The client can then safely increase the Tx delay. Useful for slow CPUs too.
-                                        if (Main.Connecting && Main.oldtime > 0) {
-                                            validPskmailRxDelay = (System.currentTimeMillis() - Main.oldtime) / 1000;
-                                            if (validPskmailRxDelay < 10.0f && validPskmailRxDelay >= 0.0f) { //Max 10 seconds delay
-                                                //With average
-                                                //Main.RxDelay = decayAverage(Main.RxDelay, validPskmailRxDelay, 3);
-                                                //Without average
-                                                Main.rxDelay = validPskmailRxDelay + 0; //Allow for RSID silence and processing
+                                    if (Main.receivedRsidAck) {
+                                        //Display an a message in the modem section of the screen and in the bottom status line
+                                        Main.monitorText += "\n*** Message Received *** ";
+                                        //Run on UI thread
+                                        java.awt.EventQueue.invokeLater(new Runnable() {
+                                            public void run() {
+                                                Main.mainui.addToStatusField("Message_Received_rsid_ack", 5);
                                             }
+                                        });
+                                        Main.receivedRsidAck = false; //Reset
+                                    } else {
+                                        Main.lastRsidTime = Main.possibleRadioMsg = System.currentTimeMillis();
+                                        //Open squelch...a frame may be coming
+                                        RigCtrl.SetSqlLevel(Main.SQL_FLOOR);
+                                        //Reset receiving radio message as we are getting a new message in all logic and the RSID would have resetted the modem anyway
+                                        Main.receivingRadioMsg = false;
+                                        Main.haveSOH = false;
+                                        Main.receivedRsidAck = false;
+                                        int mi = getmodeindex(notifier);
+                                        //          System.out.println(mi);
+                                        if (mi < 16 & mi > 0) {
+                                            Main.justReceivedRSID = true;
+                                            //As the client always sends an RSID in connect phase, calculate
+                                            // the Client's delay to send an RSID so that we adapt to its timing.
+                                            //This may be of value when using repeaters with long hang times. 
+                                            // The client can then safely increase the Tx delay. Useful for slow CPUs too.
+                                            if (Main.Connecting && Main.oldtime > 0) {
+                                                validPskmailRxDelay = (System.currentTimeMillis() - Main.oldtime) / 1000;
+                                                if (validPskmailRxDelay < 10.0f && validPskmailRxDelay >= 0.0f) { //Max 10 seconds delay
+                                                    //With average
+                                                    //Main.RxDelay = decayAverage(Main.RxDelay, validPskmailRxDelay, 3);
+                                                    //Without average
+                                                    Main.rxDelay = validPskmailRxDelay + 0; //Allow for RSID silence and processing
+                                                }
+                                            }
+                                            Main.rxModem = pmodes[mi];
+                                            Main.rxModemString = smodes[mi];
+                                            //Mark time when we received an RSID to block mode and 
+                                            // frequency change until we are sure we are not receiving a
+                                            // Radio Message.
+                                        } else if (mi == 0) { //False alarm, not a valid RSID or not a unsupported mode
+                                            Main.txModem = Main.rxModem;
                                         }
-                                        Main.rxModem = pmodes[mi];
-                                        Main.rxModemString = smodes[mi];
-                                        //Mark time when we received an RSID to block mode and 
-                                        // frequency change until we are sure we are not receiving a
-                                        // Radio Message.
-                                    } else if (mi == 0) { //False alarm, not a valid RSID or not a unsupported mode
-                                        Main.txModem = Main.rxModem;
                                     }
                                 }
                                 notifier = "";

@@ -255,6 +255,29 @@ public class RigCtrl {
         } else Rigctl(); //Try to re-connect
         return "0";
     }
+    
+    public static boolean setEotRsid(Boolean onOff) { //false = Off
+        if (function_ok) {
+
+            Object[] params = new Object[]{onOff};
+            Object result = null;
+
+            try {
+                result = client.execute("main.set_eot_rsid", params);
+                String str = result.toString();
+//          System.out.println("STR:" + str);          
+                if (str.equals("true") | str.equals("1")) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (XmlRpcException ex) {
+                //Main.log.writelog("Problem with xmlrpc set SQL: " + ex, true);
+                function_ok = false;
+            }
+        } else Rigctl(); //Try to re-connect
+        return false;
+    }
 
     public void Message(String msg, int time) {
         Main.statusLine = msg;

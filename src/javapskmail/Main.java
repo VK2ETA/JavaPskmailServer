@@ -2,7 +2,7 @@
  * Main.java
  * 
  * Copyright (C) 2008 Pär Crusefalk and Rein Couperus
- * Copyright (C) 2018-2022 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
+ * Copyright (C) 2018-2024 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -34,9 +34,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.2.0.1";
+    static String version = "3.2.0.3";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20240319";
+    static String versionDate = "20240912";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -306,7 +306,8 @@ public class Main {
     static public boolean radioMsgWorking = false; //Radiomsg processing emails or web pages - do not scan
     static public String fileNameString = "";
     static public long lastCharacterTime = 0L;//Time of last character received from Modem
-    static public boolean haveSOH = false;
+    static public boolean haveSOH = false; //We have received an SOH
+    static public boolean receivedRsidAck = false; //When we receive and "EOL" RSID we interpret it as a positive ACK
 
     /**
      * @param args the command line arguments

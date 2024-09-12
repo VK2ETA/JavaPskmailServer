@@ -529,7 +529,7 @@ public class RMsgUtil {
 
    
     //Send a single beep or double beep by sending a Tune command to the modem for short periods of time
-    public static void sendBeeps(final boolean positiveAck) {
+    public static void sendAcks(final boolean positiveAck, final boolean useRSID) {
 
         //Mark as Sending Beeps
         Main.sendingAcks = true;
@@ -537,48 +537,56 @@ public class RMsgUtil {
             @Override
             public void run() {
                 try {
-                    //int ackPosition = config.getPreferenceI("ACKPOSITION", 0);
-                    String ackPosStr = Main.configuration.getPreference("ACKPOSITION", "0");
-                    int ackPosition = 0;
-                    try {
-                        ackPosition = Integer.parseInt(ackPosStr);
-                    } catch (NumberFormatException e) {
-                        //Nothing
-                    }
-                    ackPosition = ackPosition > 8 ? 8 : ackPosition;
-                    ackPosition = ackPosition < 0 ? 0 : ackPosition;
-                    //boolean onlyForAlerts = config.getPreferenceB("ACKONLYALERTS", false);
-                    if (ackPosition > 0) {
-                        //Sure that we will TX, set flag
-                        Main.TxActive = true;
-                        //Wait for any TXing to complete
-                        int waitCount = 0;
-                        /*while (Main.TxActive && waitCount < 100) { //Max 5 seconds
+                    if (useRSID && positiveAck) {
+                        //Set the EOT RSID on
+                        RigCtrl.setEotRsid(true);
+                        //Now send the ack
+                        Main.m.Sendln("  ", "CW", "ON"); //Just send a silence, the EOT Rsid will follow automatically provided we also have TX ID on
+                    } else {
+                        //int ackPosition = config.getPreferenceI("ACKPOSITION", 0);
+                        String ackPosStr = Main.configuration.getPreference("ACKPOSITION", "0");
+                        int ackPosition = 0;
+                        try {
+                            ackPosition = Integer.parseInt(ackPosStr);
+                        } catch (NumberFormatException e) {
+                            //Nothing
+                        }
+                        ackPosition = ackPosition > 8 ? 8 : ackPosition;
+                        ackPosition = ackPosition < 0 ? 0 : ackPosition;
+                        //boolean onlyForAlerts = config.getPreferenceB("ACKONLYALERTS", false);
+                        if (ackPosition > 0) {
+                            //Sure that we will TX, set flag
+                            Main.TxActive = true;
+                            //Wait for any TXing to complete
+                            int waitCount = 0;
+                            /*while (Main.TxActive && waitCount < 100) { //Max 5 seconds
                             Thread.sleep(50);
                             waitCount++;
-                        }*/
-                        //Only send if we are waiting less than 5 seconds otherwise it is pointless
-                        if (waitCount < 100) {
-                            //Time for reception to finish trailing tones
-                            //Wait 0.4 seconds for the Rx to be fully completed
-                            long remainingSleep = Main.m.delayUntilMyAckPosition(ackPosition, false) - (50 * waitCount);
-                            remainingSleep = remainingSleep < 0 ? 0 : remainingSleep;
-                            remainingSleep = remainingSleep > 10000 ? 10000 : remainingSleep;
-                            Thread.sleep(remainingSleep);
-                            Main.m.generateDitDahSequence(ackPosition, positiveAck);
-                            //Wait for the highest Acknowledgement position before allowing TX again
-                            long endOfBeepsDuration = Main.m.delayUntilMyAckPosition(ackPosition, true);
-                            long maxAckDelay = Main.m.delayUntilMaxAcksHeard();
-                            long extraDelay = maxAckDelay - endOfBeepsDuration;
-                            if (extraDelay > 0L) {
-                                Thread.sleep(extraDelay);
+                            }*/
+                            //Only send if we are waiting less than 5 seconds otherwise it is pointless
+                            if (waitCount < 100) {
+                                //Time for reception to finish trailing tones
+                                //Wait 0.4 seconds for the Rx to be fully completed
+                                long remainingSleep = Main.m.delayUntilMyAckPosition(ackPosition, false) - (50 * waitCount);
+                                remainingSleep = remainingSleep < 0 ? 0 : remainingSleep;
+                                remainingSleep = remainingSleep > 10000 ? 10000 : remainingSleep;
+                                Thread.sleep(remainingSleep);
+                                Main.m.generateDitDahSequence(ackPosition, positiveAck);
+                                //Wait for the highest Acknowledgement position before allowing TX again
+                                long endOfBeepsDuration = Main.m.delayUntilMyAckPosition(ackPosition, true);
+                                long maxAckDelay = Main.m.delayUntilMaxAcksHeard();
+                                long extraDelay = maxAckDelay - endOfBeepsDuration;
+                                if (extraDelay > 0L) {
+                                    Thread.sleep(extraDelay);
+                                }
                             }
                         }
                     }
                 } catch (Exception e) {
                     //loggingclass.writelog("Exception Error in 'sendBeeps' " + e.getMessage(), null, true);
                 }
-                Main.sendingAcks = false;
+                //Moved to return from TX in modem.java
+                // Main.sendingAcks = false;
             }
         };
         myThread.start();
