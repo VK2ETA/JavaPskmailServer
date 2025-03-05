@@ -119,8 +119,8 @@ public class RMsgObject {
     }
 
 
-
     //Returns the latitude and longitude in a formatted string
+    //Changed so that it is always with a decimal point as the decimal separator
     public String getLatLongString() {
         double latnum = 0.0;
         double lonnum = 0.0;
@@ -130,7 +130,7 @@ public class RMsgObject {
         }
         DecimalFormat dFlat = new DecimalFormat("##0.00000;-##0.00000");
         DecimalFormat dFlon = new DecimalFormat("###0.00000;-###0.00000");
-        String decDegreesString = dFlat.format(latnum) + "," + dFlon.format(lonnum);
+        String decDegreesString = dFlat.format(latnum).replace(',','.') + "," + dFlon.format(lonnum).replace(',','.');
 
         return decDegreesString;
     }
