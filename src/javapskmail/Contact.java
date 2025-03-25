@@ -34,12 +34,13 @@ public class Contact {
     private String Notes;
     //VK2ETA: add Radio Msg fields
     private Boolean showInVIA;
-    private String password;
+    private String relayingPassword;
     private Boolean showInTO;
     private Boolean showMobileInTO;
     private Boolean showEmailInTO;
     private String MobilePhoneAlias;
     private String EmailAlias;
+    private String IotPassword;
 
     public Contact(){
         super();
@@ -58,12 +59,13 @@ public class Contact {
         MMSI="";
         Notes="";
         showInVIA = false;
-        password = "";
+        relayingPassword = "";
         showInTO = false;
         showMobileInTO = false;
         showEmailInTO = false;
         MobilePhoneAlias = "";
         EmailAlias = "";
+        IotPassword = "";
     }
 
     /**
@@ -97,12 +99,15 @@ public class Contact {
             this.setNotes(temp[8]);
             this.setNickname(temp[9]);
             this.setShowInVIA(temp[10].equals("Y"));
-            this.setPassword(temp[11]);
+            this.setRelayingPassword(temp[11]);
             this.setShowInTO(temp[12].equals("Y"));
             this.setShowMobileInTO(temp[13].equals("Y"));
             this.setMobilePhoneAlias(temp[14]);
             this.setShowEmailInTO(temp[15].equals("Y"));
             this.setEmailAlias(temp[16]);
+            if (temp.length > 17) {
+                this.setIotPassword(temp[17]);
+            }
         } else if (temp.length > 8){ //Make it compatible with old contact files
             setFirstName(temp[0]);
             setLastName(temp[1]);
@@ -117,7 +122,7 @@ public class Contact {
             //Blank out unknown fields
             this.setShowInTO(false);
             this.setShowInVIA(false);
-            this.setPassword("");
+            this.setRelayingPassword("");
             this.setShowMobileInTO(false);
             this.setShowEmailInTO(false);
             this.setMobilePhoneAlias("");
@@ -145,12 +150,13 @@ public class Contact {
         "\"" + this.getNotes()+ "\"," +
         "\"" + this.getNickname()+ "\"," +
         "\"" + this.getShowInVIA()+ "\"," +
-        "\"" + this.getPassword()+ "\"," +        
+        "\"" + this.getRelayingPassword()+ "\"," +        
         "\"" + this.getShowInTO()+ "\"," +
         "\"" + this.getShowMobileInTO()+ "\"," +
         "\"" + this.getMobilePhoneAlias()+ "\"," +
         "\"" + this.getShowEmailInTO()+ "\"," +
-        "\"" + this.getEmailAlias()+ "\"";
+        "\"" + this.getEmailAlias()+ "\"," +
+        "\"" + this.getIotPassword()+ "\"";
         return output;
     }
 
@@ -211,8 +217,12 @@ public class Contact {
         return (showInVIA ? "Y": "N");
     }
     
-    public String getPassword() {
-        return password;
+    public String getRelayingPassword() {
+        return relayingPassword;
+    }    
+    
+    public String getIotPassword() {
+        return IotPassword;
     }
     
     public String getShowInTO() {
@@ -275,8 +285,12 @@ public class Contact {
         this.showInVIA = showInVIA;
     }
 
-    public void setPassword(String password){
-        this.password = password;
+    public void setRelayingPassword(String password){
+        this.relayingPassword = password;
+    }
+    
+    public void setIotPassword(String password){
+        this.IotPassword = password;
     }
     
     public void setShowInTO(Boolean showInTO) {

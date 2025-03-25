@@ -120,7 +120,7 @@
                   <Font name="DejaVu Sans" size="12" style="0"/>
                 </Property>
                 <Property name="rows" type="int" value="5"/>
-                <Property name="text" type="java.lang.String" value="Welcome to JPSKmail Server and Client application, &#xa;&#xa;Java PSKmail Server  V3.0,0,0&#xa;&#xa;This is the cross-platforms Client and Server for PSKmail developed in java.&#xa;To find out more about PSKmail please visit http://pskmail.wikidot.com/.&#xa;&#xa;(c) Copyright 2018-2021 John Douyere (VK2ETA), based &#xa;on jPskmail client 1.7 by P&#xe4;r Crusefalk and Rein Couperus&#xa;&#xa;Distributed under the GNU General Public License version 3 or later.&#xa;This is free software: you are free to change and redistribute it.&#xa;There is NO WARRANTY, to the extent permitted by law.&#xa;"/>
+                <Property name="text" type="java.lang.String" value="Welcome to JPSKmail Server and Client application, &#xa;&#xa;Java PSKmail Server  V3.3.x.x&#xa;&#xa;This is the cross-platforms Client and Server for PSKmail developed in java.&#xa;To find out more about PSKmail please visit http://pskmail.wikidot.com/.&#xa;&#xa;(c) Copyright 2018-2021 John Douyere (VK2ETA), based &#xa;on jPskmail client 1.7 by P&#xe4;r Crusefalk and Rein Couperus&#xa;&#xa;Distributed under the GNU General Public License version 3 or later.&#xa;This is free software: you are free to change and redistribute it.&#xa;There is NO WARRANTY, to the extent permitted by law.&#xa;"/>
                 <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                   <Dimension value="[1024, 768]"/>
                 </Property>

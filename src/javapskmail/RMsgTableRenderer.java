@@ -54,13 +54,13 @@ public class RMsgTableRenderer extends JTextArea implements TableCellRenderer
             }
             setBorder(mItem.myOwn ? paddingSent : paddingReceived);
             if (isSelected) {
-                if (mItem.mMessage.crcValid || mItem.mMessage.crcValidWithPW) {
+                if (mItem.mMessage.crcValid || mItem.mMessage.crcValidWithPW || mItem.mMessage.crcValidWithIotPW) {
                     this.setBackground(table.getSelectionBackground());
                 } else {
                     this.setBackground(badCrcColorSelected);
                 }
             } else {
-                if (mItem.mMessage.crcValid || mItem.mMessage.crcValidWithPW) {
+                if (mItem.mMessage.crcValid || mItem.mMessage.crcValidWithPW || mItem.mMessage.crcValidWithIotPW) {
                     this.setBackground(table.getBackground());
                 } else {
                     this.setBackground(badCrcColor);

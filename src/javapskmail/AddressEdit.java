@@ -116,8 +116,10 @@ public class AddressEdit extends javax.swing.JDialog {
         showInToLabel = new javax.swing.JLabel();
         showInViaLabel = new javax.swing.JLabel();
         passwordLabel = new javax.swing.JLabel();
-        textPassword = new javax.swing.JTextField();
+        textRelayingPassword = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
+        passwordLabel1 = new javax.swing.JLabel();
+        textIotPassword = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(402, 232));
@@ -148,7 +150,7 @@ public class AddressEdit extends javax.swing.JDialog {
 
         pMain.setMinimumSize(new java.awt.Dimension(463, 250));
         pMain.setName(""); // NOI18N
-        pMain.setPreferredSize(new java.awt.Dimension(463, 250));
+        pMain.setPreferredSize(new java.awt.Dimension(443, 250));
 
         lblFirstName.setText(bundle.getString("AddressEdit.lblFirstName.text")); // NOI18N
 
@@ -315,7 +317,7 @@ public class AddressEdit extends javax.swing.JDialog {
         RMsgPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("AddressEdit.RMsgPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Dialog", 3, 12))); // NOI18N
         RMsgPanel.setMinimumSize(new java.awt.Dimension(140, 250));
         RMsgPanel.setName(""); // NOI18N
-        RMsgPanel.setPreferredSize(new java.awt.Dimension(140, 250));
+        RMsgPanel.setPreferredSize(new java.awt.Dimension(180, 250));
 
         checkVia.setFont(new java.awt.Font("Dialog", 3, 12)); // NOI18N
         checkVia.setMaximumSize(new java.awt.Dimension(115, 19));
@@ -360,14 +362,21 @@ public class AddressEdit extends javax.swing.JDialog {
 
         showInViaLabel.setText(bundle.getString("AddressEdit.showInViaLabel.text")); // NOI18N
 
-        passwordLabel.setText(bundle.getString("AddressEdit.passwordLabel.text")); // NOI18N
+        passwordLabel.setText(bundle.getString("AddressBook.passwordLabel1.text")); // NOI18N
 
-        textPassword.setText(bundle.getString("AddressEdit.textPassword.text")); // NOI18N
-        textPassword.setMaximumSize(new java.awt.Dimension(90, 28));
-        textPassword.setMinimumSize(new java.awt.Dimension(90, 28));
-        textPassword.setPreferredSize(new java.awt.Dimension(90, 28));
+        textRelayingPassword.setText(bundle.getString("AddressEdit.textRelayingPassword.text")); // NOI18N
+        textRelayingPassword.setMaximumSize(new java.awt.Dimension(90, 28));
+        textRelayingPassword.setMinimumSize(new java.awt.Dimension(90, 28));
+        textRelayingPassword.setPreferredSize(new java.awt.Dimension(90, 28));
 
         jLabel10.setText(bundle.getString("AddressEdit.jLabel10.text")); // NOI18N
+
+        passwordLabel1.setText(bundle.getString("AddressBook.IotpasswordLabel.text")); // NOI18N
+
+        textIotPassword.setText(bundle.getString("AddressEdit.textIotPassword.text")); // NOI18N
+        textIotPassword.setMaximumSize(new java.awt.Dimension(90, 28));
+        textIotPassword.setMinimumSize(new java.awt.Dimension(90, 28));
+        textIotPassword.setPreferredSize(new java.awt.Dimension(90, 28));
 
         javax.swing.GroupLayout RMsgPanelLayout = new javax.swing.GroupLayout(RMsgPanel);
         RMsgPanel.setLayout(RMsgPanelLayout);
@@ -377,52 +386,59 @@ public class AddressEdit extends javax.swing.JDialog {
                 .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(RMsgPanelLayout.createSequentialGroup()
                         .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(checkToCallsign)
-                            .addComponent(checkVia, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(1, 1, 1)
+                            .addComponent(checkToMobile, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(checkToEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(RMsgPanelLayout.createSequentialGroup()
+                                .addGap(6, 6, 6)
+                                .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(textMobileAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(textEmailAlias, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(RMsgPanelLayout.createSequentialGroup()
+                        .addGap(5, 5, 5)
+                        .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(checkVia, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(checkToCallsign))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(passwordLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(textPassword, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addGroup(RMsgPanelLayout.createSequentialGroup()
-                        .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(RMsgPanelLayout.createSequentialGroup()
-                                .addGap(21, 21, 21)
-                                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(showInViaLabel)
-                                    .addComponent(showInToLabel)))
+                                    .addComponent(showInToLabel))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(textRelayingPassword, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(textIotPassword, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(RMsgPanelLayout.createSequentialGroup()
-                                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(checkToMobile, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(checkToEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                        .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(textEmailAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(textMobileAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 107, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addGap(12, 12, 12)
+                                .addComponent(passwordLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
                 .addGap(1, 1, 1))
         );
         RMsgPanelLayout.setVerticalGroup(
             RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(RMsgPanelLayout.createSequentialGroup()
                 .addComponent(showInViaLabel)
-                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(passwordLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(RMsgPanelLayout.createSequentialGroup()
-                        .addGap(31, 31, 31)
+                        .addComponent(textRelayingPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(passwordLabel1))
+                    .addGroup(RMsgPanelLayout.createSequentialGroup()
                         .addComponent(checkVia, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(checkToCallsign, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, RMsgPanelLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(passwordLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(textPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18)
+                        .addComponent(checkToCallsign, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(3, 3, 3)
+                .addComponent(textIotPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(showInToLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 22, Short.MAX_VALUE)
-                .addComponent(jLabel10)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel10)
+                .addGap(3, 3, 3)
                 .addGroup(RMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(RMsgPanelLayout.createSequentialGroup()
                         .addComponent(textEmailAlias, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -440,18 +456,21 @@ public class AddressEdit extends javax.swing.JDialog {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(5, 5, 5)
-                .addComponent(pMain, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(5, 5, 5)
-                .addComponent(RMsgPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-            .addComponent(pBottom, javax.swing.GroupLayout.PREFERRED_SIZE, 496, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(5, 5, 5)
+                        .addComponent(pMain, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(5, 5, 5)
+                        .addComponent(RMsgPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(pBottom, javax.swing.GroupLayout.PREFERRED_SIZE, 496, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(50, 50, 50)
+                        .addGap(55, 55, 55)
                         .addComponent(pMain, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(22, 22, 22)
@@ -554,11 +573,12 @@ public class AddressEdit extends javax.swing.JDialog {
                 this.txtMMSI.setText(myContact.getMMSI().toString());
                 this.checkToCallsign.setSelected(myContact.getShowInTO().equals("Y"));
                 this.checkVia.setSelected(myContact.getShowInVIA().equals("Y"));
-                this.textPassword.setText(myContact.getPassword().toString());
+                this.textRelayingPassword.setText(myContact.getRelayingPassword().toString());
                 this.textEmailAlias.setText(myContact.getEmailAlias().toString());
                 this.textMobileAlias.setText(myContact.getMobilePhoneAlias().toString());
                 this.checkToMobile.setSelected(myContact.getShowMobileInTO().equals("Y"));
                 this.checkToEmail.setSelected(myContact.getShowEmailInTO().equals("Y"));
+                this.textIotPassword.setText(myContact.getIotPassword().toString());
             }
         } catch (Exception e) {
             Main.log.writelog("Error showing contacts info.", e, true);
@@ -584,12 +604,13 @@ public class AddressEdit extends javax.swing.JDialog {
                 myContact.setPhone(this.txtPhone.getText().toString());
                 myContact.setNotes(this.txtNotes.getText().toString());
                 myContact.setShowInVIA(this.checkVia.isSelected());
-                myContact.setPassword(this.textPassword.getText().toString());
+                myContact.setRelayingPassword(this.textRelayingPassword.getText().toString());
                 myContact.setShowInTO(this.checkToCallsign.isSelected());
                 myContact.setShowMobileInTO(this.checkToMobile.isSelected());
                 myContact.setShowEmailInTO(this.checkToEmail.isSelected());
                 myContact.setEmailAlias(this.textEmailAlias.getText().toString());
                 myContact.setMobilePhoneAlias(this.textMobileAlias.getText().toString());
+                myContact.setIotPassword(this.textIotPassword.getText().toString());
             }
         } catch (Exception e) {
             Main.log.writelog("Error updating contact info object. Could not save edited data.", e, true);
@@ -635,11 +656,13 @@ public class AddressEdit extends javax.swing.JDialog {
     private javax.swing.JPanel pBottom;
     private javax.swing.JPanel pMain;
     private javax.swing.JLabel passwordLabel;
+    private javax.swing.JLabel passwordLabel1;
     private javax.swing.JLabel showInToLabel;
     private javax.swing.JLabel showInViaLabel;
     private javax.swing.JTextField textEmailAlias;
+    private javax.swing.JTextField textIotPassword;
     private javax.swing.JTextField textMobileAlias;
-    private javax.swing.JTextField textPassword;
+    private javax.swing.JTextField textRelayingPassword;
     private javax.swing.JTextField txtEmail;
     private javax.swing.JTextField txtFirstName;
     private javax.swing.JTextField txtHamCallsign;

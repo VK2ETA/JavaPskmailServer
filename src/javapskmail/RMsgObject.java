@@ -51,6 +51,7 @@ public class RMsgObject {
     Short[] voiceMessage;
     boolean crcValid; //Valid with no access password
     boolean crcValidWithPW; //Valid only if access password is used
+    boolean crcValidWithIotPW; //Valid only if IOT access password is used
     String rxMode;
     String accessPasswordUsed;
     String timeId;
@@ -484,6 +485,7 @@ public class RMsgObject {
         //Find the password for this particular message's Via station 
         //Note: it may not be the via station selected on the screen right now (if we reply to a message for example)
         String password = RMsgProcessor.getRequiredAccessPassword(this);
+        System.out.println("Using Password: /" + password + "/");
         //Build the checksum using password if required
         String chksumString = RMsgCheckSum.Crc16(txBuffer + password);
         //Add enclosing new lines and crc
@@ -777,6 +779,7 @@ public class RMsgObject {
                     //CRC
                     mMessage.crcValid = false;
                     mMessage.crcValidWithPW = false;
+                    mMessage.crcValidWithIotPW = false;
                     //CRC and EOT
                     String messageLessCrc = dataString.replaceFirst(group3 + "\n", ""); //For data read from file
                     messageLessCrc = messageLessCrc.replaceFirst(group3 , "");              //For data received direct from modem
@@ -790,6 +793,11 @@ public class RMsgObject {
                     String crcWithPWCalcValue = RMsgCheckSum.Crc16(messageLessCrc + Main.accessPassword);
                     if (crcRxValue.equals(crcWithPWCalcValue)) { 
                         mMessage.crcValidWithPW = true;
+                    }
+                    //With IOT Access Password used
+                    String crcWithIotPWCalcValue = RMsgCheckSum.Crc16(messageLessCrc + Main.IotAccessPassword);
+                    if (crcRxValue.equals(crcWithIotPWCalcValue)) { 
+                        mMessage.crcValidWithIotPW = true;
                     }
                 }
                 start = msc.end();

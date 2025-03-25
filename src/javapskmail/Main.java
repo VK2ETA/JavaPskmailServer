@@ -34,9 +34,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.2.0.4";
+    static String version = "3.3.0.1";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20250305";
+    static String versionDate = "20250320";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -256,6 +256,7 @@ public class Main {
 
     static String callsignAsServer = "";
     static String accessPassword = "";
+    static String IotAccessPassword = "";
 
     //crypto
     static String strkey = "1234";
@@ -2039,6 +2040,7 @@ public class Main {
             }
             callsignAsServer = configuration.getPreference("CALLSIGNASSERVER", "N0CAL");
             accessPassword = Main.configuration.getPreference("ACCESSPASSWORD").trim();
+            IotAccessPassword = Main.configuration.getPreference("IOTACCESSPASSWORD").trim();
         } catch (Exception e) {
             MAXDCD = 3;
 //                q.backoff = "5";

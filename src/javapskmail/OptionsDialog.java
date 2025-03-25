@@ -671,9 +671,12 @@ public class OptionsDialog extends javax.swing.JDialog {
             } else {
                 this.checkboxAckWithRSID.setSelected(false);
             }
-
-            
             spinnerDaysToKeepLink.setValue(GetSpinValue("DAYSTOKEEPLINK", 90));
+            //Home Assistant IOT settings
+            this.txtHAIpAddress.setText(Main.configuration.getPreference("HOMEASSISTANTIPADDRESS"));
+            this.txtHALongLivedToken.setText(Main.configuration.getPreference("HOMEASSISTANTLONGLIVEDTOKEN"));
+            this.txtHAAccessPassword.setText(Main.configuration.getPreference("IOTACCESSPASSWORD"));
+            this.txtEntitiesAliases.setText(Main.configuration.getPreference("IOTENTITIESSHORTCUTS"));
             
          } catch (Exception ex) {
             Main.log.writelog(optionsdialog.getString("ERROR WHEN FETCHING SETTINGS!"), ex, true);
@@ -889,6 +892,16 @@ public class OptionsDialog extends javax.swing.JDialog {
         lblFldigiAutorestart = new javax.swing.JLabel();
         txtModemXMLPort = new javax.swing.JTextField();
         lblModemXmlPort = new javax.swing.JLabel();
+        pnlHaIOT = new javax.swing.JPanel();
+        jLabel16 = new javax.swing.JLabel();
+        jLabel28 = new javax.swing.JLabel();
+        jLabel29 = new javax.swing.JLabel();
+        txtHAIpAddress = new javax.swing.JTextField();
+        txtHALongLivedToken = new javax.swing.JTextField();
+        txtHAAccessPassword = new javax.swing.JPasswordField();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        txtEntitiesAliases = new javax.swing.JTextArea();
+        jLabel37 = new javax.swing.JLabel();
         pnlButtons = new javax.swing.JPanel();
         bOK = new javax.swing.JButton();
         jDesktopPane1 = new javax.swing.JDesktopPane();
@@ -2493,6 +2506,79 @@ public class OptionsDialog extends javax.swing.JDialog {
 
         tabOptions.addTab("Modem", pnlModem);
 
+        pnlHaIOT.setLayout(new java.awt.GridBagLayout());
+
+        jLabel16.setText(optionsdialog.getString("HOMEASSISTANTIPADDRESS")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        pnlHaIOT.add(jLabel16, gridBagConstraints);
+
+        jLabel28.setText(optionsdialog.getString("HOMEASSISTANTLONGLIVEDTOKEN")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+        pnlHaIOT.add(jLabel28, gridBagConstraints);
+
+        jLabel29.setText(optionsdialog.getString("IOTPASSWORD")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+        pnlHaIOT.add(jLabel29, gridBagConstraints);
+
+        txtHAIpAddress.setPreferredSize(new java.awt.Dimension(150, 19));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+        pnlHaIOT.add(txtHAIpAddress, gridBagConstraints);
+
+        txtHALongLivedToken.setMinimumSize(new java.awt.Dimension(150, 19));
+        txtHALongLivedToken.setPreferredSize(new java.awt.Dimension(150, 19));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
+        pnlHaIOT.add(txtHALongLivedToken, gridBagConstraints);
+
+        txtHAAccessPassword.setMinimumSize(new java.awt.Dimension(120, 19));
+        txtHAAccessPassword.setPreferredSize(new java.awt.Dimension(120, 19));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
+        pnlHaIOT.add(txtHAAccessPassword, gridBagConstraints);
+
+        jScrollPane1.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        jScrollPane1.setMinimumSize(new java.awt.Dimension(400, 160));
+        jScrollPane1.setPreferredSize(new java.awt.Dimension(400, 160));
+
+        txtEntitiesAliases.setColumns(20);
+        txtEntitiesAliases.setRows(5);
+        jScrollPane1.setViewportView(txtEntitiesAliases);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridheight = 5;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+        pnlHaIOT.add(jScrollPane1, gridBagConstraints);
+
+        jLabel37.setText(optionsdialog.getString("LBLENTITIESSHORTCUTS")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+        pnlHaIOT.add(jLabel37, gridBagConstraints);
+
+        tabOptions.addTab("HA IOT", pnlHaIOT);
+
         getContentPane().add(tabOptions, new java.awt.GridBagConstraints());
         tabOptions.setEnabledAt(3, true);
 
@@ -2861,8 +2947,6 @@ public class OptionsDialog extends javax.swing.JDialog {
             } else {
                 cf.setPreference("ACKWITHRSID", "no");
             }
-
-            
             //Always save in case we blank it out
             cf.setPreference("SMSEMAILGATEWAY", txtSmsEmailGatewayDomain);
             cf.setPreference("SENDCELLULARNUMBERAS", txtSendCellNumAs);
@@ -2870,10 +2954,15 @@ public class OptionsDialog extends javax.swing.JDialog {
             cf.setPreference("DELETESMSREPLYUPTO", txtDeleteUpTo);
             cf.setPreference("DELETESMSREPLYSWHOLELINE", txtDeleteWholeLine);
             cf.setPreference("DELETESMSREPLYFROM", txtDeleteFrom);
-
             myobject = spinnerDaysToKeepLink.getValue();
             cf.setPreference("DAYSTOKEEPLINK", myobject.toString());
-
+             //Home Assistant IOT settings
+            cf.setPreference("HOMEASSISTANTIPADDRESS", txtHAIpAddress.getText());
+            cf.setPreference("HOMEASSISTANTLONGLIVEDTOKEN", txtHALongLivedToken.getText());
+            char[] shapw = txtHAAccessPassword.getPassword();
+            cf.setPreference("IOTACCESSPASSWORD", new String(shapw));
+            Main.IotAccessPassword = new String(shapw);
+            cf.setPreference("IOTENTITIESSHORTCUTS", txtEntitiesAliases.getText());
         } catch (Exception ex) {
             Main.log.writelog(optionsdialog.getString("ERROR ENCOUNTERED WHEN STORING PREFERENCES!"), ex, true);
         }
@@ -3522,6 +3611,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
@@ -3534,6 +3624,8 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
+    private javax.swing.JLabel jLabel28;
+    private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;
     private javax.swing.JLabel jLabel31;
@@ -3542,6 +3634,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel36;
+    private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -3560,6 +3653,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JPasswordField jPasswordField1;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblBeaconQRG;
     private javax.swing.JLabel lblCallsign;
     private javax.swing.JLabel lblDCD;
@@ -3587,6 +3681,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JPanel pnlConfiguration;
     private javax.swing.JPanel pnlEmail;
     private javax.swing.JPanel pnlGPS;
+    private javax.swing.JPanel pnlHaIOT;
     private javax.swing.JPanel pnlModem;
     private javax.swing.JPanel pnlUserData;
     private javax.swing.JSpinner spinBeaconMinute;
@@ -3610,7 +3705,11 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JPasswordField txtAccessPassword;
     private javax.swing.JTextField txtCallsign;
     private javax.swing.JTextField txtCallsignAsServer;
+    private javax.swing.JTextArea txtEntitiesAliases;
     private javax.swing.JTextField txtFldigipath;
+    private javax.swing.JPasswordField txtHAAccessPassword;
+    private javax.swing.JTextField txtHAIpAddress;
+    private javax.swing.JTextField txtHALongLivedToken;
     private javax.swing.JFormattedTextField txtLatitude;
     private javax.swing.JTextField txtLinkto;
     private javax.swing.JTextField txtLogFile;

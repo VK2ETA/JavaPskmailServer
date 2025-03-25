@@ -41,6 +41,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.text.*;
 
+
 /**
  *
  * @author per
@@ -121,10 +122,12 @@ public class MainPskmailUi extends javax.swing.JFrame {
     public static String selectedToAlias = ""; //Aliases for sms or email destinations
     public static String selectedVia = "";
     public static String selectedViaPassword = ""; //For relays with password required
+    public static String selectedViaIotPassword = ""; //For relays with password required for IOT commands
     public static String[] toArray; //Stores array of To stations/email addresses/Cellular numbers
     public static String[] toAliasArray; //Stores array of To stations' aliases if any in the same order as toArray
     public static String[] viaArray; //Stores array of relay (via) stations
-    public static String[] viaPasswordArray; //Stores array of To stations' passwords if any in the same order as viaArray
+    public static String[] viaPasswordArray; //Stores array of Via stations' access passwords, if any, in the same order as viaArray
+    public static String[] viaIotPasswordArray; //Stores array of Via stations' IOT access passwords, if any, in the same order as viaArray
 
     //Resend request radio buttons values
     private static String howManyToResend = "1";
@@ -171,8 +174,6 @@ public class MainPskmailUi extends javax.swing.JFrame {
         initComponents();
         //Preset default visibilities
         resetAllMenus();
-        //Remove MQTT Tab until completed
-        tabMain.removeTabAt(8);
         //Preset requested visibilities
         String uiOption = Main.configuration.getPreference("UIOPTION", "Default");
         if (uiOption.equals("RadioMsg")) {
@@ -1760,15 +1761,6 @@ public class MainPskmailUi extends javax.swing.JFrame {
         bRMsgResend = new javax.swing.JButton();
         serverControl = new javax.swing.JButton();
         bRMsgManageMsg = new javax.swing.JButton();
-        tabMqtt = new javax.swing.JPanel();
-        jScrollMqttSettings = new javax.swing.JScrollPane();
-        jPanelMqttSettings = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
-        CBconnectAtStart = new javax.swing.JCheckBox();
-        jLabel4 = new javax.swing.JLabel();
-        MqttServerAddress = new javax.swing.JTextField();
-        jScrollMqttData = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
         pnlStatus = new javax.swing.JPanel();
         snLabel = new javax.swing.JLabel();
         StatusLabel = new javax.swing.JLabel();
@@ -3314,14 +3306,14 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 tblRadioMsgs.setShowVerticalLines(false);
                 tblRadioMsgs.getTableHeader().setReorderingAllowed(false);
                 tblRadioMsgs.addMouseListener(new java.awt.event.MouseAdapter() {
+                    public void mouseClicked(java.awt.event.MouseEvent evt) {
+                        tblRadioMsgsMouseClicked(evt);
+                    }
                     public void mousePressed(java.awt.event.MouseEvent evt) {
                         tblRadioMsgsMousePressed(evt);
                     }
                     public void mouseReleased(java.awt.event.MouseEvent evt) {
                         tblRadioMsgsMouseReleased(evt);
-                    }
-                    public void mouseClicked(java.awt.event.MouseEvent evt) {
-                        tblRadioMsgsMouseClicked(evt);
                     }
                 });
                 scrRadioMessages.setViewportView(tblRadioMsgs);
@@ -3463,66 +3455,6 @@ public class MainPskmailUi extends javax.swing.JFrame {
                 tabRadioMsg.add(pnlRMSgButtons, java.awt.BorderLayout.PAGE_START);
 
                 tabMain.addTab(mainpskmailui.getString("MainPskmailUi.tabRadioMsg.TabConstraints.tabTitle"), tabRadioMsg); // NOI18N
-
-                tabMqtt.setLayout(new java.awt.GridBagLayout());
-
-                jScrollMqttSettings.setMinimumSize(new java.awt.Dimension(400, 300));
-                jScrollMqttSettings.setPreferredSize(new java.awt.Dimension(400, 300));
-
-                jPanelMqttSettings.setLayout(new java.awt.GridBagLayout());
-
-                jLabel2.setText(mainpskmailui.getString("MainPskmailUi.jLabel2.text")); // NOI18N
-                gridBagConstraints = new java.awt.GridBagConstraints();
-                gridBagConstraints.gridx = 0;
-                gridBagConstraints.gridy = 0;
-                gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-                jPanelMqttSettings.add(jLabel2, gridBagConstraints);
-
-                CBconnectAtStart.setText(mainpskmailui.getString("MainPskmailUi.CBconnectAtStart.text")); // NOI18N
-                gridBagConstraints = new java.awt.GridBagConstraints();
-                gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-                gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
-                jPanelMqttSettings.add(CBconnectAtStart, gridBagConstraints);
-
-                jLabel4.setText(mainpskmailui.getString("MainPskmailUi.jLabel4.text")); // NOI18N
-                gridBagConstraints = new java.awt.GridBagConstraints();
-                gridBagConstraints.gridx = 0;
-                gridBagConstraints.gridy = 1;
-                gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-                gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
-                jPanelMqttSettings.add(jLabel4, gridBagConstraints);
-
-                MqttServerAddress.setText(mainpskmailui.getString("MainPskmailUi.MqttServerAddress.text")); // NOI18N
-                MqttServerAddress.setMinimumSize(new java.awt.Dimension(80, 19));
-                MqttServerAddress.setPreferredSize(new java.awt.Dimension(150, 19));
-                gridBagConstraints = new java.awt.GridBagConstraints();
-                gridBagConstraints.gridx = 1;
-                gridBagConstraints.gridy = 1;
-                gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-                gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
-                jPanelMqttSettings.add(MqttServerAddress, gridBagConstraints);
-
-                jScrollMqttSettings.setViewportView(jPanelMqttSettings);
-
-                gridBagConstraints = new java.awt.GridBagConstraints();
-                gridBagConstraints.gridx = 0;
-                gridBagConstraints.gridy = 0;
-                gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-                tabMqtt.add(jScrollMqttSettings, gridBagConstraints);
-
-                jScrollMqttData.setMinimumSize(new java.awt.Dimension(400, 300));
-                jScrollMqttData.setPreferredSize(new java.awt.Dimension(400, 300));
-
-                jTextArea1.setColumns(20);
-                jTextArea1.setRows(5);
-                jScrollMqttData.setViewportView(jTextArea1);
-
-                gridBagConstraints = new java.awt.GridBagConstraints();
-                gridBagConstraints.gridx = 1;
-                gridBagConstraints.gridy = 0;
-                tabMqtt.add(jScrollMqttData, gridBagConstraints);
-
-                tabMain.addTab(mainpskmailui.getString("MainPskmailUi.tabMqtt.TabConstraints.tabTitle"), tabMqtt); // NOI18N
 
                 getContentPane().add(tabMain, new java.awt.GridBagConstraints());
                 tabMain.setEnabledAt(7, true);
@@ -7731,6 +7663,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
             } else {
                 selectedVia = via.substring(4); //Remove the "via " prefix
                 selectedViaPassword = viaPasswordArray[position];
+                selectedViaIotPassword = viaIotPasswordArray[position];
             }
         }
     }//GEN-LAST:event_jComboRMsgViaActionPerformed
@@ -8525,14 +8458,18 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
         for (int i=0; i<toArray.length; i++) {
             jComboRMsgTo.addItem(toArray[i]);
         }
-        //Fill-in spinner for Via relays, with passwords now
+        //Fill-in spinner for Via relays, with potentially Access and IOT passwords now
         //String[] viaArrayOriginal = ("--DIRECT--," + Main.configuration.getPreference("RELAYLIST", "")).split(",");
         String[] viaArrayOriginal = new String[contactlist.size() + 1];
         String[] viaPasswordArrayOriginal = new String[viaArrayOriginal.length];
+        String[] viaIotPasswordArrayOriginal = new String[viaArrayOriginal.length];
         viaArrayOriginal[0] = "--DIRECT--";
         viaPasswordArrayOriginal[0] = "";
+        viaIotPasswordArrayOriginal[0] = "";
         int viaValidEntries = 1;
-        Pattern viaPattern = Pattern.compile("^\\s*([0-9a-zA-Z/\\-_.+]+)\\s*(:?)\\s*(\\S*)\\s*$");
+        //Add new format to allow IOT password to be added like in: relayCallSign:relayAccessPw:relayIOTpw
+        //Pattern viaPattern = Pattern.compile("^\\s*([0-9a-zA-Z/\\-_.+]+)\\s*(:?)\\s*(\\S*)\\s*$");
+        Pattern viaPattern = Pattern.compile("^\\s*([0-9a-zA-Z/\\-_.+]+)\\s*(:?)\\s*([^\\s:]*)\\s*(:?)\\s*([^\\s:]*)\\s*$");
         //for (int i = 0; i < viaArrayOriginal.length; i++) {
         for (int i = 0; i < contactlist.size(); i++) {
             Contact mycontact = contactlist.get(i);
@@ -8542,8 +8479,11 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
                     mycontact.getOtherCallsign().trim().length() > 0)) {
                 data = mycontact.getHamCallsign().trim().length() > 0 ? mycontact.getHamCallsign().trim() : mycontact.getOtherCallsign().trim();
             }
-            if (mycontact.getPassword().trim().length() > 0 ) {
-                data += ":" + mycontact.getPassword();
+            //Formats are "vk2eta-1" OR "vk2eta-1:relayPassword" OR "vk2eta-1:relayPassword:IOTpassword OR vk2eta-1::IOTpassword"
+             if (mycontact.getIotPassword().trim().length() > 0 ) {
+                data +=  ":" + mycontact.getRelayingPassword() + ":" + mycontact.getIotPassword();
+            } else if (mycontact.getRelayingPassword().trim().length() > 0 ) {
+                data += ":" + mycontact.getRelayingPassword();
             }
             Matcher msc = viaPattern.matcher(data);
             if (msc.find()) {
@@ -8553,39 +8493,49 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
                 if (msc.group(2) != null) separator = msc.group(2);
                 String accessPassword = "";
                 if (msc.group(3) != null) accessPassword = msc.group(3);
+                String IOTaccessPassword = "";
+                if (msc.group(5) != null) IOTaccessPassword = msc.group(5);
                 if (!callSign.equals("")) {
                     viaValidEntries++;
                     viaArrayOriginal[i + 1] = callSign;
-                    if (!separator.equals("") && !accessPassword.equals("")) {
+                    if (!accessPassword.equals("") || !IOTaccessPassword.equals("") ) {
                         viaPasswordArrayOriginal[i + 1] = accessPassword;
+                        viaIotPasswordArrayOriginal[i + 1] = IOTaccessPassword;
                     } else {
                         viaPasswordArrayOriginal[i + 1] = ""; //As it is copied later on
+                        viaIotPasswordArrayOriginal[i + 1] = ""; //As it is copied later on
                     }
                 } else {
                     viaArrayOriginal[i + 1] = ""; //Blank it out
                     viaPasswordArrayOriginal[i + 1] = "";
+                    viaIotPasswordArrayOriginal[i + 1] = "";
                 }
             } else {
                 //Malformed to destination, blank it out too
                 viaArrayOriginal[i + 1] = "";
                 viaPasswordArrayOriginal[i + 1] = "";
+                viaIotPasswordArrayOriginal[i + 1] = "";
             }
         }
         //Blank first password as it corresponds to the "--DIRECT--" entry (no relay)
         viaPasswordArrayOriginal[0] = "";
+        viaIotPasswordArrayOriginal[0] = "";
         //Copy only non null strings to final array
         viaArray = new String[viaValidEntries];
         viaPasswordArray = new String[viaValidEntries];
+        viaIotPasswordArray  = new String[viaValidEntries];
         j = 0;
         for (int i = 0; i < viaArrayOriginal.length; i++) {
             if (viaArrayOriginal[i].length() > 0) {
                 if (i > 0) {
                     //After the "--DIRECT--" entry
                     viaArray[j] = "via " + viaArrayOriginal[i];
-                    viaPasswordArray[j++] = viaPasswordArrayOriginal[i];
+                    viaPasswordArray[j] = viaPasswordArrayOriginal[i];
+                    viaIotPasswordArray[j++] = viaIotPasswordArrayOriginal[i];
                 } else {
                     viaArray[j] = viaArrayOriginal[i];
-                    viaPasswordArray[j++] = ""; //Initialise to empty string, not null element
+                    viaPasswordArray[j] = ""; //Initialise to empty string, not null element
+                    viaIotPasswordArray[j++] = "";
                 }
             }
         }
@@ -8672,7 +8622,6 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     public javax.swing.JCheckBox APRS_IS;
     private javax.swing.JButton AbortButton;
     private javax.swing.JMenuItem Beacon_menu_item;
-    private javax.swing.JCheckBox CBconnectAtStart;
     private javax.swing.JTextField CPSValue;
     private javax.swing.JButton CQButton;
     public static javax.swing.JTextField ClientFreqTxtfield;
@@ -8698,7 +8647,6 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JMenuItem Link_menu_item;
     private javax.swing.JButton ListFilesButton;
     private javax.swing.JMenuItem MnuTelnet;
-    private javax.swing.JTextField MqttServerAddress;
     private javax.swing.JMenuItem Ping_menu_item;
     private javax.swing.JButton PositButton;
     private javax.swing.JMenuItem PrefSaveMenu;
@@ -8759,9 +8707,7 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JComboBox<String> jComboRMsgVia;
     private javax.swing.JMenuItem jGetIAC;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar3;
     private javax.swing.JMenuItem jMenuQuality;
@@ -8770,14 +8716,11 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
-    private javax.swing.JPanel jPanelMqttSettings;
     private javax.swing.JRadioButton jRadBtnAliasAndAddress;
     private javax.swing.JRadioButton jRadBtnAliasOnly;
     public javax.swing.JRadioButtonMenuItem jRadioButtonAccept;
     public javax.swing.JRadioButtonMenuItem jRadioButtonDelete;
     public javax.swing.JRadioButtonMenuItem jRadioButtonReject;
-    private javax.swing.JScrollPane jScrollMqttData;
-    private javax.swing.JScrollPane jScrollMqttSettings;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
@@ -8796,7 +8739,6 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JPopupMenu.Separator jSeparator9;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JSplitPane jSplitPane2;
-    private javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextPane jTextPane2;
     private javax.swing.JLabel labelCurrentFreq;
@@ -8911,7 +8853,6 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     private javax.swing.JPanel tabIgate;
     private javax.swing.JTabbedPane tabMain;
     private javax.swing.JPanel tabModem;
-    private javax.swing.JPanel tabMqtt;
     private javax.swing.JPanel tabRadioMsg;
     private javax.swing.JPanel tabRigctl;
     private javax.swing.JPanel tabTerminal;

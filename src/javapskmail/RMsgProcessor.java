@@ -1706,22 +1706,27 @@ public class RMsgProcessor {
     //Search through current list of via stations for the one contained in the message
     public static String getRequiredAccessPassword(RMsgObject txMessage) {
         String accessPw = "";
+        String IOTaccessPw = "";
 
         //For all relay requests
-        //if (!txMessage.via.equals("") &&
-        //        (txMessage.sms.contains("*qtc?") || txMessage.sms.contains("*cmd") || isCellular(txMessage.to)
-        //                || isEmail(txMessage.to) || txMessage.to.matches(".+=.*"))) {
         if (!txMessage.via.equals("")) {
             for (int i = 0; i < Main.mainui.viaArray.length; i++) {
                 if (Main.mainui.viaArray[i].equals("via " + txMessage.via)) {
                     accessPw = Main.mainui.viaPasswordArray[i];
+                    IOTaccessPw = Main.mainui.viaIotPasswordArray[i];
                     break;
                 }
             }
         }
-        return accessPw;
+        //Use the IOT password for IOT commands
+        if (txMessage.sms.startsWith("*get? ") || txMessage.sms.startsWith("*ser? ")) {
+            return IOTaccessPw;
+        } else {
+            return accessPw;           
+        }
     }
 
+    
     //Convert local numbers to international format using country code
     public static String convertNumberToE164(String phoneNumber) {
         String resultNum = phoneNumber.replaceAll(" ", "");
@@ -1844,7 +1849,7 @@ public class RMsgProcessor {
             }
         }
         //Update heard list if messages are valid
-        if ((mMessage.crcValid || mMessage.crcValidWithPW)) {
+        if (mMessage.crcValid || mMessage.crcValidWithPW || mMessage.crcValidWithIotPW ) {
             String sendingCallsign = mMessage.from;
             if (!mMessage.relay.trim().equals("")) {
                 //Sent from a relay station
@@ -1864,7 +1869,7 @@ public class RMsgProcessor {
                     if (finalSaveAndDisplay) {
 
                         String resultString = "";
-                        if ((mMessage.crcValid || mMessage.crcValidWithPW)) {
+                        if (mMessage.crcValid || mMessage.crcValidWithPW || mMessage.crcValidWithIotPW) {
                             //Re-build the message (includes the potential alias translated to alias=destination format)
                             resultString = mMessage.formatForRx(false); //Always rebuild CRC without access password
                         } else {
@@ -1931,9 +1936,11 @@ public class RMsgProcessor {
                         if (Main.configuration.getPreference("ACKWITHRSID", "no").equals("yes")) {
                             useRsid = true;
                         }
-                        //Is it a valid message
-                        boolean messageAuthorized = ((Main.accessPassword.length() == 0 && mMessage.crcValid)
+                        //Is it an authorised relaying message
+                        boolean messageRelayingAuthorized = ((Main.accessPassword.length() == 0 && mMessage.crcValid)
                                 || (Main.accessPassword.length() > 0 && mMessage.crcValidWithPW));
+                        boolean messageIotCommandAuthorized = ((Main.IotAccessPassword.length() == 0 && mMessage.crcValid)
+                                || (Main.IotAccessPassword.length() > 0 && mMessage.crcValidWithIotPW));
                         //Command message?
                         if (mMessage.sms.startsWith("*cmd")) {
                             if (matchMyCallWith(mMessage.via, false) || (mMessage.via.length() == 0
@@ -1944,7 +1951,7 @@ public class RMsgProcessor {
                                 String replyString = "";
                                 Pattern psc = Pattern.compile("^\\*cmd\\s((?:s\\son)|(?:s\\soff))(?:\\s(\\d{1,3})\\s*([mh]))?$");
                                 Matcher msc = psc.matcher(mMessage.sms);
-                                if (messageAuthorized && msc.find()) {
+                                if (messageRelayingAuthorized && msc.find()) {
                                     String onOff = msc.group(1);
                                     String numberOff = "";
                                     if (msc.group(2) != null) {
@@ -1994,7 +2001,7 @@ public class RMsgProcessor {
                                 psc = Pattern.compile("^\\*cmd\\s((?:mute)|(?:unmute))$");
                                 String muteUnmute = "";
                                 msc = psc.matcher(mMessage.sms);
-                                if (messageAuthorized && msc.find()) {
+                                if (messageRelayingAuthorized && msc.find()) {
                                     muteUnmute = msc.group(1);
                                     if (muteUnmute.equals("mute")) {
                                         Main.wantRelayEmailsImmediat = false;
@@ -2019,7 +2026,7 @@ public class RMsgProcessor {
                                 String callToUnlink = "";
                                 String addressToUnlink = "";
                                 msc = psc.matcher(mMessage.sms);
-                                if (messageAuthorized && msc.find()) {
+                                if (messageRelayingAuthorized && msc.find()) {
                                     callToUnlink = msc.group(1);
                                     addressToUnlink = msc.group(2);
                                     cmdOk = true;
@@ -2033,6 +2040,107 @@ public class RMsgProcessor {
                                 //Reply with acknowledgment message
                                 if (!replyString.equals("")) {
                                     RMsgUtil.replyWithText(mMessage, replyString);
+                                }
+                            }
+                            //Home Assistant get state of entity
+                        } else if (mMessage.sms.startsWith("*get? ")) {
+                            //Matches example: "*get? sensor.main_battery_ah"
+                            if (matchMyCallWith(mMessage.via, false) && mMessage.to.equals("*")) {
+                                if (messageIotCommandAuthorized) {
+                                    //Setting and using shortcuts (Add: "*get? batvolt=sensor.main_battery_voltage"
+                                    //Use: "*get? batvolt" or Delete: "*get? batvolt=")
+                                    //Note: shortcut must not contain a "." (dot)
+                                    String entity = "";
+                                    String shortcut = "";
+                                    if (mMessage.sms.length() > 6 && (mMessage.sms.contains("=") || !mMessage.sms.contains("."))) {
+                                        //We have a shortcut
+                                        Pattern psc = Pattern.compile("^\\*get\\?\\s+(\\w+(=(\\w+\\.\\w+)?)?)\\s*$");
+                                        Matcher msc = psc.matcher(mMessage.sms);
+                                        if (msc.lookingAt()) {
+                                            if (msc.group(1) != null) {
+                                                //We have a shortcut
+                                                shortcut = msc.group(1);
+                                                entity = getEntityFromShortcut(shortcut);
+                                            }
+                                        }
+                                    } else {
+                                        //We have an entity ID, not a shortcut
+                                        Pattern psc = Pattern.compile("^\\*get\\?\\s+(\\w+\\.\\w+)");
+                                        Matcher msc = psc.matcher(mMessage.sms);
+                                        if (msc.lookingAt()) {
+                                            if (msc.group(1) != null) {
+                                                entity = msc.group(1);
+                                            }
+                                        }
+                                    }
+                                    if (mMessage.sms.length() > 6 && entity.matches("\\w+\\.\\w+")) {
+                                        RMsgUtil.sendAcks(true, useRsid);
+                                        //Wait for the ack to pass first
+                                        Thread.sleep(500);
+                                        HAssistant.getState(mMessage, entity);
+                                    } else if (entity.startsWith("*")) {
+                                        //We must have a message
+                                        RMsgUtil.replyWithText(mMessage, "Error: " + entity);
+                                    } else {
+                                        //We are missing data, reply with a warning
+                                        RMsgUtil.replyWithText(mMessage, "Invalid HA entity_id");
+                                    }
+                                } else {
+                                    RMsgUtil.sendAcks(false, useRsid); //Error (but don't advertize the need for a password
+                                }
+                            }
+                            //Home Assistant run service (launch action)
+                        } else if (mMessage.sms.startsWith("*ser?")) {
+                            //For me, and ONLY for me?
+                            if (matchMyCallWith(mMessage.via, false) && mMessage.to.equals("*")) {
+                                if (messageIotCommandAuthorized) {
+                                    //Setting and using shortcuts (Add: "*get? batvolt=sensor.main_battery_voltage"
+                                    //Use: "*get? batvolt" or Delete: "*get? batvolt=")
+                                    //Note: shortcut must not contain a "." (dot)
+                                    String shortcut = "";
+                                    String action = "";
+                                    String entity = "";
+                                    if (mMessage.sms.length() > 8 && (mMessage.sms.contains("=") || !mMessage.sms.contains("."))) {
+                                        //We have a shortcut
+                                        Pattern psc = Pattern.compile("^\\*ser\\?\\s+(\\w+(=(\\w+\\.\\w+)?)?)\\s+(\\w+\\/\\w+)\\s*$");
+                                        Matcher msc = psc.matcher(mMessage.sms);
+                                        if (msc.lookingAt()) {
+                                            if (msc.group(1) != null) {
+                                                //We have a shortcut
+                                                shortcut = msc.group(1);
+                                                action = msc.group(4);
+                                                entity = getEntityFromShortcut(shortcut);
+                                            }
+                                        }
+                                    } else {
+                                        //We have an entity ID, not a shortcut
+                                        Pattern psc1 = Pattern.compile("^\\*ser\\?\\s+(\\w+\\.\\w+)\\s+(\\w+\\/\\w+)\\s*");
+                                        Matcher msc1 = psc1.matcher(mMessage.sms);
+                                        if (msc1.lookingAt()) {
+                                            if (msc1.group(1) != null) {
+                                                entity = msc1.group(1);
+                                                if (msc1.group(2) != null) {
+                                                    action = msc1.group(2);
+                                                }
+                                            }
+                                        }
+                                    }
+                                    String fullCommand = "*ser? " + entity + " " + action;
+                                    //Matches example: "*ser? script.1723028923298 script/turn_on"
+                                    if (mMessage.sms.length() > 8 && fullCommand.matches("\\*ser\\?\\s+\\w+\\.\\w+\\s+\\w+\\/\\w+")) {
+                                        RMsgUtil.sendAcks(true, useRsid);
+                                        //Wait for the ack to pass first
+                                        Thread.sleep(500);
+                                        HAssistant.runAction(mMessage, entity, action);
+                                    } else if (action.length() == 0 && entity.length() == 0) {
+                                        //We must have deleted a shortcut, just acknowledge
+                                        RMsgUtil.sendAcks(true, useRsid);
+                                    } else if (action.length() != 0) {
+                                        //We are missing data, reply with a warning
+                                        RMsgUtil.replyWithText(mMessage, "Missing HA Service Data");
+                                    }
+                                } else {
+                                    RMsgUtil.sendAcks(false, useRsid); //Error (but don't advertize the need for a password
                                 }
                             }
                         } else if (mMessage.sms.startsWith("*qtc?")) {
@@ -2050,7 +2158,7 @@ public class RMsgProcessor {
                             if (matchMyCallWith(mMessage.via, false)
                                     || (matchMyCallWith(mMessage.to, false) && mMessage.via.equals(""))) {
                                 //Only properly received (and secured) messages
-                                if (messageAuthorized) {
+                                if (messageRelayingAuthorized) {
                                     RMsgUtil.sendAcks(true, useRsid);
                                     Boolean resendLast = false;
                                     //Read request (last X minutes or last N messages). Default is last ONE message if nothing is sent.
@@ -2207,7 +2315,7 @@ public class RMsgProcessor {
                                 String toStr = RMsgUtil.extractDestination(mMessage.to);
                                 //Looks like an email address? Send via internet as email
                                 if (isEmail(toStr)) {
-                                    if (messageAuthorized & Main.wantRelayEmails) {
+                                    if (messageRelayingAuthorized & Main.wantRelayEmails) {
                                         RMsgUtil.sendAcks(true, useRsid);
                                         //Get full message with binary data
                                         RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirInbox, mMessage.fileName, true);
@@ -2229,7 +2337,7 @@ public class RMsgProcessor {
                                     //Added +XXXnnnnnnnnnnn country code style
                                     //tbf if (config.getPreferenceB("SMSSENDRELAY", false)) {
                                     //Get the full message including any picture (as saved on file)
-                                    if (messageAuthorized & Main.wantRelaySMSs) {
+                                    if (messageRelayingAuthorized & Main.wantRelaySMSs) {
                                         RMsgUtil.sendAcks(true, useRsid);
                                         RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirInbox, mMessage.fileName, true);
                                         //remove alias prefix 
@@ -2296,7 +2404,7 @@ public class RMsgProcessor {
                                     RMsgUtil.replyWithPosition(replyTo, mMessage.relay, mMessage.rxMode);
                                 }
                             }
-                        //Time Sync request
+                            //Time Sync request
                         } else if (mMessage.sms.startsWith("*tim?")) {
                             if (matchMyCallWith(mMessage.to, false)
                                     || (matchMyCallWith(mMessage.via, false) && mMessage.to.equals("*"))) {
@@ -2333,7 +2441,7 @@ public class RMsgProcessor {
                                 RMsgUtil.sendAcks(mMessage.crcValid || mMessage.crcValidWithPW, useRsid);
                             } else if (matchMyCallWith(mMessage.to, true)) { //Must be to All then
                                 //Don't use single RSID ack if to ALL, use beep sequence instead
-                                RMsgUtil.sendAcks(mMessage.crcValid || mMessage.crcValidWithPW, false);
+                                RMsgUtil.sendAcks(mMessage.crcValid || mMessage.crcValidWithPW || mMessage.crcValidWithIotPW, false);
                             }
                         }
                     }
@@ -2426,6 +2534,120 @@ public class RMsgProcessor {
         return resultStr;
     }
 
+    private static String getEntityFromShortcut(String data) {
+        String result = "";
+        boolean hasMatch = false;
 
-    
+        //Extract list of shortcuts/entities ID combinations
+        String shortcutsText = Main.configuration.getPreference("IOTENTITIESSHORTCUTS");
+        String newShortcutsText = "";
+        
+        //First, do we have a new shortcut to add?
+        Pattern psc = Pattern.compile("^\\s*(\\w+)\\s*(=)\\s*(\\w+\\.\\w+)\\s*$");
+        Matcher msc = psc.matcher(data);
+        if (msc.lookingAt()) {
+            String key = msc.group(1);
+            hasMatch = true;
+            //First delete any existing shortcut with that key
+            Pattern psc2 = Pattern.compile("^\\s*(\\w+)\\s*(=)\\s*(\\w+\\.?\\w+)\\s*$", Pattern.MULTILINE);
+            Matcher msc2 = psc2.matcher(shortcutsText);
+            boolean keepLooking = true;
+            String group1;
+            String group2;
+            String group3;
+            for (int start = 0; keepLooking;) {
+                keepLooking = msc2.find(start);
+                if (keepLooking) {
+                    group1 = msc2.group(1);
+                    group2 = msc2.group(2);
+                    group3 = msc2.group(3);
+                    //Do we have a match?
+                    if (group1 != null && group2 != null && group3 != null && !group1.equals(key)) {
+                        newShortcutsText = (newShortcutsText + "\n" + group1 + group2 + group3).replaceAll("\n\n", "\n");  //Remove spaces and extra newlines
+                    }
+                    start = msc2.end();
+                }
+            }
+            group1 = msc.group(1);
+            group2 = msc.group(2);
+            group3 = msc.group(3);
+            if (group1 != null && group2 != null && group3 != null) {
+                result = group3;
+                newShortcutsText = (newShortcutsText + "\n" + group1 + group2 + group3).replaceAll("\n\n", "\n");  //Remove spaces and extra newlines
+                Main.configuration.setPreference("IOTENTITIESSHORTCUTS", newShortcutsText);
+            }
+            return result;
+        }
+
+         //Do we have a shortcut to Delete?
+        psc = Pattern.compile("^\\s*(\\w+)\\s*(=)\\s*$");
+        msc = psc.matcher(data);
+        if (msc.lookingAt()) {
+            hasMatch = true;
+            boolean deleted = false;
+            data = data.replaceAll("=", ""); //Remove the "="
+            psc = Pattern.compile("^\\s*(\\w+)\\s*(=)\\s*(\\w+\\.?\\w+)\\s*$", Pattern.MULTILINE);
+            msc = psc.matcher(shortcutsText);
+            boolean keepLooking = true;
+            String group1;
+            String group2;
+            String group3;
+            String newShortcuts = "";
+            result = "*unknown shortcut*"; //In case we don't find it in the list
+            for (int start = 0; keepLooking;) {
+                keepLooking = msc.find(start);
+                if (keepLooking) {
+                    group1 = msc.group(1);
+                    group2 = msc.group(2);
+                    group3 = msc.group(3);
+                    //Only add well formed lines and exclude the one to delete
+                    if (group1 != null && group2 != null && group3 != null && !group1.equals(RMsgMisc.ltrim(data.trim()))) {
+                        newShortcuts = (newShortcuts + "\n" + group1 + group2 + group3).replaceAll("\n\n", "\n");  //Remove extra newlines
+                    } else if (group1 != null && group2 != null && group3 != null) {
+                        result = "*Shortcut deleted*";
+                        deleted = true;
+                    }
+                    start = msc.end();
+                }
+            }
+            if (deleted) {
+                Main.configuration.setPreference("IOTENTITIESSHORTCUTS", newShortcuts);
+            }
+             return result;
+        }
+
+        //Do we have a shortcut to translate into an entity Id?
+        psc = Pattern.compile("^\\s*(\\w+)\\s*$");
+        msc = psc.matcher(data);
+        if (msc.lookingAt()) {
+            hasMatch = true;
+            psc = Pattern.compile("^\\s*(\\w+)\\s*(=)\\s*(\\w+\\.?\\w+)\\s*$", Pattern.MULTILINE);
+            msc = psc.matcher(shortcutsText);
+            boolean keepLooking = true;
+            String group1;
+            String group2;
+            String group3;
+            result = "*unknown shortcut*"; //In case we don't find it in the list
+            for (int start = 0; keepLooking;) {
+                keepLooking = msc.find(start);
+                if (keepLooking) {
+                    group1 = msc.group(1);
+                    group2 = msc.group(2);
+                    group3 = msc.group(3);
+                    //Do we have a match?
+                    if (group1 != null && group2 != null && group3 != null && group1.equals(RMsgMisc.ltrim(data.trim()))) {
+                        result = group3;  //Remove spaces
+                    }
+                    start = msc.end();
+                }
+            }
+        }
+
+        if (!hasMatch) {
+            result = "**Invalid Shortcut**";
+        }
+
+        return result;
+    }
+
 }
