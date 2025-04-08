@@ -16,6 +16,9 @@
 
 package javapskmail;
 
+import java.util.Calendar;
+import java.util.TimeZone;
+
 public class RMsgMisc {
 
     public static double decayavg(double average, double input, double weight) {
@@ -142,5 +145,5 @@ public class RMsgMisc {
         }
         return s.substring(i);
     }
-
+    
 }

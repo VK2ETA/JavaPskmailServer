@@ -2,7 +2,7 @@
  * Main.java
  * 
  * Copyright (C) 2008 Pär Crusefalk and Rein Couperus
- * Copyright (C) 2018-2024 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
+ * Copyright (C) 2018-2025 Pskmail Server and RadioMsg sections by John Douyere (VK2ETA) 
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -34,9 +34,9 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.3.0.1";
+    static String version = "3.3.0.2";
     static String application = "jPskmail " + version;// Used to preset an empty status
-    static String versionDate = "20250320";
+    static String versionDate = "20250407";
     static String host = "localhost";
     static int port = 7322; //ARQ IP port
     static String xmlPort = "7362"; //XML IP port
@@ -66,6 +66,7 @@ public class Main {
     //static final String DirTemp = "Temp";
     //static final String DirLogs = "Logs";
     static final String dirImages = "RadioMsg-Images";
+    static final String dirSendingAPI = "RadioMsgSending";
     static final String messageLogFile = "RadioMsg.log";
     //
     static String mailOutFile = "";
@@ -255,7 +256,7 @@ public class Main {
     static long restartScanAtEpoch = 0L;
 
     static String callsignAsServer = "";
-    static String accessPassword = "";
+    static String relayingPassword = "";
     static String IotAccessPassword = "";
 
     //crypto
@@ -358,9 +359,6 @@ public class Main {
 
             q.Message(version, 10);
 
-            // Make calendar object
-            //           Calendar cal = Calendar.getInstance();
-            // Make amp2 object
             Bul = new Amp2();
             Bul.init();
             Thread.sleep(1000);
@@ -441,7 +439,12 @@ public class Main {
             //System.out.println("About to call startemail");
             RMsgProcessor.startEmailsAndSMSsMonitor();
             //System.out.println("Returned from startemail");
-
+            
+            //File Sending API
+            if (configuration.getPreference("MONITORFILESFOLDER", "no").equals("yes")) {
+                RMsgProcessor.startFilesMonitor();
+            }
+            
             //vk2eta debug
             //System.out.println("entering receive loop");
             while (true) {
@@ -1067,7 +1070,7 @@ public class Main {
                                         String pCheck = bmsc.group(6);
                                         String checkstring = "00u" + scall + ":25" + spaces1 + email + spaces2 + body + "\n";
                                         String check = q.checksum(checkstring);
-                                        String checkWithPass = q.checksum(checkstring + accessPassword);
+                                        String checkWithPass = q.checksum(checkstring + relayingPassword);
                                         //Only authorized if the server is left open (without a password)
                                         // Otherwise use the RadioMsg app to send short messages
                                         //if (Main.WantServer && (Main.accessPassword.length() == 0 && check.equals(pCheck) 
@@ -1474,8 +1477,8 @@ public class Main {
                                             //I am not in a session, or the current client is connecting again, try to accept connection connect
                                             ttyCaller = newCaller;
                                             //Password supplied matches or None required?
-                                            if ((rxb.valid && Main.accessPassword.length() == 0)
-                                                    || (rxb.validWithPW && Main.accessPassword.length() > 0)) {
+                                            if ((rxb.valid && Main.relayingPassword.length() == 0)
+                                                    || (rxb.validWithPW && Main.relayingPassword.length() > 0)) {
                                                 //Clean any previous session data
                                                 disconnect = false;
                                                 status = "Listening";
@@ -1533,7 +1536,7 @@ public class Main {
                                                     //blocktime = (charval * 64 / 1000) + 4;
                                                 }
                                                 log("Connect request from " + ttyCaller);
-                                            } else if (rxb.valid && Main.accessPassword.length() > 0) {
+                                            } else if (rxb.valid && Main.relayingPassword.length() > 0) {
                                                 //Need password but none provided. Send a reject block with a reason
                                                 m.requestTxRsid("ON");
                                                 m.setRxRsid("ON");
@@ -1902,6 +1905,11 @@ public class Main {
             if (!RadioMsgSentbox.isDirectory()) {
                 RadioMsgSentbox.mkdir();
             }
+            //Create RadioMsgSendingAPI
+            File RadioMsgSendingAPI = new File(homePath + dirPrefix + dirSendingAPI + separator);
+            if (!RadioMsgSendingAPI.isDirectory()) {
+                RadioMsgSendingAPI.mkdir();
+            }
             //Create RadioMsgImages
             File RadioMsgImages = new File(homePath + dirPrefix + dirImages + separator);
             if (!RadioMsgImages.isDirectory()) {
@@ -2039,7 +2047,7 @@ public class Main {
                 wantRelaySMSsImmediat = false;
             }
             callsignAsServer = configuration.getPreference("CALLSIGNASSERVER", "N0CAL");
-            accessPassword = Main.configuration.getPreference("ACCESSPASSWORD").trim();
+            relayingPassword = Main.configuration.getPreference("ACCESSPASSWORD").trim();
             IotAccessPassword = Main.configuration.getPreference("IOTACCESSPASSWORD").trim();
         } catch (Exception e) {
             MAXDCD = 3;

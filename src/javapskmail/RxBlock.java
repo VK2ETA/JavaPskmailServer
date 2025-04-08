@@ -232,7 +232,7 @@ public class RxBlock{
             BlockCRC = RMsgCheckSum.Crc16(Character.toString((char)1) + checkstring); //Add SOH for the checksum
        } else {
             BlockCRC = checksum(checkstring);
-            BlockCRCwithPW = checksum(checkstring + Main.accessPassword);
+            BlockCRCwithPW = checksum(checkstring + Main.relayingPassword);
        }
         if (BlockCRC.equals(crc)){
            valid = true;

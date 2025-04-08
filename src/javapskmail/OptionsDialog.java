@@ -677,6 +677,12 @@ public class OptionsDialog extends javax.swing.JDialog {
             this.txtHALongLivedToken.setText(Main.configuration.getPreference("HOMEASSISTANTLONGLIVEDTOKEN"));
             this.txtHAAccessPassword.setText(Main.configuration.getPreference("IOTACCESSPASSWORD"));
             this.txtEntitiesAliases.setText(Main.configuration.getPreference("IOTENTITIESSHORTCUTS"));
+            //Monitoring of files folder .pskmail/RadioMsgSending 
+            if (Main.configuration.getPreference("MONITORFILESFOLDER").equals("yes")) {
+                this.checkboxMonitorFilesFolder.setSelected(true);
+            } else {
+                this.checkboxMonitorFilesFolder.setSelected(false);
+            }
             
          } catch (Exception ex) {
             Main.log.writelog(optionsdialog.getString("ERROR WHEN FETCHING SETTINGS!"), ex, true);
@@ -810,6 +816,8 @@ public class OptionsDialog extends javax.swing.JDialog {
         spinnerMaxAckPosition = new javax.swing.JSpinner();
         jLabel26 = new javax.swing.JLabel();
         checkboxAckWithRSID = new javax.swing.JCheckBox();
+        jLabel38 = new javax.swing.JLabel();
+        checkboxMonitorFilesFolder = new javax.swing.JCheckBox();
         pnlConfiguration = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
         txtLogFile = new javax.swing.JTextField();
@@ -1138,6 +1146,8 @@ public class OptionsDialog extends javax.swing.JDialog {
         pnlUserData.add(test3, new java.awt.GridBagConstraints());
 
         tabOptions.addTab("User data", pnlUserData);
+
+        pnlEmail.setEnabled(false);
 
         jPasswordField1.setToolTipText("Keep empty if not set at the server or email will not work!!");
         jPasswordField1.setPreferredSize(new java.awt.Dimension(120, 27));
@@ -1627,7 +1637,7 @@ public class OptionsDialog extends javax.swing.JDialog {
                         .addGap(48, 48, 48)
                         .addComponent(checkboxRelaySMSsImmediately))
                     .addComponent(jButtonConfigSmsGateway))
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel10Layout.setVerticalGroup(
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1635,7 +1645,7 @@ public class OptionsDialog extends javax.swing.JDialog {
                 .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(checkboxRelaySMSs)
                     .addComponent(checkboxRelaySMSsImmediately))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButtonConfigSmsGateway)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -1666,6 +1676,7 @@ public class OptionsDialog extends javax.swing.JDialog {
         jPanel13Layout.setHorizontalGroup(
             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel13Layout.createSequentialGroup()
+                .addContainerGap()
                 .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel13Layout.createSequentialGroup()
                         .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1679,7 +1690,7 @@ public class OptionsDialog extends javax.swing.JDialog {
                         .addComponent(jLabel25, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(spinnerMaxAckPosition, javax.swing.GroupLayout.PREFERRED_SIZE, 59, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(0, 173, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel13Layout.setVerticalGroup(
             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1699,15 +1710,29 @@ public class OptionsDialog extends javax.swing.JDialog {
                 .addGap(12, 12, 12))
         );
 
+        jLabel38.setText(optionsdialog.getString("lblMonitorFolder")); // NOI18N
+
+        checkboxMonitorFilesFolder.setToolTipText(optionsdialog.getString("TOOLTIPMONITORFILESFOLDER")); // NOI18N
+        checkboxMonitorFilesFolder.setMargin(new java.awt.Insets(0, 2, 2, 2));
+
         javax.swing.GroupLayout RadioMsgPanelLayout = new javax.swing.GroupLayout(RadioMsgPanel);
         RadioMsgPanel.setLayout(RadioMsgPanelLayout);
         RadioMsgPanelLayout.setHorizontalGroup(
             RadioMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(RadioMsgPanelLayout.createSequentialGroup()
-                .addComponent(test1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(RadioMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(test1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(RadioMsgPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel38)
+                        .addGap(78, 78, 78)
+                        .addComponent(checkboxMonitorFilesFolder)))
                 .addContainerGap(215, Short.MAX_VALUE))
-            .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(RadioMsgPanelLayout.createSequentialGroup()
+                .addGroup(RadioMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jPanel9, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel10, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
             .addComponent(jPanel13, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         RadioMsgPanelLayout.setVerticalGroup(
@@ -1718,8 +1743,12 @@ public class OptionsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jPanel9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(19, 19, 19)
+                .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(4, 4, 4)
+                .addGroup(RadioMsgPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel38)
+                    .addComponent(checkboxMonitorFilesFolder))
+                .addGap(3, 3, 3)
                 .addComponent(jPanel13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -2861,7 +2890,7 @@ public class OptionsDialog extends javax.swing.JDialog {
             char[] s3 = txtAccessPassword.getPassword();
             String st3 = new String(s3);
             cf.setPreference("ACCESSPASSWORD", st3);
-            Main.accessPassword = st3;
+            Main.relayingPassword = st3;
             if (txtServerImapHost.getText().length() > 0) {
                 cf.setPreference("SERVERIMAPHOST", txtServerImapHost.getText());
             }
@@ -2963,6 +2992,14 @@ public class OptionsDialog extends javax.swing.JDialog {
             cf.setPreference("IOTACCESSPASSWORD", new String(shapw));
             Main.IotAccessPassword = new String(shapw);
             cf.setPreference("IOTENTITIESSHORTCUTS", txtEntitiesAliases.getText());
+            //Monitoring of sending folder
+            //checkboxMonitorFilesFolder
+            if (checkboxMonitorFilesFolder.isSelected()) {
+                cf.setPreference("MONITORFILESFOLDER", "yes");
+            } else {
+                cf.setPreference("MONITORFILESFOLDER", "no");
+            }
+        
         } catch (Exception ex) {
             Main.log.writelog(optionsdialog.getString("ERROR ENCOUNTERED WHEN STORING PREFERENCES!"), ex, true);
         }
@@ -3586,6 +3623,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JComboBox<String> cboModes;
     private javax.swing.JCheckBox checkboxAckWithRSID;
     private javax.swing.JCheckBox checkboxEnablePskmailServer;
+    private javax.swing.JCheckBox checkboxMonitorFilesFolder;
     private javax.swing.JCheckBox checkboxRelayEmail;
     private javax.swing.JCheckBox checkboxRelayEmailsImmediately;
     private javax.swing.JCheckBox checkboxRelayOverRadio;
@@ -3635,6 +3673,7 @@ private void spinOffsetSecondsStateChanged(javax.swing.event.ChangeEvent evt) {/
     private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel36;
     private javax.swing.JLabel jLabel37;
+    private javax.swing.JLabel jLabel38;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;

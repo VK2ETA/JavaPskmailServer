@@ -472,7 +472,7 @@ public class MainPskmailUi extends javax.swing.JFrame {
                     Main.mainmutex = false;
                 }
 
-                // 5 x  200 = 1000 msec timer
+                // 5 x  200 = 1 second timer
                 if (timercnt < 5) {
                     timercnt++;
                 } else { //Loop run every SECOND
@@ -511,6 +511,8 @@ public class MainPskmailUi extends javax.swing.JFrame {
                     }
                     timercnt = 0;
                     Calendar cal = Calendar.getInstance();
+                    //Adjust for a received time reference (e.g. from this remote station)
+                    cal.add(Calendar.SECOND, Main.deviceToRefTimeCorrection.intValue());
                     int Hour = cal.get(Calendar.HOUR_OF_DAY);
                     int Minute = cal.get(Calendar.MINUTE);
                     int Second = cal.get(Calendar.SECOND);
@@ -722,6 +724,12 @@ public class MainPskmailUi extends javax.swing.JFrame {
                     formatsecond = formatsecond.substring(formatsecond.length() - 2);
 
                     clock = formathour + ":" + formatminute + ":" + formatsecond;
+                    //Adjust the text colour
+                    if (Main.deviceToRefTimeCorrection.intValue() == 0) {
+                        jTextField1.setForeground(Color.BLACK);
+                    } else {
+                        jTextField1.setForeground(Color.RED);
+                    }
                     setClock(clock);
 
                     // display status field
@@ -7727,13 +7735,12 @@ private void mnuHeadersFetchActionPerformed(java.awt.event.ActionEvent evt) {//G
     }//GEN-LAST:event_timeSyncMenuItemActionPerformed
 
     private void serverControlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverControlActionPerformed
-        if (selectedTo.equals("*")) {
-            //middleToastText("CAN'T send commands to all servers. Select a single TO destination above"
-            Main.q.Message(mainpskmailui.getString("you_must_select_to"), 5);
-        } else {
+        if ((selectedTo.equals("*") && !selectedVia.equals("")) || (!selectedTo.equals("*") && selectedVia.equals(""))) {
             ServerControlWindow scw = new ServerControlWindow(this, true);
             scw.setLocationRelativeTo(this);
             scw.setVisible(true);
+        } else {
+            Main.q.Message(mainpskmailui.getString("you_must_select_to_or_via"), 5);
        }
     }//GEN-LAST:event_serverControlActionPerformed
 

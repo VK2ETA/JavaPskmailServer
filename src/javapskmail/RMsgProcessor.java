@@ -46,7 +46,6 @@ import javax.swing.SwingUtilities;
 import org.jsoup.nodes.Document;
 import org.jsoup.safety.Safelist;
 
-
 public class RMsgProcessor {
 
     static boolean onWindows = true;
@@ -81,9 +80,9 @@ public class RMsgProcessor {
     static LoggingClass log;
 
     static boolean alreadyWarned = false;
-    
+
     static ArrayList<String> stationsHeard = new ArrayList<String>();
-    
+
     static final boolean TRIMORIGINALMSG = false;
     static final boolean WHOLEMSGBODY = true;
 
@@ -571,7 +570,7 @@ public class RMsgProcessor {
                                         for (String toString : emailFilterTo) {
                                             //Blank string means nobody to send to. 
                                             //And make sure the station was heard in the last hour.
-                                            if (toString != null && !toString.equals("") 
+                                            if (toString != null && !toString.equals("")
                                                     && checkIfStationHeard(toString)) {
                                                 // Create message from cellular SMS
                                                 RMsgObject radioEmailMessage = new RMsgObject();
@@ -713,6 +712,82 @@ public class RMsgProcessor {
             myThread.start();
             myThread.setName("NewMailMonitor");
         }
+    }
+
+    //Starts a new thread and register's with the file provider to alert of new 
+    //   incoming files. If requested, send them over the air as they arrive
+    // Format MsgSend: any file, with content^
+    // 1st row - To
+    // 2nd and more rows - Message in UTF-8 encoding
+    // Example File: sendMe.txt
+    // *
+    // Hello world!
+    //This is my 2nd line of text
+    //
+    public static void startFilesMonitor() {
+
+        //init search directory and scan interval
+        String sendingFolderPath = Main.homePath
+                + Main.dirPrefix + Main.dirSendingAPI + Main.separator;
+        int SCAN_INTERVAL = 10000; // 10 seconds in milliseconds
+        Set<String> processedFiles = new HashSet<>();
+
+        Thread myThread2 = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    Main.q.Message("Scanning RadioMSgSending", 5);
+                    System.out.println("Scanning RadioMSgSending directory");
+                    for (;;) {
+                        File folder = new File(sendingFolderPath);
+                        File[] files = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".txt"));
+
+                        if (files != null) {
+                            for (File file : files) {
+                                if (!processedFiles.contains(file.getName()) && file.isFile()) {
+
+                                    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                                        String toString = reader.readLine();
+                                        String smsString = "";
+                                        String line = reader.readLine();
+                                        while (line != null) {
+                                            smsString = smsString + "\n" + line;
+                                            line = reader.readLine();
+                                        }
+                                        //Only for complete messages
+                                        if (!toString.equals("") && !smsString.equals("")) {
+                                            Main.q.Message("Sending " + file.getName(), 10);
+                                            System.out.println("Sending " + file.getName());
+                                            // Create message from MsgFile
+                                            RMsgObject radioFileMessage = new RMsgObject();
+                                            radioFileMessage.to = toString;
+                                            radioFileMessage.from = Main.configuration.getPreference("CALLSIGNASSERVER", "");
+                                            radioFileMessage.relay = "";
+                                            radioFileMessage.sms = smsString;
+                                            radioFileMessage.via = ""; //only direct send
+                                            radioFileMessage.receiveDate = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                                            //Create message and add in outbox list
+                                            RMsgTxList.addMessageToList(radioFileMessage);
+                                        }
+                                    } catch (IOException e) {
+                                        System.err.println("Error processing file: " + file.getName());
+                                        e.printStackTrace();
+                                    }
+                                    processedFiles.add(file.getName());
+                                    file.delete();
+                                }
+                                processedFiles.clear();
+                            }
+                        }
+                        Thread.sleep(SCAN_INTERVAL); // sleep for freq milliseconds
+                    }
+                } catch (Exception e) {
+                    //do nothing
+                }
+            }
+        };
+        myThread2.start();
+        myThread2.setName("NewFileMonitor");
     }
 
     //Forward message as SMS message via a gateway
@@ -1849,7 +1924,7 @@ public class RMsgProcessor {
             }
         }
         //Update heard list if messages are valid
-        if (mMessage.crcValid || mMessage.crcValidWithPW || mMessage.crcValidWithIotPW ) {
+        if (mMessage.crcValid || mMessage.crcValidWithRelayPW || mMessage.crcValidWithIotPW ) {
             String sendingCallsign = mMessage.from;
             if (!mMessage.relay.trim().equals("")) {
                 //Sent from a relay station
@@ -1867,9 +1942,14 @@ public class RMsgProcessor {
                 try {
                     //save if need be
                     if (finalSaveAndDisplay) {
-
+                        
+                        //Added time syncs as valid as by definition we may not be in sync when requested
+                        if (Main.relayingPassword.startsWith("_") && mMessage.sms.equals("*tim?")) {
+                            //Force crc as valid
+                            mMessage.crcValidWithRelayPW = true;
+                        }
                         String resultString = "";
-                        if (mMessage.crcValid || mMessage.crcValidWithPW || mMessage.crcValidWithIotPW) {
+                        if (mMessage.crcValid || mMessage.crcValidWithRelayPW || mMessage.crcValidWithIotPW) {
                             //Re-build the message (includes the potential alias translated to alias=destination format)
                             resultString = mMessage.formatForRx(false); //Always rebuild CRC without access password
                         } else {
@@ -1937,8 +2017,8 @@ public class RMsgProcessor {
                             useRsid = true;
                         }
                         //Is it an authorised relaying message
-                        boolean messageRelayingAuthorized = ((Main.accessPassword.length() == 0 && mMessage.crcValid)
-                                || (Main.accessPassword.length() > 0 && mMessage.crcValidWithPW));
+                        boolean messageRelayingAuthorized = ((Main.relayingPassword.length() == 0 && mMessage.crcValid)
+                                || (Main.relayingPassword.length() > 0 && mMessage.crcValidWithRelayPW));
                         boolean messageIotCommandAuthorized = ((Main.IotAccessPassword.length() == 0 && mMessage.crcValid)
                                 || (Main.IotAccessPassword.length() > 0 && mMessage.crcValidWithIotPW));
                         //Command message?
@@ -2308,79 +2388,6 @@ public class RMsgProcessor {
                                     //RMsgUtil.replyWithText(mMessage, "Sorry...Missing Access Password");
                                 }
                             }
-                        } else if (matchMyCallWith(mMessage.via, false)) { //Am I asked to Relay messages?
-                            //Check that if we received an alias we know what the real address is
-                            if (!mMessage.to.contains("**unknown**")) {
-                                //Extract final destination  (remove alias details)
-                                String toStr = RMsgUtil.extractDestination(mMessage.to);
-                                //Looks like an email address? Send via internet as email
-                                if (isEmail(toStr)) {
-                                    if (messageRelayingAuthorized & Main.wantRelayEmails) {
-                                        RMsgUtil.sendAcks(true, useRsid);
-                                        //Get full message with binary data
-                                        RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirInbox, mMessage.fileName, true);
-                                        //remove alias prefix 
-                                        fullMessage.to = RMsgUtil.extractDestination(fullMessage.to);
-                                        //Only forward properly received (and secured) messages
-                                        String result = sendMailMsg(fullMessage, fullMessage.to, fullMessage.to);
-                                        //Error message comingback, advise client
-                                        if (!result.equals("")) {
-                                            RMsgUtil.replyWithText(mMessage, "Error sending Email: " + result);
-                                        }
-                                    } else {
-                                        RMsgUtil.sendAcks(false, false);
-                                        //We have an access password missing
-                                        //RMsgUtil.replyWithText(mMessage, "Sorry...Missing Access Password");
-                                    }
-                                } else if (isCellular(toStr)) { //Relaying messages as cellular SMS
-                                    //At least 8 digits phone number? Send via SMS
-                                    //Added +XXXnnnnnnnnnnn country code style
-                                    //tbf if (config.getPreferenceB("SMSSENDRELAY", false)) {
-                                    //Get the full message including any picture (as saved on file)
-                                    if (messageRelayingAuthorized & Main.wantRelaySMSs) {
-                                        RMsgUtil.sendAcks(true, useRsid);
-                                        RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirInbox, mMessage.fileName, true);
-                                        //remove alias prefix 
-                                        fullMessage.to = RMsgUtil.extractDestination(fullMessage.to);
-                                        //Only forward properly received (and secured) messages
-                                        sendCellularMsg(fullMessage);
-                                    } else {
-                                        RMsgUtil.sendAcks(false, false);
-                                        //We have an access password missing
-                                        //RMsgUtil.replyWithText(mMessage, "Sorry...Missing Access Password");
-                                    }
-                                    //}
-                                } else if (toStr.equals("*") || mMessage.to.length() > 0) { //To ALL or at least one character call-sign or name? Send over Radio
-                                    //Only forward properly received messages (allows relay over radio even if access password is not supplied)
-                                    if ((mMessage.crcValid || mMessage.crcValidWithPW) && Main.wantRelayOverRadio) {
-                                        RMsgUtil.sendAcks(true, useRsid);
-                                        //Get full message with binary data
-                                        RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirInbox, mMessage.fileName, true);
-                                        //Add relay and remove via information
-                                        fullMessage.relay = fullMessage.via;
-                                        fullMessage.via = "";
-                                        //Relay in the same mode we received in
-                                        fullMessage.rxMode = mMessage.rxMode;
-                                        //Send the last 3 digits of the timestamp contained in the file name
-                                        // This allows receiving stations to eliminate duplicates (direct Rx and Relayed Rx)
-                                        int strLen = mMessage.fileName.length();
-                                        fullMessage.timeId = mMessage.fileName.substring(strLen - 7, strLen - 4);
-                                        //Wait for the ack to pass first
-                                        Thread.sleep(500);
-                                        //Then send Message
-                                        RMsgTxList.addMessageToList(fullMessage);
-                                    } else {
-                                        RMsgUtil.sendAcks(false, false);
-                                        //We have an access password missing
-                                        //RMsgUtil.replyWithText(mMessage, "Sorry...Missing Access Password");
-                                    }
-                                }
-                            } else {
-                                //We have an unknown alias, reply with a warning
-                                RMsgUtil.replyWithText(mMessage, "I don't know who \""
-                                        + mMessage.to.replace("=**unknown**", "")
-                                        + "\" is. Send full Alias details.");
-                            }
                             //When re-sent pos request may not be in the beginning of the text
                             // } else if (mMessage.sms.startsWith("*pos?")) { //Position request?
                         } else if (mMessage.sms.contains("*pos?")) { //Position request?
@@ -2433,15 +2440,88 @@ public class RMsgProcessor {
                                 }
                                 //Reset source to mean "processed"
                                 Main.refTimeSource = "";
+                            }  
+                        } else if (matchMyCallWith(mMessage.via, false)) { //Am I asked to Relay messages?
+                            //Check that if we received an alias we know what the real address is
+                            if (!mMessage.to.contains("**unknown**")) {
+                                //Extract final destination  (remove alias details)
+                                String toStr = RMsgUtil.extractDestination(mMessage.to);
+                                //Looks like an email address? Send via internet as email
+                                if (isEmail(toStr)) {
+                                    if (messageRelayingAuthorized & Main.wantRelayEmails) {
+                                        RMsgUtil.sendAcks(true, useRsid);
+                                        //Get full message with binary data
+                                        RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirInbox, mMessage.fileName, true);
+                                        //remove alias prefix 
+                                        fullMessage.to = RMsgUtil.extractDestination(fullMessage.to);
+                                        //Only forward properly received (and secured) messages
+                                        String result = sendMailMsg(fullMessage, fullMessage.to, fullMessage.to);
+                                        //Error message comingback, advise client
+                                        if (!result.equals("")) {
+                                            RMsgUtil.replyWithText(mMessage, "Error sending Email: " + result);
+                                        }
+                                    } else {
+                                        RMsgUtil.sendAcks(false, false);
+                                        //We have an access password missing
+                                        //RMsgUtil.replyWithText(mMessage, "Sorry...Missing Access Password");
+                                    }
+                                } else if (isCellular(toStr)) { //Relaying messages as cellular SMS
+                                    //At least 8 digits phone number? Send via SMS
+                                    //Added +XXXnnnnnnnnnnn country code style
+                                    //tbf if (config.getPreferenceB("SMSSENDRELAY", false)) {
+                                    //Get the full message including any picture (as saved on file)
+                                    if (messageRelayingAuthorized & Main.wantRelaySMSs) {
+                                        RMsgUtil.sendAcks(true, useRsid);
+                                        RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirInbox, mMessage.fileName, true);
+                                        //remove alias prefix 
+                                        fullMessage.to = RMsgUtil.extractDestination(fullMessage.to);
+                                        //Only forward properly received (and secured) messages
+                                        sendCellularMsg(fullMessage);
+                                    } else {
+                                        RMsgUtil.sendAcks(false, false);
+                                        //We have an access password missing
+                                        //RMsgUtil.replyWithText(mMessage, "Sorry...Missing Access Password");
+                                    }
+                                    //}
+                                } else if (toStr.equals("*") || mMessage.to.length() > 0) { //To ALL or at least one character call-sign or name? Send over Radio
+                                    //Only forward properly received messages (allows relay over radio even if access password is not supplied)
+                                    if ((mMessage.crcValid || mMessage.crcValidWithRelayPW) && Main.wantRelayOverRadio) {
+                                        RMsgUtil.sendAcks(true, useRsid);
+                                        //Get full message with binary data
+                                        RMsgObject fullMessage = RMsgObject.extractMsgObjectFromFile(Main.dirInbox, mMessage.fileName, true);
+                                        //Add relay and remove via information
+                                        fullMessage.relay = fullMessage.via;
+                                        fullMessage.via = "";
+                                        //Relay in the same mode we received in
+                                        fullMessage.rxMode = mMessage.rxMode;
+                                        //Send the last 3 digits of the timestamp contained in the file name
+                                        // This allows receiving stations to eliminate duplicates (direct Rx and Relayed Rx)
+                                        int strLen = mMessage.fileName.length();
+                                        fullMessage.timeId = mMessage.fileName.substring(strLen - 7, strLen - 4);
+                                        //Wait for the ack to pass first
+                                        Thread.sleep(500);
+                                        //Then send Message
+                                        RMsgTxList.addMessageToList(fullMessage);
+                                    } else {
+                                        RMsgUtil.sendAcks(false, false);
+                                        //We have an access password missing
+                                        //RMsgUtil.replyWithText(mMessage, "Sorry...Missing Access Password");
+                                    }
+                                }
+                            } else {
+                                //We have an unknown alias, reply with a warning
+                                RMsgUtil.replyWithText(mMessage, "I don't know who \""
+                                        + mMessage.to.replace("=**unknown**", "")
+                                        + "\" is. Send full Alias details.");
                             }
                         } else {
                             //Not an action message, send ack as appropriate if directed to me ONLY or to ALL
                             if (matchMyCallWith(mMessage.to, false)) {
                                 //Directed to me and only to me, we can use a single RSID ack if requested
-                                RMsgUtil.sendAcks(mMessage.crcValid || mMessage.crcValidWithPW, useRsid);
+                                RMsgUtil.sendAcks(mMessage.crcValid || mMessage.crcValidWithRelayPW, useRsid);
                             } else if (matchMyCallWith(mMessage.to, true)) { //Must be to All then
                                 //Don't use single RSID ack if to ALL, use beep sequence instead
-                                RMsgUtil.sendAcks(mMessage.crcValid || mMessage.crcValidWithPW || mMessage.crcValidWithIotPW, false);
+                                RMsgUtil.sendAcks(mMessage.crcValid || mMessage.crcValidWithRelayPW || mMessage.crcValidWithIotPW, false);
                             }
                         }
                     }

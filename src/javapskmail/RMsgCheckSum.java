@@ -15,6 +15,11 @@
 
 package javapskmail;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.TimeZone;
+
 public class RMsgCheckSum {
 
     //@SuppressLint("DefaultLocale")
@@ -82,4 +87,55 @@ public class RMsgCheckSum {
 
         return lowerCaseCrc;
     }
+    
+    
+    //Caters for no password, fixed password (i.e. not time dependant), and time dependant password 
+    //The passwords time to live is 10 seconds as this should not permit "copy and paste" re-transmissions by other stations by producing an ever changing CRC every 10 seconds
+    //The drawback of the time based passwords is the need for time synchronisation between the client and server, which can be initiated by the client
+    public static boolean checkCrcWithPasswordAndTime(String messageLessCrc, String password, String mFilename, String crcRxValue) {
+        boolean result = false;
+ 
+        if (password.equals("")) {
+            //No password, therefore no time based password
+            String crcWithIotPWCalcValue = RMsgCheckSum.Crc16(messageLessCrc);
+            if (crcRxValue.equals(crcWithIotPWCalcValue)) {
+                result = true;
+            }
+        } else if (!password.startsWith("_")) {
+                //Has a password, but not time based
+                String crcWithIotPWCalcValue = RMsgCheckSum.Crc16(messageLessCrc + password);
+                if (crcRxValue.equals(crcWithIotPWCalcValue)) {
+                    result = true;
+                }
+        } else {
+            //Time based password (starts with an underscore (e..g "_myIotPassword"), use the file name as a time stamp
+            //Example for mFileName:  "2025-03-17_230348.txt"; //UTC date and time of message (as at time of receipt of <SOH> character)
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'_'HHmmss'.txt'");
+            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+            Long rxTimeSlot = 0L;
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(sdf.parse(mFilename));
+                rxTimeSlot = cal.getTimeInMillis() / 10000L; //In steps of 10 seconds
+            } catch (ParseException e) {
+                //e.printStackTrace();
+            }
+            //Try up to 5 x 10 seconds slots, one in advance, one on time and three in arrear to account for a) Up to 10 seconds clock differences between client and server and b) the difference between the start of transmission and the receipt of the <SOH> character (mode dependant)
+            for (int i = -1; i < 4; i++) {
+                Long testTimeSlot = rxTimeSlot - i;
+                String md5String = org.apache.commons.codec.digest.DigestUtils.md5Hex(messageLessCrc + password + testTimeSlot.toString());
+                String crcWithIotPWCalcValue = RMsgCheckSum.Crc16(md5String);
+                if (crcRxValue.equals(crcWithIotPWCalcValue)) {
+                    result = true;
+                    System.out.println("Time Slot used for CRC check: " + (i * -1));
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+    
+    
+    
 }

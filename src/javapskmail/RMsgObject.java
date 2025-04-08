@@ -50,7 +50,7 @@ public class RMsgObject {
     int positionAge;
     Short[] voiceMessage;
     boolean crcValid; //Valid with no access password
-    boolean crcValidWithPW; //Valid only if access password is used
+    boolean crcValidWithRelayPW; //Valid only if access password is used
     boolean crcValidWithIotPW; //Valid only if IOT access password is used
     String rxMode;
     String accessPasswordUsed;
@@ -81,7 +81,7 @@ public class RMsgObject {
         this.positionAge = 0;
         this.voiceMessage = null;
         this.crcValid = false;
-        this.crcValidWithPW =false;
+        this.crcValidWithRelayPW =false;
         this.rxMode = "";
         this.accessPasswordUsed = "";
         this.timeId = "";
@@ -470,7 +470,7 @@ public class RMsgObject {
         String rxBuffer = createBufferNoCRC(false, true); //No conversion to lowercase, for storage
 
         //Add enclosing new lines and crc
-        String accessPassword = Main.accessPassword;
+        String accessPassword = Main.relayingPassword;
         String chksumString = RMsgCheckSum.Crc16(rxBuffer + (withAccessPassword ? accessPassword : ""));
         rxBuffer = rxBuffer + chksumString + Character.toString((char)4);
 
@@ -487,7 +487,19 @@ public class RMsgObject {
         String password = RMsgProcessor.getRequiredAccessPassword(this);
         System.out.println("Using Password: /" + password + "/");
         //Build the checksum using password if required
-        String chksumString = RMsgCheckSum.Crc16(txBuffer + password);
+        //String chksumString = RMsgCheckSum.Crc16(txBuffer + password);
+        String chksumString = "";
+        if (!password.startsWith("_")) {
+            //No time based password or blank password
+            chksumString = RMsgCheckSum.Crc16(txBuffer + password);
+        } else {
+            //We have a time based password
+            Long nowTimeInSecs = (System.currentTimeMillis() / 1000L + Main.deviceToRefTimeCorrection) / 10L; //epoch in 10s of seconds steps, corrected for time if available
+            System.out.println("Password Time Used: " + nowTimeInSecs);
+            //test nowTimeInSecs = 171234567L;
+            String md5String = org.apache.commons.codec.digest.DigestUtils.md5Hex(txBuffer + password + nowTimeInSecs.toString());
+            chksumString = RMsgCheckSum.Crc16(md5String);
+        }
         //Add enclosing new lines and crc
         txBuffer = txBuffer + chksumString + Character.toString((char)4);
         return txBuffer;
@@ -776,29 +788,16 @@ public class RMsgObject {
                         }
                     }
                 } else if (group3 != null) {
-                    //CRC
-                    mMessage.crcValid = false;
-                    mMessage.crcValidWithPW = false;
-                    mMessage.crcValidWithIotPW = false;
                     //CRC and EOT
                     String messageLessCrc = dataString.replaceFirst(group3 + "\n", ""); //For data read from file
                     messageLessCrc = messageLessCrc.replaceFirst(group3 , "");              //For data received direct from modem
-                    String crcCalcValue = RMsgCheckSum.Crc16(messageLessCrc);
                     String crcRxValue = group3.substring(0,4);
-                    //No Access Password used
-                    if (crcRxValue.equals(crcCalcValue) || crcRxValue.equals("ssss")) { //Fixed value for Selcall/Telcall
-                        mMessage.crcValid = true;
-                    }
-                    //With Access Password used
-                    String crcWithPWCalcValue = RMsgCheckSum.Crc16(messageLessCrc + Main.accessPassword);
-                    if (crcRxValue.equals(crcWithPWCalcValue)) { 
-                        mMessage.crcValidWithPW = true;
-                    }
+                    //No Access Password used. Note: "ssss" = CRC Fixed value for Selcall/Telcall/Pagecall
+                    mMessage.crcValid = (RMsgCheckSum.checkCrcWithPasswordAndTime(messageLessCrc, "", "", crcRxValue) || crcRxValue.equals("ssss"));
+                    //With Relaying Password used
+                    mMessage.crcValidWithRelayPW = RMsgCheckSum.checkCrcWithPasswordAndTime(messageLessCrc, Main.relayingPassword, mFilename, crcRxValue);
                     //With IOT Access Password used
-                    String crcWithIotPWCalcValue = RMsgCheckSum.Crc16(messageLessCrc + Main.IotAccessPassword);
-                    if (crcRxValue.equals(crcWithIotPWCalcValue)) { 
-                        mMessage.crcValidWithIotPW = true;
-                    }
+                    mMessage.crcValidWithIotPW = RMsgCheckSum.checkCrcWithPasswordAndTime(messageLessCrc, Main.IotAccessPassword, mFilename, crcRxValue);
                 }
                 start = msc.end();
             }

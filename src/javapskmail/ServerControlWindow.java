@@ -280,49 +280,53 @@ public class ServerControlWindow extends javax.swing.JDialog {
 
     private void OkButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OkButtonActionPerformed
         int index = ActionComboBox.getSelectedIndex();
-        switch (index) {
-            case 0:
-                //Send time request to remote station
-                RMsgTxList.addMessageToList(Main.mainui.selectedTo, "", "*tim?", //Via always blank
-                        false, null, 0, null);
-                break;
-            case 1:
-                int amount = Integer.parseInt(amountComboBox.getSelectedItem().toString());
-                int unitIndex = unitsOfTimeComboBox.getSelectedIndex();
-                String suffix = unitIndex == 0 ? "m" : "h";
-                //Send scan off command (we do not allow for infinite scan off for the moment)
-                RMsgTxList.addMessageToList(Main.mainui.selectedTo, "", "*cmd s off " + amount + " " + suffix,
-                        false, null, 0L, null);
-                break;
-            case 2:
-                //Send scan on command
-                RMsgTxList.addMessageToList(Main.mainui.selectedTo, "", "*cmd s on",
-                        false, null, 0L, null);
-                break;
-            case 3:
-                //Send mute command to stop auto forwarding of emails and SMSs on their reception
-                RMsgTxList.addMessageToList(Main.mainui.selectedTo, "", "*cmd mute",
-                        false, null, 0L, null);
-                break;
-            case 4:
-                //Send unmute command to allow auto forwarding of emails and SMSs on their 
-                //  reception PROVIDED the setting allows auto forwarding at the server (the 
-                //  "Send Immediately" options in 
-                RMsgTxList.addMessageToList(Main.mainui.selectedTo, "", "*cmd unmute",
-                        false, null, 0L, null);
-                break;
-            case 5:
-                //Clear links between this station's call sign and the emails and SMS numbers. This will
-                //   prevent future email and SMS replies to be sent to this callsign, until a 
-                //   new email or SMS is sent from this station. If "For address" is blank, clear all links
-                //   for this station.
-                String client = forCallsignTextField.getText();
-                String address = forAddressTextField.getText();
-                RMsgTxList.addMessageToList(Main.mainui.selectedTo, "", "*cmd unlink " + client.trim() +
-                        " " + address.trim(), false, null, 0L, null);
-                break;  
-        }   
-        this.dispose();
+
+        if ((!Main.mainui.selectedTo.equals("*") && Main.mainui.selectedVia.equals(""))
+                || (Main.mainui.selectedTo.equals("*") && !Main.mainui.selectedVia.equals(""))) {
+            switch (index) {
+                case 0:
+                    //Send time request to remote station
+                    RMsgTxList.addMessageToList(Main.mainui.selectedTo, Main.mainui.selectedVia, "*tim?", //Via always blank
+                            false, null, 0, null);
+                    break;
+                case 1:
+                    int amount = Integer.parseInt(amountComboBox.getSelectedItem().toString());
+                    int unitIndex = unitsOfTimeComboBox.getSelectedIndex();
+                    String suffix = unitIndex == 0 ? "m" : "h";
+                    //Send scan off command (we do not allow for infinite scan off for the moment)
+                    RMsgTxList.addMessageToList(Main.mainui.selectedTo, Main.mainui.selectedVia, "*cmd s off " + amount + " " + suffix,
+                            false, null, 0L, null);
+                    break;
+                case 2:
+                    //Send scan on command
+                    RMsgTxList.addMessageToList(Main.mainui.selectedTo, Main.mainui.selectedVia, "*cmd s on",
+                            false, null, 0L, null);
+                    break;
+                case 3:
+                    //Send mute command to stop auto forwarding of emails and SMSs on their reception
+                    RMsgTxList.addMessageToList(Main.mainui.selectedTo, Main.mainui.selectedVia, "*cmd mute",
+                            false, null, 0L, null);
+                    break;
+                case 4:
+                    //Send unmute command to allow auto forwarding of emails and SMSs on their 
+                    //  reception PROVIDED the setting allows auto forwarding at the server (the 
+                    //  "Send Immediately" options in 
+                    RMsgTxList.addMessageToList(Main.mainui.selectedTo, Main.mainui.selectedVia, "*cmd unmute",
+                            false, null, 0L, null);
+                    break;
+                case 5:
+                    //Clear links between this station's call sign and the emails and SMS numbers. This will
+                    //   prevent future email and SMS replies to be sent to this callsign, until a 
+                    //   new email or SMS is sent from this station. If "For address" is blank, clear all links
+                    //   for this station.
+                    String client = forCallsignTextField.getText();
+                    String address = forAddressTextField.getText();
+                    RMsgTxList.addMessageToList(Main.mainui.selectedTo, Main.mainui.selectedVia, "*cmd unlink " + client.trim()
+                            + " " + address.trim(), false, null, 0L, null);
+                    break;
+            }
+            this.dispose();
+        }
     }//GEN-LAST:event_OkButtonActionPerformed
 
     private void CancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CancelButtonActionPerformed
