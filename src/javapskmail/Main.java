@@ -34,7 +34,7 @@ import javax.swing.JFrame;
 public class Main {
 
     //VK2ETA: Based on "jpskmail 1.7.b";
-    static String version = "3.3.0.3"; 
+    static String version = "3.3.0.3";  
     static String application = "jPskmail " + version;// Used to preset an empty status
     static String versionDate = "20250410";
     static String host = "localhost";
