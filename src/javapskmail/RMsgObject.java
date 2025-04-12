@@ -570,8 +570,9 @@ public class RMsgObject {
         if (this.sendMyTime) {
             //Time data to be sent must be generated just before sending the message to minimise Tx timing errors as messages
             // can stay in the Tx queue for a while (multiple messages, busy with a message reception, etc...)
-            Long myTime = System.currentTimeMillis() / 1000; //UTC time by definition
-            myTime = myTime - ((Long) (myTime / 1000000L) * 1000000L); //Keep the last 6 digits representing seconds
+            Long myTime = System.currentTimeMillis() / 1000; //UTC time in seconds by definition
+            //Changed from last 6 digits of epoch to full epoch value to allow clocks to be widely off (anywhere between 1970 to 2038 at minimum)
+            //myTime = myTime - ((Long) (myTime / 1000000L) * 1000000L); //Keep the last 6 digits representing seconds
             //int TxDelay = 0;
             //String TxDelayStr = Main.configuration.getPreference("TXDELAY", "0");
             //int dcdSecs = Integer.parseInt(Main.configuration.getPreference("DCD", "0"));
@@ -579,9 +580,9 @@ public class RMsgObject {
             //    TxDelay = Integer.parseInt(TxDelayStr);
             //}
             myTime += (3); //DCD and TxDelay not used for RadioMsg
-            String myTimeStr = ("0000000" + myTime.toString());
-            myTimeStr = myTimeStr.substring(myTimeStr.length() - 6);
-            txBuffer += "tim:" + myTimeStr + "\n";
+            //String myTimeStr = ("0000000" + myTime.toString());
+            //myTimeStr = myTimeStr.substring(myTimeStr.length() - 6);
+            txBuffer += "tim:" + myTime + "\n";
         }
         if (allCharsToLowerCase) {
             txBuffer = txBuffer.toLowerCase(Locale.US);
@@ -759,10 +760,12 @@ public class RMsgObject {
                             mMessage.picture = Bitmap.decodeFile(filePath + pictureFn);
                         }
                     } else if (group1.equals("tim")) {
-                        //We have a time synchronisation data, store it
-                        if (group2.length() == 6) { //6 digits?
+                        //We have a time synchronisation data, store it.
+                        //Now allows for full epoch value to be sent
+                        if (group2.length() >= 1) { //at least one digit
+                            //All digits and nothing else?
                             boolean formatOk = true;
-                            for (int i = 0; i < 6; i++) {
+                            for (int i = 0; i < group2.length(); i++) {
                                 if (group2.charAt(i) < '0' || group2.charAt(i) > '9') {
                                     formatOk = false;
                                     break; //end of exercise
@@ -773,16 +776,21 @@ public class RMsgObject {
                                 if (Main.lastRsidTime > 0L) {
                                     //We have a recent RSID received time, store the delta time and
                                     // the provisional time server call sign for later processing
-                                    Long timeRef = Long.parseLong(group2);
-                                    Long timeHere = Main.lastRsidTime / 1000 - ((Long) (Main.lastRsidTime / 1000000000L) * 1000000L); //Keep the last 6 digits representing seconds
-                                    Long deltaTime = timeRef - timeHere;
-                                    //Wrap around if we passed a 100000 seconds threshold
-                                    if (Math.abs(deltaTime) > 99998L) {
-                                        deltaTime = deltaTime < 0L ? deltaTime + 1000000L : deltaTime - 1000000L;
+                                    try {
+                                        Long timeRef = Long.parseLong(group2);
+                                        //Long timeHere = Main.lastRsidTime / 1000 - ((Long) (Main.lastRsidTime / 1000000000L) * 1000000L); //Keep the last 6 digits representing seconds
+                                        //Long deltaTime = timeRef - timeHere;
+                                        Long deltaTime = timeRef - Main.lastRsidTime / 1000;
+                                        //Wrap around if we passed a 100000 seconds threshold
+                                        //if (Math.abs(deltaTime) > 99998L) {
+                                        //    deltaTime = deltaTime < 0L ? deltaTime + 1000000L : deltaTime - 1000000L;
+                                        //}
+                                        Main.deviceToRefTimeCorrection = deltaTime;
+                                        Main.refTimeSource = mMessage.from;
+                                        mMessage.sms = "*Time Reference Received*";
+                                    } catch (NumberFormatException e) {
+                                        //Discard. Should not happen, but to make sure
                                     }
-                                    Main.deviceToRefTimeCorrection = deltaTime;
-                                    Main.refTimeSource = mMessage.from;
-                                    mMessage.sms = "*Time Reference Received*";
                                 }
                             }
                         }
